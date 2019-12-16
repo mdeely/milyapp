@@ -1,0 +1,45 @@
+.profile_leaf {
+    min-width: 200px;
+    max-width: 200px;
+    min-height: 200px;
+    max-height: 200px;
+    font-size: 16px;
+    box-shadow: 0 4px 10px rgba(0,0,0,.15), 0 1px 24px rgba(0,0,0,.1);
+    border-radius: 1000px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 16px;
+    background-color: white;
+}
+
+.delete-member {
+    color: red;
+}
+
+.has-spouse + .has-spouse {
+    margin-left: -32px;
+}
+
+.member__list {
+    display: flex;
+    padding-left: 0;
+    padding-right: 0;
+    overflow: scroll;
+}
+
+
+/* 
+.member__list {
+    display: flex;
+    flex-direction: column;
+} */
+.family__tree,
+.parent__list, 
+.child__list {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
