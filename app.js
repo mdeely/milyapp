@@ -1,33 +1,245 @@
-// const members = document.querySelector('.member__list');
-// const families = document.querySelector('.family__list');
 const familyTree = document.querySelector('.family__tree');
 const addMemberForm = document.querySelector('#add-member-form');
 const editMemberForm = document.querySelector('#edit-member-form');
-const addFamilyForm = document.querySelector('#add-family-form');
-const selectedSpouses = document.querySelector('#selectSpouse');
-const addSiblingOrSpouseForm = document.querySelector('#add-sibling-or-spouse-form');
+const spouseSelect = document.querySelector('#spouseSelect');
 const addChildForm = document.querySelector('#add-child-form');
 const addParentForm = document.querySelector('#add-parent-form');
-const spouseSelect  = M.FormSelect.getInstance("#selectSpouses");
+const allMembers = db.collection('members');
 
 
+db.collection('members').get().then((snapshot) => {
+    const allMembers = snapshot.docs;
 
-// function renderSpouseForSelect(doc) {
-//     let familyId = doc.id;
+    snapshot.docs.forEach(doc => {
+        // if ( !checkForExistence(doc) ) {
+            renderMembers(doc, allMembers);
+        // };
+        renderSelectOptions(doc);
+    });
 
-//     // Iterate through members
-//     db.collection('members').get().then(snapshot => {
-//         snapshot.docs.forEach(doc => {
-//             let option = document.createElement('option');
+    var instances = M.FormSelect.init(spouseSelect, options);
 
-//             if (doc.data().familyId == familyId && doc.data().is_parent == true) {
-//                 option.setAttribute( 'data-id', doc.id);
-//                 option.setAttribute( 'value', doc.id);
-//                 option.text = doc.data().firstName;
-//                 selectSpouse.appendChild(option);
-//             }
-//         });
+});
+
+function renderSelectOptions(doc) {
+    let text = doc.data().firstName;
+    let value = doc.id;
+    let option = document.createElement("option");
+
+    option.setAttribute( 'value', value );
+    option.text = text;
+
+    // siblingSelect.appendChild(option);
+    // childrenSelect.appendChild(option);
+    spouseSelect.appendChild(option);
+}
+
+function renderMembers(doc, allMembers) {
+
+    let relationship = '';
+    let familyBranch = document.createElement('div')
+    let siblings = doc.data().siblings;
+    let spouses = doc.data().spouses;
+    let children = doc.data().children;
+
+    familyBranch.setAttribute('class', "family__branch" + relationship);
+    familyTree.appendChild(familyBranch);
+
+    if ( children && children.length >= 1 ) {  
+        renderChildren(children, familyBranch, allMembers);
+        relationship = relationship + " parent";
+    };
+
+    if ( siblings && siblings.length >= 1 ) {  
+        renderSiblings(siblings, allMembers);
+        relationship = relationship + " sibling";
+    };
+
+    if ( spouses && spouses.length >= 1 ) { 
+        renderSpouses(spouses, familyBranch, allMembers);
+        relationship = relationship + " spouse";
+
+        let spousesContainer = familyBranch.querySelector(".spouses");
+        let memberLi = gatherMemberData(doc.id, doc.data(), relationship);
+
+        spousesContainer.appendChild(memberLi);
+        
+    } else {
+        let memberLi = gatherMemberData(doc.id, doc.data(), relationship);
+        familyBranch.appendChild(memberLi);
+    }
+};
+
+function checkForExistence(doc) {
+    let nodes = document.querySelectorAll('[data-id="'+doc.id+'"]');
+
+    if ( nodes.length > 0 ) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+function gatherMemberData(id, data, className) {
+    let memberLi = document.createElement("li");
+    let editMember = document.createElement('button');
+
+    memberLi.textContent = data.firstName;
+    editMember.textContent = "edit";
+
+    memberLi.setAttribute('class', 'profile_leaf '+className);
+    memberLi.setAttribute('data-id', id);
+    editMember.setAttribute('class', 'btn-small');
+
+    memberLi.appendChild(editMember);
+
+    editMember.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        let id = e.target.parentElement.getAttribute('data-id');
+        openEditMemberModal(id);
+    });
+
+    return memberLi;
+}
+
+function renderSiblings(siblings, allMembers) {
+    siblings.forEach(sibling => {
+
+        let siblingMatch = allMembers.find(function(member) { 
+            return member.id == sibling; 
+          }); 
+
+        let siblingId = siblingMatch.id;
+        let siblingData = siblingMatch.data();
+
+        let siblingBranch = document.createElement('div');
+        let siblingLi = gatherMemberData(siblingId, siblingData, "sibling");
+
+        siblingBranch.setAttribute('class', 'family__branch');
+
+        siblingBranch.appendChild(siblingLi);
+        familyTree.appendChild(siblingBranch);
+    });
+};
+
+function renderSpouses(spouses, currentBranch, allMembers) {
+    spouses.forEach(spouse => {
+
+        let spouseMatch = allMembers.find(function(member) { 
+            return member.id == spouse; 
+          }); 
+
+        let spouseId = spouseMatch.id;
+        let spouseData = spouseMatch.data();
+        let spousesBranch = document.createElement('div');
+        let spouseLi = gatherMemberData(spouseId, spouseData, "spouse");
+
+        spousesBranch.setAttribute("class", "spouses");
+
+        let descendantsContainer = currentBranch.querySelector(".descendants")
+
+        // TODO: Some spouses may not have siblings in which case they don't need to be insertBefore anything
+        // TODO: If the spouse is a parent, they should have a "parent" class added
+
+        spousesBranch.appendChild(spouseLi);
+        currentBranch.insertBefore(spousesBranch, descendantsContainer);
+
+    });
+};
+
+function renderChildren(children, familyBranch, allMembers) {
+    let descendants = document.createElement("div");
+
+    descendants.setAttribute("class", "descendants");
+
+    children.forEach(child => {
+        let childMatch = allMembers.find(function(member) { 
+            return member.id == child; 
+          }); 
+        let childId = childMatch.id;
+        let childData = childMatch.data();
+
+        let childLi = gatherMemberData(childId, childData, "child");
+
+        descendants.appendChild(childLi);
+    });
+
+    familyBranch.appendChild(descendants);
+};
+
+
+// function renderMemberChildren(doc) {
+
+//     let children = doc.data().children;
+
+//     children.forEach(child => { 
+//         let isExisting = familyTree.querySelector('[data-id="'+child+'"]');
+//         let li = `
+//             <li data-id="${child}" class="profile_leaf child">${child}</li>
+//             `
+
+//         console.log(isExisting);
+//         familyTree.innerHTML += li;
 //     });
+// };
+
+
+// db.collection('member_children').get().then((snapshot) => {
+//     snapshot.docs.forEach(doc => {
+//         buildMemberChildrenArray(doc);
+//     });
+// });
+
+// function buildMemberChildrenArray(doc) {
+//     let member = [];
+//     let memberChildren = doc.data().children;
+
+//     member[0] = doc.id;
+
+//     if ( memberChildren) {
+//         member.push(memberChildren);
+//     }
+
+//     familyTreeObject.push(member);
+
+//     familyTreeObject.find(isChild);
+
+//     return familyTreeObject;
+// };
+
+
+// function renderLeaf(docId, type) {
+
+//     let leafWithDocId = document.querySelector('[data-id="' + docId + '"]');
+//     let className = '';
+//     let siblingsList = '';
+
+//     if ( leafWithDocId ) {
+
+//         // let li = '';
+//         // return li;
+//     }
+
+//     if ( type ) {
+//         className = type;
+        
+//         if ( type == "child" ) {
+//             console.log("Is child");
+//         }
+//     };
+
+//     let li = `
+//         <li class="profile_leaf ${className}" data-id="${docId}">
+//             ${docId}
+//         </li>
+//     `
+
+//     if (siblingsList) {
+//         console.log("yes, but now there are siblingsList");
+//     }
+
+//     return li;
 // }
 
 // Show list of members inside family
@@ -243,18 +455,28 @@ addMemberForm.addEventListener('submit', (e) => {
 
 // Edit member update
 function openEditMemberModal(id) {
-
-    db.collection("members").doc(id).get().then( doc => {
+    allMembers.doc(id).get().then( doc => {
         let member = doc.data();
+        let matchingOption = spouseSelect.querySelector('option[value="'+id+'"');
 
-        editMemberForm.id.value = id;
+        matchingOption.setAttribute('disabled', true);
+        
+        // TODO: LEFT OFF TRYING TO SELECT CURRENT SPOUSE IN DOM
+        // TODO: Error when editng a member without spouse.
+        if ( doc.data().spouses && doc.data().spouses.length >= 1) {
+            let currentSpouseId = doc.data().spouses[0];
+            let currentSpouse = spouseSelect.querySelector('option[value="'+currentSpouseId+'"');
+            currentSpouse.setAttribute('selected', true);
+        };
+
+        var instances = M.FormSelect.init(spouseSelect, options);
+
         editMemberForm.firstName.value = member.firstName;
-        // editMemberForm.is_parent.checked = true;
-        // selectFamilies.options[selectFamilies.selectedIndex].value,
-        // selectSpouse.options[selectSpouse.selectedIndex].value
-    
+        editMemberForm.id.value = id;
+
         const modal = document.querySelector('#edit-member-modal');
         M.Modal.getInstance(modal).open();
+
     }).catch(err => {
         alert("there was an error loading this member");
     });
@@ -265,18 +487,14 @@ function openEditMemberModal(id) {
 editMemberForm.addEventListener('submit', (e) => {
     e.preventDefault();
 
-    var spouseValues = spouseSelect.getSelectedValues();
+    let spouse = spouseSelect.options[spouseSelect.selectedIndex].value;
 
-    console.log(spouseValues);
-
-    var memberId = editMemberForm.id.value;
-    var member = db.collection("members").doc(memberId);
+    let memberId = editMemberForm.id.value;
+    let member = allMembers.doc(memberId);
 
     return member.update({
-        firstName: editMemberForm.firstName.value,
-        spouses: firebase.firestore.FieldValue.arrayUnion(spouseValues)
 
-        // is_parent: editMemberForm.is_parent.checked == true ? true : false,
+        spouses: firebase.firestore.FieldValue.arrayUnion(spouse)
     })
     .then(function() {
         console.log("Document successfully updated!");
@@ -287,18 +505,6 @@ editMemberForm.addEventListener('submit', (e) => {
         // The document probably doesn't exist.
         console.error("Error updating document: ", error);
     });
-})
-
-//saving family
-addFamilyForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    db.collection('families').add({
-        name: addFamilyForm.name.value,
-    });
-    addFamilyForm.name.value = '';
-
-    const modal = document.querySelector('#add-family-modal');
-    M.Modal.getInstance(modal).close();
 })
 
 // // real-time listener for members
@@ -331,14 +537,6 @@ addFamilyForm.addEventListener('submit', (e) => {
 //         }
 //     })
 // })
-
-db.collection('members').get().then((snapshot) => {
-    snapshot.docs.forEach(doc => {
-        renderMember(doc);
-    })
-})
-
-
 
 // function renderParents(doc) {
 //     let childList = document.createElement('ul');
