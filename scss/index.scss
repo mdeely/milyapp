@@ -27,6 +27,7 @@ body {
 }
 
 .profile_leaf {
+    z-index: 2;
     flex-direction: column;
     justify-content: center;
     align-items: center;
@@ -45,18 +46,21 @@ body {
     background-size: cover;
     background-position: center;
     background-image: url("https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?cs=srgb&dl=face-facial-hair-fine-looking-guy-614810.jpg&fm=jpg");
+    animation: bounceIn .5s ease-in-out;
+    transform-origin: center;
 
     &.you {
-        .leaf_name {
+        .name_plate {
             font-weight: 900;
         }
     }
 
     &.spouse {
+        z-index: 1;
         margin-left: -$leafSpacing - 16px;
     }
 
-    .leaf_name {
+    .name_plate {
         position: absolute;
         top: $profileLeafSize - 24px;
         box-shadow: 0 1px 4px rgba(0,0,0,.2);
@@ -80,21 +84,21 @@ body {
 }
 
 .branch {
-    > .directMembers {
-        > .profile_leaf {
-            z-index: 1;
+    // > .directMembers {
+    //     > .profile_leaf {
+    //         z-index: 2;
 
-            &:before {
-                content: "";
-                position: absolute;
-                width: 1px;
-                height: $leafSpacing;
-                background-color: $lineColor;
-                top: -$leafSpacing;
-                z-index: -1;
-            }
-        }
-    }
+    //         &:before {
+    //             content: "";
+    //             position: absolute;
+    //             width: 1px;
+    //             height: $leafSpacing;
+    //             background-color: $lineColor;
+    //             top: -$leafSpacing;
+    //             z-index: -1;
+    //         }
+    //     }
+    // }
 
     .branch {
         border-top: 1px solid $lineColor;
@@ -103,7 +107,15 @@ body {
 
 .actions {
     position: absolute;
-    right: -8px;
+    right: -12px;
+
+    button {
+        border-radius: 40px;
+        background-color: white;
+        padding: 4px;
+        height: 32px;
+    }
+
 }
 
 [data-menu-for="actions_add_member"] {
@@ -135,3 +147,41 @@ nav {
     z-index: 9999;
     align-items: center;
 }
+
+.add-member-menu {
+    background-color: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,.2);
+    border-radius: 8px;
+    right: -58px;
+    top: 62px;
+    position: absolute;
+    z-index: 999;
+
+    li {
+        padding: 4px 8px;
+        text-align: left;
+
+        &:hover {
+            background-color: rgba(black, .05);
+            cursor: pointer;
+        }
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes bounceIn {
+    0% { transform: scale(.88); }
+    20% { transform: scale(1.12); }
+    40% { transform: scale(.94); }
+    60% { transform: scale(1.06); }
+    80% { transform: scale(.98); }
+    100% { transform: scale(1); }
+  }

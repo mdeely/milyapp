@@ -15,6 +15,7 @@ body {
   justify-content: center; }
 
 .profile_leaf {
+  z-index: 2;
   flex-direction: column;
   justify-content: center;
   align-items: center;
@@ -30,12 +31,15 @@ body {
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
-  background-image: url("https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?cs=srgb&dl=face-facial-hair-fine-looking-guy-614810.jpg&fm=jpg"); }
-  .profile_leaf.you .leaf_name {
+  background-image: url("https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?cs=srgb&dl=face-facial-hair-fine-looking-guy-614810.jpg&fm=jpg");
+  animation: bounceIn .5s ease-in-out;
+  transform-origin: center; }
+  .profile_leaf.you .name_plate {
     font-weight: 900; }
   .profile_leaf.spouse {
+    z-index: 1;
     margin-left: -48px; }
-  .profile_leaf .leaf_name {
+  .profile_leaf .name_plate {
     position: absolute;
     top: 136px;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
@@ -47,28 +51,23 @@ body {
     display: flex;
     align-items: center;
     white-space: nowrap; }
-    .profile_leaf .leaf_name i {
+    .profile_leaf .name_plate i {
       margin-left: 8px; }
 
 .treeName {
   margin-right: 80px; }
 
-.branch > .directMembers > .profile_leaf {
-  z-index: 1; }
-  .branch > .directMembers > .profile_leaf:before {
-    content: "";
-    position: absolute;
-    width: 1px;
-    height: 32px;
-    background-color: #d9d9d9;
-    top: -32px;
-    z-index: -1; }
 .branch .branch {
   border-top: 1px solid #d9d9d9; }
 
 .actions {
   position: absolute;
-  right: -8px; }
+  right: -12px; }
+  .actions button {
+    border-radius: 40px;
+    background-color: white;
+    padding: 4px;
+    height: 32px; }
 
 [data-menu-for="actions_add_member"] {
   position: absolute;
@@ -95,5 +94,39 @@ nav {
   color: gray;
   z-index: 9999;
   align-items: center; }
+
+.add-member-menu {
+  background-color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  right: -58px;
+  top: 62px;
+  position: absolute;
+  z-index: 999; }
+  .add-member-menu li {
+    padding: 4px 8px;
+    text-align: left; }
+    .add-member-menu li:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+      cursor: pointer; }
+
+@keyframes fadeIn {
+  from {
+    opacity: 0; }
+  to {
+    opacity: 1; } }
+@keyframes bounceIn {
+  0% {
+    transform: scale(0.88); }
+  20% {
+    transform: scale(1.12); }
+  40% {
+    transform: scale(0.94); }
+  60% {
+    transform: scale(1.06); }
+  80% {
+    transform: scale(0.98); }
+  100% {
+    transform: scale(1); } }
 
 /*# sourceMappingURL=style.css.map */

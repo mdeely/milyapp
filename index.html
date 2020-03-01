@@ -16,33 +16,33 @@
             <button class="waves-effect waves-light btn-small logged-in" style="display: none;" id="signout-button">Sign out</button>
         </nav>
         <div class="familyTree"></div>
-        <form id="signup-form" class="logged-out" style="display: none;" >
-            <h4>Sign up</h4>
-            <input id="signup-email" name="signup-email" placeholder="username"/>
-            <input id="signup-password" name="signup-password" placeholder="password"/>
-            <button class="waves-effect btn-small waves-light" id="signup-button">Sign up</button>
-            <p class="error"></p>
-        </form>
-        <form id="login-form" class="logged-out" style="display: none;" >
-            <h4>Log in</h4>
-            <input id="login-email" name="login-email" placeholder="username"/>
-            <input id="login-password" name="login-password" placeholder="password"/>
-            <button class="waves-effect btn-small waves-light" id="login-button">login in</button>
-            <p class="error"></p>
-        </form>
-        <form id="admin-form" class="admin-role" style="display: none;" >
-            <h4>Make admin</h4>
-            <input id="admin-email" name="admin-email" placeholder="username"/>
-            <button class="waves-effect btn-small waves-light" id="admin-button">Make admin</button>
-            <p class="error"></p>
-        </form>
-        <!-- <form id="create-form" class="logged-in" style="display: none;" >
-            <h4>Create member</h4>
-            <input id="member-name" name="member-name" placeholder="First name"/>
-            <button class="waves-effect waves-light btn-large" id="create-member-button">Create member</button>
-        </form> -->
 
-
+        <div class="container">
+            <div class="row">
+                <div class="col s4">
+                    <form id="signup-form" class="logged-out" style="display: none;" >
+                        <h4>Sign up</h4>
+                        <input id="signup-email" name="signup-email" placeholder="username"/>
+                        <input id="signup-password" name="signup-password" placeholder="password"/>
+                        <button class="waves-effect btn-small waves-light" id="signup-button">Sign up</button>
+                        <p class="error"></p>
+                    </form>
+                    <form id="login-form" class="logged-out" style="display: none;" >
+                        <h4>Log in</h4>
+                        <input id="login-email" name="login-email" placeholder="username"/>
+                        <input id="login-password" name="login-password" placeholder="password"/>
+                        <button class="waves-effect btn-small waves-light" id="login-button">login in</button>
+                        <p class="error"></p>
+                    </form>
+                    <form id="admin-form" class="admin-role" style="display: none;" >
+                        <h4>Make admin</h4>
+                        <input id="admin-email" name="admin-email" placeholder="username"/>
+                        <button class="waves-effect btn-small waves-light" id="admin-button">Make admin</button>
+                        <p class="error"></p>
+                    </form>
+                </div>
+            </div>
+        </div>
 
         <!-- EDIT MEMBER MODAL -->
         <div id="edit-member-modal" class="modal">

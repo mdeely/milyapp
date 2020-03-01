@@ -41,8 +41,7 @@ const setupView = (doc) => {
                 allLeaves.forEach(leafDoc => {
                     if (leafDoc.data().topMember === true) {
                         initiateTree(leafDoc, allLeaves);
-                        return;
-                    }
+                    } 
                 });
             });
             
@@ -54,11 +53,11 @@ const setupView = (doc) => {
         memberList.innerHTML = '<h4>Log in or sign up to begin</h4>';
     }
 
-    // panzoom(memberList, {
-    //     maxZoom: 1,
-    //     minZoom: 0.5,
-    //     pinchSpeed: .8 // zoom two times faster than the distance between fingers
-    //   });
+    panzoom(memberList, {
+        maxZoom: 1,
+        minZoom: 0.5,
+        pinchSpeed: .8 // zoom two times faster than the distance between fingers
+      });
 }
 
 
@@ -79,8 +78,8 @@ function buildBranchFromChosenMember(doc, allLeaves) {
     let branch = document.createElement("ul");
     let directMemberContainer = document.createElement("ul");
     let descendantsContainer = document.createElement("ul");
-    let chosenMember = buidlLeaf(doc);
-
+    let chosenMember = buildLeaf(doc);
+    
     branch.setAttribute('class', 'branch');
     descendantsContainer.setAttribute('class', 'descendants');
     directMemberContainer.setAttribute('class', 'directMembers');
@@ -92,7 +91,7 @@ function buildBranchFromChosenMember(doc, allLeaves) {
         if (spouses && spouses.length > 0) {
             spouses.forEach(spouse => {
                 let spouseDoc = allLeaves.docs.find(spouseReq => spouseReq.id === spouse);
-                let spouseEl = buidlLeaf(spouseDoc);
+                let spouseEl = buildLeaf(spouseDoc);
                 spouseEl.classList.add('spouse');
 
                 directMemberContainer.prepend(spouseEl);
@@ -132,46 +131,81 @@ function initiateTree(doc, allLeaves) {
     }
 }
 
-function buidlLeaf(doc) {
+// const getMemberLi = (doc, type) => {
+//     let name = 'Unnamed';
+
+//     if (type === "member") {
+//         name = doc.data().name.firstName;
+//     } else if (type == "leaf") {
+//         name = doc.data().name;
+//     }
+
+//     let li = `
+//         <li class="profile_leaf">
+//             <div class="name_plate">
+//                 <span class="leaf_name">${name}</span>
+//                 <a href="#edit-member-modal" class="modal-trigger>
+//                     <i class="fa fa-pencil-alt"/>
+//                 </a>
+//             </div> 
+//         </li>
+//     `
+
+//     return li;
+// }
+
+function buildLeaf(doc) {
     let li = document.createElement('li');
     let editButton = document.createElement('a');
     let editIcon = document.createElement('i');
+    let namePlate = document.createElement('div');
     let span = document.createElement('span');
-    let name = 'Unnamed';
+    let name = doc.data().name ? doc.data().name : 'Unnamed';
 
     editIcon.setAttribute('class', 'fa fa-pencil-alt');
     editButton.setAttribute("class", "modal-trigger")
     editButton.setAttribute("href", "#edit-member-modal")
     li.setAttribute("class", 'profile_leaf');
+    namePlate.setAttribute("class", 'name_plate');
     span.setAttribute("class", 'leaf_name');
 
     // Does doc exist?
     if (doc) {
+        let claimedMemberId = doc.data().claimed_by ? doc.data().claimed_by : false;
 
-        // Is it claimed by a member?
-        if (doc.data().claimed_by) {
-            if (doc.data().claimed_by === activeMember) {
-                li.classList.add('you');
-            }
-        }
+        // 
+        // TODO: LEFT OFF trying to figure out how to render MEMBER DATA vs LEAF DATA if leaf is CLAIMED
+        // 
 
-        li.setAttribute("data-id", doc.id);
-
-        if (doc.data().name) {
-            if (doc.data().name.length > 0) {
-                name = doc.data().name;
-            }
+        if (claimedMemberId) {
+            members.doc(claimedMemberId).get()
+            .then((memberDoc) => {
+                // return getMemberLi(memberDoc, "member");
+            })
         }
 
         span.textContent = name;
+
+        li.setAttribute("data-id", doc.id);
+
+        // Is it top member?
+        if (doc.data().topMember === true) {
+            li.setAttribute("data-top-member", "true");
+        }
+
+        if (claimedMemberId === activeMember) {
+            li.classList.add('you');
+        }
 
     } else {
         span.textContent = "No data found";
     }
 
     editButton.appendChild(editIcon);
-    span.appendChild(editButton);
-    li.appendChild(span);
+    namePlate.appendChild(span);
+    namePlate.appendChild(editButton);
+
+    li.appendChild(namePlate);
 
     if (doc && activeMemberIsOwner === true) {
         li.appendChild(createMemberActions(doc));
@@ -242,9 +276,6 @@ function createMemberActions(doc) {
     actionsWrapper.appendChild(modifyMember)
 
     addMembersButton.addEventListener('click', (e) => {
-        e.preventDefault();
-        let trigger = e.target;
-
         handleAddMemberMenus(e);
     })
 
@@ -327,6 +358,7 @@ function createMemberActions(doc) {
                         parents: firebase.firestore.FieldValue.arrayUnion(parentRef.id)
                     })
                     .then(() => {
+                        // renderParentToDom(parentRef);
                         setupViewWithActiveMember(activeMember);
                         console.log("new parent added");
                     })
@@ -521,6 +553,31 @@ function removeMemberFromDom(targetEl) {
     targetEl.remove();
 }
 
+function renderParentToDom(parentRef) {
+    let descendantHTML = memberList.innerHTML;
+    let branch = document.createElement("ul");
+    let directMemberContainer = document.createElement("ul");
+    let descendantsContainer = document.createElement("ul");
+
+    branch.setAttribute('class', 'branch');
+    descendantsContainer.setAttribute('class', 'descendants');
+    directMemberContainer.setAttribute('class', 'directMembers');
+
+    primaryTreeLeaves.doc(parentRef.id).get()
+    .then((parentDoc) => {
+        directMemberContainer.appendChild( buildLeaf(parentDoc) );
+    })
+
+    memberList.innerHTML = '';
+
+    descendantsContainer.innerHTML += descendantHTML;
+    branch.appendChild(directMemberContainer);
+    branch.appendChild(descendantsContainer);
+    memberList.appendChild(branch);
+
+    handleAddMemberMenus();
+}
+
 function renderChildToDom(childRef, targetElement) {
     primaryTreeLeaves.doc(childRef.id).get()
     .then((childDoc) => {
@@ -530,7 +587,7 @@ function renderChildToDom(childRef, targetElement) {
         let targetBranch = targetElement.closest(".branch");
         let descendantsContainer;
 
-        descendantBranch.appendChild( buidlLeaf(childDoc) );
+        descendantBranch.appendChild( buildLeaf(childDoc) );
         descendantBranch.setAttribute('class', 'branch');
 
         if (existing) {
@@ -559,6 +616,12 @@ function handleAddMemberMenus(e) {
     } else {
         let trigger = e.target;
         trigger.nextSibling.classList.toggle("show");
+    }
+}
+
+function setEventListenerTarget(e) {
+    if (!e.target.classList.contains("actions_addMember")) {
+        console.log("Clicked Off");
     }
 }
 
