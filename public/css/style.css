@@ -1,0 +1,99 @@
+body {
+  font-family: "Lato", san-serif; }
+
+.directMembers,
+.descendants,
+.familyTree,
+.profile_leaf {
+  display: flex; }
+
+.familyTree {
+  padding: 16px;
+  justify-content: center; }
+
+.directMembers {
+  justify-content: center; }
+
+.profile_leaf {
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 160px;
+  height: 160px;
+  font-size: 16px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15), 0 1px 24px rgba(0, 0, 0, 0.1), 0 0 0 8px white inset;
+  border-radius: 1000px;
+  text-align: center;
+  margin: 32px;
+  background-color: #f3f3f3;
+  position: relative;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  background-image: url("https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?cs=srgb&dl=face-facial-hair-fine-looking-guy-614810.jpg&fm=jpg"); }
+  .profile_leaf.you .leaf_name {
+    font-weight: 900; }
+  .profile_leaf.spouse {
+    margin-left: -48px; }
+  .profile_leaf .leaf_name {
+    position: absolute;
+    top: 136px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+    padding: 8px 12px;
+    background-color: white;
+    border-radius: 8px;
+    min-width: 50%;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    white-space: nowrap; }
+    .profile_leaf .leaf_name i {
+      margin-left: 8px; }
+
+.treeName {
+  margin-right: 80px; }
+
+.branch > .directMembers > .profile_leaf {
+  z-index: 1; }
+  .branch > .directMembers > .profile_leaf:before {
+    content: "";
+    position: absolute;
+    width: 1px;
+    height: 32px;
+    background-color: #d9d9d9;
+    top: -32px;
+    z-index: -1; }
+.branch .branch {
+  border-top: 1px solid #d9d9d9; }
+
+.actions {
+  position: absolute;
+  right: -8px; }
+
+[data-menu-for="actions_add_member"] {
+  position: absolute;
+  left: 40px;
+  top: -3px;
+  display: none;
+  padding: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  background-color: white;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 10; }
+  [data-menu-for="actions_add_member"].show {
+    display: block; }
+
+nav {
+  padding: 16px;
+  width: 100%;
+  position: sticky;
+  top: 0;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  display: flex;
+  background-color: white;
+  color: gray;
+  z-index: 9999;
+  align-items: center; }
+
+/*# sourceMappingURL=style.css.map */
