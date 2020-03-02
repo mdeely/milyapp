@@ -7,7 +7,7 @@ const createTreeModal = document.querySelector('#create-tree-modal');
 const editMemberModal = document.querySelector('#edit-member-modal');
 const editMemberForm = document.querySelector('#edit-member-form');
 const treeNameContainer = document.querySelector(".treeName");
-const removeMemberButton = document.getElementById("remove-member");
+const profileInfoClose = document.querySelector(".profileInfo__close");
 
 let owners = [];
 let activeMember;
@@ -46,18 +46,18 @@ const setupView = (doc) => {
             });
             
         } else {
-            let createTreeButton = `<a class="waves-effect waves-light btn-large modal-trigger logged-in" href="#create-tree-modal">Create a tree</a>`
+            let createTreeButton = `<a class="waves-effect waves-light btn-large modal-trigger logged-in" href="#create-tree-modal">Create a family tree</a>`
             memberList.innerHTML += createTreeButton;
         }
     } else {
         memberList.innerHTML = '<h4>Log in or sign up to begin</h4>';
     }
 
-    panzoom(memberList, {
-        maxZoom: 1,
-        minZoom: 0.5,
-        pinchSpeed: .8 // zoom two times faster than the distance between fingers
-      });
+    // panzoom(memberList, {
+    //     maxZoom: 1,
+    //     minZoom: 0.5,
+    //     pinchSpeed: .8 // zoom two times faster than the distance between fingers
+    //   });
 }
 
 
@@ -69,39 +69,44 @@ function setOwnerAndActiveMemberVars(doc) {
     }
 }
 
-function initiateBranch(doc, allLeaves) {
-    let branch = buildBranchFromChosenMember(doc, allLeaves);
+async function initiateBranch(doc, allLeaves) {
+    let branch = await buildBranchFromChosenMember(doc, allLeaves);
     memberList.appendChild(branch);
 }
 
-function buildBranchFromChosenMember(doc, allLeaves) {
+async function buildBranchFromChosenMember(doc, allLeaves) {
     let branch = document.createElement("ul");
     let directMemberContainer = document.createElement("ul");
     let descendantsContainer = document.createElement("ul");
-    let chosenMember = buildLeaf(doc);
+    let chosenMember = await getMemberLi({
+        "leafDoc": doc 
+    });
     
     branch.setAttribute('class', 'branch');
     descendantsContainer.setAttribute('class', 'descendants');
     directMemberContainer.setAttribute('class', 'directMembers');
+    directMemberContainer.insertAdjacentHTML('afterbegin', chosenMember);
 
     if (doc) {
         let spouses = doc.data().spouses;
         let children = doc.data().children;
 
         if (spouses && spouses.length > 0) {
-            spouses.forEach(spouse => {
+            spouses.forEach(async spouse => {
                 let spouseDoc = allLeaves.docs.find(spouseReq => spouseReq.id === spouse);
-                let spouseEl = buildLeaf(spouseDoc);
-                spouseEl.classList.add('spouse');
+                let spouseEl = await getMemberLi({
+                    "leafDoc" : spouseDoc,
+                    "relationship" : "spouse"
+                });
 
-                directMemberContainer.prepend(spouseEl);
+                directMemberContainer.insertAdjacentHTML('beforeend', spouseEl);
             })
         }
     
         if (children && children.length > 0) {
-            children.forEach(child => {
+            children.forEach(async (child) => {
                 let childDoc = allLeaves.docs.find(childReq => childReq.id === child);
-                let descendantBranch = buildBranchFromChosenMember(childDoc, allLeaves);
+                let descendantBranch = await buildBranchFromChosenMember(childDoc, allLeaves);
                 descendantsContainer.prepend(descendantBranch);
             })
             branch.prepend(descendantsContainer);
@@ -109,122 +114,358 @@ function buildBranchFromChosenMember(doc, allLeaves) {
     } else {
 
     }
-
-    directMemberContainer.prepend(chosenMember);
+    // directMemberContainer.prepend(chosenMember);
     branch.prepend(directMemberContainer);
     
     return branch;
 }
 
-function initiateTree(doc, allLeaves) {
+const addEventListenerToProfileLeaves = () => {
+    let profileLeaves = document.querySelectorAll(".profileLeaf");
+    profileLeaves.forEach(profileLeaf => {
+        profileLeaf.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            e.target.querySelector(".actions_dropdown").classList.add("show");
+        });
+
+        profileLeaf.addEventListener('click', (e) => {
+            editMember(e);
+            handleProfileInfo("show");
+        });
+    })
+}
+
+async function initiateTree(doc, allLeaves) {
     let chosenMemberSiblings = doc.data().siblings;
-    let chosenMemberBranch = buildBranchFromChosenMember(doc, allLeaves);
+    let chosenMemberBranch = await buildBranchFromChosenMember(doc, allLeaves);
     
     memberList.appendChild(chosenMemberBranch);
 
     if (chosenMemberSiblings && chosenMemberSiblings.length > 0) {
-        chosenMemberSiblings.forEach(sibling => {
+        chosenMemberSiblings.forEach(async (sibling) => {
             let siblingDoc = allLeaves.docs.find(siblingReq => siblingReq.id === sibling);
-            let siblingsBranch = buildBranchFromChosenMember(siblingDoc, allLeaves);
+            let siblingsBranch = await buildBranchFromChosenMember(siblingDoc, allLeaves);
             memberList.appendChild(siblingsBranch);
         })
     }
+
+    profileInfoClose.addEventListener("click", (e) => {
+        handleProfileInfo();
+    });
+
+    addEventListenerToProfileLeaves();
+
+    let deleteMemberActions = document.querySelectorAll(".delete_member_action");
+    deleteMemberActions.forEach(action => {
+        action.addEventListener('click', (e) => {
+            deleteLeaf(e);
+        })
+    })
+
+    let childButtons = document.querySelectorAll(".add_child_option");
+    childButtons.forEach(childButton => {
+        childButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // get target member
+            let targetEl = e.target.closest(".profileLeaf");
+            let targetMemberId = targetEl.getAttribute('data-id');
+            let parents = [];
+    
+            parents.push(targetMemberId);
+    
+            // create child member, update parent members
+            primaryTreeLeaves.doc(targetMemberId).get()
+            .then((targetMemberRef) => {
+                if (targetMemberRef.data().spouses && targetMemberRef.data().spouses.length > 0) {
+                    targetMemberRef.data().spouses.forEach(spouseId => {
+                        parents.push(spouseId);
+                    })
+                }
+    
+                primaryTreeLeaves.add({
+                    name: null,
+                    parents: firebase.firestore.FieldValue.arrayUnion(...parents),
+                    children: [],
+                    spouses: [],
+                    siblings: [],
+                    topMember: false
+                }).then(childRef => {
+                    if (parents && parents.length > 0) {
+                        parents.forEach(parentId => {    
+                            primaryTreeLeaves.doc(parentId).update({
+                                children: firebase.firestore.FieldValue.arrayUnion(childRef.id)
+                            })
+                            .then(() => {
+                                // Do something
+                            })
+                            .catch((err) => {
+                                console.log(err.message);
+                            }) 
+                        })
+                    };
+                    setupViewWithActiveMember(activeMember);
+                    // renderChildToDom(childRef, targetEl);
+    
+                }).catch((err) => {
+                    console.log(err.message)
+                })
+            })
+        })
+    })
+
+    let sibilngButtons = document.querySelectorAll(".add_sibling_option");
+    sibilngButtons.forEach(siblingButton => {
+        siblingButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+    
+            // get target member
+            let targetEl = e.target.closest(".profileLeaf");
+            let targetMemberId = targetEl.getAttribute('data-id');
+    
+            primaryTreeLeaves.doc(targetMemberId).get()
+            .then(targetMemberRefDoc => {
+                let siblings = [];
+                let parents = [];
+    
+                if ( targetMemberRefDoc.data().siblings && targetMemberRefDoc.data().siblings.length > 0) {
+                    targetMemberRefDoc.data().siblings.forEach(sibling => {
+                        siblings.push(sibling);
+                    })
+                }
+                if ( targetMemberRefDoc.data().parents && targetMemberRefDoc.data().parents.length > 0) {
+                    targetMemberRefDoc.data().parents.forEach(parent => {
+                        parents.push(parent);
+                    })
+                }
+    
+                siblings.push(targetMemberId);
+    
+                primaryTreeLeaves.add({
+                    name: null,
+                    siblings: firebase.firestore.FieldValue.arrayUnion(...siblings),
+                    parents: [],
+                    spouses: [],
+                    children: [],
+                    topMember: false
+                }).then(newSiblingRef => {
+                    siblings.forEach(siblingId => {
+                        primaryTreeLeaves.doc(siblingId).update({
+                            siblings: firebase.firestore.FieldValue.arrayUnion(newSiblingRef.id)
+                        })
+                    });
+                    if ( targetMemberRefDoc.data().parents && targetMemberRefDoc.data().parents.length > 0 ) {
+                        primaryTreeLeaves.doc(newSiblingRef.id).update({
+                            parents: firebase.firestore.FieldValue.arrayUnion(...parents)
+                        });
+    
+                        parents.forEach(parentId => {
+                            primaryTreeLeaves.doc(parentId).update({
+                                children: firebase.firestore.FieldValue.arrayUnion(newSiblingRef.id)
+                            })
+                        });
+                    }
+                    setupViewWithActiveMember(activeMember);
+                })
+            });
+        })
+    })
+
+
+    let spouseButtons = document.querySelectorAll(".add_spouse_option");
+    spouseButtons.forEach(spouseButton => {
+        spouseButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+    
+            let targetEl = e.target.closest(".profileLeaf");
+            let targetMemberId = targetEl.getAttribute('data-id');
+    
+            primaryTreeLeaves.doc(targetMemberId).get()
+            .then((targetMemberDoc) => {
+                // add these to new spouse
+                let children = [];
+                let spouses = [];
+    
+                if ( targetMemberDoc.data().children && targetMemberDoc.data().children.length > 0 ) {
+                    targetMemberDoc.data().children.forEach(child => {
+                        children.push(child);
+                    })
+                }
+    
+                spouses.push(targetMemberId);
+    
+                primaryTreeLeaves.add({
+                    name: null,
+                    spouses: firebase.firestore.FieldValue.arrayUnion(...spouses),
+                    siblings: [],
+                    children: [],
+                    parents: [],
+                    topMember: false
+                }).then(spouseRef => {
+                    if ( targetMemberDoc.data().children && targetMemberDoc.data().children.length > 0 ) {
+                        children.forEach(childId => {
+                            primaryTreeLeaves.doc(childId).update({
+                                parents: firebase.firestore.FieldValue.arrayUnion(spouseRef.id)
+                            })
+                            .then(() => {
+                                console.log("Children updated to include new spouse");
+                            })
+                        })
+                        primaryTreeLeaves.doc(spouseRef.id).update({
+                            children: firebase.firestore.FieldValue.arrayUnion(...children)
+                        });
+                    }
+    
+                    primaryTreeLeaves.doc(targetMemberId).update({
+                        spouses: firebase.firestore.FieldValue.arrayUnion(spouseRef.id)
+                    })
+                    .then(() => {
+                        setupViewWithActiveMember(activeMember);
+                    })
+                });
+            })
+        })
+    })
+
+    let parentButtons = document.querySelectorAll(".add_parent_option");
+    parentButtons.forEach(parentButton => {
+        parentButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+
+            // get target member
+            let targetEl = e.target.closest(".profileLeaf");
+            let targetMemberId = targetEl.getAttribute('data-id');
+    
+            primaryTreeLeaves.doc(targetMemberId).get()
+            .then(targetMemberRefDoc => {
+                let childrenOfParent = [];
+    
+                if ( targetMemberRefDoc.data().siblings.length > 0) {
+                    targetMemberRefDoc.data().siblings.forEach(sibling => {
+                        childrenOfParent.push(sibling);
+                    })
+                }
+    
+                childrenOfParent.push(targetMemberId);
+    
+                primaryTreeLeaves.add({
+                    name: null,
+                    siblings: [],
+                    parents: [],
+                    spouses: [],
+                    children: firebase.firestore.FieldValue.arrayUnion(...childrenOfParent),
+                    topMember: true
+                }).then(parentRef => {
+                    childrenOfParent.forEach(childId => {
+                        primaryTreeLeaves.doc(childId).update({
+                            topMember: false,
+                            parents: firebase.firestore.FieldValue.arrayUnion(parentRef.id)
+                        })
+                        .then(() => {
+                            // renderParentToDom(parentRef);
+                            setupViewWithActiveMember(activeMember);
+                            console.log("new parent added");
+                        })
+                    })
+                })
+    
+            });
+    
+        })
+    })
 }
 
-// const getMemberLi = (doc, type) => {
-//     let name = 'Unnamed';
-
-//     if (type === "member") {
-//         name = doc.data().name.firstName;
-//     } else if (type == "leaf") {
-//         name = doc.data().name;
-//     }
-
-//     let li = `
-//         <li class="profile_leaf">
-//             <div class="name_plate">
-//                 <span class="leaf_name">${name}</span>
-//                 <a href="#edit-member-modal" class="modal-trigger>
-//                     <i class="fa fa-pencil-alt"/>
-//                 </a>
-//             </div> 
-//         </li>
-//     `
-
-//     return li;
-// }
-
-function buildLeaf(doc) {
-    let li = document.createElement('li');
-    let editButton = document.createElement('a');
-    let editIcon = document.createElement('i');
-    let namePlate = document.createElement('div');
-    let span = document.createElement('span');
-    let name = doc.data().name ? doc.data().name : 'Unnamed';
-
-    editIcon.setAttribute('class', 'fa fa-pencil-alt');
-    editButton.setAttribute("class", "modal-trigger")
-    editButton.setAttribute("href", "#edit-member-modal")
-    li.setAttribute("class", 'profile_leaf');
-    namePlate.setAttribute("class", 'name_plate');
-    span.setAttribute("class", 'leaf_name');
-
-    // Does doc exist?
-    if (doc) {
-        let claimedMemberId = doc.data().claimed_by ? doc.data().claimed_by : false;
-
-        // 
-        // TODO: LEFT OFF trying to figure out how to render MEMBER DATA vs LEAF DATA if leaf is CLAIMED
-        // 
-
-        if (claimedMemberId) {
-            members.doc(claimedMemberId).get()
-            .then((memberDoc) => {
-                // return getMemberLi(memberDoc, "member");
-            })
+function handleProfileInfo(state) {
+    if (state) {
+        if (state == "show") {
+            document.querySelector(".profileInfo").classList.add("show");
         }
-
-        span.textContent = name;
-
-        li.setAttribute("data-id", doc.id);
-
-        // Is it top member?
-        if (doc.data().topMember === true) {
-            li.setAttribute("data-top-member", "true");
-        }
-
-        if (claimedMemberId === activeMember) {
-            li.classList.add('you');
-        }
-
     } else {
-        span.textContent = "No data found";
+        document.querySelector(".profileInfo").classList.remove("show");
+    }
+}
+
+const getMemberLi = async (params) => {
+// const getMemberLi = (params) => {
+    let leafDoc = params["leafDoc"] ? params["leafDoc"] : false;
+    let name = leafDoc.data().name ? leafDoc.data().name : "Unnamed";
+    let classNames = params["relationship"] ? params["relationship"] : '';
+    let claimedBy = leafDoc.data().claimed_by ? leafDoc.data().claimed_by : false;  
+    let parentMenuOption = '';
+    let li = '';
+
+    if (claimedBy === activeMember) {
+        classNames = classNames + " you"; 
     }
 
-    editButton.appendChild(editIcon);
-    namePlate.appendChild(span);
-    namePlate.appendChild(editButton);
-
-    li.appendChild(namePlate);
-
-    if (doc && activeMemberIsOwner === true) {
-        li.appendChild(createMemberActions(doc));
+    if (leafDoc && claimedBy) {
+        classNames = classNames + " claimed";
     }
 
-    editButton.addEventListener('click', (e) => {
-        let targetEl = e.target.closest(".profile_leaf");
-        let targetMemberId = targetEl.getAttribute('data-id');
-        let leafName = targetEl.querySelector(".leaf_name");
-        let leafNameText = leafName.textContent === 'Unnamed' ? '' : leafName.textContent;
+    if (leafDoc.data().topMember === true) {
+        parentMenuOption = `<div class="add_parent_option">Add parent</div>`;
+    }
 
-        editMemberForm["memberId"].value = targetMemberId;
-        editMemberForm["name"].value = leafNameText;
+
+    // members.doc(claimedBy).get()
+    // .then((doc) => {
+    //     if (doc.data().name.firstName) {
+    //         console.log("a document was returned");
+    //     }
+    // })
+    // .catch(() => {
+    //     return li = generateProfileLeafHtml({
+    //         "name": name,
+    //         "classNames": classNames,
+    //         "leafDoc": leafDoc,
+    //         "parentMenuOption": parentMenuOption
+    //     })
+    // })
+
+
+    // if (leafDoc && claimedBy) {
+    //     // await member doc info
+    //     const memberDoc = await members.doc(claimedBy).get();
+    //     name = memberDoc.data().name.firstName;
+    // }
+
+    return generateProfileLeafHtml({
+        "name": name,
+        "classNames": classNames,
+        "leafDoc": leafDoc,
+        "parentMenuOption": parentMenuOption
     })
+}
+
+function generateProfileLeafHtml(params) {
+    let name = params["name"];
+    let classNames = params["classNames"];
+    let leafDoc = params["leafDoc"];
+    let parentMenuOption = params["parentMenuOption"] ? params["parentMenuOption"] : '';
+
+    let li = `
+        <li class="profileLeaf ${classNames}" data-id="${leafDoc.id}">
+            <div class="actions">
+                <div class="actions_dropdown">
+                    ${parentMenuOption}
+                    <div class="add_child_option">Add child</div>
+                    <div class="add_sibling_option">Add sibling</div>
+                    <div class="add_spouse_option">Add spouse</div>
+                    <div class="delete_member_action" style="color:red;">Delete</div>
+                </div>
+            </div>
+            <div class="profileLeaf__caption">
+                <span class="profileLeaf__name">${name}</span>
+            </div> 
+            <div class="profileLeaf__connectors"></div>
+        </li>
+    `
 
     return li;
 }
-
-
 
 // Set up elements based on authentication status
 
@@ -243,239 +484,14 @@ const setupAuthUi = (user) => {
     }
 }
 
-// Create actions
-function createMemberActions(doc) {
-    let actionsWrapper = document.createElement('div');
-    let addMembersButton = document.createElement('button');
-    let addMembers = document.createElement('div');
-    let modifyMember = document.createElement('div');
+function editMember(e) {
+    let targetEl = e.target.closest(".profileLeaf");
+    let targetMemberId = targetEl.getAttribute('data-id');
+    let leafName = targetEl.querySelector(".profileLeaf__name");
+    let leafNameText = leafName.textContent === 'Unnamed' ? '' : leafName.textContent;
 
-    let childButton = generateButton('+child');
-    let parentbutton = generateButton('+parent');
-    let siblingButton = generateButton('+sibling');
-    let spouseButton = generateButton('+spouse');
-
-    actionsWrapper.setAttribute('class', 'actions');
-    modifyMember.setAttribute('class', 'actions_modify');
-    addMembers.setAttribute('class', 'actions_addMember');
-    addMembers.setAttribute('data-menu-for', 'actions_add_member')
-    addMembersButton.setAttribute('data-trigger-for', "actions_add_member");
-
-    addMembersButton.textContent = "+";
-
-    if (doc.data().topMember === true) {
-        addMembers.appendChild(parentbutton);
-    }
-
-    addMembers.appendChild(spouseButton);
-    addMembers.appendChild(siblingButton);
-    addMembers.appendChild(childButton);
-
-    actionsWrapper.appendChild(addMembersButton);
-    actionsWrapper.appendChild(addMembers);
-    actionsWrapper.appendChild(modifyMember)
-
-    addMembersButton.addEventListener('click', (e) => {
-        handleAddMemberMenus(e);
-    })
-
-    childButton.addEventListener('click', (e) => {
-        e.preventDefault();
-        
-        // get target member
-        let targetEl = e.target.closest(".profile_leaf");
-        let targetMemberId = targetEl.getAttribute('data-id');
-        let parents = [];
-
-        parents.push(targetMemberId);
-
-        // create child member, update parent members
-        primaryTreeLeaves.doc(targetMemberId).get()
-        .then((targetMemberRef) => {
-            if (targetMemberRef.data().spouses && targetMemberRef.data().spouses.length > 0) {
-                targetMemberRef.data().spouses.forEach(spouseId => {
-                    parents.push(spouseId);
-                })
-            }
-
-            primaryTreeLeaves.add({
-                name: null,
-                parents: firebase.firestore.FieldValue.arrayUnion(...parents),
-                children: [],
-                spouses: [],
-                siblings: [],
-                topMember: false
-            }).then(childRef => {
-                if (parents && parents.length > 0) {
-                    parents.forEach(parentId => {    
-                        primaryTreeLeaves.doc(parentId).update({
-                            children: firebase.firestore.FieldValue.arrayUnion(childRef.id)
-                        })
-                        .then(() => {
-                            // Do something
-                        })
-                        .catch((err) => {
-                            console.log(err.message);
-                        }) 
-                    })
-                };
-                renderChildToDom(childRef, targetEl);
-
-            }).catch((err) => {
-                console.log(err.message)
-            })
-        })
-    })
-
-    parentbutton.addEventListener('click', (e) => {
-        // get target member
-        let targetEl = e.target.closest(".profile_leaf");
-        let targetMemberId = targetEl.getAttribute('data-id');
-
-        primaryTreeLeaves.doc(targetMemberId).get()
-        .then(targetMemberRefDoc => {
-            let childrenOfParent = [];
-
-            if ( targetMemberRefDoc.data().siblings.length > 0) {
-                targetMemberRefDoc.data().siblings.forEach(sibling => {
-                    childrenOfParent.push(sibling);
-                })
-            }
-
-            childrenOfParent.push(targetMemberId);
-
-            primaryTreeLeaves.add({
-                name: null,
-                siblings: [],
-                parents: [],
-                spouses: [],
-                children: firebase.firestore.FieldValue.arrayUnion(...childrenOfParent),
-                topMember: true
-            }).then(parentRef => {
-                childrenOfParent.forEach(childId => {
-                    primaryTreeLeaves.doc(childId).update({
-                        topMember: false,
-                        parents: firebase.firestore.FieldValue.arrayUnion(parentRef.id)
-                    })
-                    .then(() => {
-                        // renderParentToDom(parentRef);
-                        setupViewWithActiveMember(activeMember);
-                        console.log("new parent added");
-                    })
-                })
-            })
-
-        });
-
-    })
-
-    siblingButton.addEventListener('click', (e) => {
-        e.preventDefault();
-
-        // get target member
-        let targetEl = e.target.closest(".profile_leaf");
-        let targetMemberId = targetEl.getAttribute('data-id');
-
-        primaryTreeLeaves.doc(targetMemberId).get()
-        .then(targetMemberRefDoc => {
-            let siblings = [];
-            let parents = [];
-
-            if ( targetMemberRefDoc.data().siblings && targetMemberRefDoc.data().siblings.length > 0) {
-                targetMemberRefDoc.data().siblings.forEach(sibling => {
-                    siblings.push(sibling);
-                })
-            }
-            if ( targetMemberRefDoc.data().parents && targetMemberRefDoc.data().parents.length > 0) {
-                targetMemberRefDoc.data().parents.forEach(parent => {
-                    parents.push(parent);
-                })
-            }
-
-            siblings.push(targetMemberId);
-
-            primaryTreeLeaves.add({
-                name: null,
-                siblings: firebase.firestore.FieldValue.arrayUnion(...siblings),
-                parents: [],
-                spouses: [],
-                children: [],
-                topMember: false
-            }).then(newSiblingRef => {
-                siblings.forEach(siblingId => {
-                    primaryTreeLeaves.doc(siblingId).update({
-                        siblings: firebase.firestore.FieldValue.arrayUnion(newSiblingRef.id)
-                    })
-                });
-                if ( targetMemberRefDoc.data().parents && targetMemberRefDoc.data().parents.length > 0 ) {
-                    primaryTreeLeaves.doc(newSiblingRef.id).update({
-                        parents: firebase.firestore.FieldValue.arrayUnion(...parents)
-                    });
-
-                    parents.forEach(parentId => {
-                        primaryTreeLeaves.doc(parentId).update({
-                            children: firebase.firestore.FieldValue.arrayUnion(newSiblingRef.id)
-                        })
-                    });
-                }
-                setupViewWithActiveMember(activeMember);
-            })
-        });
-    })
-
-    spouseButton.addEventListener('click', (e) => {
-        e.preventDefault();
-
-        let targetEl = e.target.closest(".profile_leaf");
-        let targetMemberId = targetEl.getAttribute('data-id');
-
-        primaryTreeLeaves.doc(targetMemberId).get()
-        .then((targetMemberDoc) => {
-            // add these to new spouse
-            let children = [];
-            let spouses = [];
-
-            if ( targetMemberDoc.data().children && targetMemberDoc.data().children.length > 0 ) {
-                targetMemberDoc.data().children.forEach(child => {
-                    children.push(child);
-                })
-            }
-
-            spouses.push(targetMemberId);
-
-            primaryTreeLeaves.add({
-                name: null,
-                spouses: firebase.firestore.FieldValue.arrayUnion(...spouses),
-                siblings: [],
-                children: [],
-                parents: [],
-                topMember: false
-            }).then(spouseRef => {
-                if ( targetMemberDoc.data().children && targetMemberDoc.data().children.length > 0 ) {
-                    children.forEach(childId => {
-                        primaryTreeLeaves.doc(childId).update({
-                            parents: firebase.firestore.FieldValue.arrayUnion(spouseRef.id)
-                        })
-                        .then(() => {
-                            console.log("Children updated to include new spouse");
-                        })
-                    })
-                    primaryTreeLeaves.doc(spouseRef.id).update({
-                        children: firebase.firestore.FieldValue.arrayUnion(...children)
-                    });
-                }
-
-                primaryTreeLeaves.doc(targetMemberId).update({
-                    spouses: firebase.firestore.FieldValue.arrayUnion(spouseRef.id)
-                })
-                .then(() => {
-                    setupViewWithActiveMember(activeMember);
-                })
-            });
-        })
-    })
-
-    return actionsWrapper;
+    editMemberForm["memberId"].value = targetMemberId;
+    editMemberForm["name"].value = leafNameText;
 }
 
 editMemberForm.addEventListener('submit', (e) => {
@@ -487,7 +503,7 @@ editMemberForm.addEventListener('submit', (e) => {
     primaryTreeLeaves.doc(memberId).update({
         name: name
     }).then(() => {
-        document.querySelector('.profile_leaf[data-id="'+memberId+'"] .leaf_name').textContent = name;
+        document.querySelector('.profileLeaf[data-id="'+memberId+'"] .profileLeaf__name').textContent = name;
 
         editMemberForm.reset();
         M.Modal.getInstance(editMemberModal).close();
@@ -496,15 +512,14 @@ editMemberForm.addEventListener('submit', (e) => {
 
 });
 
-removeMemberButton.addEventListener('click', (e) => {
-    deleteLeaf(e);
-})
-
 function deleteLeaf(e) {
+    e.stopPropagation();
     e.preventDefault();
 
-    let targetMemberId = editMemberForm["memberId"].value;
-    let targetEl = document.querySelector("[data-id='"+targetMemberId+"']");
+    let targetEl = e.target.closest(".profileLeaf");
+    let targetMemberId = targetEl.getAttribute('data-id');
+    // let targetMemberId = editMemberForm["memberId"].value;
+    // let targetEl = document.querySelector("[data-id='"+targetMemberId+"']");
 
     primaryTreeLeaves.doc(targetMemberId).get().then(targetMemberDoc => { 
         console.log()
@@ -574,8 +589,6 @@ function renderParentToDom(parentRef) {
     branch.appendChild(directMemberContainer);
     branch.appendChild(descendantsContainer);
     memberList.appendChild(branch);
-
-    handleAddMemberMenus();
 }
 
 function renderChildToDom(childRef, targetElement) {
@@ -587,7 +600,7 @@ function renderChildToDom(childRef, targetElement) {
         let targetBranch = targetElement.closest(".branch");
         let descendantsContainer;
 
-        descendantBranch.appendChild( buildLeaf(childDoc) );
+        descendantBranch.insertAdjacentElement("afterbegin", getMemberLi({"leafDoc" :childDoc}) );
         descendantBranch.setAttribute('class', 'branch');
 
         if (existing) {
@@ -599,8 +612,6 @@ function renderChildToDom(childRef, targetElement) {
 
         descendantsContainer.appendChild(descendantBranch)
         targetBranch.appendChild(descendantsContainer);
-
-        handleAddMemberMenus();
     })
     .catch((err) => {
         console.log(err.message);
@@ -608,53 +619,20 @@ function renderChildToDom(childRef, targetElement) {
 
 }
 
-function handleAddMemberMenus(e) {
-    document.querySelectorAll("[data-menu-for]").forEach(menu=>{menu.classList.remove('show')});
-
-    if (!e) {
-        return;
-    } else {
-        let trigger = e.target;
-        trigger.nextSibling.classList.toggle("show");
-    }
-}
-
-function setEventListenerTarget(e) {
-    if (!e.target.classList.contains("actions_addMember")) {
-        console.log("Clicked Off");
-    }
-}
-
 function warnAboutDescendants(targetMemberDoc) {
     // if target member has no spouses, but has children
     if (targetMemberDoc.data().spouses && targetMemberDoc.data().spouses.length > 0) {
         // Do nothing
     } else if (targetMemberDoc.data().children && targetMemberDoc.data().children.length > 0) {
-        return alert("ALl descendant connections will be deleted. TODO: Actually delete those descendant members");
+        return alert("ALl descendant connections will be deleted (not true yet). TODO: Actually delete those descendant members");
     };
 }
 
 function setupViewWithActiveMember(activeMember) {
     members.doc(activeMember).get()
     .then(doc => {
-        freezeView(true);
         setupView(doc);
-        freezeView(false);
     });
-}
-
-function freezeView(freeze) {
-    if (freeze) {
-        let width = memberList.offsetWidth;
-        let height = memberList.offsetHeight;
-    
-        memberList.style.width = width;
-        memberList.style.height = height;
-    } else {
-        memberList.style.width = '';
-        memberList.style.height = '';
-    }
-
 }
 
 function removeFromSpouses(doc) {
@@ -703,23 +681,6 @@ function removeFromChildren(doc) {
         })
     }
 }
-
-function generateButton(buttonText) {
-    let button;;
-
-    if (buttonText === "edit") {
-        button = document.createElement("a");
-        button.setAttribute("class", "modal-trigger btn");
-        button.setAttribute('href', '#edit-member-modal');
-    } else {
-        button = document.createElement("button");
-    }
-
-    button.textContent = buttonText;
-
-    return button;
-}
-
 
 const createTreeForm = document.querySelector("#create-tree-form");
 
@@ -773,4 +734,14 @@ createTreeForm.addEventListener('submit', (e) => {
 document.addEventListener('DOMContentLoaded', function() {
     var modals = document.querySelectorAll('.modal');
     M.Modal.init(modals);
+});
+
+// Close the dropdown menu if the user clicks outside of it
+window.addEventListener('click', (e) => {
+    if (!event.target.matches('.actions_dropdown_trigger')) {
+      let dropdowns = document.querySelectorAll(".actions_dropdown.show");
+      dropdowns.forEach(dropdown => {
+          dropdown.classList.remove("show");
+      })
+    }
 });
