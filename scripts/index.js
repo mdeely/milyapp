@@ -69,16 +69,16 @@ function setOwnerAndActiveMemberVars(doc) {
     }
 }
 
-async function initiateBranch(doc, allLeaves) {
-    let branch = await buildBranchFromChosenMember(doc, allLeaves);
+function initiateBranch(doc, allLeaves) {
+    let branch = buildBranchFromChosenMember(doc, allLeaves);
     memberList.appendChild(branch);
 }
 
-async function buildBranchFromChosenMember(doc, allLeaves) {
+function buildBranchFromChosenMember(doc, allLeaves) {
     let branch = document.createElement("ul");
     let directMemberContainer = document.createElement("ul");
     let descendantsContainer = document.createElement("ul");
-    let chosenMember = await getMemberLi({
+    let chosenMember = getMemberLi({
         "leafDoc": doc 
     });
     
@@ -92,9 +92,9 @@ async function buildBranchFromChosenMember(doc, allLeaves) {
         let children = doc.data().children;
 
         if (spouses && spouses.length > 0) {
-            spouses.forEach(async spouse => {
+            spouses.forEach(spouse => {
                 let spouseDoc = allLeaves.docs.find(spouseReq => spouseReq.id === spouse);
-                let spouseEl = await getMemberLi({
+                let spouseEl = getMemberLi({
                     "leafDoc" : spouseDoc,
                     "relationship" : "spouse"
                 });
@@ -104,9 +104,9 @@ async function buildBranchFromChosenMember(doc, allLeaves) {
         }
     
         if (children && children.length > 0) {
-            children.forEach(async (child) => {
+            children.forEach(child => {
                 let childDoc = allLeaves.docs.find(childReq => childReq.id === child);
-                let descendantBranch = await buildBranchFromChosenMember(childDoc, allLeaves);
+                let descendantBranch = buildBranchFromChosenMember(childDoc, allLeaves);
                 descendantsContainer.prepend(descendantBranch);
             })
             branch.prepend(descendantsContainer);
@@ -135,16 +135,16 @@ const addEventListenerToProfileLeaves = () => {
     })
 }
 
-async function initiateTree(doc, allLeaves) {
+function initiateTree(doc, allLeaves) {
     let chosenMemberSiblings = doc.data().siblings;
-    let chosenMemberBranch = await buildBranchFromChosenMember(doc, allLeaves);
+    let chosenMemberBranch = buildBranchFromChosenMember(doc, allLeaves);
     
     memberList.appendChild(chosenMemberBranch);
 
     if (chosenMemberSiblings && chosenMemberSiblings.length > 0) {
-        chosenMemberSiblings.forEach(async (sibling) => {
+        chosenMemberSiblings.forEach((sibling) => {
             let siblingDoc = allLeaves.docs.find(siblingReq => siblingReq.id === sibling);
-            let siblingsBranch = await buildBranchFromChosenMember(siblingDoc, allLeaves);
+            let siblingsBranch = buildBranchFromChosenMember(siblingDoc, allLeaves);
             memberList.appendChild(siblingsBranch);
         })
     }
@@ -388,7 +388,7 @@ function handleProfileInfo(state) {
     }
 }
 
-const getMemberLi = async (params) => {
+const getMemberLi = (params) => {
 // const getMemberLi = (params) => {
     let leafDoc = params["leafDoc"] ? params["leafDoc"] : false;
     let name = leafDoc.data().name ? leafDoc.data().name : "Unnamed";
