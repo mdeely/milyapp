@@ -56,7 +56,8 @@ img {
     display: flex;
     align-items: center;
     white-space: nowrap;
-    z-index: 4; }
+    z-index: 4;
+    pointer-events: none; }
   .profileLeaf__name {
     width: 100%; }
   .profileLeaf.you .profileLeaf__caption {

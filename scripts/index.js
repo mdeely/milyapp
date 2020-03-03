@@ -396,6 +396,22 @@ const getMemberLi = (params) => {
     let claimedBy = leafDoc.data().claimed_by ? leafDoc.data().claimed_by : false;  
     let parentMenuOption = '';
     let li = '';
+    let profilePhoto = '';
+
+    if (leafDoc.data().photo) {
+        let storageRef = storage.ref();
+        let imageRef = storageRef.child(leafDoc.data().photo);
+
+        imageRef.getDownloadURL()
+        .then(url => {
+            console.log(url);
+            profilePhoto = url;
+          })
+          .catch(function(error) {
+            // Handle any errors
+          });
+    }
+
 
     if (claimedBy === activeMember) {
         classNames = classNames + " you"; 
@@ -436,7 +452,8 @@ const getMemberLi = (params) => {
         "name": name,
         "classNames": classNames,
         "leafDoc": leafDoc,
-        "parentMenuOption": parentMenuOption
+        "parentMenuOption": parentMenuOption,
+        "profilePhoto" : profilePhoto
     })
 }
 
@@ -445,9 +462,11 @@ function generateProfileLeafHtml(params) {
     let classNames = params["classNames"];
     let leafDoc = params["leafDoc"];
     let parentMenuOption = params["parentMenuOption"] ? params["parentMenuOption"] : '';
+    let profilePhoto = params["profilePhoto"] ? "url('"+params['profilePhoto']+")" : "inherit";
+
 
     let li = `
-        <li class="profileLeaf ${classNames}" data-id="${leafDoc.id}">
+        <li class="profileLeaf ${classNames}" data-id="${leafDoc.id}" style="background-image: ${profilePhoto}">
             <div class="actions">
                 <div class="actions_dropdown">
                     ${parentMenuOption}
@@ -745,3 +764,34 @@ window.addEventListener('click', (e) => {
       })
     }
 });
+
+
+const storageUrl = "gs://mily-4c2a8.appspot.com";
+const uploadTestInput = document.querySelector("[name='profilePhoto']");
+
+uploadTestInput.addEventListener('change', (e) => {
+    e.preventDefault();
+
+    let leafId = editMemberForm["memberId"].value;
+    let file = e.target.files[0];
+    let fileName = file.name;
+    var file_ext = fileName.substr(fileName.lastIndexOf('.')+1,fileName.length);
+    let filePath = primaryTree + '/' + leafId + '/' + fileName;
+
+    let storageRef = firebase.storage().ref(filePath);
+    
+    storageRef.put(file)
+    .then(function(snapshot) {
+        primaryTreeLeaves.doc(leafId).update({
+            photo: filePath
+        })
+        .then(() => {
+            console.log('Uploaded a blob or file!');
+        })
+        .catch((err) => {
+            console.log(err.message);
+        })
+      }).catch((err) => {
+          console.log(err.message);
+      })
+})

@@ -78,6 +78,7 @@ img {
         align-items: center;
         white-space: nowrap;
         z-index: 4;
+        pointer-events: none;
     }
 
     &__name {
