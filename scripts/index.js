@@ -53,11 +53,11 @@ const setupView = (doc) => {
         memberList.innerHTML = '<h4>Log in or sign up to begin</h4>';
     }
 
-    // panzoom(memberList, {
-    //     maxZoom: 1,
-    //     minZoom: 0.5,
-    //     pinchSpeed: .8 // zoom two times faster than the distance between fingers
-    //   });
+    panzoom(memberList, {
+        maxZoom: 1,
+        minZoom: 0.5,
+        pinchSpeed: .8 // zoom two times faster than the distance between fingers
+      });
 }
 
 
@@ -69,16 +69,16 @@ function setOwnerAndActiveMemberVars(doc) {
     }
 }
 
-function initiateBranch(doc, allLeaves) {
-    let branch = buildBranchFromChosenMember(doc, allLeaves);
+async function initiateBranch(doc, allLeaves) {
+    let branch = await buildBranchFromChosenMember(doc, allLeaves);
     memberList.appendChild(branch);
 }
 
-function buildBranchFromChosenMember(doc, allLeaves) {
+async function buildBranchFromChosenMember(doc, allLeaves) {
     let branch = document.createElement("ul");
     let directMemberContainer = document.createElement("ul");
     let descendantsContainer = document.createElement("ul");
-    let chosenMember = getMemberLi({
+    let chosenMember = await getMemberLi({
         "leafDoc": doc 
     });
     
@@ -92,23 +92,42 @@ function buildBranchFromChosenMember(doc, allLeaves) {
         let children = doc.data().children;
 
         if (spouses && spouses.length > 0) {
-            spouses.forEach(spouse => {
+
+            for (const spouse of spouses) {
                 let spouseDoc = allLeaves.docs.find(spouseReq => spouseReq.id === spouse);
-                let spouseEl = getMemberLi({
+                let spouseEl = await getMemberLi({
                     "leafDoc" : spouseDoc,
                     "relationship" : "spouse"
                 });
 
                 directMemberContainer.insertAdjacentHTML('beforeend', spouseEl);
-            })
+              }
+
+
+            // spouses.forEach(spouse => {
+            //     let spouseDoc = allLeaves.docs.find(spouseReq => spouseReq.id === spouse);
+            //     let spouseEl = getMemberLi({
+            //         "leafDoc" : spouseDoc,
+            //         "relationship" : "spouse"
+            //     });
+
+            //     directMemberContainer.insertAdjacentHTML('beforeend', spouseEl);
+            // })
         }
     
         if (children && children.length > 0) {
-            children.forEach(child => {
+
+            for (const child of children) {
                 let childDoc = allLeaves.docs.find(childReq => childReq.id === child);
-                let descendantBranch = buildBranchFromChosenMember(childDoc, allLeaves);
+                let descendantBranch = await buildBranchFromChosenMember(childDoc, allLeaves);
                 descendantsContainer.prepend(descendantBranch);
-            })
+              }
+
+            // children.forEach(child => {
+            //     let childDoc = allLeaves.docs.find(childReq => childReq.id === child);
+            //     let descendantBranch = await buildBranchFromChosenMember(childDoc, allLeaves);
+            //     descendantsContainer.prepend(descendantBranch);
+            // })
             branch.prepend(descendantsContainer);
         }
     } else {
@@ -130,23 +149,30 @@ const addEventListenerToProfileLeaves = () => {
 
         profileLeaf.addEventListener('click', (e) => {
             editMember(e);
-            handleProfileInfo("show");
+            handleProfileInfo("show", e);
         });
     })
 }
 
-function initiateTree(doc, allLeaves) {
+async function initiateTree(doc, allLeaves) {
     let chosenMemberSiblings = doc.data().siblings;
-    let chosenMemberBranch = buildBranchFromChosenMember(doc, allLeaves);
+    let chosenMemberBranch = await buildBranchFromChosenMember(doc, allLeaves);
     
     memberList.appendChild(chosenMemberBranch);
 
     if (chosenMemberSiblings && chosenMemberSiblings.length > 0) {
-        chosenMemberSiblings.forEach((sibling) => {
+
+        for (const sibling of chosenMemberSiblings) {
             let siblingDoc = allLeaves.docs.find(siblingReq => siblingReq.id === sibling);
-            let siblingsBranch = buildBranchFromChosenMember(siblingDoc, allLeaves);
+            let siblingsBranch = await buildBranchFromChosenMember(siblingDoc, allLeaves);
             memberList.appendChild(siblingsBranch);
-        })
+          }
+
+        // chosenMemberSiblings.forEach((sibling) => {
+        //     let siblingDoc = allLeaves.docs.find(siblingReq => siblingReq.id === sibling);
+        //     let siblingsBranch = await buildBranchFromChosenMember(siblingDoc, allLeaves);
+        //     memberList.appendChild(siblingsBranch);
+        // })
     }
 
     profileInfoClose.addEventListener("click", (e) => {
@@ -378,9 +404,12 @@ function initiateTree(doc, allLeaves) {
     })
 }
 
-function handleProfileInfo(state) {
+function handleProfileInfo(state, e) {
     if (state) {
         if (state == "show") {
+            let bgImage = e.target.style.backgroundImage;
+            var imageUrl = bgImage.slice(4, -1).replace(/["']/g, "");
+            document.querySelector(".profileInfo__image").setAttribute('src', imageUrl); 
             document.querySelector(".profileInfo").classList.add("show");
         }
     } else {
@@ -388,30 +417,23 @@ function handleProfileInfo(state) {
     }
 }
 
-const getMemberLi = (params) => {
-// const getMemberLi = (params) => {
+const getProfileImageURL = async (leafDoc) => {
+    if (leafDoc.data().photo) {
+        let storageRef = storage.ref();
+        let imageRef = storageRef.child(leafDoc.data().photo);
+
+        return imageRef.getDownloadURL();
+    }
+    return '';
+}
+
+const getMemberLi = async (params) => {
     let leafDoc = params["leafDoc"] ? params["leafDoc"] : false;
     let name = leafDoc.data().name ? leafDoc.data().name : "Unnamed";
     let classNames = params["relationship"] ? params["relationship"] : '';
     let claimedBy = leafDoc.data().claimed_by ? leafDoc.data().claimed_by : false;  
     let parentMenuOption = '';
     let li = '';
-    let profilePhoto = '';
-
-    if (leafDoc.data().photo) {
-        let storageRef = storage.ref();
-        let imageRef = storageRef.child(leafDoc.data().photo);
-
-        imageRef.getDownloadURL()
-        .then(url => {
-            console.log(url);
-            profilePhoto = url;
-          })
-          .catch(function(error) {
-            // Handle any errors
-          });
-    }
-
 
     if (claimedBy === activeMember) {
         classNames = classNames + " you"; 
@@ -424,7 +446,6 @@ const getMemberLi = (params) => {
     if (leafDoc.data().topMember === true) {
         parentMenuOption = `<div class="add_parent_option">Add parent</div>`;
     }
-
 
     // members.doc(claimedBy).get()
     // .then((doc) => {
@@ -441,19 +462,17 @@ const getMemberLi = (params) => {
     //     })
     // })
 
-
-    // if (leafDoc && claimedBy) {
-    //     // await member doc info
-    //     const memberDoc = await members.doc(claimedBy).get();
-    //     name = memberDoc.data().name.firstName;
-    // }
+    if (leafDoc && claimedBy) {
+        const memberDoc = await members.doc(claimedBy).get();
+        name = memberDoc.data().name.firstName;
+    }
 
     return generateProfileLeafHtml({
         "name": name,
         "classNames": classNames,
         "leafDoc": leafDoc,
         "parentMenuOption": parentMenuOption,
-        "profilePhoto" : profilePhoto
+        "profilePhoto" : await getProfileImageURL(leafDoc)
     })
 }
 
@@ -462,7 +481,7 @@ function generateProfileLeafHtml(params) {
     let classNames = params["classNames"];
     let leafDoc = params["leafDoc"];
     let parentMenuOption = params["parentMenuOption"] ? params["parentMenuOption"] : '';
-    let profilePhoto = params["profilePhoto"] ? "url('"+params['profilePhoto']+")" : "inherit";
+    let profilePhoto = params["profilePhoto"] ? "url('"+params['profilePhoto']+")" : "";
 
 
     let li = `
@@ -482,6 +501,22 @@ function generateProfileLeafHtml(params) {
             <div class="profileLeaf__connectors"></div>
         </li>
     `
+
+    // let li = `
+    //     <figure class="profileLeaf ${classNames}" data-id="${leafDoc.id}" style="background-image: ${profilePhoto}">
+    //         <img src="${profilePhoto}"/>
+    //         <div class="actions">
+    //             <div class="actions_dropdown">
+    //                 ${parentMenuOption}
+    //                 <div class="add_child_option">Add child</div>
+    //                 <div class="add_sibling_option">Add sibling</div>
+    //                 <div class="add_spouse_option">Add spouse</div>
+    //                 <div class="delete_member_action" style="color:red;">Delete</div>
+    //             </div>
+    //         </div>
+    //         <figcaption class="profileLeaf__caption profileLeaf__name">${name}</figcaption> 
+    //     </li>
+    // `
 
     return li;
 }
@@ -767,26 +802,36 @@ window.addEventListener('click', (e) => {
 
 
 const storageUrl = "gs://mily-4c2a8.appspot.com";
-const uploadTestInput = document.querySelector("[name='profilePhoto']");
+const profilePhotoInputUpload = document.querySelector("[name='profilePhoto']");
 
-uploadTestInput.addEventListener('change', (e) => {
+profilePhotoInputUpload.addEventListener('change', (e) => {
     e.preventDefault();
 
     let leafId = editMemberForm["memberId"].value;
     let file = e.target.files[0];
     let fileName = file.name;
-    var file_ext = fileName.substr(fileName.lastIndexOf('.')+1,fileName.length);
-    let filePath = primaryTree + '/' + leafId + '/' + fileName;
+    // var file_ext = fileName.substr(fileName.lastIndexOf('.')+1,fileName.length);
+    let filePath = 'tree/' + primaryTree + '/' + leafId + '/' + fileName;
 
     let storageRef = firebase.storage().ref(filePath);
     
     storageRef.put(file)
-    .then(function(snapshot) {
+    .then(() => {
         primaryTreeLeaves.doc(leafId).update({
             photo: filePath
         })
         .then(() => {
-            console.log('Uploaded a blob or file!');
+            let memberToUpdate = memberList.querySelector("[data-id='"+leafId+"']");
+            let profileInfoImage = document.querySelector(".profileInfo__image");
+
+            let reader = new FileReader();
+            reader.onload = function(){
+                memberToUpdate.style.backgroundImage = "url('"+reader.result+"')";
+                profileInfoImage.setAttribute('src', reader.result);
+            };
+            reader.readAsDataURL(file);
+
+            console.log('Profile photo uploaded');
         })
         .catch((err) => {
             console.log(err.message);

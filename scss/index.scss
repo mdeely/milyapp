@@ -59,7 +59,8 @@ img {
     background-image: url("https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?cs=srgb&dl=face-facial-hair-fine-looking-guy-614810.jpg&fm=jpg");
     animation: bounceIn .5s ease-in-out;
     transform-origin: center;
-    border-radius: 1000px;
+    border-radius: 50%;
+    box-shadow:  0 0 0 8px white inset, 0 4px 12px rgba(0, 0, 0, 0.15);
 
     &:hover {
         z-index: 999;
@@ -81,9 +82,9 @@ img {
         pointer-events: none;
     }
 
-    &__name {
-        width: 100%;
-    }
+    // &__name {
+    //     width: 100%;
+    // }
 
     &.you {
         .profileLeaf__caption {
@@ -310,6 +311,13 @@ nav {
         border: none;
         cursor: pointer;
         font-size: 18px;
+    }
+
+    &__image {
+        width: 100%;
+        object-fit: cover;
+        object-position: top;
+        height: 280px;
     }
 
     form {
