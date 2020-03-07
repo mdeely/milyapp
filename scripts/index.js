@@ -9,11 +9,35 @@ const editMemberForm = document.querySelector('#edit-member-form');
 const treeNameContainer = document.querySelector(".treeName");
 const profileInfoClose = document.querySelector(".profileInfo__close");
 
+const profileInfo = document.querySelector(".profileInfo");
+const profileInfoName = profileInfo.querySelector(".profileInfo__name");
+const profileInfoImage = profileInfo.querySelector(".profileInfo__image");
+const profileInfoEmail = profileInfo.querySelector(".profileInfo__email");
+const profileInfoBirthday = profileInfo.querySelector(".profileInfo__birthday");
+const profileInfoAddress1 = profileInfo.querySelector(".profileInfo__address1");
+const profileInfoAddress2 = profileInfo.querySelector(".profileInfo__address2");
+const profileInfoCity = profileInfo.querySelector(".profileInfo__city");
+const profileInfoZipcode = profileInfo.querySelector(".profileInfo__zipcode");
+const profileInfoCountry = profileInfo.querySelector(".profileInfo__country");
+
+const viewPref_list = document.querySelector(".viewPref--list");
+const viewPref_tree = document.querySelector(".viewPref--tree");
+
+const placeholderImageUrl = "https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?cs=srgb&dl=face-facial-hair-fine-looking-guy-614810.jpg&fm=jpg";
+
 let owners = [];
 let activeMember;
 let activeMemberIsOwner = false;
 let primaryTree = '';
 let primaryTreeLeaves = '';
+
+viewPref_list.addEventListener('click', () => {
+    memberList.classList.add('list');
+});
+
+viewPref_tree.addEventListener('click', () => {
+    memberList.classList.remove('list');
+})
 
 // Render members and actions available 
 
@@ -53,11 +77,11 @@ const setupView = (doc) => {
         memberList.innerHTML = '<h4>Log in or sign up to begin</h4>';
     }
 
-    panzoom(memberList, {
-        maxZoom: 1,
-        minZoom: 0.5,
-        pinchSpeed: .8 // zoom two times faster than the distance between fingers
-      });
+    // panzoom(memberList, {
+    //     maxZoom: 1,
+    //     minZoom: 0.5,
+    //     pinchSpeed: .8 // zoom two times faster than the distance between fingers
+    //   });
 }
 
 
@@ -93,8 +117,11 @@ async function buildBranchFromChosenMember(doc, allLeaves) {
 
         if (spouses && spouses.length > 0) {
 
+            // is spouse divorced, separated, or married?
+
             for (const spouse of spouses) {
                 let spouseDoc = allLeaves.docs.find(spouseReq => spouseReq.id === spouse);
+
                 let spouseEl = await getMemberLi({
                     "leafDoc" : spouseDoc,
                     "relationship" : "spouse"
@@ -407,13 +434,33 @@ async function initiateTree(doc, allLeaves) {
 function handleProfileInfo(state, e) {
     if (state) {
         if (state == "show") {
-            let bgImage = e.target.style.backgroundImage;
-            var imageUrl = bgImage.slice(4, -1).replace(/["']/g, "");
-            document.querySelector(".profileInfo__image").setAttribute('src', imageUrl); 
-            document.querySelector(".profileInfo").classList.add("show");
+            let target = e.target;
+
+            let name = target.querySelector(".profileLeaf__caption").textContent;
+            let imageUrl = target.querySelector(".profileLeaf__image").getAttribute("src");
+            let email = target.querySelector(".profileLeaf__email").textContent;
+            let birthday = target.querySelector(".profileLeaf__birthday").textContent;
+            let deceased = target.querySelector(".profileLeaf__deceased");
+            let address1 = target.querySelector(".profileLeaf__address1").textContent;
+            let address2 = target.querySelector(".profileLeaf__address2").textContent;
+            let city = target.querySelector(".profileLeaf__city").textContent;
+            let zipcode = target.querySelector(".profileLeaf__zipcode").textContent;
+            let country = target.querySelector(".profileLeaf__country").textContent;
+
+            profileInfoName.textContent = name; 
+            profileInfoImage.setAttribute('src', imageUrl); 
+            profileInfoEmail.textContent = email; 
+            profileInfoBirthday.textContent = birthday; 
+            profileInfoAddress1.textContent = address1; 
+            profileInfoAddress2.textContent = address2; 
+            profileInfoCity.textContent = city; 
+            profileInfoZipcode.textContent = zipcode; 
+            profileInfoCountry.textContent = country; 
+
+            profileInfo.classList.add("show");
         }
     } else {
-        document.querySelector(".profileInfo").classList.remove("show");
+        profileInfo.classList.remove("show");
     }
 }
 
@@ -430,10 +477,26 @@ const getProfileImageURL = async (leafDoc) => {
 const getMemberLi = async (params) => {
     let leafDoc = params["leafDoc"] ? params["leafDoc"] : false;
     let name = leafDoc.data().name ? leafDoc.data().name : "Unnamed";
+    let email = leafDoc.data().email ? leafDoc.data().email : "No email set";
+    let birthday = leafDoc.data().birthday ? leafDoc.data().birthday.toDate() : "No birthday set";
+    let address1 = leafDoc.data().address ? leafDoc.data().address.address1 : "No address1 set";
+    let address2 = leafDoc.data().address ? leafDoc.data().address.address2 : "No address2 set";
+    let city = leafDoc.data().address ? leafDoc.data().address.city : "No city set";
+    let zipcode = leafDoc.data().address ? leafDoc.data().address.zipcode : "No zipcode set";
+    let country = leafDoc.data().address ? leafDoc.data().address.country : "No country set";
     let classNames = params["relationship"] ? params["relationship"] : '';
     let claimedBy = leafDoc.data().claimed_by ? leafDoc.data().claimed_by : false;  
     let parentMenuOption = '';
-    let li = '';
+    let spouseMenuOption = '';
+    let siblingMenuOption = '';
+
+    if (classNames === "spouse") {
+
+        // check for married, seperated, divorced
+    } else {
+        spouseMenuOption = `<div class="add_spouse_option">Add partner</div>`;
+        siblingMenuOption = `<div class="add_sibling_option">Add sibling</div>`;
+    }
 
     if (claimedBy === activeMember) {
         classNames = classNames + " you"; 
@@ -447,21 +510,6 @@ const getMemberLi = async (params) => {
         parentMenuOption = `<div class="add_parent_option">Add parent</div>`;
     }
 
-    // members.doc(claimedBy).get()
-    // .then((doc) => {
-    //     if (doc.data().name.firstName) {
-    //         console.log("a document was returned");
-    //     }
-    // })
-    // .catch(() => {
-    //     return li = generateProfileLeafHtml({
-    //         "name": name,
-    //         "classNames": classNames,
-    //         "leafDoc": leafDoc,
-    //         "parentMenuOption": parentMenuOption
-    //     })
-    // })
-
     if (leafDoc && claimedBy) {
         const memberDoc = await members.doc(claimedBy).get();
         name = memberDoc.data().name.firstName;
@@ -472,7 +520,16 @@ const getMemberLi = async (params) => {
         "classNames": classNames,
         "leafDoc": leafDoc,
         "parentMenuOption": parentMenuOption,
-        "profilePhoto" : await getProfileImageURL(leafDoc)
+        "spouseMenuOption": spouseMenuOption,
+        "siblingMenuOption": siblingMenuOption,
+        "profilePhoto" : await getProfileImageURL(leafDoc),
+        "email": email,
+        "birthday": birthday,
+        "address1": address1,
+        "address2": address2,
+        "city": city,
+        "zipcode": zipcode,
+        "country": country
     })
 }
 
@@ -481,30 +538,21 @@ function generateProfileLeafHtml(params) {
     let classNames = params["classNames"];
     let leafDoc = params["leafDoc"];
     let parentMenuOption = params["parentMenuOption"] ? params["parentMenuOption"] : '';
-    let profilePhoto = params["profilePhoto"] ? "url('"+params['profilePhoto']+")" : "";
+    let spouseMenuOption = params["spouseMenuOption"] ? params["spouseMenuOption"] : '';
+    let siblingMenuOption = params["siblingMenuOption"] ? params["siblingMenuOption"] : '';
+    let email = params['email'];
+    let birthday = params['birthday'];
+    let address1 = params['address1'];
+    let address2 = params['address2'];
+    let city = params['city'];
+    let zipcode = params['zipcode'];
+    let country = params['country'];
+    // let profilePhoto = params["profilePhoto"] ? "url('"+params['profilePhoto']+")" : "";
+    let profilePhoto = params["profilePhoto"] ? params['profilePhoto'] : placeholderImageUrl;
 
-
-    let li = `
-        <li class="profileLeaf ${classNames}" data-id="${leafDoc.id}" style="background-image: ${profilePhoto}">
-            <div class="actions">
-                <div class="actions_dropdown">
-                    ${parentMenuOption}
-                    <div class="add_child_option">Add child</div>
-                    <div class="add_sibling_option">Add sibling</div>
-                    <div class="add_spouse_option">Add spouse</div>
-                    <div class="delete_member_action" style="color:red;">Delete</div>
-                </div>
-            </div>
-            <div class="profileLeaf__caption">
-                <span class="profileLeaf__name">${name}</span>
-            </div> 
-            <div class="profileLeaf__connectors"></div>
-        </li>
-    `
 
     // let li = `
-    //     <figure class="profileLeaf ${classNames}" data-id="${leafDoc.id}" style="background-image: ${profilePhoto}">
-    //         <img src="${profilePhoto}"/>
+    //     <li class="profileLeaf ${classNames}" data-id="${leafDoc.id}" style="background-image: ${profilePhoto}">
     //         <div class="actions">
     //             <div class="actions_dropdown">
     //                 ${parentMenuOption}
@@ -514,9 +562,37 @@ function generateProfileLeafHtml(params) {
     //                 <div class="delete_member_action" style="color:red;">Delete</div>
     //             </div>
     //         </div>
-    //         <figcaption class="profileLeaf__caption profileLeaf__name">${name}</figcaption> 
+    //         <div class="profileLeaf__caption">
+    //             <span class="profileLeaf__name">${name}</span>
+    //         </div> 
+    //         <div class="profileLeaf__connectors"></div>
     //     </li>
     // `
+
+    let li = `
+        <figure class="profileLeaf ${classNames}" data-id="${leafDoc.id}">
+            <img class="profileLeaf__image" src="${profilePhoto}"/>
+            <div class="actions">
+                <div class="actions_dropdown">
+                    ${parentMenuOption}
+                    <div class="add_child_option">Add child</div>
+                    ${siblingMenuOption}
+                    ${spouseMenuOption}
+                    <div class="delete_member_action" style="color:red;">Delete</div>
+                </div>
+            </div>
+            <div class="profileLeaf__info">
+                <span class="profileLeaf__email">${email}</span>
+                <span class="profileLeaf__address1">${address1}</span>
+                <span class="profileLeaf__address2">${address2}</span>
+                <span class="profileLeaf__city">${city}</span>
+                <span class="profileLeaf__zipcode">${zipcode}</span>
+                <span class="profileLeaf__country">${country}</span>
+                <span class="profileLeaf__birthday">${birthday}</span>
+            </div>
+            <figcaption class="profileLeaf__caption profileLeaf__name">${name}</figcaption> 
+        </li>
+    `
 
     return li;
 }
@@ -541,11 +617,31 @@ const setupAuthUi = (user) => {
 function editMember(e) {
     let targetEl = e.target.closest(".profileLeaf");
     let targetMemberId = targetEl.getAttribute('data-id');
-    let leafName = targetEl.querySelector(".profileLeaf__name");
-    let leafNameText = leafName.textContent === 'Unnamed' ? '' : leafName.textContent;
+    let leafName = targetEl.querySelector(".profileLeaf__name").textContent;
+    let leafEmail = targetEl.querySelector(".profileLeaf__email").textContent;
+    let leafBirthday = targetEl.querySelector(".profileLeaf__birthday").textContent === 0 ? targetEl.querySelector(".profileLeaf__birthday").textContent : false ;
+    let leafAddress1 = targetEl.querySelector(".profileLeaf__address1").textContent;
+    let leafAddress2 = targetEl.querySelector(".profileLeaf__address2").textContent;
+    let leafCity = targetEl.querySelector(".profileLeaf__city").textContent;
+    let leafZipcode = targetEl.querySelector(".profileLeaf__zipcode").textContent;
+    let leafCountry = targetEl.querySelector(".profileLeaf__country").textContent;
+
+    let leafNameText = leafName === 'Unnamed' ? '' : leafName;
+    
+    if (leafBirthday) {
+        leafBirthday = new Date(leafBirthday).toISOString().substring(0, 10);
+        editMemberForm["birthday"].value = leafBirthday;
+    }
 
     editMemberForm["memberId"].value = targetMemberId;
     editMemberForm["name"].value = leafNameText;
+    // editMemberForm["email"].value = leafEmail;
+    // editMemberForm["birthday"].value = leafBirthday;
+    // editMemberForm["address1"].value = leafAddress1;
+    // editMemberForm["address2"].value = leafAddress2;
+    // editMemberForm["city"].value = leafCity;
+    // editMemberForm["zipcode"].value = leafZipcode;
+    // editMemberForm["country"].value = leafCountry;
 }
 
 editMemberForm.addEventListener('submit', (e) => {
@@ -553,11 +649,30 @@ editMemberForm.addEventListener('submit', (e) => {
 
     let memberId = editMemberForm['memberId'].value;
     let name = editMemberForm['name'].value;
+    let email = editMemberForm['email'].value;
+    let birthday = editMemberForm['birthday'].value ? new Date(editMemberForm['birthday'].value) : null;
+    let address1 = editMemberForm['address1'].value;
+    let address2 = editMemberForm['address2'].value;
+    let city = editMemberForm['city'].value;
+    let zipcode = editMemberForm['zipcode'].value;
+    let country = editMemberForm['country'].value;
 
     primaryTreeLeaves.doc(memberId).update({
-        name: name
+        "name": name,
+        "email": email,
+        "birthday": birthday,
+        "address": {
+            "address1": address1,
+            "address2": address2,
+            "city": city,
+            "zipcode": zipcode,
+            "country": country
+        }
+
     }).then(() => {
-        document.querySelector('.profileLeaf[data-id="'+memberId+'"] .profileLeaf__name').textContent = name;
+        let targetLeaf = memberList.querySelector('.profileLeaf[data-id="'+memberId+'"]');
+        
+        targetLeaf.querySelector(".profileLeaf__name").textContent = name;
 
         editMemberForm.reset();
         M.Modal.getInstance(editMemberModal).close();
@@ -756,11 +871,16 @@ createTreeForm.addEventListener('submit', (e) => {
             siblings: [],
             parents: [],
             children: [],
-            spouses: []
+            spouses: [],
+            address: {},
+            email: '',
+            birthday: 0
         }).then(leafRef => {
             members.doc(authMemberId).update({
                 primary_tree: treeRef.id,
-                trees: firebase.firestore.FieldValue.arrayUnion(treeRef.id)
+                trees: firebase.firestore.FieldValue.arrayUnion(treeRef.id),
+                address: {},
+                email: ''
             }).then(() => {
                 console.log("new member is: "+authMemberId);
                 trees.doc(treeRef.id).collection('leaves').doc(leafRef.id).update({
@@ -821,12 +941,12 @@ profilePhotoInputUpload.addEventListener('change', (e) => {
             photo: filePath
         })
         .then(() => {
-            let memberToUpdate = memberList.querySelector("[data-id='"+leafId+"']");
-            let profileInfoImage = document.querySelector(".profileInfo__image");
+            let memberToUpdate = memberList.querySelector("[data-id='"+leafId+"'] .profileLeaf__image");
+            let profileInfoImage = profileInfo.querySelector(".profileInfo__image");
 
             let reader = new FileReader();
             reader.onload = function(){
-                memberToUpdate.style.backgroundImage = "url('"+reader.result+"')";
+                memberToUpdate.setAttribute('src', reader.result);
                 profileInfoImage.setAttribute('src', reader.result);
             };
             reader.readAsDataURL(file);

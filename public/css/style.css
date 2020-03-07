@@ -1,8 +1,7 @@
 body {
   font-family: 'Lato', san-serif;
   display: flex;
-  flex-direction: column;
-  overflow: hidden; }
+  flex-direction: column; }
 
 img {
   max-width: 100%; }
@@ -18,14 +17,35 @@ img {
   width: 100%;
   padding: 16px;
   justify-content: center;
-  max-height: calc(100vh - 80px); }
+  max-height: calc(100vh - 80px);
+  overflow: scroll; }
+  .familyTree.list {
+    justify-content: left; }
+    .familyTree.list .directMembers,
+    .familyTree.list .descendants,
+    .familyTree.list .familyTree,
+    .familyTree.list .profileLeaf,
+    .familyTree.list .contentContainer {
+      display: block; }
+    .familyTree.list .profileLeaf {
+      height: 96px;
+      width: 96px; }
+      .familyTree.list .profileLeaf.spouse {
+        margin-left: 32px;
+        margin-top: -48px; }
+      .familyTree.list .profileLeaf__caption {
+        left: 100%;
+        top: 50%;
+        bottom: initial; }
+    .familyTree.list .branch .descendants {
+      margin-left: 80px; }
 
 .directMembers {
   justify-content: center; }
 
 .profileLeaf {
   cursor: pointer;
-  z-index: 3;
+  z-index: 2;
   flex-direction: column;
   justify-content: center;
   align-items: center;
@@ -35,16 +55,18 @@ img {
   text-align: center;
   margin: 32px;
   position: relative;
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-position: center;
-  background-image: url("https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?cs=srgb&dl=face-facial-hair-fine-looking-guy-614810.jpg&fm=jpg");
   animation: bounceIn .5s ease-in-out;
-  transform-origin: center;
-  border-radius: 50%;
-  box-shadow: 0 0 0 8px white inset, 0 4px 12px rgba(0, 0, 0, 0.15); }
+  transform-origin: center; }
   .profileLeaf:hover {
-    z-index: 999; }
+    z-index: 99; }
+  .profileLeaf__image {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+    object-position: top;
+    border-radius: 50%;
+    box-shadow: 0 0 0 8px white, 0 4px 12px 8px rgba(0, 0, 0, 0.15);
+    pointer-events: none; }
   .profileLeaf__caption {
     position: absolute;
     bottom: -12px;
@@ -54,11 +76,11 @@ img {
     border-radius: 8px;
     min-width: 50%;
     margin: 0 auto;
-    display: flex;
-    align-items: center;
     white-space: nowrap;
     z-index: 4;
     pointer-events: none; }
+  .profileLeaf__info {
+    display: none; }
   .profileLeaf.you .profileLeaf__caption {
     font-weight: 900; }
   .profileLeaf.claimed {
@@ -102,7 +124,7 @@ img {
       content: none; }
 
 .treeName {
-  margin-right: 80px; }
+  margin-right: auto; }
 
 .actions {
   position: absolute;
@@ -187,10 +209,16 @@ nav {
     background-color: white;
     box-shadow: 0px 4px 32px rgba(0, 0, 0, 0.16), 0px 2px 4px rgba(0, 0, 0, 0.16);
     height: 100%;
-    position: relative; }
+    position: relative;
+    overflow: scroll; }
   .profileInfo__name {
     padding: 24px;
-    font-size: 18px; }
+    font-size: 18px;
+    position: sticky;
+    top: 0;
+    background-color: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    z-index: 2; }
   .profileInfo__close {
     width: 44px;
     height: 44px;
@@ -203,12 +231,43 @@ nav {
     right: 24px;
     border: none;
     cursor: pointer;
-    font-size: 18px; }
+    font-size: 18px;
+    z-index: 3;
+    margin-left: auto; }
   .profileInfo__image {
     width: 100%;
     object-fit: cover;
     object-position: top;
     height: 280px; }
+  .profileInfo__imageContainer {
+    position: relative;
+    z-index: 1; }
+  .profileInfo__imageUploadButton {
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 100px;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    z-index: 1;
+    background-color: rgba(255, 255, 255, 0.5); }
+  .profileInfo__imageUpload {
+    z-index: 2;
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    width: 44px;
+    height: 44px;
+    opacity: 0;
+    height: 100%;
+    width: 100%;
+    cursor: pointer; }
   .profileInfo form {
     padding: 24px; }
   .profileInfo.show {

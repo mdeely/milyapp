@@ -11,7 +11,7 @@ body {
     font-family: 'Lato', san-serif;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    // overflow: hidden;
 }
 
 img {
@@ -31,6 +31,39 @@ img {
     padding: 16px;
     justify-content: center;
     max-height: calc(100vh - #{$navHeight});
+    overflow: scroll;
+
+    &.list {
+        justify-content: left;
+
+        .directMembers,
+        .descendants,
+        .familyTree,
+        .profileLeaf,
+        .contentContainer {
+            display: block;
+        }
+
+        .profileLeaf {
+            height: 96px;
+            width: 96px;
+
+            &.spouse {
+                margin-left: 32px;
+                margin-top: -48px;
+            }
+
+            &__caption {
+                left: 100%;
+                top: 50%;
+                bottom: initial;
+            }
+        }
+
+        .branch .descendants {
+            margin-left: 80px;
+        }
+    }
 }
 
 .directMembers {
@@ -43,7 +76,7 @@ img {
 
 .profileLeaf {
     cursor: pointer;
-    z-index: 3;
+    z-index: 2;
     flex-direction: column;
     justify-content: center;
     align-items: center;
@@ -53,17 +86,21 @@ img {
     text-align: center;
     margin: $leafSpacing;
     position: relative;
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: center;
-    background-image: url("https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?cs=srgb&dl=face-facial-hair-fine-looking-guy-614810.jpg&fm=jpg");
     animation: bounceIn .5s ease-in-out;
     transform-origin: center;
-    border-radius: 50%;
-    box-shadow:  0 0 0 8px white inset, 0 4px 12px rgba(0, 0, 0, 0.15);
 
     &:hover {
-        z-index: 999;
+        z-index: 99;
+    }
+
+    &__image {
+        height: 100%;
+        width: 100%;
+        object-fit: cover;
+        object-position: top;
+        border-radius: 50%;
+        box-shadow:  0 0 0 8px white, 0 4px 12px 8px rgba(0, 0, 0, 0.15);
+        pointer-events: none;
     }
 
     &__caption {
@@ -75,11 +112,13 @@ img {
         border-radius: 8px;
         min-width: 50%;
         margin: 0 auto;
-        display: flex;
-        align-items: center;
         white-space: nowrap;
         z-index: 4;
         pointer-events: none;
+    }
+
+    &__info {
+        display: none;
     }
 
     // &__name {
@@ -160,7 +199,7 @@ img {
 }
 
 .treeName {
-    margin-right: 80px;
+    margin-right: auto;
 }
 
 .branch {
@@ -291,11 +330,17 @@ nav {
         0px 2px 4px rgba(black, 0.16);
         height: 100%;
         position: relative;
+        overflow: scroll;
     }
 
     &__name {
         padding: 24px;
         font-size: 18px;
+        position: sticky;
+        top: 0;
+        background-color: white;
+        box-shadow: 0 2px 8px rgba(0,0,0,.1);
+        z-index: 2;
     }
 
     &__close {
@@ -311,6 +356,8 @@ nav {
         border: none;
         cursor: pointer;
         font-size: 18px;
+        z-index: 3;
+        margin-left: auto;
     }
 
     &__image {
@@ -318,6 +365,41 @@ nav {
         object-fit: cover;
         object-position: top;
         height: 280px;
+    }
+
+    &__imageContainer {
+        position: relative;
+        z-index: 1;
+    }
+
+    &__imageUploadButton {
+        position: absolute;
+        bottom: 16px;
+        right: 16px;
+        width: 44px;
+        height: 44px;
+        display: flex;
+        justify-content: center;
+        align-items: center; 
+        border-radius: 100px;
+        border: none;
+        cursor: pointer;
+        font-size: 18px;
+        z-index: 1;
+        background-color: rgba(white, .5);
+    }
+
+    &__imageUpload {
+        z-index: 2;
+        position: absolute;
+        bottom: 16px;
+        right: 16px;
+        width: 44px;
+        height: 44px;
+        opacity: 0;
+        height: 100%;
+        width: 100%;
+        cursor: pointer;
     }
 
     form {

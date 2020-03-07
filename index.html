@@ -15,18 +15,51 @@
             <div class="logged-in userEmail"></div>
             <button class="waves-effect waves-light btn-small logged-in" style="display: none;" id="signout-button">Sign out</button>
         </nav>
+        <button class="viewPref--list">List</button>
+        <button class="viewPref--tree">Tree</button>
         <div class="contentContainer">
             <div class="familyTree"></div>
             <div class="profileInfo">
                 <div class="profileInfo__container">
                     <button class="profileInfo__close"><i class="fa fa-times"></i></button>
                     <div class="profileInfo__name">Name</div>
-                    <img class="profileInfo__image" src="https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?cs=srgb&dl=face-facial-hair-fine-looking-guy-614810.jpg&fm=jpg" alt="">
+                    <div class="profileInfo__imageContainer">
+                        <img class="profileInfo__image" src="https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?cs=srgb&dl=face-facial-hair-fine-looking-guy-614810.jpg&fm=jpg" alt="">
+                        <input type="file" accept='image/*' name="profilePhoto" class="profileInfo__imageUpload">
+                        <button class="profileInfo__imageUploadButton">
+                            <i class="fa fa-upload"></i>
+                        </button>
+                    </div>
+                    <div class="profileInfo__email">email</div>
+                    <div class="profileInfo__middletName">Middle name</div>
+                    <div class="profileInfo__lastName">Last name</div>
+                    <div class="profileInfo__birthday">birthday</div>
+                    <div class="profileInfo__deceased">deceased?</div>
+                    <div class="profileInfo__address1">address 1</div>
+                    <div class="profileInfo__address2">address 2</div>
+                    <div class="profileInfo__city">city</div>
+                    <div class="profileInfo__zipcode">zipcode</div>
+                    <div class="profileInfo__country">country</div>
+                    <div class="profileInfo__cellPhone">Cell phone</div>
+                    <div class="profileInfo__workPhone">Work phone</div>
+                    <div class="profileInfo__homePhone">Home phone</div>
+                    <div class="profileInfo__notes">Notes</div>
+
+
                     <form id="edit-member-form">
                         <input type="text" id="memberId" name="memberId" placeholder="memberId" disabled>
                         <input type="text" id="name" name="name" placeholder="Name">
+                        <input type="email" id="email" name="email" placeholder="Email">
+                        <input type="date" id="birthday" name="birthday" placeholder="Birthday">
+                        <input type="checkbox" id="deceased" name="deceased" placeholder="Deceased?">
+                        <fieldset>
+                            <input type="text" id="address1" name="address1" placeholder="Address 1">
+                            <input type="text" id="address2" name="address2" placeholder="Address 2">
+                            <input type="text" id="city" name="city" placeholder="City">
+                            <input type="number" id="zipcode" name="zip" placeholder="zipcode">
+                            <input type="text" id="country" name="country" placeholder="country">
+                        </fieldset>
                         <button class="btn-small">Save</button>
-                        <input type="file" accept='image/*' name="profilePhoto">
                     </form>
                 </div>
             </div>
