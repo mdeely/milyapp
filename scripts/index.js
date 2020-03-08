@@ -112,15 +112,15 @@ async function buildBranchFromChosenMember(doc, allLeaves) {
     directMemberContainer.insertAdjacentHTML('afterbegin', chosenMember);
 
     if (doc) {
-        let spouses = doc.data().spouses;
+        let spouses = Object.keys(doc.data().spouses);
         let children = doc.data().children;
-
+    
         if (spouses && spouses.length > 0) {
-
             // is spouse divorced, separated, or married?
 
             for (const spouse of spouses) {
                 let spouseDoc = allLeaves.docs.find(spouseReq => spouseReq.id === spouse);
+                // let spouseDoc = allLeaves.docs.find(spouseReq => console.log(spouseReq.id));
 
                 let spouseEl = await getMemberLi({
                     "leafDoc" : spouseDoc,
@@ -241,7 +241,7 @@ async function initiateTree(doc, allLeaves) {
                     name: null,
                     parents: firebase.firestore.FieldValue.arrayUnion(...parents),
                     children: [],
-                    spouses: [],
+                    spouses: null,
                     siblings: [],
                     topMember: false
                 }).then(childRef => {
@@ -300,7 +300,7 @@ async function initiateTree(doc, allLeaves) {
                     name: null,
                     siblings: firebase.firestore.FieldValue.arrayUnion(...siblings),
                     parents: [],
-                    spouses: [],
+                    spouses: null,
                     children: [],
                     topMember: false
                 }).then(newSiblingRef => {
@@ -340,19 +340,18 @@ async function initiateTree(doc, allLeaves) {
             .then((targetMemberDoc) => {
                 // add these to new spouse
                 let children = [];
-                let spouses = [];
+                let spouses = {};
+                spouses[targetMemberId] = null;
     
                 if ( targetMemberDoc.data().children && targetMemberDoc.data().children.length > 0 ) {
                     targetMemberDoc.data().children.forEach(child => {
                         children.push(child);
                     })
                 }
-    
-                spouses.push(targetMemberId);
-    
+
                 primaryTreeLeaves.add({
                     name: null,
-                    spouses: firebase.firestore.FieldValue.arrayUnion(...spouses),
+                    spouses: spouses,
                     siblings: [],
                     children: [],
                     parents: [],
@@ -371,12 +370,19 @@ async function initiateTree(doc, allLeaves) {
                             children: firebase.firestore.FieldValue.arrayUnion(...children)
                         });
                     }
-    
-                    primaryTreeLeaves.doc(targetMemberId).update({
-                        spouses: firebase.firestore.FieldValue.arrayUnion(spouseRef.id)
-                    })
+
+                    let spouseObj = {};
+                    spouseObj[spouseRef.id] = null;
+
+                    console.log(targetMemberId);
+
+                    primaryTreeLeaves.doc(targetMemberId).set({
+                        spouses: spouseObj
+                    }, {merge: true})
                     .then(() => {
                         setupViewWithActiveMember(activeMember);
+                    }).catch((err) => {
+                        console.log(err.message);
                     })
                 });
             })
