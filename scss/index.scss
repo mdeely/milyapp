@@ -48,7 +48,7 @@ img {
             height: 96px;
             width: 96px;
 
-            &.spouse {
+            &.spouse.married {
                 margin-left: 32px;
                 margin-top: -48px;
             }
@@ -142,7 +142,7 @@ img {
                     0 0 0 8px blue inset;
     }
 
-    &.spouse {
+    &.spouse.married {
         z-index: 1;
         margin-left: -$leafSpacing - 16px;
     }

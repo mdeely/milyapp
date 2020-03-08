@@ -112,34 +112,33 @@ async function buildBranchFromChosenMember(doc, allLeaves) {
     directMemberContainer.insertAdjacentHTML('afterbegin', chosenMember);
 
     if (doc) {
-        let spouses = Object.keys(doc.data().spouses);
+        let spousesMap = Object.entries(doc.data().spouses);
+        spousesMap.forEach(spouseObj => {
+            console.log(spouseObj);
+            console.log(spouseObj[0]);
+            console.log(spouseObj[1]);
+        });
+
+        let spouses = doc.data().spouses ? Object.entries(doc.data().spouses) : "";
         let children = doc.data().children;
     
         if (spouses && spouses.length > 0) {
             // is spouse divorced, separated, or married?
 
             for (const spouse of spouses) {
-                let spouseDoc = allLeaves.docs.find(spouseReq => spouseReq.id === spouse);
-                // let spouseDoc = allLeaves.docs.find(spouseReq => console.log(spouseReq.id));
-
+                let spouseKey = spouse[0];
+                let spouseValue = spouse[1];
+                let spouseRelationship = spouseValue !== null ? "spouse "+spouse[1] : "spouse";
+                let spouseDoc = allLeaves.docs.find(spouseReq => spouseReq.id === spouseKey);
                 let spouseEl = await getMemberLi({
                     "leafDoc" : spouseDoc,
-                    "relationship" : "spouse"
+                    "relationship" : spouseRelationship
                 });
 
                 directMemberContainer.insertAdjacentHTML('beforeend', spouseEl);
               }
-
-
-            // spouses.forEach(spouse => {
-            //     let spouseDoc = allLeaves.docs.find(spouseReq => spouseReq.id === spouse);
-            //     let spouseEl = getMemberLi({
-            //         "leafDoc" : spouseDoc,
-            //         "relationship" : "spouse"
-            //     });
-
-            //     directMemberContainer.insertAdjacentHTML('beforeend', spouseEl);
-            // })
+        } else {
+            console.log("No spouses detected for this member");
         }
     
         if (children && children.length > 0) {
@@ -495,6 +494,7 @@ const getMemberLi = async (params) => {
     let parentMenuOption = '';
     let spouseMenuOption = '';
     let siblingMenuOption = '';
+    let childMenuOption = '';
 
     if (classNames === "spouse") {
 
@@ -502,6 +502,7 @@ const getMemberLi = async (params) => {
     } else {
         spouseMenuOption = `<div class="add_spouse_option">Add partner</div>`;
         siblingMenuOption = `<div class="add_sibling_option">Add sibling</div>`;
+        childMenuOption = `<div class="add_child_option">Add child</div>`;
     }
 
     if (claimedBy === activeMember) {
@@ -528,6 +529,7 @@ const getMemberLi = async (params) => {
         "parentMenuOption": parentMenuOption,
         "spouseMenuOption": spouseMenuOption,
         "siblingMenuOption": siblingMenuOption,
+        "childMenuOption": childMenuOption,
         "profilePhoto" : await getProfileImageURL(leafDoc),
         "email": email,
         "birthday": birthday,
@@ -546,6 +548,7 @@ function generateProfileLeafHtml(params) {
     let parentMenuOption = params["parentMenuOption"] ? params["parentMenuOption"] : '';
     let spouseMenuOption = params["spouseMenuOption"] ? params["spouseMenuOption"] : '';
     let siblingMenuOption = params["siblingMenuOption"] ? params["siblingMenuOption"] : '';
+    let childMenuOption = params["childMenuOption"] ? params["childMenuOption"] : '';
     let email = params['email'];
     let birthday = params['birthday'];
     let address1 = params['address1'];
@@ -581,7 +584,7 @@ function generateProfileLeafHtml(params) {
             <div class="actions">
                 <div class="actions_dropdown">
                     ${parentMenuOption}
-                    <div class="add_child_option">Add child</div>
+                    ${childMenuOption}
                     ${siblingMenuOption}
                     ${spouseMenuOption}
                     <div class="delete_member_action" style="color:red;">Delete</div>
@@ -812,12 +815,15 @@ function setupViewWithActiveMember(activeMember) {
 
 function removeFromSpouses(doc) {
     let targetMemberId = doc.id;
-
-    if (doc.data().spouses && doc.data().spouses.length > 0) {
-        doc.data().spouses.forEach(spouseId => {
-            primaryTreeLeaves.doc(spouseId).update({
-                spouses: firebase.firestore.FieldValue.arrayRemove(targetMemberId)
-            })   
+    if (doc.data().spouses && Object.keys(doc.data().spouses).length > 0) {
+        Object.keys(doc.data().spouses).forEach(spouseId => {
+            primaryTreeLeaves.doc(spouseId).set({
+                // remove spouse id from map
+                "spouses": {
+                    [targetMemberId] : firebase.firestore.FieldValue.delete()
+                }
+            },
+            { merge: true })   
         })
     }
 }

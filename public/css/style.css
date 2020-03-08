@@ -30,7 +30,7 @@ img {
     .familyTree.list .profileLeaf {
       height: 96px;
       width: 96px; }
-      .familyTree.list .profileLeaf.spouse {
+      .familyTree.list .profileLeaf.spouse.married {
         margin-left: 32px;
         margin-top: -48px; }
       .familyTree.list .profileLeaf__caption {
@@ -88,7 +88,7 @@ img {
   .profileLeaf.selected {
     transform: scale3d(1.1, 1.1, 1.1);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15), 0 1px 24px rgba(0, 0, 0, 0.1), 0 0 0 8px blue inset; }
-  .profileLeaf.spouse {
+  .profileLeaf.spouse.married {
     z-index: 1;
     margin-left: -48px; }
   .profileLeaf__connectors {
