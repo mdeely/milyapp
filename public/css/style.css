@@ -4,7 +4,8 @@ body {
   flex-direction: column; }
 
 img {
-  max-width: 100%; }
+  max-width: 100%;
+  background-color: #FDD3A6; }
 
 .directMembers,
 .descendants,
@@ -17,10 +18,12 @@ img {
   width: 100%;
   padding: 16px;
   justify-content: center;
-  max-height: calc(100vh - 80px);
-  overflow: scroll; }
+  max-height: calc(100vh - 80px); }
+  .familyTree > .branch + .branch {
+    margin-left: 160px; }
   .familyTree.list {
-    justify-content: left; }
+    justify-content: left;
+    display: initial; }
     .familyTree.list .directMembers,
     .familyTree.list .descendants,
     .familyTree.list .familyTree,
@@ -30,7 +33,7 @@ img {
     .familyTree.list .profileLeaf {
       height: 96px;
       width: 96px; }
-      .familyTree.list .profileLeaf.spouse.married {
+      .familyTree.list .profileLeaf.spouse {
         margin-left: 32px;
         margin-top: -48px; }
       .familyTree.list .profileLeaf__caption {
@@ -77,7 +80,6 @@ img {
     min-width: 50%;
     margin: 0 auto;
     white-space: nowrap;
-    z-index: 4;
     pointer-events: none; }
   .profileLeaf__info {
     display: none; }
@@ -88,7 +90,7 @@ img {
   .profileLeaf.selected {
     transform: scale3d(1.1, 1.1, 1.1);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15), 0 1px 24px rgba(0, 0, 0, 0.1), 0 0 0 8px blue inset; }
-  .profileLeaf.spouse.married {
+  .profileLeaf.spouse {
     z-index: 1;
     margin-left: -48px; }
   .profileLeaf__connectors {
@@ -137,7 +139,8 @@ img {
     padding: 8px;
     min-width: 120px;
     border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); }
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1; }
     .actions .actions_dropdown.show {
       display: block; }
     .actions .actions_dropdown > * {
@@ -160,14 +163,24 @@ img {
   [data-menu-for="actions_add_member"].show {
     display: block; }
 
+.viewPref--list,
+.viewPref--tree {
+  position: absolute;
+  bottom: 48px;
+  right: 48px;
+  z-index: 999; }
+
+.viewPref--tree {
+  right: 80px; }
+
 nav {
   padding: 16px;
   width: 100%;
-  position: sticky;
+  position: absolute;
   top: 0;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  box-shadow: none;
   display: flex;
-  background-color: white;
+  background-color: transparent;
   color: gray;
   z-index: 9999;
   align-items: center;
@@ -192,6 +205,8 @@ nav {
   flex: 1;
   position: relative;
   max-height: calc(100vh - 80px); }
+  .contentContainer:focus {
+    outline: none; }
 
 .profileInfo {
   position: fixed;

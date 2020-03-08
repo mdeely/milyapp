@@ -16,6 +16,7 @@ body {
 
 img {
     max-width: 100%;
+    background-color: #FDD3A6;
 }
 
 .directMembers,
@@ -31,10 +32,15 @@ img {
     padding: 16px;
     justify-content: center;
     max-height: calc(100vh - #{$navHeight});
-    overflow: scroll;
+    // overflow: scroll;
+
+    > .branch + .branch {
+        margin-left: $profileLeafSize;
+    }
 
     &.list {
         justify-content: left;
+        display: initial;
 
         .directMembers,
         .descendants,
@@ -48,7 +54,7 @@ img {
             height: 96px;
             width: 96px;
 
-            &.spouse.married {
+            &.spouse {
                 margin-left: 32px;
                 margin-top: -48px;
             }
@@ -113,7 +119,6 @@ img {
         min-width: 50%;
         margin: 0 auto;
         white-space: nowrap;
-        z-index: 4;
         pointer-events: none;
     }
 
@@ -142,7 +147,7 @@ img {
                     0 0 0 8px blue inset;
     }
 
-    &.spouse.married {
+    &.spouse {
         z-index: 1;
         margin-left: -$leafSpacing - 16px;
     }
@@ -237,6 +242,7 @@ img {
         min-width: 120px;
         border-radius: 8px;
         box-shadow: 0 2px 10px rgba(black, .1);
+        z-index: 1;
 
         &.show {
             display: block;
@@ -271,14 +277,26 @@ img {
     }
 }
 
+.viewPref--list,
+.viewPref--tree {
+    position: absolute;
+    bottom: 48px;
+    right: 48px;
+    z-index: 999;
+}
+
+.viewPref--tree  {
+    right: 80px;
+}
+
 nav {
     padding: 16px;
     width: 100%;
-    position: sticky;
+    position: absolute;
     top: 0;
-    box-shadow: 0 4px 10px rgba(black, .2);
+    box-shadow: none;
     display: flex;
-    background-color: white;
+    background-color: transparent;
     color: gray;
     z-index: 9999;
     align-items: center;
@@ -309,6 +327,10 @@ nav {
     flex: 1;
     position: relative;
     max-height: calc(100vh - #{$navHeight});
+
+    &:focus {
+        outline: none;
+    }
 }
 
 .profileInfo {

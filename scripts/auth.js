@@ -53,7 +53,11 @@ signInForm.addEventListener('submit', (e) => {
         members.add({
             claimed_by: cred.user.uid,
             created_by: cred.user.uid,
-            name: {firstName: email},
+            name: {
+                firstName: "You (Member)",
+                lastName: null,
+                surname: null
+            },
         }).then(() => {
             signInForm.reset();
             signInForm.querySelector(".error").innerHTML = '';

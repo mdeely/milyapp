@@ -23,7 +23,8 @@ const profileInfoCountry = profileInfo.querySelector(".profileInfo__country");
 const viewPref_list = document.querySelector(".viewPref--list");
 const viewPref_tree = document.querySelector(".viewPref--tree");
 
-const placeholderImageUrl = "https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?cs=srgb&dl=face-facial-hair-fine-looking-guy-614810.jpg&fm=jpg";
+// const placeholderImageUrl = "https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?cs=srgb&dl=face-facial-hair-fine-looking-guy-614810.jpg&fm=jpg";
+const placeholderImageUrl = "https://firebasestorage.googleapis.com/v0/b/mily-4c2a8.appspot.com/o/assets%2Fplaceholder%2Fprofile_placeholder.svg?alt=media&token=d3b939f1-d46b-4315-bcc6-3167d17a18ed"
 
 let owners = [];
 let activeMember;
@@ -77,11 +78,11 @@ const setupView = (doc) => {
         memberList.innerHTML = '<h4>Log in or sign up to begin</h4>';
     }
 
-    // panzoom(memberList, {
-    //     maxZoom: 1,
-    //     minZoom: 0.5,
-    //     pinchSpeed: .8 // zoom two times faster than the distance between fingers
-    //   });
+    panzoom(memberList, {
+        maxZoom: 1,
+        minZoom: 0.5,
+        pinchSpeed: .8 // zoom two times faster than the distance between fingers
+      });
 }
 
 
@@ -112,13 +113,6 @@ async function buildBranchFromChosenMember(doc, allLeaves) {
     directMemberContainer.insertAdjacentHTML('afterbegin', chosenMember);
 
     if (doc) {
-        let spousesMap = Object.entries(doc.data().spouses);
-        spousesMap.forEach(spouseObj => {
-            console.log(spouseObj);
-            console.log(spouseObj[0]);
-            console.log(spouseObj[1]);
-        });
-
         let spouses = doc.data().spouses ? Object.entries(doc.data().spouses) : "";
         let children = doc.data().children;
     
@@ -147,13 +141,8 @@ async function buildBranchFromChosenMember(doc, allLeaves) {
                 let childDoc = allLeaves.docs.find(childReq => childReq.id === child);
                 let descendantBranch = await buildBranchFromChosenMember(childDoc, allLeaves);
                 descendantsContainer.prepend(descendantBranch);
-              }
+            }
 
-            // children.forEach(child => {
-            //     let childDoc = allLeaves.docs.find(childReq => childReq.id === child);
-            //     let descendantBranch = await buildBranchFromChosenMember(childDoc, allLeaves);
-            //     descendantsContainer.prepend(descendantBranch);
-            // })
             branch.prepend(descendantsContainer);
         }
     } else {
@@ -193,12 +182,6 @@ async function initiateTree(doc, allLeaves) {
             let siblingsBranch = await buildBranchFromChosenMember(siblingDoc, allLeaves);
             memberList.appendChild(siblingsBranch);
           }
-
-        // chosenMemberSiblings.forEach((sibling) => {
-        //     let siblingDoc = allLeaves.docs.find(siblingReq => siblingReq.id === sibling);
-        //     let siblingsBranch = await buildBranchFromChosenMember(siblingDoc, allLeaves);
-        //     memberList.appendChild(siblingsBranch);
-        // })
     }
 
     profileInfoClose.addEventListener("click", (e) => {
@@ -237,7 +220,11 @@ async function initiateTree(doc, allLeaves) {
                 }
     
                 primaryTreeLeaves.add({
-                    name: null,
+                    name: {
+                        firstName: null,
+                        lastName: null,
+                        surname: null
+                    },
                     parents: firebase.firestore.FieldValue.arrayUnion(...parents),
                     children: [],
                     spouses: null,
@@ -296,7 +283,11 @@ async function initiateTree(doc, allLeaves) {
                 siblings.push(targetMemberId);
     
                 primaryTreeLeaves.add({
-                    name: null,
+                    name: {
+                        firstName: null,
+                        lastName: null,
+                        surname: null
+                    },
                     siblings: firebase.firestore.FieldValue.arrayUnion(...siblings),
                     parents: [],
                     spouses: null,
@@ -349,7 +340,11 @@ async function initiateTree(doc, allLeaves) {
                 }
 
                 primaryTreeLeaves.add({
-                    name: null,
+                    name: {
+                        firstName: null,
+                        lastName: null,
+                        surname: null
+                    },
                     spouses: spouses,
                     siblings: [],
                     children: [],
@@ -410,7 +405,11 @@ async function initiateTree(doc, allLeaves) {
                 childrenOfParent.push(targetMemberId);
     
                 primaryTreeLeaves.add({
-                    name: null,
+                    name: {
+                        firstName: null,
+                        lastName: null,
+                        surname: null
+                    },
                     siblings: [],
                     parents: [],
                     spouses: [],
@@ -481,7 +480,7 @@ const getProfileImageURL = async (leafDoc) => {
 
 const getMemberLi = async (params) => {
     let leafDoc = params["leafDoc"] ? params["leafDoc"] : false;
-    let name = leafDoc.data().name ? leafDoc.data().name : "Unnamed";
+    let name = leafDoc.data().name.firstName ? leafDoc.data().name.firstName : "Unnamed";
     let email = leafDoc.data().email ? leafDoc.data().email : "No email set";
     let birthday = leafDoc.data().birthday ? leafDoc.data().birthday.toDate() : "No birthday set";
     let address1 = leafDoc.data().address ? leafDoc.data().address.address1 : "No address1 set";
@@ -491,13 +490,14 @@ const getMemberLi = async (params) => {
     let country = leafDoc.data().address ? leafDoc.data().address.country : "No country set";
     let classNames = params["relationship"] ? params["relationship"] : '';
     let claimedBy = leafDoc.data().claimed_by ? leafDoc.data().claimed_by : false;  
+
     let parentMenuOption = '';
     let spouseMenuOption = '';
     let siblingMenuOption = '';
     let childMenuOption = '';
+    let deleteMenuOption = '';
 
-    if (classNames === "spouse") {
-
+    if (classNames.includes("spouse")) {
         // check for married, seperated, divorced
     } else {
         spouseMenuOption = `<div class="add_spouse_option">Add partner</div>`;
@@ -509,10 +509,6 @@ const getMemberLi = async (params) => {
         classNames = classNames + " you"; 
     }
 
-    if (leafDoc && claimedBy) {
-        classNames = classNames + " claimed";
-    }
-
     if (leafDoc.data().topMember === true) {
         parentMenuOption = `<div class="add_parent_option">Add parent</div>`;
     }
@@ -520,6 +516,10 @@ const getMemberLi = async (params) => {
     if (leafDoc && claimedBy) {
         const memberDoc = await members.doc(claimedBy).get();
         name = memberDoc.data().name.firstName;
+        classNames = classNames + " claimed";
+
+    } else {
+        deleteMenuOption = `<div class="delete_member_action" style="color:red;">Delete</div>`;
     }
 
     return generateProfileLeafHtml({
@@ -530,6 +530,7 @@ const getMemberLi = async (params) => {
         "spouseMenuOption": spouseMenuOption,
         "siblingMenuOption": siblingMenuOption,
         "childMenuOption": childMenuOption,
+        "deleteMenuOption": deleteMenuOption,
         "profilePhoto" : await getProfileImageURL(leafDoc),
         "email": email,
         "birthday": birthday,
@@ -549,6 +550,7 @@ function generateProfileLeafHtml(params) {
     let spouseMenuOption = params["spouseMenuOption"] ? params["spouseMenuOption"] : '';
     let siblingMenuOption = params["siblingMenuOption"] ? params["siblingMenuOption"] : '';
     let childMenuOption = params["childMenuOption"] ? params["childMenuOption"] : '';
+    let deleteMenuOption = params["deleteMenuOption"] ? params["deleteMenuOption"] : '';
     let email = params['email'];
     let birthday = params['birthday'];
     let address1 = params['address1'];
@@ -556,27 +558,7 @@ function generateProfileLeafHtml(params) {
     let city = params['city'];
     let zipcode = params['zipcode'];
     let country = params['country'];
-    // let profilePhoto = params["profilePhoto"] ? "url('"+params['profilePhoto']+")" : "";
     let profilePhoto = params["profilePhoto"] ? params['profilePhoto'] : placeholderImageUrl;
-
-
-    // let li = `
-    //     <li class="profileLeaf ${classNames}" data-id="${leafDoc.id}" style="background-image: ${profilePhoto}">
-    //         <div class="actions">
-    //             <div class="actions_dropdown">
-    //                 ${parentMenuOption}
-    //                 <div class="add_child_option">Add child</div>
-    //                 <div class="add_sibling_option">Add sibling</div>
-    //                 <div class="add_spouse_option">Add spouse</div>
-    //                 <div class="delete_member_action" style="color:red;">Delete</div>
-    //             </div>
-    //         </div>
-    //         <div class="profileLeaf__caption">
-    //             <span class="profileLeaf__name">${name}</span>
-    //         </div> 
-    //         <div class="profileLeaf__connectors"></div>
-    //     </li>
-    // `
 
     let li = `
         <figure class="profileLeaf ${classNames}" data-id="${leafDoc.id}">
@@ -587,7 +569,7 @@ function generateProfileLeafHtml(params) {
                     ${childMenuOption}
                     ${siblingMenuOption}
                     ${spouseMenuOption}
-                    <div class="delete_member_action" style="color:red;">Delete</div>
+                    ${deleteMenuOption}
                 </div>
             </div>
             <div class="profileLeaf__info">
@@ -602,7 +584,6 @@ function generateProfileLeafHtml(params) {
             <figcaption class="profileLeaf__caption profileLeaf__name">${name}</figcaption> 
         </li>
     `
-
     return li;
 }
 
@@ -667,7 +648,9 @@ editMemberForm.addEventListener('submit', (e) => {
     let country = editMemberForm['country'].value;
 
     primaryTreeLeaves.doc(memberId).update({
-        "name": name,
+        "name": {
+            firstName: name
+        },
         "email": email,
         "birthday": birthday,
         "address": {
@@ -769,32 +752,53 @@ function renderParentToDom(parentRef) {
     memberList.appendChild(branch);
 }
 
-function renderChildToDom(childRef, targetElement) {
-    primaryTreeLeaves.doc(childRef.id).get()
-    .then((childDoc) => {
-        let existing =  targetElement.closest(".branch").querySelector(".descendants");
+async function renderChildToDom(childRef, targetElement) {
+    // primaryTreeLeaves.doc(childRef.id).get()
+    // .then((childDoc) => {
+    //     let existing =  targetElement.closest(".branch").querySelector(".descendants");
 
-        let descendantBranch = document.createElement('ul');
-        let targetBranch = targetElement.closest(".branch");
-        let descendantsContainer;
+    //     let descendantBranch = document.createElement('ul');
+    //     let targetBranch = targetElement.closest(".branch");
+    //     let descendantsContainer;
 
-        descendantBranch.insertAdjacentElement("afterbegin", getMemberLi({"leafDoc" :childDoc}) );
-        descendantBranch.setAttribute('class', 'branch');
+    //     descendantBranch.insertAdjacentElement("afterbegin", getMemberLi({"leafDoc" : childDoc}) );
+    //     descendantBranch.setAttribute('class', 'branch');
 
-        if (existing) {
-            descendantsContainer = existing;
-        } else {
-            descendantsContainer = document.createElement('div');
-            descendantsContainer.setAttribute('class', 'descendants');
-        }
+    //     if (existing) {
+    //         descendantsContainer = existing;
+    //     } else {
+    //         descendantsContainer = document.createElement('div');
+    //         descendantsContainer.setAttribute('class', 'descendants');
+    //     }
 
-        descendantsContainer.appendChild(descendantBranch)
-        targetBranch.appendChild(descendantsContainer);
-    })
-    .catch((err) => {
-        console.log(err.message);
-    })
+    //     descendantsContainer.appendChild(descendantBranch)
+    //     targetBranch.appendChild(descendantsContainer);
+    // })
+    // .catch((err) => {
+    //     console.log(err.message);
+    // })
 
+    let childDoc = await primaryTreeLeaves.doc(childRef.id).get();
+    let existing =  targetElement.closest(".branch").querySelector(".descendants");
+
+    let descendantBranch = document.createElement('ul');
+    let targetBranch = targetElement.closest(".branch");
+    let descendantsContainer;
+
+    let childMemberEl = await getMemberLi({"leafDoc" : childDoc});
+
+    descendantBranch.insertAdjacentHTML('afterbegin', childMemberEl );
+    descendantBranch.setAttribute('class', 'branch');
+
+    if (existing) {
+        descendantsContainer = existing;
+    } else {
+        descendantsContainer = document.createElement('div');
+        descendantsContainer.setAttribute('class', 'descendants');
+    }
+
+    descendantsContainer.appendChild(descendantBranch)
+    targetBranch.appendChild(descendantsContainer);
 }
 
 function warnAboutDescendants(targetMemberDoc) {
@@ -878,7 +882,11 @@ createTreeForm.addEventListener('submit', (e) => {
     }).then(treeRef => {
         treeRef.collection('leaves').add({
             claimed_by: authMemberId,
-            name: `(You)`,
+            name: {
+                firstName: "You (Leaf)",
+                lastName: null,
+                surname: null
+            },
             topMember: true,
             siblings: [],
             parents: [],
