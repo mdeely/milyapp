@@ -5,7 +5,11 @@ const adminRole = document.querySelectorAll(".admin-role");
 const userEmail = document.querySelector(".userEmail");
 const createTreeModal = document.querySelector('#create-tree-modal');
 const editMemberModal = document.querySelector('#edit-member-modal');
+const notificationModal = document.querySelector('#notification-modal');
+const notificationAcceptButton = document.querySelector("#notification-accept-button");
+const notificationDeclineButton = document.querySelector("#notification-decline-button");
 const editMemberForm = document.querySelector('#edit-member-form');
+const inviteMemberForm = document.querySelector('#invite-member-form');
 const treeNameContainer = document.querySelector(".treeName");
 const profileInfoClose = document.querySelector(".profileInfo__close");
 
@@ -24,7 +28,10 @@ const viewPref_list = document.querySelector(".viewPref--list");
 const viewPref_tree = document.querySelector(".viewPref--tree");
 
 // const placeholderImageUrl = "https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?cs=srgb&dl=face-facial-hair-fine-looking-guy-614810.jpg&fm=jpg";
-const placeholderImageUrl = "https://firebasestorage.googleapis.com/v0/b/mily-4c2a8.appspot.com/o/assets%2Fplaceholder%2Fprofile_placeholder.svg?alt=media&token=d3b939f1-d46b-4315-bcc6-3167d17a18ed"
+const placeholderImageUrl = "https://firebasestorage.googleapis.com/v0/b/mily-4c2a8.appspot.com/o/assets%2Fplaceholder%2Fprofile_placeholder.svg?alt=media&token=d3b939f1-d46b-4315-bcc6-3167d17a18ed";
+const placeholderImageUrl2 = "https://firebasestorage.googleapis.com/v0/b/mily-4c2a8.appspot.com/o/assets%2Fplaceholder%2Fprofile_placeholder_2.svg?alt=media&token=966e665f-5d88-48a9-83d9-eec397b1b823";
+const placeholderImageUrl3 = "https://firebasestorage.googleapis.com/v0/b/mily-4c2a8.appspot.com/o/assets%2Fplaceholder%2Fprofile_placeholder_3.svg?alt=media&token=fde7c2ee-01a0-472d-a8a0-ea78c2d64620";
+const placeholderImages = [placeholderImageUrl, placeholderImageUrl2, placeholderImageUrl3];
 
 let owners = [];
 let activeMember;
@@ -49,6 +56,81 @@ const setupView = (doc) => {
         activeMember = doc.id;
         memberList.setAttribute('data-active-member', activeMember);
 
+        notifications
+        .where('sent_to', '==', doc.data().email)
+        .where('status', '==', "pending")
+        .get().then((data) => {
+            if (data.docs.length > 0) {
+                data.docs.forEach(doc => {
+                    console.log("Notification for " +doc.data().sent_to+" to take over leaf member "+doc.data().leaf_to_claim +". Tree: "+doc.data().tree);
+                    let notificationId = notificationModal.querySelector(".notificationId");
+                    let message = notificationModal.querySelector(".notification-message");
+
+                    notificationId.textContent = doc.id;
+                    message.textContent += doc.data().sent_from + " has invited you to take over a leaf ("+doc.data().leaf_to_claim+")";
+
+                    notificationAcceptButton.addEventListener('click', (e) => {
+                        e.preventDefault;
+
+                        let notificationId = notificationModal.querySelector(".notificationId").textContent;
+                        let tree = doc.data().tree;
+                        let leaf_to_claim = doc.data().leaf_to_claim;
+    
+                        console.log(tree);
+                        console.log(leaf_to_claim);
+                        console.log(notificationId);
+
+                        trees.doc(tree).collection('leaves').doc(leaf_to_claim).update({
+                            "claimed_by": activeMember,
+                            "invitation" : ''
+                        })
+                        .then(() => {
+                            console.log("Leaf claimed and invitation removed!");
+
+                            trees.doc(tree).update({
+                                "members": firebase.firestore.FieldValue.arrayUnion(activeMember)
+                            }).then((treeRef) => {
+                                console.log("Member added to Tree!");
+                            }).catch(err => {
+                                console.log("error updating tree")
+                            }) 
+
+                            members.doc(activeMember).update({
+                                "trees" : firebase.firestore.FieldValue.arrayUnion(treeRef.id),
+                                "primary_tree": tree
+                            })
+                            .catch(err => {
+                                console.log("error updating members")
+                            })
+
+                            notifications.doc(notificationId).delete()
+                            .then(() => {
+                                console.log("Notification deleted!");
+                            })
+                            .catch(err => {
+                                console.log("error deleting notification");
+                            })  
+                            
+                        }).catch(err => {
+                            console.log("error updating leaf")
+                        }) 
+    
+                        // notification status becomes "accepted or declined"
+                        // z find that tree and update the leaf member
+                        // z tree adds member to MEMBERS
+                        // member adds tree to TREES
+                        // if no primary, also make it primary
+                        // remove invitation properties from leaf
+                    });
+    
+                    notificationAcceptButton.addEventListener('click', (e) => {
+                        e.preventDefault();
+                    });
+                })
+                notificationModal.style.display = "block";
+            }
+
+        });
 
         if (doc.data().primary_tree && doc.data().primary_tree.length > 0) {
             primaryTree = doc.data().primary_tree;
@@ -75,14 +157,14 @@ const setupView = (doc) => {
             memberList.innerHTML += createTreeButton;
         }
     } else {
-        memberList.innerHTML = '<h4>Log in or sign up to begin</h4>';
+        console.log("Log in or sign up to begin");
     }
 
-    panzoom(memberList, {
-        maxZoom: 1,
-        minZoom: 0.5,
-        pinchSpeed: .8 // zoom two times faster than the distance between fingers
-      });
+    // panzoom(memberList, {
+    //     maxZoom: 1,
+    //     minZoom: 0.5,
+    //     pinchSpeed: .8 // zoom two times faster than the distance between fingers
+    //   });
 }
 
 
@@ -131,8 +213,6 @@ async function buildBranchFromChosenMember(doc, allLeaves) {
 
                 directMemberContainer.insertAdjacentHTML('beforeend', spouseEl);
               }
-        } else {
-            console.log("No spouses detected for this member");
         }
     
         if (children && children.length > 0) {
@@ -189,6 +269,51 @@ async function initiateTree(doc, allLeaves) {
     });
 
     addEventListenerToProfileLeaves();
+
+    let inviteMemberAction = document.querySelectorAll(".invite_member_action");
+    inviteMemberAction.forEach(action => {
+        action.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            let targetEl = e.target.closest(".profileLeaf");
+            let targetMemberId = targetEl.getAttribute('data-id');
+
+            inviteMemberForm["invite-leaf-id"].value = targetMemberId;
+
+            inviteMemberForm.style.display = "block";
+        })
+    })
+
+    inviteMemberForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        let leafId = inviteMemberForm["invite-leaf-id"].value;
+        let invitationTo = inviteMemberForm["invite-email"].value;
+
+        notifications.add({
+            "type": "invite",
+            "sent_to": invitationTo,
+            "sent_from" : activeMember,
+            "leaf_to_claim": leafId,
+            "tree" : primaryTree,
+            "status": "pending"
+        })
+        .then((notificationReq) => {
+            primaryTreeLeaves.doc(leafId).update({
+                "invitation": notificationReq.id
+            })
+            .then(() => {
+                inviteMemberForm.style.display = "none";
+            })
+            .catch(err => {
+                console.log(err.message);
+            })
+        })
+        .catch(err => {
+            console.log(err.message);
+        })
+
+    });
 
     let deleteMemberActions = document.querySelectorAll(".delete_member_action");
     deleteMemberActions.forEach(action => {
@@ -496,6 +621,7 @@ const getMemberLi = async (params) => {
     let siblingMenuOption = '';
     let childMenuOption = '';
     let deleteMenuOption = '';
+    let inviteMenuOption = '';
 
     if (classNames.includes("spouse")) {
         // check for married, seperated, divorced
@@ -517,7 +643,9 @@ const getMemberLi = async (params) => {
         const memberDoc = await members.doc(claimedBy).get();
         name = memberDoc.data().name.firstName;
         classNames = classNames + " claimed";
-
+    } else if (!claimedBy) {
+        inviteMenuOption = `<div class="invite_member_action">Invite</div>`;
+        deleteMenuOption = `<div class="delete_member_action" style="color:red;">Delete</div>`;
     } else {
         deleteMenuOption = `<div class="delete_member_action" style="color:red;">Delete</div>`;
     }
@@ -531,6 +659,7 @@ const getMemberLi = async (params) => {
         "siblingMenuOption": siblingMenuOption,
         "childMenuOption": childMenuOption,
         "deleteMenuOption": deleteMenuOption,
+        "inviteMenuOption": inviteMenuOption,
         "profilePhoto" : await getProfileImageURL(leafDoc),
         "email": email,
         "birthday": birthday,
@@ -551,6 +680,7 @@ function generateProfileLeafHtml(params) {
     let siblingMenuOption = params["siblingMenuOption"] ? params["siblingMenuOption"] : '';
     let childMenuOption = params["childMenuOption"] ? params["childMenuOption"] : '';
     let deleteMenuOption = params["deleteMenuOption"] ? params["deleteMenuOption"] : '';
+    let inviteMenuOption = params["inviteMenuOption"] ? params["inviteMenuOption"] : '';
     let email = params['email'];
     let birthday = params['birthday'];
     let address1 = params['address1'];
@@ -569,6 +699,7 @@ function generateProfileLeafHtml(params) {
                     ${childMenuOption}
                     ${siblingMenuOption}
                     ${spouseMenuOption}
+                    ${inviteMenuOption}
                     ${deleteMenuOption}
                 </div>
             </div>

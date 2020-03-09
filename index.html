@@ -3,7 +3,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"> -->
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous">
     <!-- <link rel="stylesheet" href="/style.css"> -->
     <link rel="stylesheet" href="public/css/style.css"> 
@@ -15,52 +15,61 @@
             <div class="logged-in userEmail"></div>
             <button class="waves-effect waves-light btn-small logged-in" style="display: none;" id="signout-button">Sign out</button>
         </nav>
-        <button class="viewPref--list">List</button>
-        <button class="viewPref--tree">Tree</button>
+        
+        <div class="viewPref">
+            <button class="viewPref--list iconButton"><i class="fa fa-list"></i></button>
+            <button class="viewPref--tree iconButton"><i class="fa fa-tree"></i></button>
+            <button class="viewPref--zoomIn iconButton"><i class="fa fa-plus"></i></button>
+            <button class="viewPref--zoomOut iconButton"><i class="fa fa-minus"></i></button>
+        </div>
+
         <div class="contentContainer">
             <div class="familyTree"></div>
             <div class="profileInfo">
                 <div class="profileInfo__container">
-                    <button class="profileInfo__close"><i class="fa fa-times"></i></button>
-                    <div class="profileInfo__name">Name</div>
+                    <div class="profileInfo__header">
+                        <div class="profileInfo__name">Name</div>
+                        <button class="profileInfo__close"><i class="fa fa-times"></i></button>
+                    </div>
                     <div class="profileInfo__imageContainer">
                         <img class="profileInfo__image" src="https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?cs=srgb&dl=face-facial-hair-fine-looking-guy-614810.jpg&fm=jpg" alt="">
-                        <input type="file" accept='image/*' name="profilePhoto" class="profileInfo__imageUpload">
                         <button class="profileInfo__imageUploadButton">
+                            <input type="file" accept='image/*' name="profilePhoto" class="profileInfo__imageUpload">
                             <i class="fa fa-upload"></i>
                         </button>
                     </div>
-
-                    <form id="edit-member-form">
-                        <input type="text" id="memberId" name="memberId" placeholder="memberId" disabled>
-                        <input type="text" id="name" name="name" placeholder="Name">
-                        <input type="email" id="email" name="email" placeholder="Email">
-                        <input type="date" id="birthday" name="birthday" placeholder="Birthday">
-                        <input type="checkbox" id="deceased" name="deceased" placeholder="Deceased?">
-                        <fieldset>
-                            <input type="text" id="address1" name="address1" placeholder="Address 1">
-                            <input type="text" id="address2" name="address2" placeholder="Address 2">
-                            <input type="text" id="city" name="city" placeholder="City">
-                            <input type="number" id="zipcode" name="zip" placeholder="zipcode">
-                            <input type="text" id="country" name="country" placeholder="country">
-                        </fieldset>
-                        <button class="btn-small">Save</button>
-                    </form>
-
-                    <div class="profileInfo__email">email</div>
-                    <div class="profileInfo__middletName">Middle name</div>
-                    <div class="profileInfo__lastName">Last name</div>
-                    <div class="profileInfo__birthday">birthday</div>
-                    <div class="profileInfo__deceased">deceased?</div>
-                    <div class="profileInfo__address1">address 1</div>
-                    <div class="profileInfo__address2">address 2</div>
-                    <div class="profileInfo__city">city</div>
-                    <div class="profileInfo__zipcode">zipcode</div>
-                    <div class="profileInfo__country">country</div>
-                    <div class="profileInfo__cellPhone">Cell phone</div>
-                    <div class="profileInfo__workPhone">Work phone</div>
-                    <div class="profileInfo__homePhone">Home phone</div>
-                    <div class="profileInfo__notes">Notes</div>
+                    <div class="profileInfo__body">
+                        <form id="edit-member-form">
+                            <input type="text" id="memberId" name="memberId" placeholder="memberId" disabled>
+                            <input type="text" id="name" name="name" placeholder="Name">
+                            <input type="email" id="email" name="email" placeholder="Email">
+                            <input type="date" id="birthday" name="birthday" placeholder="Birthday">
+                            <input type="checkbox" id="deceased" name="deceased" placeholder="Deceased?">
+                            <fieldset>
+                                <input type="text" id="address1" name="address1" placeholder="Address 1">
+                                <input type="text" id="address2" name="address2" placeholder="Address 2">
+                                <input type="text" id="city" name="city" placeholder="City">
+                                <input type="number" id="zipcode" name="zip" placeholder="zipcode">
+                                <input type="text" id="country" name="country" placeholder="country">
+                            </fieldset>
+                            <button class="btn-small">Save</button>
+                        </form>
+    
+                        <div class="profileInfo__item profileInfo__email">email</div>
+                        <div class="profileInfo__item profileInfo__middletName">Middle name</div>
+                        <div class="profileInfo__item profileInfo__lastName">Last name</div>
+                        <div class="profileInfo__item profileInfo__birthday">birthday</div>
+                        <div class="profileInfo__item profileInfo__deceased">deceased?</div>
+                        <div class="profileInfo__item profileInfo__address1">address 1</div>
+                        <div class="profileInfo__item profileInfo__address2">address 2</div>
+                        <div class="profileInfo__item profileInfo__city">city</div>
+                        <div class="profileInfo__item profileInfo__zipcode">zipcode</div>
+                        <div class="profileInfo__item profileInfo__country">country</div>
+                        <div class="profileInfo__item profileInfo__cellPhone">Cell phone</div>
+                        <div class="profileInfo__item profileInfo__workPhone">Work phone</div>
+                        <div class="profileInfo__item profileInfo__homePhone">Home phone</div>
+                        <div class="profileInfo__item profileInfo__notes">Notes</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -91,21 +100,27 @@
             </div>
         </div>
 
-        <!-- EDIT MEMBER MODAL -->
-        <div id="edit-member-modal" class="modal">
-            <div class="modal-content">
-                <h4>Edit member</h4>
-                <!-- <form id="edit-member-form">
-                    <input type="text" id="memberId" name="memberId" placeholder="memberId" disabled>
-                    <input type="text" id="name" name="name" placeholder="Name">
-                    <button class="btn-small">Save</button>
-                    <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cancel</a>
-                </form> -->
-            </div>
+        <!-- INVITE MEMBER -->
+        <form id="invite-member-form" class="modal" style="display: none;" >
+            <h4>Invite member</h4>
+            <input id="invite-leaf-id" name="invite-leaf-id" style="display: none" disabled/>
+            <input id="invite-email" name="invite-email" placeholder="Email"/>
+            <button>Invite member</button>
+            <p class="error"></p>
+        </form>
+
+        <!-- NOTIFICATION MODAL -->
+        <div id="notification-modal" class="modal" style="display: none;" >
+            <h4>Notifications</h4>
+            <p class="notification-message"></p>
+            <button id="notification-accept-button">Accept</button>
+            <button id="notification-accept-button">Decline</button>
+            <p class="error"></p>
+            <span class="notificationId" style="display:none"></span>
         </div>
 
         <!-- CREATE TREE MODAL -->
-        <div id="create-tree-modal" class="modal">
+        <div id="create-tree-modal" class="modal" style="display: none">
             <div class="modal-content">
                 <h4>Create a tree</h4>
                 <form id="create-tree-form">

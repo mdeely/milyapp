@@ -11,6 +11,7 @@ adminForm.addEventListener('submit', (e) => {
 
 const members = db.collection('members');
 const trees = db.collection('trees');
+const notifications = db.collection('notifications');
 const users = db.collection('users');
 const families = db.collection('families');
 
@@ -51,13 +52,16 @@ signInForm.addEventListener('submit', (e) => {
     auth.createUserWithEmailAndPassword(email, password)
     .then(cred => {
         members.add({
-            claimed_by: cred.user.uid,
-            created_by: cred.user.uid,
-            name: {
+            "claimed_by": cred.user.uid,
+            "created_by": cred.user.uid,
+            "name": {
                 firstName: "You (Member)",
                 lastName: null,
                 surname: null
             },
+            "email": email,
+            "trees": [],
+            "primary_tree": ''
         }).then(() => {
             signInForm.reset();
             signInForm.querySelector(".error").innerHTML = '';
