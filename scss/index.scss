@@ -11,6 +11,8 @@ body {
     font-family: 'Lato', san-serif;
     display: flex;
     flex-direction: column;
+    padding: 0;
+    margin: 0;
     // overflow: hidden;
 }
 
@@ -42,11 +44,19 @@ img {
     display: flex;
 }
 
+.mainContent {
+    flex: 1;
+    position: relative;
+    height: 100vh;
+}
+
 .familyTree {
-    width: 100%;
+    max-width: 100vw;
     padding: 16px;
     justify-content: center;
     max-height: calc(100vh - #{$navHeight});
+    transition: transform .2s ease-in-out;
+    transform-origin: center;
     // overflow: scroll;
 
     > .branch + .branch {
@@ -61,6 +71,7 @@ img {
     &.list {
         justify-content: left;
         display: initial;
+        transform-origin: left top;
 
         .directMembers,
         .descendants,
@@ -225,7 +236,10 @@ img {
 }
 
 .treeName {
-    margin-right: auto;
+    margin: 0 auto;
+    text-align: center;
+    width: 100%;
+
 }
 
 .branch {
@@ -259,22 +273,28 @@ img {
         display: none;
         position: absolute;
         background-color: white;
-        padding: 8px;
-        min-width: 120px;
+        min-width: 160px;
         border-radius: 8px;
         box-shadow: 0 2px 10px rgba(black, .1);
         z-index: 1;
+        text-align: left;
 
         &.show {
             display: block;
         }
 
-        > * {
-            text-align: left;
+
+        > [class*="option"],
+        [class*="action"] {
+            padding: 8px 16px;
 
             &:hover {
                 background-color: rgba(black, .05);
                 cursor: pointer;
+            }
+
+            &:active {
+                background-color: rgba(black, .08);
             }
         }
     }
@@ -310,7 +330,7 @@ img {
 }
 
 .viewPref {
-    position: fixed;
+    position: absolute;
     bottom: 48px;
     right: 48px;
     z-index: 999;

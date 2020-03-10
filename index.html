@@ -10,21 +10,21 @@
     <title>Document</title>
 </head>
     <body>
-        <nav>
-            <div class="treeName"></div>
-            <div class="logged-in userEmail"></div>
-            <button class="waves-effect waves-light btn-small logged-in" style="display: none;" id="signout-button">Sign out</button>
-        </nav>
-        
-        <div class="viewPref">
-            <button class="viewPref--list iconButton"><i class="fa fa-list"></i></button>
-            <button class="viewPref--tree iconButton"><i class="fa fa-tree"></i></button>
-            <button class="viewPref--zoomIn iconButton"><i class="fa fa-plus"></i></button>
-            <button class="viewPref--zoomOut iconButton"><i class="fa fa-minus"></i></button>
-        </div>
+
 
         <div class="contentContainer">
-            <div class="familyTree"></div>
+            <div class="mainContent">
+                <div class="logged-in userEmail"></div>
+                <button class="waves-effect waves-light btn-small logged-in" style="display: none;" id="signout-button">Sign out</button>
+                <div class="treeName"></div>
+                <div class="familyTree" data-zoom="1"></div>
+                <div class="viewPref">
+                    <button class="viewPref--list iconButton"><i class="fa fa-list"></i></button>
+                    <button class="viewPref--tree iconButton"><i class="fa fa-tree"></i></button>
+                    <button class="viewPref--zoomIn iconButton"><i class="fa fa-plus"></i></button>
+                    <button class="viewPref--zoomOut iconButton"><i class="fa fa-minus"></i></button>
+                </div>
+            </div>
             <div class="profileInfo">
                 <div class="profileInfo__container">
                     <div class="profileInfo__header">
@@ -44,7 +44,10 @@
                             <input type="text" id="name" name="name" placeholder="Name">
                             <input type="email" id="email" name="email" placeholder="Email">
                             <input type="date" id="birthday" name="birthday" placeholder="Birthday">
-                            <input type="checkbox" id="deceased" name="deceased" placeholder="Deceased?">
+                            <label name=deceased>
+                                Deceased
+                                <input type="checkbox" id="deceased" name="deceased" placeholder="Deceased?">
+                            </label>
                             <fieldset>
                                 <input type="text" id="address1" name="address1" placeholder="Address 1">
                                 <input type="text" id="address2" name="address2" placeholder="Address 2">

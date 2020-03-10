@@ -13,6 +13,9 @@ const inviteMemberForm = document.querySelector('#invite-member-form');
 const treeNameContainer = document.querySelector(".treeName");
 const profileInfoClose = document.querySelector(".profileInfo__close");
 
+const viewPrefZoomIn = document.querySelector(".viewPref--zoomIn");
+const viewPrefZoomOut = document.querySelector(".viewPref--zoomOut");
+
 const profileInfo = document.querySelector(".profileInfo");
 const profileInfoName = profileInfo.querySelector(".profileInfo__name");
 const profileInfoImage = profileInfo.querySelector(".profileInfo__image");
@@ -87,29 +90,33 @@ const setupView = (doc) => {
                         .then(() => {
                             console.log("Leaf claimed and invitation removed!");
 
-                            trees.doc(tree).update({
-                                "members": firebase.firestore.FieldValue.arrayUnion(activeMember)
-                            }).then((treeRef) => {
-                                console.log("Member added to Tree!");
-                            }).catch(err => {
-                                console.log("error updating tree")
-                            }) 
-
-                            members.doc(activeMember).update({
-                                "trees" : firebase.firestore.FieldValue.arrayUnion(treeRef.id),
-                                "primary_tree": tree
-                            })
-                            .catch(err => {
-                                console.log("error updating members")
-                            })
-
                             notifications.doc(notificationId).delete()
                             .then(() => {
                                 console.log("Notification deleted!");
                             })
                             .catch(err => {
-                                console.log("error deleting notification");
+                                console.log("error deleting notification: "+err.message);
                             })  
+                            console.log(activeMember);
+                            console.log(tree);
+
+                            trees.doc(tree).update({
+                                "members": firebase.firestore.FieldValue.arrayUnion(activeMember)
+                            }).then(() => {
+                                members.doc(activeMember).update({
+                                    "trees" : firebase.firestore.FieldValue.arrayUnion(tree),
+                                    "primary_tree": tree
+                                })
+                                .then(() => {  
+                                    console.log("Tree updated!")
+
+                                })
+                                .catch(err => {
+                                    console.log("error updating members: "+err.message)
+                                })
+                            }).catch(err => {
+                                console.log("error updating tree"+err.message)
+                            }) 
                             
                         }).catch(err => {
                             console.log("error updating leaf")
@@ -166,6 +173,44 @@ const setupView = (doc) => {
     //     pinchSpeed: .8 // zoom two times faster than the distance between fingers
     //   });
 }
+
+viewPrefZoomIn.addEventListener('click', (e) => {
+    e.preventDefault();
+    
+    let zoomAmount = parseInt(memberList.getAttribute("data-zoom"));
+    let matrixZoom;
+
+    if (zoomAmount === 1) {
+         return
+    } else {
+        zoomAmount = zoomAmount - 1;
+        matrixZoom = 1 / zoomAmount;
+    }
+
+    console.log("Zooming in " +zoomAmount);
+
+
+    memberList.style.transform = `matrix(${matrixZoom}, 0, 0,${matrixZoom}, 0, 0)`;
+    memberList.setAttribute("data-zoom", zoomAmount);
+})
+
+viewPrefZoomOut.addEventListener('click', (e) => {
+    e.preventDefault();
+    
+    let zoomAmount = parseInt(memberList.getAttribute("data-zoom"));
+    let matrixZoom;
+
+    if (zoomAmount === 4) {
+         return
+    } else {
+        zoomAmount = zoomAmount + 1;
+        matrixZoom = 1 / zoomAmount;
+    }
+
+
+    memberList.style.transform = `matrix(${matrixZoom}, 0, 0,${matrixZoom}, 0, 0)`;
+    memberList.setAttribute("data-zoom", zoomAmount);
+})
 
 
 function setOwnerAndActiveMemberVars(doc) {
@@ -587,6 +632,12 @@ function handleProfileInfo(state, e) {
             profileInfoCountry.textContent = country; 
 
             profileInfo.classList.add("show");
+
+            if (!owners.includes(activeMember)) {
+                profileInfo.querySelector("form").remove();
+                profileInfo.querySelector(".profileInfo__imageUploadButton").remove();
+                profilePhotoInputUpload.remove();
+            }
         }
     } else {
         profileInfo.classList.remove("show");
@@ -625,29 +676,28 @@ const getMemberLi = async (params) => {
 
     if (classNames.includes("spouse")) {
         // check for married, seperated, divorced
-    } else {
-        spouseMenuOption = `<div class="add_spouse_option">Add partner</div>`;
-        siblingMenuOption = `<div class="add_sibling_option">Add sibling</div>`;
-        childMenuOption = `<div class="add_child_option">Add child</div>`;
     }
 
     if (claimedBy === activeMember) {
         classNames = classNames + " you"; 
     }
 
-    if (leafDoc.data().topMember === true) {
+    if (owners.includes(activeMember) && leafDoc.data().topMember === true) {
         parentMenuOption = `<div class="add_parent_option">Add parent</div>`;
+    }
+
+    if (leafDoc && owners.includes(activeMember)) {
+        inviteMenuOption = `<div class="invite_member_action">Invite</div>`;
+        deleteMenuOption = `<div class="delete_member_action" style="color:red;">Remove member</div>`;
+        spouseMenuOption = `<div class="add_spouse_option">Add partner</div>`;
+        siblingMenuOption = `<div class="add_sibling_option">Add sibling</div>`;
+        childMenuOption = `<div class="add_child_option">Add child</div>`;
     }
 
     if (leafDoc && claimedBy) {
         const memberDoc = await members.doc(claimedBy).get();
         name = memberDoc.data().name.firstName;
         classNames = classNames + " claimed";
-    } else if (!claimedBy) {
-        inviteMenuOption = `<div class="invite_member_action">Invite</div>`;
-        deleteMenuOption = `<div class="delete_member_action" style="color:red;">Delete</div>`;
-    } else {
-        deleteMenuOption = `<div class="delete_member_action" style="color:red;">Delete</div>`;
     }
 
     return generateProfileLeafHtml({
@@ -798,7 +848,7 @@ editMemberForm.addEventListener('submit', (e) => {
         targetLeaf.querySelector(".profileLeaf__name").textContent = name;
 
         editMemberForm.reset();
-        M.Modal.getInstance(editMemberModal).close();
+        // M.Modal.getInstance(editMemberModal).close();
         console.log("Updated successfully!");
     })
 
@@ -850,7 +900,7 @@ function deleteLeaf(e) {
 
         primaryTreeLeaves.doc(targetMemberId).delete()
         .then(() => {
-            M.Modal.getInstance(editMemberModal).close();
+            // M.Modal.getInstance(editMemberModal).close();
             removeMemberFromDom(targetEl);
         });
     });
@@ -1070,7 +1120,6 @@ window.addEventListener('click', (e) => {
       })
     }
 });
-
 
 const storageUrl = "gs://mily-4c2a8.appspot.com";
 const profilePhotoInputUpload = document.querySelector("[name='profilePhoto']");

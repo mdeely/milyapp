@@ -55,7 +55,7 @@ signInForm.addEventListener('submit', (e) => {
             "claimed_by": cred.user.uid,
             "created_by": cred.user.uid,
             "name": {
-                firstName: "You (Member)",
+                firstName: email,
                 lastName: null,
                 surname: null
             },
