@@ -1,19 +1,17 @@
-// add admin cloud function
-const adminForm = document.querySelector("#admin-form");
-adminForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const adminEmail = adminForm["admin-email"].value;
-    const addAdminRole = functions.httpsCallable('addAdminRole');
-    addAdminRole({ email: adminEmail }).then(result => {
-        console.log(result);
-    })
-})
+// // add admin cloud function
+// const adminForm = document.querySelector("#admin-form");
+// adminForm.addEventListener('submit', (e) => {
+//     e.preventDefault();
+//     const adminEmail = adminForm["admin-email"].value;
+//     const addAdminRole = functions.httpsCallable('addAdminRole');
+//     addAdminRole({ email: adminEmail }).then(result => {
+//         console.log(result);
+//     })
+// })
 
 const members = db.collection('members');
 const trees = db.collection('trees');
 const notifications = db.collection('notifications');
-const users = db.collection('users');
-const families = db.collection('families');
 
 // listen for auth status changes
 auth.onAuthStateChanged(user => {
@@ -22,14 +20,12 @@ auth.onAuthStateChanged(user => {
             user.admin = idTokenResult.claims.admin
             setupAuthUi(user);
         })
-
         // get member where claimed by UID
         members.where('claimed_by', '==', user.uid).limit(1).get().then((data) => {
             data.docs.forEach(doc => {
                 setupView(doc);
             })
         });
-        
     } else {
         setupAuthUi(user);
         setupView();
@@ -41,6 +37,9 @@ const signInForm = document.querySelector("#signup-form");
 const signOutButton = document.querySelector("#signout-button");
 const logInForm = document.querySelector("#login-form");
 
+const productionEnv = location.host.includes("milyapp") ? true : false;
+
+
 signInForm.addEventListener('submit', (e) => {
     e.preventDefault();
 
@@ -51,6 +50,7 @@ signInForm.addEventListener('submit', (e) => {
     // sign up the user
     auth.createUserWithEmailAndPassword(email, password)
     .then(cred => {
+        // Associate a member to the user
         members.add({
             "claimed_by": cred.user.uid,
             "created_by": cred.user.uid,

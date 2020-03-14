@@ -21,19 +21,81 @@ ul {
     padding: 0;
 }
 
+.u-w_full {
+    width: 100%;
+}
+
+button,
+.button {
+    padding: 12px;
+    background-color: #333333;
+    border: 0px solid transparent;
+    font-size: 1rem;
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+input {
+    padding: 0 8px;
+    margin-bottom: 1rem;
+    line-height: 3rem;
+    font-size: 1rem;
+
+    &[disabled] {
+        opacity: .5;
+    }
+}
+
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="date"] {
+    width: 100%;
+    border-radius: 8px;
+    border: 1px solid #e5e5e5;
+}
+
+.checkbox-group {
+    display: flex;
+}
+
+fieldset {
+    padding: 0;
+    border: 0px solid transparent;
+}
+
 img {
     max-width: 100%;
     background-color: #FDD3A6;
+}
+.navigation {
+    position: absolute;
+    right: 24px;
+    top: 24px;
+    display: flex;
+    align-items: center;
+
+    .userEmail {
+        margin-right: 16px;
+    }
 }
 
 .modal {
     position: fixed;
     top: 35%;
+    left: 50%;
+    right: 50%;
+    width: 100%;
     max-width: 500px;
     margin: 0 auto;
     border-radius: 16px;
     box-shadow: 0 4px 12px rgba(black, .2);
     padding: 24px;
+    z-index: 9999;
+    background-color: white;
+    transform: translate(-50%, -50%);
 }
 
 .directMembers,
@@ -42,12 +104,15 @@ img {
 .profileLeaf,
 .contentContainer {
     display: flex;
+    justify-content: center;
 }
 
 .mainContent {
     flex: 1;
     position: relative;
     height: 100vh;
+    width: 100%;
+    min-width: 50%;
 }
 
 .familyTree {
@@ -70,7 +135,8 @@ img {
     
     &.list {
         justify-content: left;
-        display: initial;
+        display: flex;
+        flex-direction: column;
         transform-origin: left top;
 
         .directMembers,
@@ -152,6 +218,10 @@ img {
         margin: 0 auto;
         white-space: nowrap;
         pointer-events: none;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        max-width: 72%;
+        overflow: hidden;
     }
 
     &__info {
@@ -238,8 +308,15 @@ img {
 .treeName {
     margin: 0 auto;
     text-align: center;
-    width: 100%;
+    max-width: 50ch;
+    font-weight: 900;
+    font-size: 1.25rem;
+    padding: 48px;
+}
 
+.disabled {
+    opacity: .5;
+    pointer-events: none;
 }
 
 .branch {
@@ -278,9 +355,14 @@ img {
         box-shadow: 0 2px 10px rgba(black, .1);
         z-index: 1;
         text-align: left;
+        padding: 8px 0;
 
         &.show {
             display: block;
+        }
+
+        &:empty {
+            display: none;
         }
 
 
@@ -379,7 +461,7 @@ nav {
 .contentContainer {
     flex: 1;
     position: relative;
-    max-height: calc(100vh - #{$navHeight});
+    max-height: 100vh;
 
     &:focus {
         outline: none;
@@ -418,7 +500,7 @@ nav {
     }
 
     &__body {
-        padding: 48px;
+        padding: 24px;
     }
 
     &__name {
@@ -468,7 +550,9 @@ nav {
         cursor: pointer;
         font-size: 18px;
         z-index: 1;
-        background-color: rgba(white, .5);
+        opacity: .5;
+        color: white;
+        mix-blend-mode: multiply;
     }
 
     &__imageUpload {

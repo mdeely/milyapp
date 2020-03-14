@@ -6,16 +6,19 @@
     <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"> -->
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous">
     <!-- <link rel="stylesheet" href="/style.css"> -->
-    <link rel="stylesheet" href="public/css/style.css"> 
-    <title>Document</title>
+    <link rel="stylesheet" href="css/style.css"> 
+    <title>Mily</title>
 </head>
     <body>
 
 
         <div class="contentContainer">
             <div class="mainContent">
-                <div class="logged-in userEmail"></div>
-                <button class="waves-effect waves-light btn-small logged-in" style="display: none;" id="signout-button">Sign out</button>
+                <div class="navigation">
+                    <div class="logged-in userEmail"></div>
+                    <button class="waves-effect waves-light btn-small logged-in" style="display: none;" id="signout-button">Sign out</button>
+                    <a class="waves-effect waves-light button modal-trigger logged-in" href="#create-primary-tree-modal">Create a family tree</a>
+                </div>
                 <div class="treeName"></div>
                 <div class="familyTree" data-zoom="1"></div>
                 <div class="viewPref">
@@ -55,7 +58,7 @@
                                 <input type="number" id="zipcode" name="zip" placeholder="zipcode">
                                 <input type="text" id="country" name="country" placeholder="country">
                             </fieldset>
-                            <button class="btn-small">Save</button>
+                            <button class="btn-small u-w_full">Save</button>
                         </form>
     
                         <div class="profileInfo__item profileInfo__email">email</div>
@@ -107,7 +110,23 @@
         <form id="invite-member-form" class="modal" style="display: none;" >
             <h4>Invite member</h4>
             <input id="invite-leaf-id" name="invite-leaf-id" style="display: none" disabled/>
-            <input id="invite-email" name="invite-email" placeholder="Email"/>
+            <input id="invite-email" name="invite-email" placeholder="Email" type="email"/>
+
+            <label class="checkbox-group" for="invite-make-admin">
+                <input value="admins" type="radio" id="invite-make-admin" name="permission-type">
+                Admin
+            </label>
+
+            <label class="checkbox-group" for="invite-make-contributor">
+                <input value="contributors" type="radio" id="invite-make-contributor" name="permission-type">
+                Contributor
+            </label>
+
+            <label class="checkbox-group" for="invite-make-viewer">
+                <input value="viewers" type="radio" id="invite-make-viewer" name="permission-type" checked>
+                Viewer
+            </label>
+
             <button>Invite member</button>
             <p class="error"></p>
         </form>
@@ -117,13 +136,13 @@
             <h4>Notifications</h4>
             <p class="notification-message"></p>
             <button id="notification-accept-button">Accept</button>
-            <button id="notification-accept-button">Decline</button>
+            <button id="notification-decline-button">Decline</button>
             <p class="error"></p>
             <span class="notificationId" style="display:none"></span>
         </div>
 
         <!-- CREATE TREE MODAL -->
-        <div id="create-tree-modal" class="modal" style="display: none">
+        <div id="create-primary-tree-modal" class="modal" style="display: none">
             <div class="modal-content">
                 <h4>Create a tree</h4>
                 <form id="create-tree-form">
