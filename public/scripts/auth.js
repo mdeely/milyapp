@@ -9,36 +9,49 @@
 //     })
 // })
 
+const productionEnv = location.host.includes("milyapp") ? true : false;
+
 const members = db.collection('members');
 const trees = db.collection('trees');
 const notifications = db.collection('notifications');
-
-// listen for auth status changes
-auth.onAuthStateChanged(user => {
-    if (user) {
-        user.getIdTokenResult().then(idTokenResult => {
-            user.admin = idTokenResult.claims.admin
-            setupAuthUi(user);
-        })
-        // get member where claimed by UID
-        members.where('claimed_by', '==', user.uid).limit(1).get().then((data) => {
-            data.docs.forEach(doc => {
-                setupView(doc);
-            })
-        });
-    } else {
-        setupAuthUi(user);
-        setupView();
-    }
-})
 
 // signup form
 const signInForm = document.querySelector("#signup-form");
 const signOutButton = document.querySelector("#signout-button");
 const logInForm = document.querySelector("#login-form");
 
-const productionEnv = location.host.includes("milyapp") ? true : false;
+setupEnvironment();
 
+signOutButton.addEventListener('click', (e) => {
+    e.preventDefault();
+    // sign out the user
+    auth.signOut();
+})
+
+function setupEnvironment() {
+    if (productionEnv) {
+        signInForm.remove();
+    }
+}
+
+// listen for auth status changes
+auth.onAuthStateChanged(async user => {
+    if (user) {
+        user.getIdTokenResult().then(idTokenResult => {
+            user.admin = idTokenResult.claims.admin
+            setupAuthUi(user);
+        })
+        // get member where claimed by UID
+        let authMember = await members.where('claimed_by', '==', user.uid).limit(1).get();
+        for (const doc of authMember.docs) {
+            window.authMemberDoc = await doc ? doc : null;
+            setupView();
+        }
+    } else {
+        setupAuthUi(user);
+        setupView();
+    }
+})
 
 signInForm.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -61,7 +74,7 @@ signInForm.addEventListener('submit', (e) => {
             },
             "email": email,
             "trees": [],
-            "primary_tree": ''
+            "primary_tree": null
         }).then(() => {
             signInForm.reset();
             signInForm.querySelector(".error").innerHTML = '';
@@ -71,12 +84,6 @@ signInForm.addEventListener('submit', (e) => {
     }).catch(err => {
         signInForm.querySelector(".error").innerHTML = err.message;
     })
-})
-
-signOutButton.addEventListener('click', (e) => {
-    e.preventDefault();
-    // sign out the user
-    auth.signOut();
 })
 
 logInForm.addEventListener('submit', (e) => {

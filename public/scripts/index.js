@@ -46,13 +46,9 @@ const placeholderImages = [
 let admins = [];
 let contributors = [];
 let viewers = [];
-let activeMember;
-let activeLeaf;
 let activeMemberIsAdmin = false;
 let activeMemberIsContributor = false;
 let activeMemberIsViewer = false;
-let primaryTree = '';
-let primaryTreeLeaves = '';
 
 viewPref_list.addEventListener('click', () => {
     memberList.classList.add('list');
@@ -62,181 +58,228 @@ viewPref_tree.addEventListener('click', () => {
     memberList.classList.remove('list');
 })
 
-// Render members and actions available 
+const renderTreeFromUrl = () => {
+    let treeId = getTreeIdFromUrl();
+    let pathName = location.pathname;
 
-const setupView = async (doc) => {
-    if (productionEnv) {
-        signInForm.remove();
+    // TREE IN URL
+    if (treeId) {
+        console.log(treeId);
+
+        trees.doc(treeId).collection('leaves').get()
+        .then((allLeaves) => {
+            window.currentTreeLeavesDocs = allLeaves.docs;
+            if (currentTreeLeavesDocs.length > 0) {
+                updateDocument('',"Tree!",pathName+"#/trees/"+treeId);
+                currentTreeLeavesDocs.forEach(leafDoc => {
+                    if (leafDoc.data().topMember === true) {
+                        initiateTree(leafDoc, currentTreeLeavesDocs);
+                    } 
+                });
+                // render tree from tree params
+                // 
+            } else {
+                memberList.innerHTML = '';
+
+                console.log("Tree does not exist!")
+            }
+        })
+        .catch(err => {
+            console.log("Error retreiving tree: "+err);
+        })
+    } else  {
+        memberList.innerHTML = '';
+        // Check for active member
+        // Does active member have a primary tree?
+        // Then see if that have any "trees", pick the first one, make that the new primary.
+        // If no "trees, show "you have no trees!" and maybe a button.
+        console.log("Tree ID is not present");
     }
+}
 
-    if (doc) {
+const renderPrimaryTreeFromMember = (reqTreeId) => {
+    trees.doc(reqTreeId).get().then(doc => {
+        window.currenTreeDoc = doc;
+        treeNameContainer.innerHTML += `${currenTreeDoc.data().name}`;
+        setAdminsAndActiveMember();
+    })
+
+    let memberTrees = authMemberDoc.data().trees;
+    memberTrees.forEach(tree => {
+        treeNameContainer.innerHTML += "("+tree+")";
+    })
+
+    let pathName = location.pathname;
+    // get tree to see if member is admin
+    
+    currentTreeLeavesRef.get()
+    .then(allLeaves => {
+        window.currentTreeLeavesDocs = allLeaves.docs;
+        updateDocument('',"Tree!",pathName+"#/trees/"+reqTreeId);
+        currentTreeLeavesDocs.forEach(leafDoc => {
+            if (leafDoc.data().topMember === true) {
+                initiateTree(leafDoc, currentTreeLeavesDocs);
+            } 
+        });
+    });
+    // Reset view
+    // Set activeMembe
+    // Notificaitons (check and present)
+
+    // Handle tree based data and presentation
+    // Get that tree's leaf that is claimed by the current member
+    // 
+
+    // Set authMember (id, email, primary_tree, trees)
+    // Set authMemberLeaf 
+    // Set currentTreeId (name, members, )
+    // 
+}
+
+function checkForNotifications() {
+    notifications
+    .where('sent_to', '==', authMemberDoc.data().email)
+    .where('status', '==', "pending")
+    .get().then((data) => {
+
+        if (data.docs.length > 0) {
+            console.log("notifications found");
+            data.docs.forEach(doc => {
+                console.log("Notification for " +doc.data().sent_to+" to take over leaf member "+doc.data().leaf_to_claim +". Tree: "+doc.data().tree);
+                let notificationId = notificationModal.querySelector(".notificationId");
+                let message = notificationModal.querySelector(".notification-message");
+
+                notificationId.textContent = doc.id;
+                message.textContent += doc.data().sent_from + " has invited you to take over a leaf ("+doc.data().leaf_to_claim+")";
+
+                if (doc.permission_type === "admin") {
+                    message.textContent += "ADMIN permissions";
+                } else if (doc.permission_type === "contributor") {
+                    message.textContent += "CONTRIBUTOR permissions";
+                } else if (doc.permission_type === "viewer") {
+                    message.textContent += "VIEWER permissions.";
+                }
+
+                notificationAcceptButton.addEventListener('click', (e) => {
+                    e.preventDefault;
+
+                    let notificationId = notificationModal.querySelector(".notificationId").textContent;
+                    let tree = doc.data().tree;
+                    let leaf_to_claim = doc.data().leaf_to_claim;
+                    let permission_type = doc.data().permission_type;
+
+                    trees.doc(tree).collection('leaves').doc(leaf_to_claim).update({
+                        "claimed_by": authMemberDoc.id,
+                        "invitation" : null
+                    })
+                    .then(() => {
+                        console.log("Leaf claimed and invitation removed!");
+
+                        notifications.doc(notificationId).delete()
+                        .then(() => {
+                            console.log("Notification deleted!");
+                        })
+                        .catch(err => {
+                            console.log("error deleting notification: "+err.message);
+                        })  
+
+                        trees.doc(tree).update({
+                            [permission_type] : firebase.firestore.FieldValue.arrayUnion(doc.data().leaf_to_claim)
+                        }).then(() => {
+                            console.log("Successfully set permissions");
+                            console.log("Member has primary tree : "+authMemberDoc.data().primary_tree);
+                            if (!authMemberDoc.data().primary_tree) {
+                                console.log('Adding family tree as primary :)');
+                                members.doc(authMemberDoc.id).update({
+                                    "trees" : firebase.firestore.FieldValue.arrayUnion(tree),
+                                    "primary_tree": tree
+                                })
+                                .then(() => {  
+                                    console.log("Tree updated!")
+                                    notificationModal.style.display = "none";
+                                    setupViewWithActiveMember(authMemberDoc.id);
+                                })
+                                .catch(err => {
+                                    console.log("error updating members: "+err.message)
+                                })
+                            } else {
+                                members.doc(authMemberDoc.id).update({
+                                    "trees" : firebase.firestore.FieldValue.arrayUnion(tree),
+                                })
+                                .then(() => {  
+                                    console.log("Tree updated!")
+                                    notificationModal.style.display = "none";
+                                    setupViewWithActiveMember(authMemberDoc.id);
+                                })
+                                .catch(err => {
+                                    console.log("error updating members: "+err.message)
+                                })
+                            }
+                        }).catch(err => {
+                            console.log("error updating tree"+err.message)
+                        }) 
+                        
+                    }).catch(err => {
+                        console.log("error updating leaf")
+                    }) 
+                });
+
+                notificationDeclineButton.addEventListener('click', (e) => {
+                    e.preventDefault();
+
+                    let notificationId = notificationModal.querySelector(".notificationId").textContent;
+                    let tree = doc.data().tree;
+                    let leaf_to_claim = doc.data().leaf_to_claim;
+
+                    trees.doc(tree).collection("leaves").doc(leaf_to_claim).update({
+                        invitation: null
+                    })
+                    .then(() => {
+                        notifications.doc(notificationId).update({
+                            status: "declined"
+                        })
+                        .then(() => {
+                            notificationModal.style.display = "none";
+                            setupViewWithActiveMember(authMemberDoc.id);
+                        })
+                    });
+                })
+            })
+            notificationModal.style.display = "block";
+        } else {
+            // console.log("no notifications found");
+        }
+    });
+}
+
+// Render members and actions available 
+const setupView = async () => {
+    
+    if (window.authMemberDoc) {
         memberList.innerHTML = "";
         contentContainer.style.display = "";
 
-        activeMember = doc.id;
+        checkForNotifications();
 
-        memberList.setAttribute('data-active-member', activeMember);
-        notifications
-        .where('sent_to', '==', doc.data().email)
-        .where('status', '==', "pending")
-        .get().then((data) => {
-
-            if (data.docs.length > 0) {
-                data.docs.forEach(doc => {
-                    console.log("Notification for " +doc.data().sent_to+" to take over leaf member "+doc.data().leaf_to_claim +". Tree: "+doc.data().tree);
-                    let notificationId = notificationModal.querySelector(".notificationId");
-                    let message = notificationModal.querySelector(".notification-message");
-
-                    notificationId.textContent = doc.id;
-                    message.textContent += doc.data().sent_from + " has invited you to take over a leaf ("+doc.data().leaf_to_claim+")";
-
-                    if (doc.permission_type === "admin") {
-                        message.textContent += "ADMIN permissions";
-                    } else if (doc.permission_type === "contributor") {
-                        message.textContent += "CONTRIBUTOR permissions";
-                    } else if (doc.permission_type === "viewer") {
-                        message.textContent += "VIEWER permissions.";
-                    }
-
-                    notificationAcceptButton.addEventListener('click', (e) => {
-                        e.preventDefault;
-
-                        let notificationId = notificationModal.querySelector(".notificationId").textContent;
-                        let tree = doc.data().tree;
-                        let leaf_to_claim = doc.data().leaf_to_claim;
-                        let permission_type = doc.data().permission_type;
-
-                        trees.doc(tree).collection('leaves').doc(leaf_to_claim).update({
-                            "claimed_by": activeMember,
-                            "invitation" : null
-                        })
-                        .then(() => {
-                            console.log("Leaf claimed and invitation removed!");
-
-                            notifications.doc(notificationId).delete()
-                            .then(() => {
-                                console.log("Notification deleted!");
-                            })
-                            .catch(err => {
-                                console.log("error deleting notification: "+err.message);
-                            })  
-
-                            trees.doc(tree).update({
-                                [permission_type] : firebase.firestore.FieldValue.arrayUnion(doc.data().leaf_to_claim)
-                            }).then(() => {
-                                console.log("permission updated i guess");
-                                members.doc(activeMember).get()
-                                .then((memberDoc) => {
-                                    if (memberDoc.data().primaryTree) {
-                                        members.doc(activeMember).update({
-                                            "trees" : firebase.firestore.FieldValue.arrayUnion(tree),
-                                            "primary_tree": tree
-                                        })
-                                        .then(() => {  
-                                            console.log("Tree updated!")
-                                            notificationModal.style.display = "none";
-                                            setupViewWithActiveMember(activeMember);
-                                        })
-                                        .catch(err => {
-                                            console.log("error updating members: "+err.message)
-                                        })
-                                    } else {
-                                        members.doc(activeMember).update({
-                                            "trees" : firebase.firestore.FieldValue.arrayUnion(tree),
-                                        })
-                                        .then(() => {  
-                                            console.log("Tree updated!")
-                                            notificationModal.style.display = "none";
-                                            setupViewWithActiveMember(activeMember);
-                                        })
-                                        .catch(err => {
-                                            console.log("error updating members: "+err.message)
-                                        })
-                                    }
-                                })
-                            }).catch(err => {
-                                console.log("error updating tree"+err.message)
-                            }) 
-                            
-                        }).catch(err => {
-                            console.log("error updating leaf")
-                        }) 
-                    });
-
-                    notificationDeclineButton.addEventListener('click', (e) => {
-                        e.preventDefault();
-
-                        let notificationId = notificationModal.querySelector(".notificationId").textContent;
-                        let tree = doc.data().tree;
-                        let leaf_to_claim = doc.data().leaf_to_claim;
-
-                        trees.doc(tree).collection("leaves").doc(leaf_to_claim).update({
-                            invitation: null
-                        })
-                        .then(() => {
-                            notifications.doc(notificationId).update({
-                                status: "declined"
-                            })
-                            .then(() => {
-                                notificationModal.style.display = "none";
-                                setupViewWithActiveMember(activeMember);
-                            })
-                        });
-                    })
-                })
-                notificationModal.style.display = "block";
-            }
-        });
-
-        if (doc.data().primary_tree && doc.data().primary_tree.length > 0) {
+        if (1 === 0) {
+            // if tree id comes from url
+            renderTreeFromUrl();
+        }
+        else if (authMemberDoc.data().primary_tree && authMemberDoc.data().primary_tree.length > 0) {
             treeNameContainer.innerHTML = '';
-            primaryTree = doc.data().primary_tree;
-            primaryTreeLeaves = trees.doc(primaryTree).collection('leaves');
 
-            const state = { 'page_id': 1, 'user_id': 5 }
-            const title = 'Title?'
-            const url = "tree/"+primaryTree
-
-            // get location.pathname
-            console.log(location.pathname);
-            var pathnameArray = window.location.pathname.split('/');
-            console.log(!pathnameArray.includes("public"));
-            console.log(pathnameArray.includes("tree"));
-
-            // updateDocument(state, title, url);
-
-            activeLeaf = await primaryTreeLeaves.where("claimed_by", "==", activeMember).limit(1).get()
+            window.currentTreeId = authMemberDoc.data().primary_tree;
+            window.currentTreeLeavesRef = trees.doc(currentTreeId).collection('leaves');
+            window.authMemberTreeLeaf = await currentTreeLeavesRef.where("claimed_by", "==", authMemberDoc.id).limit(1).get()
             .then((data) => {
                 return data.docs[0].id;
             })
-                        
-            memberList.setAttribute('data-active-tree', primaryTree);
-
-            trees.doc(primaryTree).get().then(doc => {
-                treeNameContainer.innerHTML += `${doc.data().name}`;
-                setAdminsAndActiveMember(doc);
-            })
-
-            let memberTrees = doc.data().trees;
-            memberTrees.forEach(tree => {
-                treeNameContainer.innerHTML += "("+tree+")";
-            })
-
-            // get tree to see if member is admin
-            primaryTreeLeaves.get()
-            .then(allLeaves => {
-                allLeaves.forEach(leafDoc => {
-                    if (leafDoc.data().topMember === true) {
-                        initiateTree(leafDoc, allLeaves);
-                    } 
-                });
-            });
-            
-        } else {
-            let createTreeButton = `<a class="waves-effect waves-light button modal-trigger logged-in" href="#create-primary-tree-modal">Create a family tree</a>`
-            navigation.innerHTML += createTreeButton;
+                    
+            renderPrimaryTreeFromMember(currentTreeId);
         }
+
     } else {
+        updateDocument('',"Welcome!", '/');
         contentContainer.style.display = "none";
         console.log("Log in or sign up to begin");
     }
@@ -293,13 +336,14 @@ viewPrefZoomOut.addEventListener('click', (e) => {
 })
 
 
-async function setAdminsAndActiveMember(doc) {
-    admins = doc.data().admins;
-    contributors = doc.data().contributors;
-    viewers = doc.data().viewers;
-    let adminMember = admins.find(adminMember => adminMember === activeLeaf);
-    let contributorMember = contributors.find(contributorMember => contributorMember === activeLeaf);
-    let viewerMember = viewers.find(viewerMember => viewerMember === activeLeaf);
+async function setAdminsAndActiveMember() {
+    admins = currenTreeDoc.data().admins;
+    contributors = currenTreeDoc.data().contributors;
+    viewers = currenTreeDoc.data().viewers;
+
+    let adminMember = admins.find(adminMember => adminMember === authMemberTreeLeaf);
+    let contributorMember = contributors.find(contributorMember => contributorMember === authMemberTreeLeaf);
+    let viewerMember = viewers.find(viewerMember => viewerMember === authMemberTreeLeaf);
 
     if (adminMember) {
         activeMemberIsAdmin = true;
@@ -314,12 +358,12 @@ async function setAdminsAndActiveMember(doc) {
     }
 }
 
-async function initiateBranch(doc, allLeaves) {
-    let branch = await buildBranchFromChosenMember(doc, allLeaves);
+async function initiateBranch(doc) {
+    let branch = await buildBranchFromChosenMember(doc);
     memberList.appendChild(branch);
 }
 
-async function buildBranchFromChosenMember(doc, allLeaves) {
+async function buildBranchFromChosenMember(doc) {
     let branch = document.createElement("ul");
     let directMemberContainer = document.createElement("ul");
     let descendantsContainer = document.createElement("ul");
@@ -343,7 +387,7 @@ async function buildBranchFromChosenMember(doc, allLeaves) {
                 let spouseKey = spouse[0];
                 let spouseValue = spouse[1];
                 let spouseRelationship = spouseValue !== null ? "spouse "+spouse[1] : "spouse";
-                let spouseDoc = allLeaves.docs.find(spouseReq => spouseReq.id === spouseKey);
+                let spouseDoc = currentTreeLeavesDocs.find(spouseReq => spouseReq.id === spouseKey);
                 let spouseEl = await getMemberLi({
                     "leafDoc" : spouseDoc,
                     "relationship" : spouseRelationship
@@ -356,8 +400,8 @@ async function buildBranchFromChosenMember(doc, allLeaves) {
         if (children && children.length > 0) {
 
             for (const child of children) {
-                let childDoc = allLeaves.docs.find(childReq => childReq.id === child);
-                let descendantBranch = await buildBranchFromChosenMember(childDoc, allLeaves);
+                let childDoc = currentTreeLeavesDocs.find(childReq => childReq.id === child);
+                let descendantBranch = await buildBranchFromChosenMember(childDoc);
                 descendantsContainer.prepend(descendantBranch);
             }
 
@@ -387,17 +431,17 @@ const addEventListenerToProfileLeaves = () => {
     })
 }
 
-async function initiateTree(doc, allLeaves) {
-    let chosenMemberSiblings = doc.data().siblings;
-    let chosenMemberBranch = await buildBranchFromChosenMember(doc, allLeaves);
+async function initiateTree(doc) {
+    let chosenMemberSiblings = authMemberDoc.data().siblings;
+    let chosenMemberBranch = await buildBranchFromChosenMember(doc);
     
     memberList.appendChild(chosenMemberBranch);
 
     if (chosenMemberSiblings && chosenMemberSiblings.length > 0) {
 
         for (const sibling of chosenMemberSiblings) {
-            let siblingDoc = allLeaves.docs.find(siblingReq => siblingReq.id === sibling);
-            let siblingsBranch = await buildBranchFromChosenMember(siblingDoc, allLeaves);
+            let siblingDoc = currentTreeLeavesDocs.find(siblingReq => siblingReq.id === sibling);
+            let siblingsBranch = await buildBranchFromChosenMember(siblingDoc);
             memberList.appendChild(siblingsBranch);
           }
     }
@@ -421,18 +465,18 @@ async function initiateTree(doc, allLeaves) {
             let targetEl = e.target.closest(".profileLeaf");
             let targetLeafId = targetEl.getAttribute('data-id');
 
-            primaryTreeLeaves.doc(targetLeafId).get()
+            currentTreeLeavesRef.doc(targetLeafId).get()
             .then((leafDoc) => {
                 let invitationId = leafDoc.data().invitation;
                 console.log(invitationId);
                 notifications.doc(invitationId).delete()
                 .then(()=> {
-                    primaryTreeLeaves.doc(targetLeafId).update({
+                    currentTreeLeavesRef.doc(targetLeafId).update({
                         "invitation": null
                     }).catch(err => {
                         console.log("Error upating leaf invitation: "+err.message);
                     });
-                    setupViewWithActiveMember(activeMember);
+                    setupViewWithActiveMember(authMemberDoc.id);
                 })
                 .catch(err => {
                     console.log("Error deleting notification: "+err.message);
@@ -468,14 +512,14 @@ async function initiateTree(doc, allLeaves) {
         notifications.add({
             "type": "invite",
             "sent_to": invitationTo,
-            "sent_from" : activeMember,
+            "sent_from" : authMemberDoc.id,
             "leaf_to_claim": leafId,
-            "tree" : primaryTree,
+            "tree" : currentTreeId,
             "status": "pending",
             "permission_type": permission
         })
         .then((notificationReq) => {
-            primaryTreeLeaves.doc(leafId).update({
+            currentTreeLeavesRef.doc(leafId).update({
                 "invitation": notificationReq.id
             })
             .then(() => {
@@ -521,7 +565,7 @@ async function initiateTree(doc, allLeaves) {
             parents.push(targetMemberId);
     
             // create child member, update parent members
-            primaryTreeLeaves.doc(targetMemberId).get()
+            currentTreeLeavesRef.doc(targetMemberId).get()
             .then((targetMemberRef) => {
                 if (targetMemberRef.data().spouses && targetMemberRef.data().spouses.length > 0) {
                     targetMemberRef.data().spouses.forEach(spouseId => {
@@ -529,7 +573,7 @@ async function initiateTree(doc, allLeaves) {
                     })
                 }
     
-                primaryTreeLeaves.add({
+                currentTreeLeavesRef.add({
                     name: {
                         firstName: null,
                         lastName: null,
@@ -540,16 +584,16 @@ async function initiateTree(doc, allLeaves) {
                     spouses: null,
                     siblings: [],
                     topMember: false,
-                    created_by: activeMember
+                    created_by: authMemberDoc.id
                 }).then(childRef => {
-                    trees.doc(primaryTree).update({
+                    trees.doc(currentTreeId).update({
                         viewers: firebase.firestore.FieldValue.arrayUnion(childRef.id)
                     }).catch(err => {
                         console.log("Error adding new member to tree: "+err.message);
                     });
                     if (parents && parents.length > 0) {
                         parents.forEach(parentId => {    
-                            primaryTreeLeaves.doc(parentId).update({
+                            currentTreeLeavesRef.doc(parentId).update({
                                 children: firebase.firestore.FieldValue.arrayUnion(childRef.id)
                             })
                             .then(() => {
@@ -560,7 +604,7 @@ async function initiateTree(doc, allLeaves) {
                             }) 
                         })
                     };
-                    setupViewWithActiveMember(activeMember);
+                    setupViewWithActiveMember(authMemberDoc.id);
                     // renderChildToDom(childRef, targetEl);
     
                 }).catch((err) => {
@@ -580,7 +624,7 @@ async function initiateTree(doc, allLeaves) {
             let targetEl = e.target.closest(".profileLeaf");
             let targetMemberId = targetEl.getAttribute('data-id');
     
-            primaryTreeLeaves.doc(targetMemberId).get()
+            currentTreeLeavesRef.doc(targetMemberId).get()
             .then(targetMemberRefDoc => {
                 let siblings = [];
                 let parents = [];
@@ -598,7 +642,7 @@ async function initiateTree(doc, allLeaves) {
     
                 siblings.push(targetMemberId);
     
-                primaryTreeLeaves.add({
+                currentTreeLeavesRef.add({
                     name: {
                         firstName: null,
                         lastName: null,
@@ -609,30 +653,30 @@ async function initiateTree(doc, allLeaves) {
                     spouses: null,
                     children: [],
                     topMember: false,
-                    created_by: activeMember
+                    created_by: authMemberDoc.id
                 }).then(newSiblingRef => {
-                    trees.doc(primaryTree).update({
+                    trees.doc(currentTreeId).update({
                         viewers: firebase.firestore.FieldValue.arrayUnion(newSiblingRef.id)
                     }).catch(err => {
                         console.log("Error adding new member to tree: "+err.message);
                     });
                     siblings.forEach(siblingId => {
-                        primaryTreeLeaves.doc(siblingId).update({
+                        currentTreeLeavesRef.doc(siblingId).update({
                             siblings: firebase.firestore.FieldValue.arrayUnion(newSiblingRef.id)
                         })
                     });
                     if ( targetMemberRefDoc.data().parents && targetMemberRefDoc.data().parents.length > 0 ) {
-                        primaryTreeLeaves.doc(newSiblingRef.id).update({
+                        currentTreeLeavesRef.doc(newSiblingRef.id).update({
                             parents: firebase.firestore.FieldValue.arrayUnion(...parents)
                         });
     
                         parents.forEach(parentId => {
-                            primaryTreeLeaves.doc(parentId).update({
+                            currentTreeLeavesRef.doc(parentId).update({
                                 children: firebase.firestore.FieldValue.arrayUnion(newSiblingRef.id)
                             })
                         });
                     }
-                    setupViewWithActiveMember(activeMember);
+                    setupViewWithActiveMember(authMemberDoc.id);
                 })
             });
         })
@@ -648,7 +692,7 @@ async function initiateTree(doc, allLeaves) {
             let targetEl = e.target.closest(".profileLeaf");
             let targetMemberId = targetEl.getAttribute('data-id');
     
-            primaryTreeLeaves.doc(targetMemberId).get()
+            currentTreeLeavesRef.doc(targetMemberId).get()
             .then((targetMemberDoc) => {
                 // add these to new spouse
                 let children = [];
@@ -661,7 +705,7 @@ async function initiateTree(doc, allLeaves) {
                     })
                 }
 
-                primaryTreeLeaves.add({
+                currentTreeLeavesRef.add({
                     name: {
                         firstName: null,
                         lastName: null,
@@ -672,23 +716,23 @@ async function initiateTree(doc, allLeaves) {
                     children: [],
                     parents: [],
                     topMember: false,
-                    created_by: activeMember
+                    created_by: authMemberDoc.id
                 }).then(spouseRef => {
-                    trees.doc(primaryTree).update({
+                    trees.doc(currentTreeId).update({
                         viewers: firebase.firestore.FieldValue.arrayUnion(spouseRef.id)
                     }).catch(err => {
                         console.log("Error adding new member to tree: "+err.message);
                     });
                     if ( targetMemberDoc.data().children && targetMemberDoc.data().children.length > 0 ) {
                         children.forEach(childId => {
-                            primaryTreeLeaves.doc(childId).update({
+                            currentTreeLeavesRef.doc(childId).update({
                                 parents: firebase.firestore.FieldValue.arrayUnion(spouseRef.id)
                             })
                             .then(() => {
                                 console.log("Children updated to include new spouse");
                             })
                         })
-                        primaryTreeLeaves.doc(spouseRef.id).update({
+                        currentTreeLeavesRef.doc(spouseRef.id).update({
                             children: firebase.firestore.FieldValue.arrayUnion(...children)
                         });
                     }
@@ -696,11 +740,11 @@ async function initiateTree(doc, allLeaves) {
                     let spouseObj = {};
                     spouseObj[spouseRef.id] = null;
 
-                    primaryTreeLeaves.doc(targetMemberId).set({
+                    currentTreeLeavesRef.doc(targetMemberId).set({
                         spouses: spouseObj
                     }, {merge: true})
                     .then(() => {
-                        setupViewWithActiveMember(activeMember);
+                        setupViewWithActiveMember(authMemberDoc.id);
                     }).catch((err) => {
                         console.log(err.message);
                     })
@@ -718,7 +762,7 @@ async function initiateTree(doc, allLeaves) {
             let targetEl = e.target.closest(".profileLeaf");
             let targetMemberId = targetEl.getAttribute('data-id');
     
-            primaryTreeLeaves.doc(targetMemberId).get()
+            currentTreeLeavesRef.doc(targetMemberId).get()
             .then(targetMemberRefDoc => {
                 let childrenOfParent = [];
     
@@ -730,7 +774,7 @@ async function initiateTree(doc, allLeaves) {
     
                 childrenOfParent.push(targetMemberId);
     
-                primaryTreeLeaves.add({
+                currentTreeLeavesRef.add({
                     name: {
                         firstName: null,
                         lastName: null,
@@ -741,21 +785,21 @@ async function initiateTree(doc, allLeaves) {
                     spouses: [],
                     children: firebase.firestore.FieldValue.arrayUnion(...childrenOfParent),
                     topMember: true,
-                    created_by: activeMember
+                    created_by: authMemberDoc.id
                 }).then(parentRef => {
-                    trees.doc(primaryTree).update({
+                    trees.doc(currentTreeId).update({
                         viewers: firebase.firestore.FieldValue.arrayUnion(parentRef.id)
                     }).catch(err => {
                         console.log("Error adding new member to tree: "+err.message);
                     });
                     childrenOfParent.forEach(childId => {
-                        primaryTreeLeaves.doc(childId).update({
+                        currentTreeLeavesRef.doc(childId).update({
                             topMember: false,
                             parents: firebase.firestore.FieldValue.arrayUnion(parentRef.id)
                         })
                         .then(() => {
                             // renderParentToDom(parentRef);
-                            setupViewWithActiveMember(activeMember);
+                            setupViewWithActiveMember(authMemberDoc.id);
                             console.log("new parent added");
                         })
                     })
@@ -793,7 +837,7 @@ function handleProfileInfo(state, e) {
 
             profileInfo.classList.add("show");
 
-            if (!admins.includes(activeMember)) {
+            if (!admins.includes(authMemberDoc.id)) {
                 profileInfo.querySelector("form").remove();
                 profileInfo.querySelector(".profileInfo__imageUploadButton").remove();
                 profilePhotoInputUpload.remove();
@@ -841,7 +885,7 @@ const getMemberLi = async (params) => {
         // check for married, seperated, divorced
     }
 
-    if (claimedBy === activeMember) {
+    if (claimedBy === authMemberDoc.id) {
         classNames = classNames + " you"; 
     }
 
@@ -850,15 +894,15 @@ const getMemberLi = async (params) => {
     if (leafDoc) {
 
         if (activeMemberIsAdmin) {
-            console.log("Is admin");
+            // console.log("Is admin");
         }
 
         if (activeMemberIsContributor) {
-            console.log("Is contributor");
+            // console.log("Is contributor");
         }
 
         if (activeMemberIsViewer) {
-            console.log("Is viewer");
+            // console.log("Is viewer");
         }
 
         if (activeMemberIsAdmin) {
@@ -885,7 +929,7 @@ const getMemberLi = async (params) => {
                 parentMenuOption = `<div class="add_parent_option">Add parent</div>`;
             }
         } else {
-            if (createdBy === activeMember && !claimedBy) {
+            if (createdBy === authMemberDoc.id && !claimedBy) {
                 childMenuOption = `<div class="add_child_option">Add child</div>`;
                 spouseMenuOption = `<div class="add_spouse_option">Add partner</div>`;
                 siblingMenuOption = `<div class="add_sibling_option">Add sibling</div>`;
@@ -1029,7 +1073,7 @@ editMemberForm.addEventListener('submit', (e) => {
     let zipcode = editMemberForm['zipcode'].value;
     let country = editMemberForm['country'].value;
 
-    primaryTreeLeaves.doc(memberId).update({
+    currentTreeLeavesRef.doc(memberId).update({
         "name": {
             firstName: name
         },
@@ -1042,7 +1086,6 @@ editMemberForm.addEventListener('submit', (e) => {
             "zipcode": zipcode,
             "country": country
         }
-
     }).then(() => {
         let targetLeaf = memberList.querySelector('.profileLeaf[data-id="'+memberId+'"]');
         
@@ -1062,15 +1105,15 @@ async function deleteMember(e) {
     let leafEl = e.target.closest(".profileLeaf");
     let leafMemberId = leafEl.getAttribute('data-id');
 
-    let leafDoc = await primaryTreeLeaves.doc(leafMemberId).get();
+    let leafDoc = await currentTreeLeavesRef.doc(leafMemberId).get();
     let memberId = leafDoc.data().claimed_by;
 
     let memberDoc = await members.doc(memberId).get();
     let memberPrimaryTree = memberDoc.data().primary_tree;
 
-    if (primaryTree === memberPrimaryTree) {
+    if (currentTreeId === memberPrimaryTree) {
         members.doc(memberId).update({
-            "trees": firebase.firestore.FieldValue.arrayRemove(primaryTree),
+            "trees": firebase.firestore.FieldValue.arrayRemove(currentTreeId),
             "primary_tree": null
         })
         .catch((err) => {
@@ -1078,21 +1121,21 @@ async function deleteMember(e) {
         })
     } else {
         members.doc(memberId).update({
-            "trees": firebase.firestore.FieldValue.arrayRemove(primaryTree),
+            "trees": firebase.firestore.FieldValue.arrayRemove(currentTreeId),
         })
         .catch((err) => {
             console.log("member trees not updated")
         })
     }
 
-    primaryTreeLeaves.doc(leafMemberId).update({
+    currentTreeLeavesRef.doc(leafMemberId).update({
         "claimed_by": null
     })
     .catch((err) => {
         console.log("primary tree not updated")
     })
 
-    trees.doc(primaryTree).update({
+    trees.doc(currentTreeId).update({
         "admins": firebase.firestore.FieldValue.arrayRemove(leafMemberId),
         "contributors": firebase.firestore.FieldValue.arrayRemove(leafMemberId),
         "viewers": firebase.firestore.FieldValue.arrayRemove(leafMemberId)
@@ -1104,7 +1147,7 @@ async function deleteMember(e) {
         console.log("tree not updated")
     })
 
-    setupViewWithActiveMember(activeMember);
+    setupViewWithActiveMember(authMemberDoc.id);
 }
 
 function deleteLeaf(e) {
@@ -1116,9 +1159,9 @@ function deleteLeaf(e) {
     // let targetMemberId = editMemberForm["memberId"].value;
     // let targetEl = document.querySelector("[data-id='"+targetMemberId+"']");
 
-    primaryTreeLeaves.doc(targetMemberId).get().then(targetMemberDoc => { 
+    currentTreeLeavesRef.doc(targetMemberId).get().then(targetMemberDoc => { 
         console.log()
-        if ( targetMemberDoc.data().claimed_by === activeMember ) {
+        if ( targetMemberDoc.data().claimed_by === authMemberDoc.id ) {
             alert("You cannot delete yourself. I will figure out a way not to show the button in the future");
             return;
         }
@@ -1131,27 +1174,27 @@ function deleteLeaf(e) {
 
         if (targetMemberDoc.data().topMember === true) {
             if ( targetMemberDoc.data().spouses && targetMemberDoc.data().spouses.length > 0 ) {
-                primaryTreeLeaves.doc(targetMemberDoc.data().spouses[0]).update({
+                currentTreeLeavesRef.doc(targetMemberDoc.data().spouses[0]).update({
                     topMember: true
                 })
                 .then(() => {
                     console.log("spouse was made top member");
                 })
             } else if ( targetMemberDoc.data().children && targetMemberDoc.data().children.length > 0 ) {
-                primaryTreeLeaves.doc(targetMemberDoc.data().children[0]).update({
+                currentTreeLeavesRef.doc(targetMemberDoc.data().children[0]).update({
                     topMember: true
                 })
                 .then(() => {
                     console.log("child was made top member");
                 })
             } else if ( targetMemberDoc.data().siblings && targetMemberDoc.data().siblings > 0 ) {
-                primaryTreeLeaves.doc(targetMemberDoc.data().siblings[0]).update({
+                currentTreeLeavesRef.doc(targetMemberDoc.data().siblings[0]).update({
                     topMember: true
                 })         
             }       
         }
 
-        primaryTreeLeaves.doc(targetMemberId).delete()
+        currentTreeLeavesRef.doc(targetMemberId).delete()
         .then(() => {
             // M.Modal.getInstance(editMemberModal).close();
             removeMemberFromDom(targetEl);
@@ -1173,7 +1216,7 @@ function renderParentToDom(parentRef) {
     descendantsContainer.setAttribute('class', 'descendants');
     directMemberContainer.setAttribute('class', 'directMembers');
 
-    primaryTreeLeaves.doc(parentRef.id).get()
+    currentTreeLeavesRef.doc(parentRef.id).get()
     .then((parentDoc) => {
         directMemberContainer.appendChild( buildLeaf(parentDoc) );
     })
@@ -1187,7 +1230,7 @@ function renderParentToDom(parentRef) {
 }
 
 async function renderChildToDom(childRef, targetElement) {
-    // primaryTreeLeaves.doc(childRef.id).get()
+    // currentTreeLeavesRef.doc(childRef.id).get()
     // .then((childDoc) => {
     //     let existing =  targetElement.closest(".branch").querySelector(".descendants");
 
@@ -1212,7 +1255,7 @@ async function renderChildToDom(childRef, targetElement) {
     //     console.log(err.message);
     // })
 
-    let childDoc = await primaryTreeLeaves.doc(childRef.id).get();
+    let childDoc = await currentTreeLeavesRef.doc(childRef.id).get();
     let existing =  targetElement.closest(".branch").querySelector(".descendants");
 
     let descendantBranch = document.createElement('ul');
@@ -1245,7 +1288,7 @@ function warnAboutDescendants(targetMemberDoc) {
 }
 
 function setupViewWithActiveMember(activeMember) {
-    members.doc(activeMember).get()
+    members.doc(authMemberDoc.id).get()
     .then(doc => {
         setupView(doc);
     });
@@ -1255,7 +1298,7 @@ function removeFromSpouses(doc) {
     let targetMemberId = doc.id;
     if (doc.data().spouses && Object.keys(doc.data().spouses).length > 0) {
         Object.keys(doc.data().spouses).forEach(spouseId => {
-            primaryTreeLeaves.doc(spouseId).set({
+            currentTreeLeavesRef.doc(spouseId).set({
                 // remove spouse id from map
                 "spouses": {
                     [targetMemberId] : firebase.firestore.FieldValue.delete()
@@ -1271,7 +1314,7 @@ function removeFromParents(doc) {
 
     if (doc.data().parents && doc.data().parents.length > 0) {
         doc.data().parents.forEach(parentId => {
-            primaryTreeLeaves.doc(parentId).update({
+            currentTreeLeavesRef.doc(parentId).update({
                 children: firebase.firestore.FieldValue.arrayRemove(targetMemberId)
             })   
         })
@@ -1282,7 +1325,7 @@ function removeFromSiblings(doc) {
     let targetMemberId = doc.id;
     if (doc.data().siblings && doc.data().siblings.length > 0) {
         doc.data().siblings.forEach(siblingId => {
-            primaryTreeLeaves.doc(siblingId).update({
+            currentTreeLeavesRef.doc(siblingId).update({
                 siblings: firebase.firestore.FieldValue.arrayRemove(targetMemberId)
             })   
         })
@@ -1294,7 +1337,7 @@ function removeFromChildren(doc) {
 
     if (doc.data().children && doc.data().children.length > 0) {
         doc.data().children.forEach(childId => {
-            primaryTreeLeaves.doc(childId).update({
+            currentTreeLeavesRef.doc(childId).update({
                 parents: firebase.firestore.FieldValue.arrayRemove(targetMemberId)
             })   
         })
@@ -1306,10 +1349,8 @@ const createTreeForm = document.querySelector("#create-tree-form");
 createTreeForm.addEventListener('submit', (e) => {
     e.preventDefault();
 
-    let authMemberId = memberList.getAttribute('data-active-member');
-
     trees.add({
-        created_by: authMemberId,
+        created_by: authMemberDoc.id,
         admins: [],
         contributors: [],
         viewers: [],
@@ -1317,7 +1358,7 @@ createTreeForm.addEventListener('submit', (e) => {
         contributors: []
     }).then(treeRef => {
         treeRef.collection('leaves').add({
-            claimed_by: authMemberId,
+            claimed_by: authMemberDoc.id,
             name: {
                 firstName: "You (Leaf)",
                 lastName: null,
@@ -1332,51 +1373,50 @@ createTreeForm.addEventListener('submit', (e) => {
             email: '',
             birthday: 0
         }).then(leafRef => {
-            members.doc(authMemberId).get()
-            .then((doc) => {
-                if (!doc.data().primary_tree) {
-                    members.doc(authMemberId).update({
-                        primary_tree: treeRef.id,
-                        trees: firebase.firestore.FieldValue.arrayUnion(treeRef.id),
-                    })
-                    .then(() => {
-                        console.log("new member is: "+authMemberId);
-                        trees.doc(treeRef.id).collection('leaves').doc(leafRef.id).update({
-                            claimed_by: authMemberId
+            if (!authMemberDoc.data().primary_tree) {
+                console.log("user has not primary TREEEEEEEE!");
+                members.doc(authMemberDoc.id).update({
+                    primary_tree: treeRef.id,
+                    trees: firebase.firestore.FieldValue.arrayUnion(treeRef.id),
+                })
+                .then(() => {
+                    console.log("new member is: "+authMemberDoc.id);
+                    trees.doc(treeRef.id).collection('leaves').doc(leafRef.id).update({
+                        claimed_by: authMemberDoc.id
+                    }).then(() => {
+                        trees.doc(treeRef.id).update({
+                            admins : firebase.firestore.FieldValue.arrayUnion(leafRef.id)
                         }).then(() => {
-                            trees.doc(treeRef.id).update({
-                                admins : firebase.firestore.FieldValue.arrayUnion(leafRef.id)
-                            }).then(() => {
-                                createTreeForm.reset();
-                                location.reload();
-                            })
+                            createTreeForm.reset();
+                            location.reload();
                         })
                     })
-                    .catch(err => {
-                        console.log(err.message)
-                    })
-                } else {
-                    members.doc(authMemberId).update({
-                        trees: firebase.firestore.FieldValue.arrayUnion(treeRef.id),
-                    })
-                    .then(() => {
-                        console.log("new member is: "+authMemberId);
-                        trees.doc(treeRef.id).collection('leaves').doc(leafRef.id).update({
-                            claimed_by: authMemberId
+                })
+                .catch(err => {
+                    console.log(err.message)
+                })
+                
+            } else {
+                members.doc(authMemberDoc.id).update({
+                    trees: firebase.firestore.FieldValue.arrayUnion(treeRef.id),
+                })
+                .then(() => {
+                    console.log("new member is: "+authMemberDoc.id);
+                    trees.doc(treeRef.id).collection('leaves').doc(leafRef.id).update({
+                        claimed_by: authMemberDoc.id
+                    }).then(() => {
+                        trees.doc(treeRef.id).update({
+                            admins : firebase.firestore.FieldValue.arrayUnion(leafRef.id)
                         }).then(() => {
-                            trees.doc(treeRef.id).update({
-                                admins : firebase.firestore.FieldValue.arrayUnion(leafRef.id)
-                            }).then(() => {
-                                createTreeForm.reset();
-                                location.reload();
-                            })
+                            createTreeForm.reset();
+                            location.reload();
                         })
                     })
-                    .catch(err => {
-                        console.log(err.message)
-                    })
-                }
-            })
+                })
+                .catch(err => {
+                    console.log(err.message)
+                })
+            }
 
         })
         .catch(err => {
@@ -1420,7 +1460,7 @@ profilePhotoInputUpload.addEventListener('change', (e) => {
     
     storageRef.put(file)
     .then(() => {
-        primaryTreeLeaves.doc(leafId).update({
+        currentTreeLeavesRef.doc(leafId).update({
             photo: filePath
         })
         .then(() => {
