@@ -307,7 +307,7 @@ const setupView = async (treeDocFromUrl) => {
             treeNameContainer.innerHTML = '';
                     
             console.log("rendering from primary Member");
-            renderPrimaryTreeFromMember(currentTreeId);
+            renderPrimaryTreeFromMember(authMemberDoc.data().primary_tree);
         }
 
     } else {
@@ -460,7 +460,7 @@ async function buildBranchFromChosenMember(doc) {
 const addEventListenerToProfileLeaves = () => {
     let profileLeaves = document.querySelectorAll(".profileLeaf");
     profileLeaves.forEach(profileLeaf => {
-        profileLeaf.addEventListener('contextmenu', (e) => {
+        profileLeaf.addEventListener('contextmenu dblclick', (e) => {
             e.preventDefault();
             e.target.querySelector(".actions_dropdown").classList.add("show");
         });
@@ -469,18 +469,6 @@ const addEventListenerToProfileLeaves = () => {
             editMember(e);
             handleProfileInfo("show", e);
         });
-
-        // For touch devices
-        profileLeaf.addEventListener('touchstart', function() {
-            timer = setTimeout(function() {
-                e.preventDefault();
-                e.target.querySelector(".actions_dropdown").classList.add("show");
-            }, 1000)
-          }, false)
-          
-          profileLeaf.addEventListener('touchend', function() {
-            clearTimeout(timer)
-          }, false)
     })
 }
 
