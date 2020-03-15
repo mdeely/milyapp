@@ -312,6 +312,10 @@ img {
     font-weight: 900;
     font-size: 1.25rem;
     padding: 48px;
+
+    a {
+        display: block;
+    }
 }
 
 .disabled {

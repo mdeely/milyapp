@@ -218,6 +218,8 @@ img {
   font-weight: 900;
   font-size: 1.25rem;
   padding: 48px; }
+  .treeName a {
+    display: block; }
 
 .disabled {
   opacity: .5;

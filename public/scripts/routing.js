@@ -1,3 +1,17 @@
+
+checkForUrl();
+
+function checkForUrl() {
+    if (!getTreeIdFromUrl()) {
+        console.log("nothing in url so...");
+        // "trees" and "treedID" are not present in url
+    } else {
+        console.log("setting up tree from url");
+        setupView(getTreeIdFromUrl());
+        // render tree from url
+    }
+};
+
 // ROUTE has TREE
 // * User is authenticated
 //     * TREE exists:
@@ -18,7 +32,7 @@
 // handleUrl();
 
 window.addEventListener('hashchange', function(){
-    renderTreeFromUrl(getTreeIdFromUrl());
+    setupView(getTreeIdFromUrl());
         // IF TREE EXISTS in the pathname,
         /// then get that index and move to the next index to grab the tree ID
         // Render the view from that ID
@@ -30,6 +44,8 @@ window.addEventListener('hashchange', function(){
 function getTreeIdFromUrl() {
     let pathnameArray = window.location.hash.split('/');
     let treeId = false;
+
+    console.log(window.location.hash);
 
     if (pathnameArray.includes("trees")) {
         let treeIndex = pathnameArray.indexOf("trees");
