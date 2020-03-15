@@ -21,6 +21,9 @@ const viewPrefZoomOut = document.querySelector(".viewPref--zoomOut");
 
 const profileInfo = document.querySelector(".profileInfo");
 const profileInfoName = profileInfo.querySelector(".profileInfo__name");
+const profileInfoMiddleName = profileInfo.querySelector(".profileInfo__middleName");
+const profileInfoLastName = profileInfo.querySelector(".profileInfo__lastName");
+const profileInfoSurname = profileInfo.querySelector(".profileInfo__surname");
 const profileInfoImage = profileInfo.querySelector(".profileInfo__image");
 const profileInfoEmail = profileInfo.querySelector(".profileInfo__email");
 const profileInfoBirthday = profileInfo.querySelector(".profileInfo__birthday");
@@ -53,7 +56,9 @@ viewPref_tree.addEventListener('click', () => {
 })
 
 const rendertreeIdFromUrl = (treeIdFromUrl) => {
+    setTreeVariables(treeIdFromUrl);
 
+    console.log("tree id is in url");
     // TREE IN URL
     if (treeIdFromUrl) {
 
@@ -67,11 +72,13 @@ const rendertreeIdFromUrl = (treeIdFromUrl) => {
         let memberTrees = authMemberDoc.data().trees;
         memberTrees.forEach(tree => {
             // let pathName = location.pathname;
-    
-            let link = document.createElement("a");
-            link.setAttribute("href", "#/trees/"+tree);
-            link.textContent = tree;
-            treeNameContainer.appendChild(link);
+
+            trees.doc(tree).get().then((treeDoc) => {
+                let link = document.createElement("a");
+                link.setAttribute("href", "#/trees/"+tree);
+                link.textContent = treeDoc.data().name;
+                treeNameContainer.appendChild(link);
+            })
         })
 
         let pathName = location.pathname;
@@ -108,6 +115,7 @@ const rendertreeIdFromUrl = (treeIdFromUrl) => {
 }
 
 const renderPrimaryTreeFromMember = (reqTreeId) => {
+    setTreeVariables();
     trees.doc(reqTreeId).get().then(doc => {
         window.currentTreeDoc = doc;
         
@@ -138,6 +146,9 @@ const renderPrimaryTreeFromMember = (reqTreeId) => {
             } 
         });
     });
+
+    updateDocument('',"Tree!", pathName+"#/trees/"+reqTreeId);
+
     // Reset view
     // Set activeMembe
     // Notificaitons (check and present)
@@ -269,7 +280,7 @@ function checkForNotifications() {
 }
 
 // Render members and actions available 
-const setupView = async () => {
+const setupView = async (treeDocFromUrl) => {
     // check to see if parameters exist;
 
     if (window.authMemberDoc) {
@@ -282,38 +293,29 @@ const setupView = async () => {
             // if tree id comes from url
             treeNameContainer.innerHTML = '';
 
-            let treeIdFromUrl = getTreeIdFromUrl();
+            let treeDoc = await getTreeDocFromUrl();
+            let treeIdFromUrl = treeDoc.id;
             
-            window.currentTreeId = treeIdFromUrl;
-            window.currentTreeRef = trees.doc(currentTreeId);
-            window.currentTreeLeavesRef = currentTreeRef.collection('leaves');
-            window.authMemberTreeLeafDoc = await currentTreeLeavesRef.where("claimed_by", "==", authMemberDoc.id).limit(1).get()
-            .then((data) => {
-                return data.docs[0];
-            })
-            window.authMemberTreeLeafId = authMemberTreeLeafDoc.id;
-
             console.log("rendering from url");
-            rendertreeIdFromUrl(treeIdFromUrl);
+            if (treeDoc) {
+                rendertreeIdFromUrl(treeIdFromUrl);
+            } else {
+                renderPrimaryTreeFromMember(authMemberDoc.data().primary_tree);
+            }
         }
         else if (authMemberDoc.data().primary_tree && authMemberDoc.data().primary_tree.length > 0) {
             treeNameContainer.innerHTML = '';
-
-            window.currentTreeId = authMemberDoc.data().primary_tree;
-            window.currentTreeRef = trees.doc(currentTreeId);
-            window.currentTreeLeavesRef = currentTreeRef.collection('leaves');
-            window.authMemberTreeLeafDoc = await currentTreeLeavesRef.where("claimed_by", "==", authMemberDoc.id).limit(1).get()
-            .then((data) => {
-                return data.docs[0];
-            })
-            window.authMemberTreeLeafId = authMemberTreeLeafDoc.id;
                     
             console.log("rendering from primary Member");
             renderPrimaryTreeFromMember(currentTreeId);
         }
 
     } else {
-        updateDocument('',"Welcome!", '/');
+        updateDocument('',"Welcome!", "/");
+        // if (treeIdFromUrl) {
+        //     console.log("treeid: "+treeIdFromUrl);
+        //     location.search = treeIdFromUrl;
+        // }
         contentContainer.style.display = "none";
         console.log("Log in or sign up to begin");
     }
@@ -323,6 +325,23 @@ const setupView = async () => {
     //     minZoom: 0.5,
     //     pinchSpeed: .8 // zoom two times faster than the distance between fingers
     //   });
+}
+
+async function setTreeVariables(treeIdFromUrl) {
+    let treeId = authMemberDoc.data().primary_tree;
+
+    if (treeIdFromUrl) {
+        treeId = treeIdFromUrl;
+    }
+
+    window.currentTreeId = treeId;
+    window.currentTreeRef = trees.doc(currentTreeId);
+    window.currentTreeLeavesRef = currentTreeRef.collection('leaves');
+    window.authMemberTreeLeafDoc = await currentTreeLeavesRef.where("claimed_by", "==", authMemberDoc.id).limit(1).get()
+    .then((data) => {
+        return data.docs[0];
+    })
+    window.authMemberTreeLeafId = authMemberTreeLeafDoc.id;
 }
 
 const updateDocument = (state=null, title=null, url) => {
@@ -516,19 +535,18 @@ async function initiateTree(doc) {
             let targetEl = e.target.closest(".profileLeaf");
             let targetMemberId = targetEl.getAttribute('data-id');
 
-            inviteMemberForm["invite-leaf-id"].value = targetMemberId;
-
+            inviteMemberForm.querySelector("#invite-leaf-id").value = targetMemberId;
             inviteMemberForm.style.display = "block";
         })
     })
 
-    inviteMemberForm.addEventListener("submit", (e) => {  
+    inviteMemberFormButton.addEventListener("click", (e) => {  
         createInvitation();
     });
 
     function createInvitation() {
-        let leafId = inviteMemberForm["invite-leaf-id"].value;
-        let invitationTo = inviteMemberForm["invite-email"].value;
+        let leafId = inviteMemberForm.querySelector("#invite-leaf-id").value;
+        let invitationTo = inviteMemberForm.querySelector("#invite-email").value;
         let permission = inviteMemberForm.querySelector('[name="permission-type"]:checked').value;
 
         notifications.add({
@@ -597,6 +615,7 @@ async function initiateTree(doc) {
                 currentTreeLeavesRef.add({
                     name: {
                         firstName: null,
+                        middleName: null,
                         lastName: null,
                         surname: null
                     },
@@ -675,6 +694,7 @@ async function initiateTree(doc) {
                 currentTreeLeavesRef.add({
                     name: {
                         firstName: null,
+                        middleName: null,
                         lastName: null,
                         surname: null
                     },
@@ -738,6 +758,7 @@ async function initiateTree(doc) {
                 currentTreeLeavesRef.add({
                     name: {
                         firstName: null,
+                        middleName: null,
                         lastName: null,
                         surname: null
                     },
@@ -807,6 +828,7 @@ async function initiateTree(doc) {
                 currentTreeLeavesRef.add({
                     name: {
                         firstName: null,
+                        middleName: null,
                         lastName: null,
                         surname: null
                     },
@@ -845,6 +867,9 @@ function handleProfileInfo(state, e) {
             let target = e.target;
 
             let name = target.querySelector(".profileLeaf__caption").textContent;
+            let middleName = target.querySelector(".profileLeaf__middleName").textContent;
+            let lastName = target.querySelector(".profileLeaf__lastName").textContent;
+            let surname = target.querySelector(".profileLeaf__surname").textContent;
             let imageUrl = target.querySelector(".profileLeaf__image").getAttribute("src");
             let email = target.querySelector(".profileLeaf__email").textContent;
             let birthday = target.querySelector(".profileLeaf__birthday").textContent;
@@ -856,6 +881,9 @@ function handleProfileInfo(state, e) {
             let country = target.querySelector(".profileLeaf__country").textContent;
 
             profileInfoName.textContent = name; 
+            profileInfoMiddleName.textContent = middleName; 
+            profileInfoLastName.textContent = lastName; 
+            profileInfoSurname.textContent = surname; 
             profileInfoImage.setAttribute('src', imageUrl); 
             profileInfoEmail.textContent = email; 
             profileInfoBirthday.textContent = birthday; 
@@ -867,11 +895,14 @@ function handleProfileInfo(state, e) {
 
             profileInfo.classList.add("show");
 
-            if (!admins.includes(authMemberDoc.id)) {
-                profileInfo.querySelector("form").remove();
-                profileInfo.querySelector(".profileInfo__imageUploadButton").remove();
-                profilePhotoInputUpload.remove();
-            }
+            if (!isAdminLeaf) {
+                profileInfo.querySelector("form").style.display = "none";
+                profileInfo.querySelector(".profileInfo__imageUploadButton").style.display = "none";;
+                profilePhotoInputUpload.style.display = "none";
+            } else {
+                profileInfo.querySelector("form").style.display = "block";
+                profileInfo.querySelector(".profileInfo__imageUploadButton").style.display = "block";;
+                profilePhotoInputUpload.style.display = "block";            }
         }
     } else {
         profileInfo.classList.remove("show");
@@ -891,6 +922,9 @@ const getMemberLi = async (params) => {
     let leafDoc = params["leafDoc"] ? params["leafDoc"] : false;
     let leafDocData = leafDoc.data();
     let name = leafDocData.name.firstName ? leafDocData.name.firstName : "Unnamed";
+    let middleName = leafDocData.name.middleName ? leafDocData.name.middleName : "Unnamed";
+    let lastName = leafDocData.name.lastName ? leafDocData.name.lastName : "Unnamed";
+    let surname = leafDocData.name.surname ? leafDocData.name.surname : "Unnamed";
     let email = leafDocData.email ? leafDocData.email : "No email set";
     let birthday = leafDocData.birthday ? leafDocData.birthday.toDate() : "No birthday set";
     let address1 = leafDocData.address ? leafDocData.address.address1 : "No address1 set";
@@ -925,8 +959,6 @@ const getMemberLi = async (params) => {
     if (leafDoc) {
 
         if (isAdminLeaf) {
-            console.log(leafDoc.id+" :Is admin");
-
             if (leafDoc.id === authMemberTreeLeafId) {
                 treeNameContainer.innerHTML += "(admin)"
 
@@ -937,8 +969,6 @@ const getMemberLi = async (params) => {
         }
 
         if (isContributorLeaf) {
-            console.log(leafDoc.id+" :Is contributor");
-
             if (leafDoc.id === authMemberTreeLeafId) {
                 treeNameContainer.innerHTML += "(contributor)"
 
@@ -949,8 +979,6 @@ const getMemberLi = async (params) => {
         }
 
         if (isViewerLeaf) {
-            console.log(leafDoc.id+" :Is viewer");
-
             if (leafDoc.id === authMemberTreeLeafId) {
                 treeNameContainer.innerHTML += "(viewer)"
 
@@ -997,11 +1025,19 @@ const getMemberLi = async (params) => {
     if (leafDoc && claimedBy) {
         const memberDoc = await members.doc(claimedBy).get();
         name = memberDoc.data().name.firstName;
+        middleName = memberDoc.data().name.middleName;
+        lastName = memberDoc.data().name.lastName;
+        surname = memberDoc.data().name.surname;
+        email = memberDoc.data().email;
+        birthday = memberDoc.data().birthday;
         classNames = classNames + " claimed";
     }
 
     return generateProfileLeafHtml({
         "name": name,
+        "middleName": middleName,
+        "lastName": lastName,
+        "surname": surname,
         "classNames": classNames,
         "leafDoc": leafDoc,
         "parentMenuOption": parentMenuOption,
@@ -1023,6 +1059,9 @@ const getMemberLi = async (params) => {
 
 function generateProfileLeafHtml(params) {
     let name = params["name"];
+    let middleName = params["middleName"];
+    let lastName = params["lastName"];
+    let surname = params["surname"];
     let classNames = params["classNames"];
     let leafDoc = params["leafDoc"];
     let parentMenuOption = params["parentMenuOption"] ? params["parentMenuOption"] : '';
@@ -1055,6 +1094,9 @@ function generateProfileLeafHtml(params) {
             </div>
             <div class="profileLeaf__info">
                 <span class="profileLeaf__email">${email}</span>
+                <span class="profileLeaf__middleName">${middleName}</span>
+                <span class="profileLeaf__lastName">${lastName}</span>
+                <span class="profileLeaf__surname">${surname}</span>
                 <span class="profileLeaf__address1">${address1}</span>
                 <span class="profileLeaf__address2">${address2}</span>
                 <span class="profileLeaf__city">${city}</span>
@@ -1416,6 +1458,7 @@ createTreeForm.addEventListener('submit', (e) => {
             claimed_by: authMemberDoc.id,
             name: {
                 firstName: "You (Leaf)",
+                middleName: null,
                 lastName: null,
                 surname: null
             },

@@ -32,7 +32,7 @@
 // handleUrl();
 
 window.addEventListener('hashchange', function(){
-    setupView(getTreeIdFromUrl());
+    setupView(getTreeDocFromUrl());
         // IF TREE EXISTS in the pathname,
         /// then get that index and move to the next index to grab the tree ID
         // Render the view from that ID
@@ -41,7 +41,7 @@ window.addEventListener('hashchange', function(){
         // updateDocument(state, title, url);
 })
 
-function getTreeIdFromUrl() {
+async function getTreeDocFromUrl() {
     let pathnameArray = window.location.hash.split('/');
     let treeId = false;
 
@@ -50,45 +50,10 @@ function getTreeIdFromUrl() {
         treeId = pathnameArray[treeIndex + 1];
     }
 
-    return treeId;
+    console.log("getTreeIdFromUrl: "+treeId);
+    let treeDoc = await trees.doc(treeId).get();
+    return treeDoc.exists ? treeDoc : false;
 }
-
-// function handleUrl() {
-//     var pathnameArray = window.location.hash.split('/');
-
-//     // // TREE IN URL
-//     // if (pathnameArray.includes("trees")) {
-//     //     let treeIndex = pathnameArray.indexOf("trees");
-//     //     let treeId = pathnameArray[treeIndex + 1];
-
-//     //     if (treeId) {
-//     //         trees.doc(treeId).get()
-//     //         .then((doc) => {
-//     //             if (doc.exists) {
-//     //                 console.log(doc.id);
-//     //                 console.log("Tree exists!")
-//     //                 // render tree from tree params
-//     //                 // 
-//     //             } else {
-//     //                 console.log("Tree does not exist!")
-//     //             }
-//     //         })
-//     //         .catch(err => {
-//     //             console.log("Error retreiving tree: "+err.message);
-//     //         })
-//     //     } else  {
-//     //         // Check for active member
-//     //         // Does active member have a primary tree?
-//     //         // Then see if that have any "trees", pick the first one, make that the new primary.
-//     //         // If no "trees, show "you have no trees!" and maybe a button.
-//     //         console.log("Tree ID is not present");
-//     //     }
-
-//     // // NO TREE IN URL
-//     // } else {
-//     //     console.log("Not seeing 'tree' in the url. Checking for primary tree...")
-//     // }
-// }
 
 // window.onpopstate = function(event) {
 //     console.log("onopopstate fired");

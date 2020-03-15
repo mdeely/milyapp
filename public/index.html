@@ -62,8 +62,9 @@
                         </form>
     
                         <div class="profileInfo__item profileInfo__email">email</div>
-                        <div class="profileInfo__item profileInfo__middletName">Middle name</div>
+                        <div class="profileInfo__item profileInfo__middleName">Middle name</div>
                         <div class="profileInfo__item profileInfo__lastName">Last name</div>
+                        <div class="profileInfo__item profileInfo__surname">Surname</div>
                         <div class="profileInfo__item profileInfo__birthday">birthday</div>
                         <div class="profileInfo__item profileInfo__deceased">deceased?</div>
                         <div class="profileInfo__item profileInfo__address1">address 1</div>
@@ -107,7 +108,7 @@
         </div>
 
         <!-- INVITE MEMBER -->
-        <form id="invite-member-form" class="modal" style="display: none;" >
+        <div id="invite-member-form" class="modal" style="display: none;" >
             <h4>Invite member</h4>
             <input id="invite-leaf-id" name="invite-leaf-id" style="display: none" disabled/>
             <input id="invite-email" name="invite-email" placeholder="Email" type="email"/>
@@ -126,10 +127,10 @@
                 <input value="viewers" type="radio" id="invite-make-viewer" name="permission-type" checked>
                 Viewer
             </label>
-
-            <button>Invite member</button>
+            <p>When inviting someone, their information from their profile will display instead of the information you currently see.</p>
+            <button id="invite-member-form-button">Invite member</button>
             <p class="error"></p>
-        </form>
+        </div>
 
         <!-- NOTIFICATION MODAL -->
         <div id="notification-modal" class="modal" style="display: none;" >
