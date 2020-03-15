@@ -90,9 +90,9 @@ function getTreeIdFromUrl() {
 //     // }
 // }
 
-window.onpopstate = function(event) {
-    console.log("onopopstate fired");
-}
+// window.onpopstate = function(event) {
+//     console.log("onopopstate fired");
+// }
 
 
 
