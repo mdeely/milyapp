@@ -469,6 +469,18 @@ const addEventListenerToProfileLeaves = () => {
             editMember(e);
             handleProfileInfo("show", e);
         });
+
+        // For touch devices
+        profileLeaf.addEventListener('touchstart', function() {
+            timer = setTimeout(function() {
+                e.preventDefault();
+                e.target.querySelector(".actions_dropdown").classList.add("show");
+            }, 1000)
+          }, false)
+          
+          profileLeaf.addEventListener('touchend', function() {
+            clearTimeout(timer)
+          }, false)
     })
 }
 
