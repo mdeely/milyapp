@@ -58,20 +58,35 @@ viewPref_tree.addEventListener('click', () => {
     memberList.classList.remove('list');
 })
 
-const renderTreeFromUrl = () => {
-    let treeId = getTreeIdFromUrl();
+const rendertreeIdFromUrl = (treeIdFromUrl) => {
 
     // TREE IN URL
-    if (treeId) {
-        console.log(treeId);
+    if (treeIdFromUrl) {
+
+        trees.doc(treeIdFromUrl).get().then(doc => {
+            window.currenTreeDoc = doc;
+            
+            treeNameContainer.innerHTML += `${currenTreeDoc.data().name}`;
+            setAdminsAndActiveMember();
+        })
+
+        let memberTrees = authMemberDoc.data().trees;
+        memberTrees.forEach(tree => {
+            // let pathName = location.pathname;
+    
+            let link = document.createElement("a");
+            link.setAttribute("href", "#/trees/"+tree);
+            link.textContent = tree;
+            treeNameContainer.appendChild(link);
+        })
 
         let pathName = location.pathname;
 
-        trees.doc(treeId).collection('leaves').get()
+        trees.doc(treeIdFromUrl).collection('leaves').get()
         .then((allLeaves) => {
             window.currentTreeLeavesDocs = allLeaves.docs;
             if (currentTreeLeavesDocs.length > 0) {
-                updateDocument('',"Tree!", pathName+"#/trees/"+treeId);
+                // updateDocument('',"Tree!", pathName+"#/trees/"+treeId);
                 currentTreeLeavesDocs.forEach(leafDoc => {
                     if (leafDoc.data().topMember === true) {
                         initiateTree(leafDoc, currentTreeLeavesDocs);
@@ -122,7 +137,7 @@ const renderPrimaryTreeFromMember = (reqTreeId) => {
     currentTreeLeavesRef.get()
     .then(allLeaves => {
         window.currentTreeLeavesDocs = allLeaves.docs;
-        updateDocument('',"Tree!", pathName+"#/trees/"+reqTreeId);
+        // updateDocument('',"Tree!", pathName+"#/trees/"+reqTreeId);
         currentTreeLeavesDocs.forEach(leafDoc => {
             if (leafDoc.data().topMember === true) {
                 initiateTree(leafDoc, currentTreeLeavesDocs);
@@ -260,28 +275,31 @@ function checkForNotifications() {
 }
 
 // Render members and actions available 
-const setupView = async (treeId=null) => {
-    
+const setupView = async () => {
+    // check to see if parameters exist;
+
     if (window.authMemberDoc) {
         memberList.innerHTML = "";
         contentContainer.style.display = "";
 
         checkForNotifications();
         
-        if (treeId) {
+        if (location.hash) {
             // if tree id comes from url
-            console.log("rendering from url");
+            treeNameContainer.innerHTML = '';
 
-            window.currentTreeId = treeId;
+            console.log("rendering from url");
+            let treeIdFromUrl = getTreeIdFromUrl();
+            
+            window.currentTreeId = treeIdFromUrl;
             window.currentTreeLeavesRef = trees.doc(currentTreeId).collection('leaves');
-            console.log(currentTreeLeavesRef);
             window.authMemberTreeLeafDoc = await currentTreeLeavesRef.where("claimed_by", "==", authMemberDoc.id).limit(1).get()
             .then((data) => {
                 return data.docs[0];
             })
             window.authMemberTreeLeafId = authMemberTreeLeafDoc.id;
 
-            renderTreeFromUrl(treeId);
+            rendertreeIdFromUrl(treeIdFromUrl);
         }
         else if (authMemberDoc.data().primary_tree && authMemberDoc.data().primary_tree.length > 0) {
             treeNameContainer.innerHTML = '';
@@ -311,7 +329,7 @@ const setupView = async (treeId=null) => {
     //   });
 }
 
-const updateDocument = (state, title=null, url) => {
+const updateDocument = (state=null, title=null, url) => {
     history.pushState(state, title, url);
     document.title = title;
 }

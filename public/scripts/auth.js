@@ -48,6 +48,8 @@ auth.onAuthStateChanged(async user => {
             setupView();
         }
     } else {
+        history.replaceState(null, null, null);
+        window.authMemberDoc = null;
         setupAuthUi(user);
         setupView();
     }

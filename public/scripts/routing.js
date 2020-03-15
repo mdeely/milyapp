@@ -1,16 +1,16 @@
 
-checkForUrl();
+// checkForUrl();
 
-function checkForUrl() {
-    if (!getTreeIdFromUrl()) {
-        console.log("nothing in url so...");
-        // "trees" and "treedID" are not present in url
-    } else {
-        console.log("setting up tree from url");
-        setupView(getTreeIdFromUrl());
-        // render tree from url
-    }
-};
+// function checkForUrl() {
+//     if (!getTreeIdFromUrl()) {
+//         console.log("nothing in url so...");
+//         // "trees" and "treedID" are not present in url
+//     } else {
+//         console.log("setting up tree from url");
+//         setupView(getTreeIdFromUrl());
+//         // render tree from url
+//     }
+// };
 
 // ROUTE has TREE
 // * User is authenticated
@@ -44,8 +44,6 @@ window.addEventListener('hashchange', function(){
 function getTreeIdFromUrl() {
     let pathnameArray = window.location.hash.split('/');
     let treeId = false;
-
-    console.log(window.location.hash);
 
     if (pathnameArray.includes("trees")) {
         let treeIndex = pathnameArray.indexOf("trees");
