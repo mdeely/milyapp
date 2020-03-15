@@ -4,6 +4,7 @@ const loggedInLinks = document.querySelectorAll(".logged-in");
 const adminRole = document.querySelectorAll(".admin-role");
 const userEmail = document.querySelector(".userEmail");
 const createTreeModal = document.querySelector('#create-primary-tree-modal');
+const createTreeButton = document.querySelector('#create-tree-button');
 const editMemberModal = document.querySelector('#edit-member-modal');
 const notificationModal = document.querySelector('#notification-modal');
 const notificationAcceptButton = document.querySelector("#notification-accept-button");
@@ -13,6 +14,7 @@ const inviteMemberForm = document.querySelector('#invite-member-form');
 const inviteMemberFormButton = document.querySelector('#invite-member-form-button');
 const treeNameContainer = document.querySelector(".treeName");
 const profileInfoClose = document.querySelector(".profileInfo__close");
+const profileInfoEdit = document.querySelector(".profileInfo__edit");
 const contentContainer = document.querySelector(".contentContainer");
 const navigation = document.querySelector(".navigation");
 
@@ -20,6 +22,9 @@ const viewPrefZoomIn = document.querySelector(".viewPref--zoomIn");
 const viewPrefZoomOut = document.querySelector(".viewPref--zoomOut");
 
 const profileInfo = document.querySelector(".profileInfo");
+const profileInfoForm = profileInfo.querySelector("form");
+const profileInfoInformation = profileInfo.querySelector(".profileInfo__information");
+const profileInfoFooter = profileInfo.querySelector(".profileInfo__footer");
 const profileInfoName = profileInfo.querySelector(".profileInfo__name");
 const profileInfoMiddleName = profileInfo.querySelector(".profileInfo__middleName");
 const profileInfoLastName = profileInfo.querySelector(".profileInfo__lastName");
@@ -127,10 +132,12 @@ const renderPrimaryTreeFromMember = (reqTreeId) => {
     memberTrees.forEach(tree => {
         // let pathName = location.pathname;
 
-        let link = document.createElement("a");
-        link.setAttribute("href", "#/trees/"+tree);
-        link.textContent = tree;
-        treeNameContainer.appendChild(link);
+        trees.doc(tree).get().then((treeDoc) => {
+            let link = document.createElement("a");
+            link.setAttribute("href", "#/trees/"+tree);
+            link.textContent = treeDoc.data().name;
+            treeNameContainer.appendChild(link);
+        })
     })
 
     let pathName = location.pathname;
@@ -460,9 +467,19 @@ async function buildBranchFromChosenMember(doc) {
 const addEventListenerToProfileLeaves = () => {
     let profileLeaves = document.querySelectorAll(".profileLeaf");
     profileLeaves.forEach(profileLeaf => {
-        profileLeaf.addEventListener('contextmenu dblclick', (e) => {
+        profileLeaf.addEventListener('contextmenu', (e) => {
             e.preventDefault();
             e.target.querySelector(".actions_dropdown").classList.add("show");
+        });
+
+        profileLeaf.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (e.touches.length === 1) {
+                editMember(e);
+                handleProfileInfo("show", e);
+            } else if (e.touches.length > 1) {
+                e.target.querySelector(".actions_dropdown").classList.add("show");
+            }
         });
 
         profileLeaf.addEventListener('click', (e) => {
@@ -494,6 +511,12 @@ async function initiateTree(doc) {
     profileInfoClose.addEventListener("click", (e) => {
         handleProfileInfo();
     });
+
+    profileInfoEdit.addEventListener('click', (e) => {
+        profileInfoForm.style.display = "block";
+        profileInfoInformation.style.display = "none";
+        profileInfoFooter.style.display = "block";
+    })
 
     addEventListenerToProfileLeaves();
 
@@ -541,10 +564,15 @@ async function initiateTree(doc) {
     })
 
     inviteMemberFormButton.addEventListener("click", (e) => {  
-        createInvitation();
+        e.target.style.pointerEvents = "none";
+        e.target.setAttribute("disabled", "disabled");
+        e.preventDefault();
+        createInvitation(e);
     });
 
-    function createInvitation() {
+    function createInvitation(e) {
+        console.log("Clicked!!");
+
         let leafId = inviteMemberForm.querySelector("#invite-leaf-id").value;
         let invitationTo = inviteMemberForm.querySelector("#invite-email").value;
         let permission = inviteMemberForm.querySelector('[name="permission-type"]:checked').value;
@@ -564,7 +592,9 @@ async function initiateTree(doc) {
             })
             .then(() => {
                 console.log("notification made!");
+                e.target.style.pointerEvents = null;
                 inviteMemberForm.style.display = "none";
+                e.target.setAttribute("disabled", null);
             })
             .catch(err => {
                 console.log(err.message);
@@ -895,12 +925,16 @@ function handleProfileInfo(state, e) {
 
             profileInfo.classList.add("show");
 
+            profileInfoForm.style.display = "none";
+            profileInfoInformation.style.display = "block";
+            profileInfoFooter.style.display = "none";
+
             if (!isAdminLeaf) {
-                profileInfo.querySelector("form").style.display = "none";
+                profileInfoEdit.style.display = "none";
                 profileInfo.querySelector(".profileInfo__imageUploadButton").style.display = "none";;
                 profilePhotoInputUpload.style.display = "none";
             } else {
-                profileInfo.querySelector("form").style.display = "block";
+                profileInfoEdit.style.display = "block";
                 profileInfo.querySelector(".profileInfo__imageUploadButton").style.display = "block";;
                 profilePhotoInputUpload.style.display = "block";            }
         }
@@ -990,6 +1024,8 @@ const getMemberLi = async (params) => {
 
         if (isAdminLeaf) {
 
+            console.log("admin?: "+isAdminLeaf);
+
             if (has_invitation) {
                 inviteMenuOption = `<div class="cancel_invite_member_action">Cancel invitation</div>`;
             } else if (!claimedBy){
@@ -1000,6 +1036,7 @@ const getMemberLi = async (params) => {
             
             if (!claimedBy) {
                 deleteMenuOption = `<div class="delete_leaf_action" style="color:red;">Delete</div>`;
+            } else if (claimedBy === authMemberDoc.id) {
             } else {
                 deleteMenuOption = `<div class="delete_member_action" style="color:red;">Uninvite ${name}</div>`;
             }
@@ -1188,7 +1225,7 @@ editMemberForm.addEventListener('submit', (e) => {
         
         targetLeaf.querySelector(".profileLeaf__name").textContent = name;
 
-        editMemberForm.reset();
+        // editMemberForm.reset();
         // M.Modal.getInstance(editMemberModal).close();
         console.log("Updated successfully!");
     })
@@ -1207,6 +1244,9 @@ async function deleteMember(e) {
 
     let memberDoc = await members.doc(memberId).get();
     let memberPrimaryTree = memberDoc.data().primary_tree;
+
+    console.log("Current tree is: "+currentTreeId);
+    console.log("Member's primary tree is: "+memberPrimaryTree)
 
     if (currentTreeId === memberPrimaryTree) {
         members.doc(memberId).update({
@@ -1441,6 +1481,12 @@ function removeFromChildren(doc) {
     }
 }
 
+createTreeButton.addEventListener('click',(e) => {
+    e.preventDefault();
+    console.log("çreate tree clicked");
+    createTreeModal.style.display = "block";
+})
+
 const createTreeForm = document.querySelector("#create-tree-form");
 
 createTreeForm.addEventListener('submit', (e) => {
@@ -1527,10 +1573,10 @@ createTreeForm.addEventListener('submit', (e) => {
 });
 
 // setup materialize components
-document.addEventListener('DOMContentLoaded', function() {
-    var modals = document.querySelectorAll('.modal');
-    M.Modal.init(modals);
-});
+// document.addEventListener('DOMContentLoaded', function() {
+//     var modals = document.querySelectorAll('.modal');
+//     M.Modal.init(modals);
+// });
 
 // Close the dropdown menu if the user clicks outside of it
 window.addEventListener('click', (e) => {

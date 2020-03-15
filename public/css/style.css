@@ -35,6 +35,7 @@ input {
 input[type="text"],
 input[type="password"],
 input[type="email"],
+input[type="number"],
 input[type="date"] {
   width: 100%;
   border-radius: 8px;
@@ -96,16 +97,13 @@ img {
   justify-content: center;
   max-height: calc(100vh - 80px);
   transition: transform .2s ease-in-out;
-  transform-origin: center; }
+  transform-origin: center top; }
   .familyTree > .branch + .branch {
     margin-left: 160px; }
   .familyTree:empty {
     display: none; }
   .familyTree.list {
-    justify-content: left;
-    display: flex;
-    flex-direction: column;
-    transform-origin: left top; }
+    display: flex; }
     .familyTree.list .directMembers,
     .familyTree.list .descendants,
     .familyTree.list .familyTree,
@@ -128,6 +126,14 @@ img {
 .directMembers {
   justify-content: center; }
 
+.authenticationContainer {
+  max-width: 420px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex; }
+  .authenticationContainer > * {
+    padding: 16px; }
+
 .profileLeaf {
   cursor: pointer;
   z-index: 2;
@@ -142,7 +148,20 @@ img {
   position: relative;
   animation: bounceIn .5s ease-in-out;
   transform-origin: center;
-  transition: all .2s ease-in-out; }
+  transition: all .2s ease-in-out;
+  -webkit-touch-callout: none;
+  /* iOS Safari */
+  -webkit-user-select: none;
+  /* Safari */
+  -khtml-user-select: none;
+  /* Konqueror HTML */
+  -moz-user-select: none;
+  /* Old versions of Firefox */
+  -ms-user-select: none;
+  /* Internet Explorer/Edge */
+  user-select: none;
+  /* Non-prefixed version, currently
+     supported by Chrome, Opera and Firefox */ }
   .profileLeaf:hover {
     z-index: 99; }
   .profileLeaf__image {
@@ -349,11 +368,17 @@ nav {
     background-color: white;
     z-index: 2;
     top: 0; }
+  .profileInfo__footer {
+    padding: 24px;
+    position: sticky;
+    bottom: 0;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+    background-color: white; }
   .profileInfo__body {
     padding: 24px; }
   .profileInfo__name {
     font-size: 18px; }
-  .profileInfo__close {
+  .profileInfo__close, .profileInfo__edit {
     width: 44px;
     height: 44px;
     display: flex;
@@ -368,7 +393,10 @@ nav {
     font-size: 18px;
     z-index: 3;
     margin-left: auto; }
+  .profileInfo__edit {
+    right: 76px; }
   .profileInfo__image {
+    display: none;
     width: 100%;
     object-fit: cover;
     object-position: top;

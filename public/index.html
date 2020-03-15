@@ -17,7 +17,7 @@
                 <div class="navigation">
                     <div class="logged-in userEmail"></div>
                     <button class="waves-effect waves-light btn-small logged-in" style="display: none;" id="signout-button">Sign out</button>
-                    <a class="waves-effect waves-light button modal-trigger logged-in" href="#create-primary-tree-modal">Create a family tree</a>
+                    <button id="create-tree-button">Create a family tree</button>
                 </div>
                 <div class="treeName"></div>
                 <div class="familyTree" data-zoom="1"></div>
@@ -32,6 +32,7 @@
                 <div class="profileInfo__container">
                     <div class="profileInfo__header">
                         <div class="profileInfo__name">Name</div>
+                        <button class="profileInfo__edit"><i class="fa fa-pencil-alt"></i></button>
                         <button class="profileInfo__close"><i class="fa fa-times"></i></button>
                     </div>
                     <div class="profileInfo__imageContainer">
@@ -42,7 +43,7 @@
                         </button>
                     </div>
                     <div class="profileInfo__body">
-                        <form id="edit-member-form">
+                        <form id="edit-member-form" style="display: none">
                             <input type="text" id="memberId" name="memberId" placeholder="memberId" disabled>
                             <input type="text" id="name" name="name" placeholder="Name">
                             <input type="email" id="email" name="email" placeholder="Email">
@@ -58,53 +59,53 @@
                                 <input type="number" id="zipcode" name="zip" placeholder="zipcode">
                                 <input type="text" id="country" name="country" placeholder="country">
                             </fieldset>
-                            <button class="btn-small u-w_full">Save</button>
                         </form>
     
-                        <div class="profileInfo__item profileInfo__email">email</div>
-                        <div class="profileInfo__item profileInfo__middleName">Middle name</div>
-                        <div class="profileInfo__item profileInfo__lastName">Last name</div>
-                        <div class="profileInfo__item profileInfo__surname">Surname</div>
-                        <div class="profileInfo__item profileInfo__birthday">birthday</div>
-                        <div class="profileInfo__item profileInfo__deceased">deceased?</div>
-                        <div class="profileInfo__item profileInfo__address1">address 1</div>
-                        <div class="profileInfo__item profileInfo__address2">address 2</div>
-                        <div class="profileInfo__item profileInfo__city">city</div>
-                        <div class="profileInfo__item profileInfo__zipcode">zipcode</div>
-                        <div class="profileInfo__item profileInfo__country">country</div>
-                        <div class="profileInfo__item profileInfo__cellPhone">Cell phone</div>
-                        <div class="profileInfo__item profileInfo__workPhone">Work phone</div>
-                        <div class="profileInfo__item profileInfo__homePhone">Home phone</div>
-                        <div class="profileInfo__item profileInfo__notes">Notes</div>
+                        <div class="profileInfo__information">
+                            <div class="profileInfo__item profileInfo__email">email</div>
+                            <div class="profileInfo__item profileInfo__middleName">Middle name</div>
+                            <div class="profileInfo__item profileInfo__lastName">Last name</div>
+                            <div class="profileInfo__item profileInfo__surname">Surname</div>
+                            <div class="profileInfo__item profileInfo__birthday">birthday</div>
+                            <div class="profileInfo__item profileInfo__deceased">deceased?</div>
+                            <div class="profileInfo__item profileInfo__address1">address 1</div>
+                            <div class="profileInfo__item profileInfo__address2">address 2</div>
+                            <div class="profileInfo__item profileInfo__city">city</div>
+                            <div class="profileInfo__item profileInfo__zipcode">zipcode</div>
+                            <div class="profileInfo__item profileInfo__country">country</div>
+                            <div class="profileInfo__item profileInfo__cellPhone">Cell phone</div>
+                            <div class="profileInfo__item profileInfo__workPhone">Work phone</div>
+                            <div class="profileInfo__item profileInfo__homePhone">Home phone</div>
+                            <div class="profileInfo__item profileInfo__notes">Notes</div>
+                        </div>
+                    </div>
+                    <div class="profileInfo__footer">
+                        <button class="btn-small u-w_full">Save</button>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="container">
-            <div class="row">
-                <div class="col s4">
-                    <form id="signup-form" class="logged-out" style="display: none;" >
-                        <h4>Sign up</h4>
-                        <input id="signup-email" name="signup-email" placeholder="username"/>
-                        <input id="signup-password" name="signup-password" placeholder="password"/>
-                        <button class="waves-effect btn-small waves-light" id="signup-button">Sign up</button>
-                        <p class="error"></p>
-                    </form>
-                    <form id="login-form" class="logged-out" style="display: none;" >
-                        <h4>Log in</h4>
-                        <input id="login-email" name="login-email" placeholder="username"/>
-                        <input id="login-password" name="login-password" placeholder="password"/>
-                        <button class="waves-effect btn-small waves-light" id="login-button">login in</button>
-                        <p class="error"></p>
-                    </form>
-                    <form id="admin-form" class="admin-role" style="display: none;" >
-                        <h4>Make admin</h4>
-                        <input id="admin-email" name="admin-email" placeholder="username"/>
-                        <button class="waves-effect btn-small waves-light" id="admin-button">Make admin</button>
-                        <p class="error"></p>
-                    </form>
-                </div>
-            </div>
+        <div class="authenticationContainer">
+            <form id="signup-form" class="logged-out" style="display: none;" >
+                <h4>Sign up</h4>
+                <input type="email" id="signup-email" name="signup-email" placeholder="username"/>
+                <input type="password" id="signup-password" name="signup-password" placeholder="password"/>
+                <button class="waves-effect btn-small waves-light" id="signup-button">Sign up</button>
+                <p class="error"></p>
+            </form>
+            <form id="login-form" class="logged-out" style="display: none;" >
+                <h4>Log in</h4>
+                <input type="email" id="login-email" name="login-email" placeholder="username"/>
+                <input type="password" id="login-password" name="login-password" placeholder="password"/>
+                <button class="waves-effect btn-small waves-light" id="login-button">login in</button>
+                <p class="error"></p>
+            </form>
+            <form id="admin-form" class="admin-role" style="display: none;" >
+                <h4>Make admin</h4>
+                <input id="admin-email" name="admin-email" placeholder="username"/>
+                <button class="waves-effect btn-small waves-light" id="admin-button">Make admin</button>
+                <p class="error"></p>
+            </form>
         </div>
 
         <!-- INVITE MEMBER -->
@@ -148,8 +149,7 @@
                 <h4>Create a tree</h4>
                 <form id="create-tree-form">
                     <input type="text" id="treeName" name="treeName" placeholder="Tree name">
-                    <button class="btn-small">Create tree</button>
-                    <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cancel</a>
+                    <button id="create-tree-form-button">Create tree</button>
                 </form>
             </div>
         </div>

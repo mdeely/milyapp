@@ -52,6 +52,7 @@ input {
 input[type="text"],
 input[type="password"],
 input[type="email"],
+input[type="number"],
 input[type="date"] {
     width: 100%;
     border-radius: 8px;
@@ -122,7 +123,8 @@ img {
     justify-content: center;
     max-height: calc(100vh - #{$navHeight});
     transition: transform .2s ease-in-out;
-    transform-origin: center;
+    transform-origin: center top;
+
     // overflow: scroll;
 
     > .branch + .branch {
@@ -135,10 +137,7 @@ img {
 
     
     &.list {
-        justify-content: left;
         display: flex;
-        flex-direction: column;
-        transform-origin: left top;
 
         .directMembers,
         .descendants,
@@ -178,6 +177,17 @@ img {
     // Nothing
 }
 
+.authenticationContainer {
+    max-width: 420px;
+    width: 100%;
+    margin: 0 auto;
+    display: flex;
+    
+    > * {
+        padding: 16px;
+    }
+}
+
 .profileLeaf {
     cursor: pointer;
     z-index: 2;
@@ -193,6 +203,13 @@ img {
     animation: bounceIn .5s ease-in-out;
     transform-origin: center;
     transition: all .2s ease-in-out;
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Old versions of Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome, Opera and Firefox */
 
     &:hover {
         z-index: 99;
@@ -504,6 +521,14 @@ nav {
         top: 0;
     }
 
+    &__footer {
+        padding: 24px;
+        position: sticky;
+        bottom: 0;
+        box-shadow: 0 -2px 8px rgba(0,0,0,.1);
+        background-color: white;
+    }
+
     &__body {
         padding: 24px;
     }
@@ -512,7 +537,8 @@ nav {
         font-size: 18px;
     }
 
-    &__close {
+    &__close,
+    &__edit {
         width: 44px;
         height: 44px;
         display: flex;
@@ -529,7 +555,12 @@ nav {
         margin-left: auto;
     }
 
+    &__edit {
+        right: 44px + 24px + 8px;
+    }
+
     &__image {
+        display: none;
         width: 100%;
         object-fit: cover;
         object-position: top;
