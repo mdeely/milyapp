@@ -10,6 +10,7 @@ const notificationModal = document.querySelector('#notification-modal');
 const notificationAcceptButton = document.querySelector("#notification-accept-button");
 const notificationDeclineButton = document.querySelector("#notification-decline-button");
 const editMemberForm = document.querySelector('#edit-member-form');
+const editMemberFormButton = document.querySelector('#edit-member-form-button');
 const inviteMemberForm = document.querySelector('#invite-member-form');
 const inviteMemberFormButton = document.querySelector('#invite-member-form-button');
 const treeNameContainer = document.querySelector(".treeName");
@@ -70,7 +71,7 @@ const rendertreeIdFromUrl = (treeIdFromUrl) => {
         trees.doc(treeIdFromUrl).get().then(doc => {
             window.currentTreeDoc = doc;
             
-            treeNameContainer.innerHTML += `${currentTreeDoc.data().name}`;
+            // treeNameContainer.innerHTML += `${currentTreeDoc.data().name}`;
             setAdminsAndActiveMember();
         })
 
@@ -124,7 +125,7 @@ const renderPrimaryTreeFromMember = (reqTreeId) => {
     trees.doc(reqTreeId).get().then(doc => {
         window.currentTreeDoc = doc;
         
-        treeNameContainer.innerHTML += `${currentTreeDoc.data().name}`;
+        // treeNameContainer.innerHTML += `${currentTreeDoc.data().name}`;
         setAdminsAndActiveMember();
     })
 
@@ -474,11 +475,11 @@ const addEventListenerToProfileLeaves = () => {
 
         profileLeaf.addEventListener('touchstart', (e) => {
             e.preventDefault();
-            if (e.touches.length === 1) {
+            if (e.touches.length === 2) {
+                e.target.querySelector(".actions_dropdown").classList.add("show");
+            } else if (e.touches.length === 1) {
                 editMember(e);
                 handleProfileInfo("show", e);
-            } else if (e.touches.length > 1) {
-                e.target.querySelector(".actions_dropdown").classList.add("show");
             }
         });
 
@@ -1168,8 +1169,11 @@ function editMember(e) {
     let targetEl = e.target.closest(".profileLeaf");
     let targetMemberId = targetEl.getAttribute('data-id');
     let leafName = targetEl.querySelector(".profileLeaf__name").textContent;
+    let leafMiddleName = targetEl.querySelector(".profileLeaf__middleName").textContent;
+    let leafLastName = targetEl.querySelector(".profileLeaf__lastName").textContent;
+    let leafSurname = targetEl.querySelector(".profileLeaf__surname").textContent;
     let leafEmail = targetEl.querySelector(".profileLeaf__email").textContent;
-    let leafBirthday = targetEl.querySelector(".profileLeaf__birthday").textContent === 0 ? targetEl.querySelector(".profileLeaf__birthday").textContent : false ;
+    let leafBirthday = targetEl.querySelector(".profileLeaf__birthday").textContent ? targetEl.querySelector(".profileLeaf__birthday").textContent : false;
     let leafAddress1 = targetEl.querySelector(".profileLeaf__address1").textContent;
     let leafAddress2 = targetEl.querySelector(".profileLeaf__address2").textContent;
     let leafCity = targetEl.querySelector(".profileLeaf__city").textContent;
@@ -1178,27 +1182,33 @@ function editMember(e) {
 
     let leafNameText = leafName === 'Unnamed' ? '' : leafName;
     
-    if (leafBirthday) {
+    if (typeof leafBirthday !== "string") {
         leafBirthday = new Date(leafBirthday).toISOString().substring(0, 10);
         editMemberForm["birthday"].value = leafBirthday;
     }
 
     editMemberForm["memberId"].value = targetMemberId;
     editMemberForm["name"].value = leafNameText;
-    // editMemberForm["email"].value = leafEmail;
-    // editMemberForm["birthday"].value = leafBirthday;
-    // editMemberForm["address1"].value = leafAddress1;
-    // editMemberForm["address2"].value = leafAddress2;
-    // editMemberForm["city"].value = leafCity;
-    // editMemberForm["zipcode"].value = leafZipcode;
-    // editMemberForm["country"].value = leafCountry;
+    editMemberForm["middleName"].value = leafMiddleName;
+    editMemberForm["lastName"].value = leafLastName;
+    editMemberForm["surname"].value = leafSurname;
+    editMemberForm["email"].value = leafEmail;
+    editMemberForm["birthday"].value = leafBirthday;
+    editMemberForm["address1"].value = leafAddress1;
+    editMemberForm["address2"].value = leafAddress2;
+    editMemberForm["city"].value = leafCity;
+    editMemberForm["zipcode"].value = leafZipcode;
+    editMemberForm["country"].value = leafCountry;
 }
 
-editMemberForm.addEventListener('submit', (e) => {
+editMemberFormButton.addEventListener('click', (e) => {
     e.preventDefault();
 
     let memberId = editMemberForm['memberId'].value;
     let name = editMemberForm['name'].value;
+    let middleName = editMemberForm['middleName'].value;
+    let lastName = editMemberForm['lastName'].value;
+    let surname = editMemberForm['surname'].value;
     let email = editMemberForm['email'].value;
     let birthday = editMemberForm['birthday'].value ? new Date(editMemberForm['birthday'].value) : null;
     let address1 = editMemberForm['address1'].value;
@@ -1209,7 +1219,10 @@ editMemberForm.addEventListener('submit', (e) => {
 
     currentTreeLeavesRef.doc(memberId).update({
         "name": {
-            firstName: name
+            "firstName": name,
+            "lastName": lastName,
+            "middleName": middleName,
+            "surname": surname
         },
         "email": email,
         "birthday": birthday,
