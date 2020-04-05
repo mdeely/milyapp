@@ -42,6 +42,8 @@ const profileInfoCountry = profileInfo.querySelector(".profileInfo__country");
 const viewPref_list = document.querySelector(".viewPref--list");
 const viewPref_tree = document.querySelector(".viewPref--tree");
 
+window.leaves = [];
+
 // const placeholderImageUrl = "https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?cs=srgb&dl=face-facial-hair-fine-looking-guy-614810.jpg&fm=jpg";
 const placeholderImageUrl = "https://firebasestorage.googleapis.com/v0/b/mily-4c2a8.appspot.com/o/assets%2Fplaceholder%2Fprofile_placeholder.svg?alt=media&token=d3b939f1-d46b-4315-bcc6-3167d17a18ed";
 const placeholderImageUrl2 = "https://firebasestorage.googleapis.com/v0/b/mily-4c2a8.appspot.com/o/assets%2Fplaceholder%2Fprofile_placeholder_2.svg?alt=media&token=966e665f-5d88-48a9-83d9-eec397b1b823";
@@ -75,17 +77,7 @@ const rendertreeIdFromUrl = (treeIdFromUrl) => {
             setAdminsAndActiveMember();
         })
 
-        let memberTrees = authMemberDoc.data().trees;
-        memberTrees.forEach(tree => {
-            // let pathName = location.pathname;
-
-            trees.doc(tree).get().then((treeDoc) => {
-                let link = document.createElement("a");
-                link.setAttribute("href", "#/trees/"+tree);
-                link.textContent = treeDoc.data().name;
-                treeNameContainer.appendChild(link);
-            })
-        })
+        handleMemberTrees(authMemberDoc.data().trees);
 
         let pathName = location.pathname;
 
@@ -120,6 +112,18 @@ const rendertreeIdFromUrl = (treeIdFromUrl) => {
     }
 }
 
+function handleMemberTrees(docs) {
+    docs.forEach(tree => {
+        // let pathName = location.pathname;
+        trees.doc(tree).get().then((treeDoc) => {
+            let link = document.createElement("a");
+            link.setAttribute("href", "#/trees/"+tree);
+            link.textContent = treeDoc.data().name;
+            treeNameContainer.appendChild(link);
+        })
+    })
+}
+
 const renderPrimaryTreeFromMember = (reqTreeId) => {
     setTreeVariables();
     trees.doc(reqTreeId).get().then(doc => {
@@ -129,17 +133,7 @@ const renderPrimaryTreeFromMember = (reqTreeId) => {
         setAdminsAndActiveMember();
     })
 
-    let memberTrees = authMemberDoc.data().trees;
-    memberTrees.forEach(tree => {
-        // let pathName = location.pathname;
-
-        trees.doc(tree).get().then((treeDoc) => {
-            let link = document.createElement("a");
-            link.setAttribute("href", "#/trees/"+tree);
-            link.textContent = treeDoc.data().name;
-            treeNameContainer.appendChild(link);
-        })
-    })
+    handleMemberTrees(authMemberDoc.data().trees);
 
     let pathName = location.pathname;
     // get tree to see if member is admin
@@ -426,6 +420,8 @@ async function buildBranchFromChosenMember(doc) {
     directMemberContainer.insertAdjacentHTML('afterbegin', chosenMember);
 
     if (doc) {
+        window.leaves.push(doc);
+
         let spouses = doc.data().spouses ? Object.entries(doc.data().spouses) : "";
         let children = doc.data().children;
     
@@ -605,7 +601,6 @@ async function initiateTree(doc) {
             console.log(err.message);
         })
     }
-
 
     let deleteLeafActions = document.querySelectorAll(".delete_leaf_action");
     deleteLeafActions.forEach(action => {
@@ -993,35 +988,35 @@ const getMemberLi = async (params) => {
     // If invitation is pending
     if (leafDoc) {
 
-        if (isAdminLeaf) {
-            if (leafDoc.id === authMemberTreeLeafId) {
-                treeNameContainer.innerHTML += "(admin)"
+        // if (isAdminLeaf) {
+        //     if (leafDoc.id === authMemberTreeLeafId) {
+        //         treeNameContainer.innerHTML += "(admin)"
 
-                if (currentTreeId === authMemberDoc.data().primary_tree) {
-                    treeNameContainer.innerHTML += "(primary)"
-                }
-            }
-        }
+        //         if (currentTreeId === authMemberDoc.data().primary_tree) {
+        //             treeNameContainer.innerHTML += "(primary)"
+        //         }
+        //     }
+        // }
 
-        if (isContributorLeaf) {
-            if (leafDoc.id === authMemberTreeLeafId) {
-                treeNameContainer.innerHTML += "(contributor)"
+        // if (isContributorLeaf) {
+        //     if (leafDoc.id === authMemberTreeLeafId) {
+        //         treeNameContainer.innerHTML += "(contributor)"
 
-                if (currentTreeId === authMemberDoc.data().primary_tree) {
-                    treeNameContainer.innerHTML += "(primary)"
-                }
-            }
-        }
+        //         if (currentTreeId === authMemberDoc.data().primary_tree) {
+        //             treeNameContainer.innerHTML += "(primary)"
+        //         }
+        //     }
+        // }
 
-        if (isViewerLeaf) {
-            if (leafDoc.id === authMemberTreeLeafId) {
-                treeNameContainer.innerHTML += "(viewer)"
+        // if (isViewerLeaf) {
+        //     if (leafDoc.id === authMemberTreeLeafId) {
+        //         treeNameContainer.innerHTML += "(viewer)"
 
-                if (currentTreeId === authMemberDoc.data().primary_tree) {
-                    treeNameContainer.innerHTML += "(primary)"
-                }
-            }
-        }
+        //         if (currentTreeId === authMemberDoc.data().primary_tree) {
+        //             treeNameContainer.innerHTML += "(primary)"
+        //         }
+        //     }
+        // }
 
         if (isAdminLeaf) {
 
@@ -1120,6 +1115,7 @@ function generateProfileLeafHtml(params) {
     let li = `
         <figure class="profileLeaf ${classNames}" data-id="${leafDoc.id}">
             <img class="profileLeaf__image" src="${profilePhoto}"/>
+            <div class="profileLeaf__connection"></div>
             <div class="actions">
                 <div class="actions_dropdown">
                     ${parentMenuOption}
@@ -1143,7 +1139,7 @@ function generateProfileLeafHtml(params) {
                 <span class="profileLeaf__birthday">${birthday}</span>
             </div>
             <figcaption class="profileLeaf__caption profileLeaf__name">${name}</figcaption> 
-        </li>
+        </figure>
     `
     return li;
 }
@@ -1640,3 +1636,8 @@ profilePhotoInputUpload.addEventListener('change', (e) => {
           console.log(err.message);
       })
 })
+
+
+// Open/Close modals
+// Open/Close dropdowns
+// Open/Close sidemenu
