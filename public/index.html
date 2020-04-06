@@ -10,167 +10,49 @@
     <title>Mily</title>
 </head>
     <body>
-
-        <div class="contentContainer">
-            <div class="connectionLines"></div>
-            <div class="mainContent">
-                <div class="navigation">
-                    <div class="logged-in userEmail"></div>
-                    <button class="waves-effect waves-light btn-small logged-in" style="display: none;" id="signout-button">Sign out</button>
-                    <button id="create-tree-button">Create a family tree</button>
+        <nav>
+            <h1>Mily</h1>
+            <button id="sign-ub_button" class="ifAuth--hide">Log in</button>
+            <button class="ifAuth--hide">Sign up</button>
+            <button id="sign-out_button" class="ifAuth--show u-mar-l_auto white">Sign out</button>
+            <ul id="treeMenu" class="ifAuth--show u-mar-lr_auto"></ul>
+        </nav>
+        <form id="sign-in_form" class="ifAuth--hide">
+            <input type="email" name="sign-in_email" placeholder="Email">
+            <input type="password" name="sign-in_password" placeholder="Password">
+            <p class="message"></p>
+            <button>Sign in</button>
+        </form>
+        <div id="mainContent">
+            <div id="familyTree" class="ifAuth--show"></div>
+            <div id="detailsPanel" class="ifAuth--show">
+                <div class="detailsPanel__actions">
+                    <button class="iconButton" data-modal-trigger="invite-member_modal"><i class="fa fa-envelope"></i></button>
+                    <button class="iconButton details__button--close"><i class="fa fa-arrow-right"></i></button>
                 </div>
-                <div class="treeName"></div>
-                <div class="familyTree" data-zoom="1"></div>
-                <div class="viewPref">
-                    <button class="viewPref--list iconButton"><i class="fa fa-list"></i></button>
-                    <button class="viewPref--tree iconButton"><i class="fa fa-tree"></i></button>
-                    <button class="viewPref--zoomIn iconButton"><i class="fa fa-plus"></i></button>
-                    <button class="viewPref--zoomOut iconButton"><i class="fa fa-minus"></i></button>
-                </div>
-            </div>
-            <div class="profileInfo">
-                <div class="profileInfo__container">
-                    <div class="profileInfo__header">
-                        <div class="profileInfo__name">Name</div>
-                        <button class="profileInfo__edit"><i class="fa fa-pencil-alt"></i></button>
-                        <button class="profileInfo__close"><i class="fa fa-times"></i></button>
-                    </div>
-                    <div class="profileInfo__imageContainer">
-                        <img class="profileInfo__image" src="https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?cs=srgb&dl=face-facial-hair-fine-looking-guy-614810.jpg&fm=jpg" alt="">
-                        <button class="profileInfo__imageUploadButton">
-                            <input type="file" accept='image/*' name="profilePhoto" class="profileInfo__imageUpload">
-                            <i class="fa fa-upload"></i>
-                        </button>
-                    </div>
-                    <div class="profileInfo__body">
-                        <form id="edit-member-form" style="display: none">
-                            <input type="text" id="memberId" name="memberId" placeholder="memberId" disabled>
-                            <input type="text" id="name" name="name" placeholder="Name">
-                            <input type="text" id="lastName" name="lastName" placeholder="Last name">
-                            <input type="text" id="middleName" name="middleName" placeholder="Middle name">
-                            <input type="text" id="surname" name="surname" placeholder="Surname">
-                            <input type="email" id="email" name="email" placeholder="Email">
-                            <input type="date" id="birthday" name="birthday" placeholder="Birthday">
-                            <label name=deceased>
-                                Deceased
-                                <input type="checkbox" id="deceased" name="deceased" placeholder="Deceased?">
-                            </label>
-                            <fieldset>
-                                <input type="text" id="address1" name="address1" placeholder="Address 1">
-                                <input type="text" id="address2" name="address2" placeholder="Address 2">
-                                <input type="text" id="city" name="city" placeholder="City">
-                                <input type="number" id="zipcode" name="zip" placeholder="zipcode">
-                                <input type="text" id="country" name="country" placeholder="country">
-                            </fieldset>
-                        </form>
-    
-                        <div class="profileInfo__information">
-                            <div class="profileInfo__item profileInfo__email">email</div>
-                            <div class="profileInfo__item profileInfo__middleName">Middle name</div>
-                            <div class="profileInfo__item profileInfo__lastName">Last name</div>
-                            <div class="profileInfo__item profileInfo__surname">Surname</div>
-                            <div class="profileInfo__item profileInfo__birthday">birthday</div>
-                            <div class="profileInfo__item profileInfo__deceased">deceased?</div>
-                            <div class="profileInfo__item profileInfo__address1">address 1</div>
-                            <div class="profileInfo__item profileInfo__address2">address 2</div>
-                            <div class="profileInfo__item profileInfo__city">city</div>
-                            <div class="profileInfo__item profileInfo__zipcode">zipcode</div>
-                            <div class="profileInfo__item profileInfo__country">country</div>
-                            <div class="profileInfo__item profileInfo__cellPhone">Cell phone</div>
-                            <div class="profileInfo__item profileInfo__workPhone">Work phone</div>
-                            <div class="profileInfo__item profileInfo__homePhone">Home phone</div>
-                            <div class="profileInfo__item profileInfo__notes">Notes</div>
-                        </div>
-                    </div>
-                    <div class="profileInfo__footer">
-                        <button id="edit-member-form-button" class="btn-small u-w_full">Save</button>
-                    </div>
+                <div class="detailsPanel__information">
+                    
                 </div>
             </div>
         </div>
-        <div class="authenticationContainer">
-            <form id="signup-form" class="logged-out" style="display: none;" >
-                <h4>Sign up</h4>
-                <input type="email" id="signup-email" name="signup-email" placeholder="username"/>
-                <input type="password" id="signup-password" name="signup-password" placeholder="password"/>
-                <button class="waves-effect btn-small waves-light" id="signup-button">Sign up</button>
-                <p class="error"></p>
-            </form>
-            <form id="login-form" class="logged-out" style="display: none;" >
-                <h4>Log in</h4>
-                <input type="email" id="login-email" name="login-email" placeholder="username"/>
-                <input type="password" id="login-password" name="login-password" placeholder="password"/>
-                <button class="waves-effect btn-small waves-light" id="login-button">login in</button>
-                <p class="error"></p>
-            </form>
-            <form id="admin-form" class="admin-role" style="display: none;" >
-                <h4>Make admin</h4>
-                <input id="admin-email" name="admin-email" placeholder="username"/>
-                <button class="waves-effect btn-small waves-light" id="admin-button">Make admin</button>
-                <p class="error"></p>
-            </form>
-        </div>
-
-        <!-- INVITE MEMBER -->
-        <div id="invite-member-form" class="modal" style="display: none;" >
-            <h4>Invite member</h4>
-            <input id="invite-leaf-id" name="invite-leaf-id" style="display: none" disabled/>
-            <input id="invite-email" name="invite-email" placeholder="Email" type="email"/>
-
-            <label class="checkbox-group" for="invite-make-admin">
-                <input value="admins" type="radio" id="invite-make-admin" name="permission-type">
-                Admin
-            </label>
-
-            <label class="checkbox-group" for="invite-make-contributor">
-                <input value="contributors" type="radio" id="invite-make-contributor" name="permission-type">
-                Contributor
-            </label>
-
-            <label class="checkbox-group" for="invite-make-viewer">
-                <input value="viewers" type="radio" id="invite-make-viewer" name="permission-type" checked>
-                Viewer
-            </label>
-            <p>When inviting someone, their information from their profile will display instead of the information you currently see.</p>
-            <button id="invite-member-form-button">Invite member</button>
-            <p class="error"></p>
-        </div>
-
-        <!-- NOTIFICATION MODAL -->
-        <div id="notification-modal" class="modal" style="display: none;" >
-            <h4>Notifications</h4>
-            <p class="notification-message"></p>
-            <button id="notification-accept-button">Accept</button>
-            <button id="notification-decline-button">Decline</button>
-            <p class="error"></p>
-            <span class="notificationId" style="display:none"></span>
-        </div>
-
-        <!-- CREATE TREE MODAL -->
-        <div id="create-primary-tree-modal" class="modal" style="display: none">
-            <div class="modal-content">
-                <h4>Create a tree</h4>
-                <form id="create-tree-form">
-                    <input type="text" id="treeName" name="treeName" placeholder="Tree name">
-                    <button id="create-tree-form-button">Create tree</button>
-                </form>
+        <div class="modal medium" data-modal="invite-member_modal">
+            <div class="modal-dialouge">
+                <h1>Invite member</h1>
+                <button class="modal_button--close">Close</button>
+                <button class="modal_button--close iconButton white"><i class="fa fa-times"></i></button>
             </div>
         </div>
 
     <!-- The core Firebase JS SDK is always required and must be listed first -->
     <script src="https://www.gstatic.com/firebasejs/7.8.1/firebase-app.js"></script>
-
-    <!-- TODO: Add SDKs for Firebase products that you want to use
-        https://firebase.google.com/docs/web/setup#available-libraries -->
+    <!-- The core Firebase Libraries -->
     <script src="https://www.gstatic.com/firebasejs/7.8.1/firebase-analytics.js"></script>
     <script src="https://www.gstatic.com/firebasejs/7.8.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/7.8.1/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/7.8.1/firebase-functions.js"></script>
     <script src="https://www.gstatic.com/firebasejs/7.8.1/firebase-storage.js"></script>
 
-
     <script>
-
         // Your web app's Firebase configuration
         var firebaseConfig = {
             apiKey: "AIzaSyAcZZL5rDM5IueGWmkNzCXQlxlamOajn2g",
@@ -190,15 +72,15 @@
         const db = firebase.firestore();
         const functions = firebase.functions();
         const storage = firebase.storage();
-
     </script>
 
-        <!-- Compiled and minified JavaScript -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-        <script src="scripts/auth.js"></script>
-        <script src="scripts/index.js"></script>
-        <script src="scripts/routing.js"></script>
-        <script src='https://unpkg.com/panzoom@8.7.3/dist/panzoom.min.js'></script>
-        <!-- <script src="scripts/leader-line.min.js"></script> -->
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="scripts/auth.js"></script>
+    <script src="scripts/index.js"></script>
+    <script src="scripts/routing.js"></script>
+    <script src='https://unpkg.com/panzoom@8.7.3/dist/panzoom.min.js'></script>
+    <!-- <script src="scripts/leader-line.min.js"></script> -->
+
     </body>
 </html>

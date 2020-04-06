@@ -9,18 +9,14 @@
 //     })
 // })
 
-const productionEnv = location.host.includes("milyapp") ? true : false;
-
-const members = db.collection('members');
-const trees = db.collection('trees');
-const notifications = db.collection('notifications');
+const membersRef = db.collection('members');
+const treesRef = db.collection('trees');
+// const notifications = db.collection('notifications');
 
 // signup form
-const signInForm = document.querySelector("#signup-form");
-const signOutButton = document.querySelector("#signout-button");
-const logInForm = document.querySelector("#login-form");
-
-setupEnvironment();
+// const signInForm = document.querySelector("#signup-form");
+const signOutButton = document.querySelector("#sign-out_button");
+const signInForm = document.querySelector("#sign-in_form");
 
 signOutButton.addEventListener('click', (e) => {
     e.preventDefault();
@@ -28,77 +24,113 @@ signOutButton.addEventListener('click', (e) => {
     auth.signOut();
 })
 
-function setupEnvironment() {
-    if (productionEnv) {
-        signInForm.remove();
+auth.onAuthStateChanged(user => {
+    if (user) {
+        setupAuthUser(user);
+    } else {
+        authenticatedView();
+        clearAuthMemberVar();
+        familyTreeEl.innerHTML = '';
+        treeMenu.innerHTML = '';
+    }
+})
+
+const setupAuthUser = (user) => {
+    authenticatedView(true);
+    getAndSetAuthMemberVars(user);
+};
+
+const getAndSetAuthMemberVars = async (user) => {
+    let authMember = await membersRef.where('claimed_by', '==', user.uid).limit(1).get();
+    for (const doc of authMember.docs) {
+        window.authMemberDoc = await doc ? doc : null;
+        window.primaryTreeId = authMemberDoc.data().primary_tree;
+    };
+
+    getAndSetCurrenTreeVars();
+}
+
+const getAndSetCurrenTreeVars = async (reqTreeId) => {
+    let treeId = reqTreeId ? reqTreeId : window.primaryTreeId;
+
+    window.currentTreeDoc = await treesRef.doc(treeId).get();
+    
+    window.currentTreeLeaves = new Array;
+
+    let leaves = await treesRef.doc(window.currentTreeDoc.id).collection("leaves").get();
+
+    for await (const leafDoc of leaves.docs) {
+        window.currentTreeLeaves.push(leafDoc);
+    }
+
+    setupView();
+}
+
+const clearAuthMemberVar = () => {
+    delete window.authMemberDoc;
+}
+
+const authenticatedView = (isAuthenticated) => {
+    let ifAuthShow = document.querySelectorAll(".ifAuth--show");
+    let ifAuthHide = document.querySelectorAll(".ifAuth--hide");
+
+    if (isAuthenticated) {
+        for (const element of ifAuthShow) {
+            element.style.display = "block";
+        }
+        for (const element of ifAuthHide) {
+            element.style.display = "none";
+        }
+    } else {
+        for (const element of ifAuthShow) {
+            element.style.display = "none";
+        }
+        for (const element of ifAuthHide) {
+            element.style.display = "block";
+        }
     }
 }
 
-// listen for auth status changes
-auth.onAuthStateChanged(async user => {
-    if (user) {
-        user.getIdTokenResult().then(idTokenResult => {
-            user.admin = idTokenResult.claims.admin
-            setupAuthUi(user);
-        })
-        // get member where claimed by UID
-        let authMember = await members.where('claimed_by', '==', user.uid).limit(1).get();
-        for (const doc of authMember.docs) {
-            window.authMemberDoc = await doc ? doc : null;
-            setupView();
-        }
-    } else {
-        history.replaceState(null, null, null);
-        window.authMemberDoc = null;
-        setupAuthUi(user);
-        setupView();
-    }
-})
-
 signInForm.addEventListener('submit', (e) => {
     e.preventDefault();
-
-    //get user info
-    const email = signInForm['signup-email'].value;
-    const password = signInForm['signup-password'].value;
-
-    // sign up the user
-    auth.createUserWithEmailAndPassword(email, password)
-    .then(cred => {
-        // Associate a member to the user
-        members.add({
-            "claimed_by": cred.user.uid,
-            "created_by": cred.user.uid,
-            "name": {
-                firstName: email,
-                lastName: null,
-                surname: null
-            },
-            "email": email,
-            "trees": [],
-            "primary_tree": null
-        }).then(() => {
-            signInForm.reset();
-            signInForm.querySelector(".error").innerHTML = '';
-        }).catch(err => {
-            signInForm.querySelector(".error").innerHTML = err.message;
-        })
-    }).catch(err => {
-        signInForm.querySelector(".error").innerHTML = err.message;
-    })
-})
-
-logInForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    //get user info
-    const email = logInForm['login-email'].value;
-    const password = logInForm['login-password'].value;
+    const email = signInForm['sign-in_email'].value;
+    const password = signInForm['sign-in_password'].value;
 
     auth.signInWithEmailAndPassword(email, password)
     .then(cred => {
-        logInForm.reset();
-        logInForm.querySelector(".error").innerHTML = '';
+        signInForm.reset();
+        signInForm.querySelector(".message").innerHTML = '';
     }).catch(err => {
-        logInForm.querySelector(".error").innerHTML = err.message;
+        signInForm.querySelector(".message").innerHTML = err.message;
     })
 })
+
+// signInForm.addEventListener('submit', (e) => {
+//     e.preventDefault();
+
+//     const email = signInForm['signup-email'].value;
+//     const password = signInForm['signup-password'].value;
+
+//     auth.createUserWithEmailAndPassword(email, password)
+//     .then(cred => {
+//         members.add({
+//             "claimed_by": cred.user.uid,
+//             "created_by": cred.user.uid,
+//             "name": {
+//                 firstName: email,
+//                 lastName: null,
+//                 surname: null
+//             },
+//             "email": email,
+//             "trees": [],
+//             "primary_tree": null
+//         }).then(() => {
+//             signInForm.reset();
+//             signInForm.querySelector(".error").innerHTML = '';
+//         }).catch(err => {
+//             signInForm.querySelector(".error").innerHTML = err.message;
+//         })
+//     }).catch(err => {
+//         signInForm.querySelector(".error").innerHTML = err.message;
+//     })
+// })
