@@ -30,15 +30,27 @@ auth.onAuthStateChanged(user => {
     } else {
         authenticatedView();
         clearAuthMemberVar();
-        familyTreeEl.innerHTML = '';
-        treeMenu.innerHTML = '';
+        clearView();
     }
 })
+
+const clearView = () => {
+    familyTreeEl.innerHTML = '';
+    treeMenu.innerHTML = '';
+}
 
 const setupAuthUser = (user) => {
     authenticatedView(true);
     getAndSetAuthMemberVars(user);
 };
+
+const getAndSetTreeDocs = async () => {
+    window.authMemberTrees = [];
+    for await (let treeId of window.authMemberDoc.data().trees) {
+        let treeDoc = await treesRef.doc(treeId).get();
+        window.authMemberTrees.push(treeDoc);
+    }
+}
 
 const getAndSetAuthMemberVars = async (user) => {
     let authMember = await membersRef.where('claimed_by', '==', user.uid).limit(1).get();
@@ -63,6 +75,7 @@ const getAndSetCurrenTreeVars = async (reqTreeId) => {
         window.currentTreeLeaves.push(leafDoc);
     }
 
+    await getAndSetTreeDocs();
     setupView();
 }
 
@@ -76,7 +89,7 @@ const authenticatedView = (isAuthenticated) => {
 
     if (isAuthenticated) {
         for (const element of ifAuthShow) {
-            element.style.display = "block";
+            element.style.display = "";
         }
         for (const element of ifAuthHide) {
             element.style.display = "none";
@@ -86,7 +99,7 @@ const authenticatedView = (isAuthenticated) => {
             element.style.display = "none";
         }
         for (const element of ifAuthHide) {
-            element.style.display = "block";
+            element.style.display = "";
         }
     }
 }

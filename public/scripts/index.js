@@ -3,9 +3,13 @@ const treeMenuEl = document.querySelector("#treeMenu");
 const mainContent = document.querySelector("#mainContent");
 const detailsPanel = mainContent.querySelector("#detailsPanel");
 const detailsPanelInfo = detailsPanel.querySelector(".detailsPanel__information");
+const detailsPanelFirstName = detailsPanel.querySelector(".detailsPanel__firstName");
+const detailsPanelMetaData = detailsPanel.querySelector(".detailsPanel__metaData");
+const placeholderImageUrl = "https://firebasestorage.googleapis.com/v0/b/mily-4c2a8.appspot.com/o/assets%2Fplaceholder%2Fprofile_placeholder.svg?alt=media&token=d3b939f1-d46b-4315-bcc6-3167d17a18ed";
 const modalTriggers = document.querySelectorAll("[data-modal-trigger]");
 
 const setupView = () => {
+    clearView();
     populateTreeMenu();
     iterateOverCurrentLeaves();
 }
@@ -39,16 +43,31 @@ const initiateModals = () => {
 };
 
 const populateTreeMenu = () => {
-    for (const treeId of window.authMemberDoc.data().trees) {
+    for (let treeDoc of window.authMemberTrees) {
         let className = '';
-        if (treeId === window.currentTreeDoc.id) {
+        if (treeDoc.id === window.currentTreeDoc.id) {
             className = "active";
         }
-        if (treeId === window.primaryTreeId) {
+        if (treeDoc.id === window.primaryTreeId) {
             className += " primary";
         }
-        let treeEl =   `<li class="${className}">${treeId}</li`;
-        treeMenuEl.innerHTML += treeEl;
+
+        let treeEl = document.createElement("li");
+        let treeAnchor = document.createElement("a")
+
+        treeAnchor.setAttribute("data-id", treeDoc.id);
+        treeAnchor.setAttribute("class", className);
+        treeAnchor.textContent = treeDoc.data().name;
+
+        treeEl.addEventListener('click', (e) => {
+            e.preventDefault();
+
+            let reqTreeId = e.target.getAttribute("data-id");
+            getAndSetCurrenTreeVars(reqTreeId);
+        })
+
+        treeEl.appendChild(treeAnchor);
+        treeMenuEl.appendChild(treeEl);
     }
 }
 
@@ -58,6 +77,7 @@ const getLeafEl = (doc) => {
     let figcaption = document.createElement("figcaption");
 
     figcaption.textContent = leafName;
+    figcaption.setAttribute("class", "leaf_caption");
     figure.setAttribute("class", "leaf");
     figure.setAttribute("data-id", doc.id);
     figure.appendChild(figcaption);
@@ -83,8 +103,42 @@ const getLeafEl = (doc) => {
 }
 
 const populateDetailsPanel = (docId) => {
+    detailsPanelMetaData.textContent = '';
     let doc = window.currentTreeLeaves.find(doc => doc.id === docId);
-    detailsPanelInfo.textContent = doc.data().name.firstName;
+    detailsPanelFirstName.textContent = doc.data().name.firstName;
+
+    let profileImage = detailsPanel.querySelector(".detailsPanel__profileImage");
+    profileImage.setAttribute('src', placeholderImageUrl);
+
+    generateDetailElement({data: doc.data().email, name: "email", icon: "envelope"});
+    generateDetailElement({data: doc.data().birthday, name: "birthday", icon: "birthday-cake"});
+    generateDetailElement({data: doc.data().address1, name: "address", icon: "map-pin"});
+    generateDetailElement({data: doc.data().occupation, name: "occupation", icon: "briefcase"});
+}
+
+const generateDetailElement = (params) => {
+    let reqName = params["name"];
+    let reqIcon = params["icon"];
+    let data = params["data"];
+
+    if (reqName === "birthday") {
+        var options = { year: 'numeric', month: 'long', day: 'numeric' };
+
+        let date = data.toDate();
+        data = new Intl.DateTimeFormat('en-US', options).format(date);
+    }
+
+    let infoEl = `<div class="detailsPanel__item detailsPanel__${reqName} u-mar-b_4"><i class="fa fa-${reqIcon} detailsPanel__icon u-mar-r_2"></i>${data}</div>`
+
+    // let infoEl = document.createElement("div");
+    // let icon = document.createElement("i");
+
+    // infoEl.setAttribute("class", "detailsPanel__"+reqName);
+    // icon.setAttribute("class", "fa fa-"+reqIcon);
+    // infoEl.textContent += data;
+    // infoEl.appendChild(icon);
+
+    detailsPanelMetaData.innerHTML += infoEl;
 }
 
 const iterateOverCurrentLeaves = () => {
