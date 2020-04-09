@@ -12,7 +12,7 @@
     <body>
         <nav>
             <h1>Mily</h1>
-            <button id="sign-ub_button" class="ifAuth--hide">Log in</button>
+            <button id="sign-up_button" class="ifAuth--hide">Log in</button>
             <button class="ifAuth--hide">Sign up</button>
             <button id="sign-out_button" class="ifAuth--show u-mar-l_auto white">Sign out</button>
             <ul id="treeMenu" class="ifAuth--show u-mar-lr_auto"></ul>
@@ -25,7 +25,7 @@
         </form>
         <div id="mainContent">
             <div id="familyTree" class="ifAuth--show"></div>
-            <div id="detailsPanel" class="ifAuth--show">
+            <div id="detailsPanel">
                 <div class="detailsPanel__actions u-mar-b_4">
                     <button class="iconButton" data-modal-trigger="invite-member_modal"><i class="fa fa-plus"></i></button>
                     <button class="iconButton secondary details__button--close u-mar-l_auto"><i class="fa fa-arrow-right"></i></button>
@@ -34,7 +34,9 @@
                     <img class="detailsPanel__profileImage u-mar-lr_auto u-mar-b_3" src="" alt="">
                     <div class="detailsPanel__firstName u-mar-lr_auto header_m u-ta_center u-mar-b_5"></div>
                     <h6 class="u-mar-b_4">Details</h6>
-                    <div class="detailsPanel__metaData"></div>
+                    <div class="detailsPanel__metaData u-mar-b_7"></div>
+                    <h6 class="u-mar-b_4">Immediate family</h6>
+                    <div class="detailsPanel__immediateFamily"></div>
                 </div>
             </div>
         </div>

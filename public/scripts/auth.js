@@ -37,6 +37,7 @@ auth.onAuthStateChanged(user => {
 const clearView = () => {
     familyTreeEl.innerHTML = '';
     treeMenu.innerHTML = '';
+    showDetailPanels(false);
 }
 
 const setupAuthUser = (user) => {
@@ -89,7 +90,7 @@ const authenticatedView = (isAuthenticated) => {
 
     if (isAuthenticated) {
         for (const element of ifAuthShow) {
-            element.style.display = "";
+            element.style.display = "inherit";
         }
         for (const element of ifAuthHide) {
             element.style.display = "none";
@@ -99,7 +100,7 @@ const authenticatedView = (isAuthenticated) => {
             element.style.display = "none";
         }
         for (const element of ifAuthHide) {
-            element.style.display = "";
+            element.style.display = "inherit";
         }
     }
 }
