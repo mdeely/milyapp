@@ -60,7 +60,6 @@ nav {
   background-color: var(--brand);
   height: var(--navHeight);
   max-height: var(--navHeight);
-  overflow: hidden;
   position: sticky;
   top: 0;
   z-index: 999;
@@ -107,12 +106,20 @@ nav {
   bottom: 0;
   z-index: 99;
   background-color: white;
-  background-image: url("../assets/img/wavy-sm.svg");
-  background-repeat: no-repeat;
-  background-position: top;
-  background-size: contain;
-  background-size: 100%;
   box-shadow: 0 0 0 1px var(--color_border) inset; }
+  #detailsPanel:before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    background-image: url("../assets/img/wavy-sm.svg");
+    background-repeat: no-repeat;
+    background-position: top;
+    background-size: contain;
+    background-size: 100%;
+    height: 400px;
+    z-index: -1; }
 
 .detailsPanel__actions {
   display: flex; }
@@ -133,16 +140,50 @@ nav {
   background-color: lightgray;
   background-color: var(--color_yellow); }
 
-#treeMenu {
-  border: 1px solid green;
+.branch {
+  display: flex;
+  align-items: center;
+  flex-direction: column; }
+
+.descendants,
+.spouses {
+  display: flex;
+  flex-direction: row; }
+
+#treeMenu__currentTree {
+  font-size: 20px;
+  font-weight: 900;
+  padding: 16px 24px;
+  border-radius: 4px;
+  cursor: pointer; }
+  #treeMenu__currentTree:hover {
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.25); }
+  #treeMenu__currentTree:active {
+    background-color: rgba(255, 255, 255, 0.05); }
+
+#treeMenu__options {
   position: absolute;
-  left: 0;
-  right: 0;
-  max-width: 400px;
+  display: none;
+  left: 50%;
+  -webkit-transform: translateX(-50%);
+  transform: translateX(-50%);
+  width: 100%;
+  min-width: 375px;
+  background-color: white;
+  border-radius: 8px;
+  color: initial;
+  top: calc(100% + 8px);
+  box-shadow: var(--leafShadow); }
+
+#treeMenu {
+  position: absolute;
   margin: 0 auto;
   text-align: center;
   display: flex;
-  flex-direction: column; }
+  flex-direction: column;
+  left: 50%;
+  -webkit-transform: translateX(-50%);
+  transform: translateX(-50%); }
   #treeMenu .primary {
     border: 1px solid purple; }
   #treeMenu .active {
@@ -171,6 +212,8 @@ nav {
     opacity: 0;
     transform: scale(0.8);
     transition: transform 0.2s ease-in-out; }
+  .leaf:hover {
+    transform: scale(1.05); }
   .leaf:active {
     transform: scale(0.9); }
   .leaf.active:before {
@@ -298,6 +341,9 @@ button,
 
 .u-mar-l_auto {
   margin-left: auto; }
+
+.u-mar-l_2 {
+  margin-left: 16px; }
 
 .u-mar-r_2 {
   margin-right: 16px; }

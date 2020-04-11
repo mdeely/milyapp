@@ -1,5 +1,7 @@
 const familyTreeEl = document.querySelector("#familyTree");
 const treeMenuEl = document.querySelector("#treeMenu");
+const treeMenuDropdownEl = document.querySelector("#treeMenu__options");
+const treeMenuCurrentTreeEl = document.querySelector("#treeMenu__currentTree");
 const mainContent = document.querySelector("#mainContent");
 const detailsPanel = mainContent.querySelector("#detailsPanel");
 const detailsPanelInfo = detailsPanel.querySelector(".detailsPanel__information");
@@ -11,7 +13,12 @@ const modalTriggers = document.querySelectorAll("[data-modal-trigger]");
 const setupView = () => {
     clearView();
     populateTreeMenu();
-    iterateOverCurrentLeaves();
+    let topMemberDoc = window.currentTreeLeaves.find(doc => doc.data().topMember === true);
+
+    window.renderedLeafMembers = [];
+    let generatedFamilyTreeHtml = renderFamilyFromMember(topMemberDoc);
+
+    familyTreeEl.appendChild(generatedFamilyTreeHtml);
 }
 
 const showModal = (e) => {
@@ -45,30 +52,35 @@ const initiateModals = () => {
 const populateTreeMenu = () => {
     for (let treeDoc of window.authMemberTrees) {
         let className = '';
+
         if (treeDoc.id === window.currentTreeDoc.id) {
             className = "active";
+            treeMenuCurrentTreeEl.innerHTML += treeDoc.data().name;
         }
+
         if (treeDoc.id === window.primaryTreeId) {
             className += " primary";
         }
 
-        let treeEl = document.createElement("li");
-        let treeAnchor = document.createElement("a")
+        let treeAnchor = document.createElement("div");
 
         treeAnchor.setAttribute("data-id", treeDoc.id);
         treeAnchor.setAttribute("class", className);
         treeAnchor.textContent = treeDoc.data().name;
 
-        treeEl.addEventListener('click', (e) => {
+        treeAnchor.addEventListener('click', (e) => {
             e.preventDefault();
 
             let reqTreeId = e.target.getAttribute("data-id");
             getAndSetCurrenTreeVars(reqTreeId);
         })
 
-        treeEl.appendChild(treeAnchor);
-        treeMenuEl.appendChild(treeEl);
+        treeMenuDropdownEl.appendChild(treeAnchor);
     }
+
+    let caretIcon = `<i class="fa fa-caret-down u-mar-1_2"></i>`;
+
+    treeMenuCurrentTreeEl.innerHTML += caretIcon;
 }
 
 const getLeafEl = (doc) => {
@@ -119,34 +131,68 @@ const populateDetailsPanel = (docId) => {
 const generateDetailElement = (params) => {
     let reqName = params["name"];
     let reqIcon = params["icon"];
-    let data = params["data"];
+    let data = params["data"] ? params["data"] : null;
 
-    if (reqName === "birthday") {
-        var options = { year: 'numeric', month: 'long', day: 'numeric' };
+    if (data) {
+        if (reqName === "birthday" && data) {
+            var options = { year: 'numeric', month: 'long', day: 'numeric' };
+    
+            let date = data.toDate();
+            data = new Intl.DateTimeFormat('en-US', options).format(date);
+        }
 
-        let date = data.toDate();
-        data = new Intl.DateTimeFormat('en-US', options).format(date);
+        let infoEl = `<div class="detailsPanel__item detailsPanel__${reqName} u-mar-b_4"><i class="fa fa-${reqIcon} detailsPanel__icon u-mar-r_2"></i>${data}</div>`
+
+        detailsPanelMetaData.innerHTML += infoEl;
     }
-
-    let infoEl = `<div class="detailsPanel__item detailsPanel__${reqName} u-mar-b_4"><i class="fa fa-${reqIcon} detailsPanel__icon u-mar-r_2"></i>${data}</div>`
-
-    // let infoEl = document.createElement("div");
-    // let icon = document.createElement("i");
-
-    // infoEl.setAttribute("class", "detailsPanel__"+reqName);
-    // icon.setAttribute("class", "fa fa-"+reqIcon);
-    // infoEl.textContent += data;
-    // infoEl.appendChild(icon);
-
-    detailsPanelMetaData.innerHTML += infoEl;
 }
 
-const iterateOverCurrentLeaves = () => {
-    for (const leafDoc of window.currentTreeLeaves) {
-        let leafEl = getLeafEl(leafDoc);
+const createBranchEl = (el, className) => {
+    let branchEl = document.createElement(el);
+    branchEl.setAttribute("class", className);
 
-        familyTreeEl.appendChild(leafEl);
+    return branchEl;
+}
+
+const renderFamilyFromMember = (doc) => {
+    let children = doc.data().children && doc.data().children.length > 0 ? doc.data().children : null;
+    let spouses = doc.data().spouses ? Object.entries(doc.data().spouses) : null;
+    let branchEl = createBranchEl("div", "branch");
+    let leafEl = getLeafEl(doc);
+    let spousesContainer = createBranchEl("div", "spouses");
+
+    renderedLeafMembers.push(doc.id);
+    
+    spousesContainer.appendChild(leafEl);
+
+    if (children) {
+        let descendantsContainer = createBranchEl("div", "descendants");
+        for (childId of children) {
+            let childDoc = window.currentTreeLeaves.find(leafDoc => leafDoc.id === childId);
+            descendantsContainer.appendChild(renderFamilyFromMember(childDoc));
+        }
+        branchEl.appendChild(descendantsContainer);
     }
+
+    if (spouses) {
+        for (spouse of spouses) {
+            let spouseId = spouse[0];
+            let spouseStatus = spouse[1];
+            let spouseDoc = window.currentTreeLeaves.find(leafDoc => leafDoc.id === spouseId);
+            let spouseLeafEl = getLeafEl(spouseDoc);
+
+            renderedLeafMembers.push(spouseId);
+            spousesContainer.appendChild(spouseLeafEl);
+        }
+    }
+
+    console.log(spousesContainer);
+
+    branchEl.prepend(spousesContainer);
+
+    // console.log(renderedLeafMembers);
+
+    return branchEl;
 }
 
 const removeActiveLeafClass = () => {
@@ -167,6 +213,13 @@ const showDetailPanels = (show) => {
 }
 
 initiateModals();
+
+document.addEventListener('keydown', function(event) {
+    const key = event.key; // Or const {key} = event; in ES6+
+    if (key === "Escape") {
+       showDetailPanels(false);
+    }
+});
 
 for (let closeButton of document.querySelectorAll(".details__button--close")) {
     closeButton.addEventListener('click', (e) => {

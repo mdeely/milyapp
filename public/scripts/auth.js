@@ -35,8 +35,7 @@ auth.onAuthStateChanged(user => {
 })
 
 const clearView = () => {
-    familyTreeEl.innerHTML = '';
-    treeMenu.innerHTML = '';
+    treeMenuCurrentTreeEl.textContent = '';
     showDetailPanels(false);
 }
 
