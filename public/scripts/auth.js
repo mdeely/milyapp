@@ -66,6 +66,8 @@ const getAndSetCurrenTreeVars = async (reqTreeId) => {
     let treeId = reqTreeId ? reqTreeId : window.primaryTreeId;
 
     window.currentTreeDoc = await treesRef.doc(treeId).get();
+
+    window.currentTreeLeafCollectionRef = treesRef.doc(currentTreeDoc.id).collection('leaves')
     
     window.currentTreeLeaves = new Array;
 
@@ -89,17 +91,17 @@ const authenticatedView = (isAuthenticated) => {
 
     if (isAuthenticated) {
         for (const element of ifAuthShow) {
-            element.style.display = "inherit";
+            element.classList.remove("u-d_none");
         }
         for (const element of ifAuthHide) {
-            element.style.display = "none";
+            element.classList.add("u-d_none");
         }
     } else {
         for (const element of ifAuthShow) {
-            element.style.display = "none";
+            element.classList.add("u-d_none");
         }
         for (const element of ifAuthHide) {
-            element.style.display = "inherit";
+            element.classList.remove("u-d_none");
         }
     }
 }

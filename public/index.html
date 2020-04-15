@@ -10,14 +10,14 @@
     <title>Mily</title>
 </head>
     <body>
-        <nav>
-            <h1>MILY</h1>
+        <nav class="mainNav">
+            <h1 class="u-mar-b_0">MILY</h1>
             <button id="sign-up_button" class="ifAuth--hide">Log in</button>
             <button class="ifAuth--hide">Sign up</button>
             <button id="sign-out_button" class="ifAuth--show u-mar-l_auto white">Sign out</button>
             <div id="treeMenu" class="ifAuth--show u-mar-lr_auto">
-                <div id="treeMenu__currentTree"></div>
-                <div id="treeMenu__options"></div>
+                <div id="treeMenu__currentTree" data-dropdown-target="treeMenu__options"></div>
+                <ul id="treeMenu__options" class="dropdown u-p_absolute u-d_none"></div>
             </div>
         </nav>
         <form id="sign-in_form" class="ifAuth--hide">
@@ -26,30 +26,40 @@
             <p class="message"></p>
             <button>Sign in</button>
         </form>
-        <div id="mainContent">
-            <div id="familyTree" class="ifAuth--show"></div>
-            <div id="detailsPanel">
-                <div class="detailsPanel__actions u-mar-b_4">
-                    <button class="iconButton" data-modal-trigger="invite-member_modal"><i class="fa fa-plus"></i></button>
-                    <button class="iconButton secondary u-mar-l_auto"><i class="fa fa-ellipsis-h"></i></button>
+        <section id="mainContent">
+            <section id="familyTree" class="ifAuth--show"></section>
+            <aside id="detailsPanel">
+                <nav class="detailsPanel__actions u-mar-b_4">
+                    <button class="iconButton" data-dropdown-target="add-relationship-dropdown"><i class="fa fa-plus"></i></button>
+                    <!-- <button class="iconButton" data-dropdown-target="add-relationship-dropdown" data-modal-trigger="invite-member_modal"><i class="fa fa-plus"></i></button> -->
+                    <button class="iconButton secondary u-mar-l_auto" data-dropdown-target="member-options-dropdown"><i class="fa fa-ellipsis-h"></i></button>
                     <button class="iconButton secondary details__button--close u-mar-l_2"><i class="fa fa-arrow-right"></i></button>
-                </div>
-                <div class="dropdown">
-                    <button id="add-child-action">Add child</button>
-                    <button id="add-parent-action">Parent</button>
-                    <button id="add-spouse-action">Spouse</button>
-                    <button id="add-sibling-action">Sibling</button>
-                </div>
+                </nav>
+                <ul id="member-options-dropdown" class="dropdown u-d_none u-p_fixed">
+                    <li id="edit-member-action" class="dropdown__item">Edit member details</li>
+                    <li id="remove-leaf-action" class="dropdown__item u-c_danger">Remove from tree</li>
+                </ul>
+                <ul id="add-relationship-dropdown" class="dropdown u-d_none u-p_fixed">
+                    <li class="dropdown__item dropdown__label">Add relationship</li>
+                    <li id="add-parent-action" class="dropdown__item">Parent</li>
+                    <li id="add-child-action" class="dropdown__item">Child</li>
+                    <li id="add-spouse-action" class="dropdown__item">Spouse</li>
+                    <li id="add-sibling-action" class="dropdown__item">Sibling</li>
+                </ul>
                 <div class="detailsPanel__information">
-                    <img class="detailsPanel__profileImage u-mar-lr_auto u-mar-b_3" src="" alt="">
+                    <div class="detailsPanel__profileImage u-mar-lr_auto u-mar-b_3">
+                        <img src="" alt="">
+                    </div>
                     <div class="detailsPanel__firstName u-mar-lr_auto header_m u-ta_center u-mar-b_5"></div>
                     <h6 class="u-mar-b_4">Details</h6>
                     <div class="detailsPanel__metaData u-mar-b_7"></div>
                     <h6 class="u-mar-b_4">Immediate family</h6>
                     <div class="detailsPanel__immediateFamily"></div>
                 </div>
-            </div>
-        </div>
+                <form id="detailsPanel__edit" class="u-pad-b_10">
+                </form>
+            </aside>
+        </section>
         <div class="modal medium" data-modal="invite-member_modal">
             <div class="modal-dialouge">
                 <h1>Invite member</h1>
