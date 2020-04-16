@@ -18,9 +18,11 @@ $brand: #002831;
     --color_border: #D9DFE0;
     --leafSize: 96px;
     --profileImageSize: 128px;
+    --leafCaptionOffset: 12px;
     --leafSpacing: 32px;
     --leafShadow: 0px 2px 16px rgba(0, 0, 0, 0.05), 0px 1px 2px rgba(0, 0, 0, 0.07), 0px 4px 24px rgba(0, 0, 0, 0.08);
     --leafCaptionShadow: 0 0 12px rgba(0,0,0, .2);
+    --detailsPanelDecorationTopOffset : 0;
 }
 
 * {
@@ -97,11 +99,15 @@ h6 {
     }
 
     &.showDetails {
-        background-color: var(--color_background);
+        // background-color: var(--color_background);
 
         #familyTree {
             margin-right: var(--detailsWidth);
         }
+
+        // .spouseToSpouse__line {
+        //     transform: translateX( calc( var(--detailsWidth)/2 * -1 ));
+        // }
 
         #detailsPanel {
             right: 0;
@@ -116,6 +122,7 @@ h6 {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
+    position: relative;
 }
 
 #detailsPanel {
@@ -137,7 +144,7 @@ h6 {
         position: absolute;
         left: 1px;
         right: 0;
-        top: 0;
+        top: var(--detailsPanelDecorationTopOffset);
         background-image: url("../assets/img/wavy-sm.svg");
         background-repeat: no-repeat;
         background-position: top;
@@ -197,12 +204,25 @@ h6 {
 .spouses {
     display: flex;
     flex-direction: row;
+    position: relative;
+}
+
+.spouses {
+    // position: relative;
+
+    // &:before {
+    //     content: "";
+    //     position: absolute;
+    //     left: calc(var(--leafSize)/2);
+    //     right: 0;
+    //     top: calc( calc(var(--leafSize)/2) + var(--leafSpacing));
+    //     height: 1px;
+    //     background-color: var(--color_border);
+    //     width: calc( calc(var(--leafSize)*2) + var(--leafSpacing));
+    // }
 }
 
 .spouses .leaf {
-    &:last-child:not(:first-child) {
-        background-color: green;
-    }
     // &:after {
     //     content: "";
     //     position: absolute;
@@ -288,6 +308,7 @@ h6 {
 
     &:hover {
         transform: scale(1.05);
+        z-index: 1;
     }
 
     &:active {
@@ -307,7 +328,7 @@ h6 {
         position: absolute;
         padding: 8px 12px;
         border-radius: 8px;
-        bottom: -12px;
+        bottom: calc( var(--leafCaptionOffset) * -1 );
         margin: 0 auto;
         background-color: white;
         box-shadow: var(--leafShadow);
@@ -315,10 +336,52 @@ h6 {
     }
 }
 
+.parentToChild__middleBar,
+.childToParent__middleBar,
+.spouseToSpouse__line,
+.parentToChildren__downLine {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: 0 auto;
+    z-index: -1;
+    background-color: var(--color_border);
+    transition: all .2s ease-in-out;
+    transform: scale(.95);
+    height: 1px;
+    pointer-events: none;
+}
+
+.spouseToSpouse__line {
+    top: calc( var(--leafSize) / 2 + var(--leafSpacing) );
+    bottom: 0;
+    width: calc( 100% - var(--leafSize));
+}
+
+.parentToChild__middleBar {
+    top: 0;
+    width:  calc( 100% - calc( var(--leafSpacing) + var(--leafSize) ));
+}
+
+.childToParent__middleBar {
+    width: 1px;
+    height: var(--leafSpacing);
+    top: calc( var(--leafSpacing) * -1);
+}
+
+.parentToChildren__downLine {
+    width: 1px;
+    height: calc( var(--leafSize) - calc( var(--leafSpacing) / 2 ));
+    // top: calc( var(--leafSize) / 2 + var(--leafSpacing) );
+    bottom: 0;
+}
+
 @media screen and (max-width: 640px) {
     :root {
         --navHeight: 176px;
         --detailsWidth: 100%;
+        --detailsPanelDecorationTopOffset : -48px;
     }
     
     #familyTree {
@@ -421,9 +484,15 @@ button,
     font-weight: bold;
     font-size: 15px;
     transition: all .1s ease-in-out;
+    text-decoration: none;
 
     &:hover {
         transform: scale(1.05);
+    }
+
+    &:active {
+        transform: scale(1.02);
+        transition: all 0s ease-in-out;
     }
 
     &:focus {
