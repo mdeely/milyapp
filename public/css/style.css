@@ -60,13 +60,21 @@ h6 {
   max-height: var(--navHeight);
   position: sticky;
   top: 0;
-  z-index: 999;
+  z-index: 900;
   color: white;
   align-items: center;
   padding-left: 32px;
   padding-right: 32px; }
   .mainNav a {
     color: white; }
+  .mainNav__decoration {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: auto;
+    z-index: -1; }
 
 #mainContent {
   display: flex;
@@ -87,9 +95,10 @@ h6 {
   transition: margin-right 0.2s ease-in-out;
   overflow: scroll;
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   justify-content: center;
-  position: relative; }
+  position: relative;
+  top: 56px; }
 
 #detailsPanel {
   position: fixed;
@@ -158,18 +167,22 @@ h6 {
   flex-direction: row;
   position: relative; }
 
+.message:empty {
+  display: none; }
+
 #treeMenu__currentTree {
   font-size: 20px;
   font-weight: 900;
   padding: 16px 24px;
   border-radius: 4px;
   cursor: pointer;
-  transition: .1s ease-in-out; }
+  transition: all .1s ease-in-out; }
   #treeMenu__currentTree:hover {
     box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.25); }
   #treeMenu__currentTree:active {
     background-color: rgba(255, 255, 255, 0.06);
-    transform: scale(0.98); }
+    transform: scale(0.98);
+    transition: transform .05s ease-in-out; }
 
 #treeMenu__options {
   left: 50%;
@@ -222,7 +235,8 @@ h6 {
     transform: scale(1.05);
     z-index: 1; }
   .leaf:active {
-    transform: scale(0.9); }
+    transform: scale(0.95);
+    transition: all 0.05s ease-in-out; }
   .leaf.active:before {
     opacity: 1;
     transform: scale(1); }
@@ -237,6 +251,10 @@ h6 {
     background-color: white;
     box-shadow: var(--leafShadow);
     font-size: 14px; }
+    .leaf .leaf_caption:empty:before {
+      content: "No name";
+      font-style: italic;
+      opacity: .75; }
 
 .parentToChild__middleBar,
 .childToParent__middleBar,
@@ -288,7 +306,15 @@ h6 {
     bottom: calc(-100vh - var(--navHeight));
     top: unset;
     transition: bottom 0.2s ease-in-out;
-    max-height: calc(100vh - (var(--navHeight) + 40px)); }
+    max-height: calc(100vh - (var(--navHeight) + 12vh)); }
+
+  .mainNav {
+    align-items: baseline;
+    padding: 24px; }
+
+  #treeMenu {
+    width: calc(100% - 48px);
+    bottom: 24px; }
 
   #mainContent:not(.showDetails) #detailsPanel {
     right: unset; }
@@ -305,6 +331,22 @@ h6 {
     right: 0;
     top: initial;
     z-index: 999; } }
+.card {
+  --cardMaxWidth: 352px;
+  --cardPadding: 24px;
+  width: 100%;
+  max-width: var(--cardMaxWidth);
+  box-shadow: var(--leafShadow);
+  border-radius: 8px;
+  background-color: white;
+  overflow: hidden; }
+  .card__header {
+    padding: var(--cardHeaderPadding, var(--cardPadding)); }
+  .card__content {
+    padding: var(--cardContentPadding, var(--cardPadding)); }
+  .card__footer {
+    padding: var(--cardFooterPadding, var(--cardPadding)); }
+
 input[type=text],
 input[type=email],
 input[type=password],
@@ -315,7 +357,8 @@ select {
   box-shadow: 0 0 0 1px var(--color_border);
   border-radius: 8px;
   font-size: 16px;
-  border: 0px solid transparent; }
+  border: 0px solid transparent;
+  background-color: white; }
   input[type=text]:hover,
   input[type=email]:hover,
   input[type=password]:hover,
@@ -337,12 +380,18 @@ label {
   font-size: 15px; }
 
 .inputGroup {
+  --inputGroupLayout: column;
   display: flex;
-  align-items: center; }
+  flex-direction: var(--inputGroupLayout); }
+  .inputGroup__horizontal {
+    --inputGroupLayout: row;
+    align-items: center; }
+    .inputGroup__horizontal label {
+      margin-bottom: unset; }
   .inputGroup + .inputGroup {
     margin-top: 16px; }
-  .inputGroup:hover label {
-    font-weight: 900; }
+  .inputGroup label {
+    margin-bottom: 8px; }
 
 .button,
 button,
@@ -359,9 +408,11 @@ button,
   font-size: 15px;
   transition: all .1s ease-in-out;
   text-decoration: none; }
-  .button:hover,
+  .button:hover, .button:focus,
   button:hover,
-  .iconButton:hover {
+  button:focus,
+  .iconButton:hover,
+  .iconButton:focus {
     transform: scale(1.05); }
   .button:active,
   button:active,
@@ -371,8 +422,8 @@ button,
   .button:focus,
   button:focus,
   .iconButton:focus {
-    outline: 4px solid var(--color_outline);
-    border-radius: 8px; }
+    box-shadow: 0 0 0 4px var(--color_outline);
+    outline: 0px solid transparent; }
   .button.secondary,
   button.secondary,
   .iconButton.secondary {
@@ -401,10 +452,28 @@ button,
   border-radius: 50%;
   align-items: center; }
   .iconButton:focus {
-    border-radius: 50%; }
+    box-shadow: 0 0 0 4px var(--color_outline); }
   .iconButton i {
     line-height: var(--iconButtonSize);
-    pointer-events: none; }
+    pointer-events: none;
+    text-decoration: none; }
+
+.buttonGroup {
+  display: flex;
+  align-content: center; }
+  .buttonGroup > button,
+  .buttonGroup .button,
+  .buttonGroup .iconButton {
+    margin-left: 4px;
+    margin-right: 4px; }
+    .buttonGroup > button:last-child,
+    .buttonGroup .button:last-child,
+    .buttonGroup .iconButton:last-child {
+      margin-right: 0px; }
+    .buttonGroup > button:first-child,
+    .buttonGroup .button:first-child,
+    .buttonGroup .iconButton:first-child {
+      margin-left: 0px; }
 
 .modal {
   position: fixed;
@@ -427,7 +496,6 @@ button,
     top: calc(30vh - 5vh);
     max-width: 600px;
     width: 100%;
-    padding: 32px;
     border-radius: 16px;
     box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
     background-color: white; }
@@ -445,10 +513,13 @@ button,
   box-shadow: var(--leafShadow);
   border-radius: 8px;
   background-color: white;
-  padding: 8px 0; }
+  padding: 8px 0;
+  z-index: 999; }
   .dropdown__item {
     padding: 12px 20px;
-    font-weight: bold; }
+    font-weight: bold;
+    display: flex;
+    align-items: center; }
     .dropdown__item:hover {
       background-color: rgba(0, 40, 49, 0.08);
       cursor: pointer; }
@@ -458,7 +529,6 @@ button,
   .dropdown__label {
     text-transform: uppercase;
     letter-spacing: 1px;
-    pointer-events: none;
     color: rgba(0, 40, 49, 0.5);
     font-weight: bold;
     font-size: 12px; }
@@ -483,6 +553,12 @@ button,
 .u-d_flex {
   display: flex; }
 
+.u-jc_flex-end {
+  justify-content: flex-end; }
+
+.u-pad_0 {
+  padding: 0px; }
+
 .u-pad_4 {
   padding: 16px; }
 
@@ -498,6 +574,9 @@ button,
 
 .u-mar-l_2 {
   margin-left: 16px; }
+
+.u-mar-r_auto {
+  margin-right: auto; }
 
 .u-mar-r_2 {
   margin-right: 16px; }

@@ -10,21 +10,70 @@
     <title>Mily</title>
 </head>
     <body>
-        <nav class="mainNav">
+        <nav class="mainNav u-mar-b_6">
             <h1 class="u-mar-b_0">MILY</h1>
-            <button id="sign-up_button" class="ifAuth--hide">Log in</button>
-            <button class="ifAuth--hide">Sign up</button>
+            <div class="buttonGroup u-mar-l_auto">
+                <button id="sign-up_button" class="ifAuth--hide">Log in</button>
+                <button class="ifAuth--hide">Sign up</button>
+            </div>
             <button id="sign-out_button" class="ifAuth--show u-mar-l_auto white">Sign out</button>
             <div id="treeMenu" class="ifAuth--show u-mar-lr_auto">
                 <div id="treeMenu__currentTree" data-dropdown-target="treeMenu__options"></div>
                 <ul id="treeMenu__options" class="dropdown u-p_absolute u-d_none"></div>
             </div>
+            <img src="/assets/img/wavy-lg-dark.svg" alt="decoration" class="mainNav__decoration"/>
         </nav>
-        <form id="sign-in_form" class="ifAuth--hide">
-            <input type="email" name="sign-in_email" placeholder="Email">
-            <input type="password" name="sign-in_password" placeholder="Password">
-            <p class="message"></p>
-            <button>Sign in</button>
+        <form id="sign-in_form" class="ifAuth--hide card u-mar-lr_auto">
+            <div class="card__header u-pad_0">
+                <img src="/assets/img/wavy-sm--yellow.svg" alt="decoration">
+            </div>
+            <div class="card__content">
+                <div class="inputGroup">
+                    <label for="sign_in_email">Email</label>
+                    <input type="email" name="sign-in_email" placeholder="Email">
+                </div>
+                <div class="inputGroup">
+                    <label for="password">Password</label>
+                    <input type="password" name="sign-in_password" placeholder="Password">
+                    <p class="message"></p>
+                </div>
+            </div>
+            <div class="card__footer">
+                <button class="u-w_full">Log in</button>
+            </div>
+        </form>
+        <form id="sign-up_form" class="ifAuth--hide card u-mar-lr_auto">
+            <div class="card__header u-pad_0">
+                <img src="/assets/img/wavy-sm--yellow.svg" alt="decoration">
+            </div>
+            <div class="card__content">
+                <div class="inputGroup">
+                    <label for="sign_up_email">Email</label>
+                    <input type="email" name="sign-up_email" placeholder="Email">
+                </div>
+                <div class="inputGroup">
+                    <label for="sign-up_password">Password</label>
+                    <input type="password" name="sign-up_password" placeholder="Password">
+                    <p class="message"></p>
+                </div>
+            </div>
+            <div class="card__footer">
+                <button class="u-w_full">Sign up</button>
+            </div>
+        </form>
+        <form id="create-tree_form" class="card u-mar-lr_auto u-d_none">
+            <div class="card__header">
+                <h2 class="u-mar-b_0">Create your first family tree!</h2>
+            </div>
+            <div class="card__content">
+                <div class="inputGroup">
+                    <label for="create-tree_name">Name your family tree</label>
+                    <input type="text" name="create-tree_name">
+                </div>
+            </div>
+            <div class="card__footer">
+                <button class="u-w_full">Create tree</button>
+            </div>
         </form>
         <section id="mainContent">
             <section id="familyTree" class="ifAuth--show"></section>
@@ -60,12 +109,49 @@
                 </form>
             </aside>
         </section>
-        <div class="modal medium" data-modal="invite-member_modal">
-            <div class="modal-dialouge">
-                <h1>Invite member</h1>
-                <button class="modal_button--close">Close</button>
-                <button class="modal_button--close iconButton white"><i class="fa fa-times"></i></button>
-            </div>
+        <div class="modal medium" data-modal="edit-tree_modal">
+            <form id="edit-tree_form" class="card modal-dialouge">
+                <div class="card__header">
+                    <h1 class="u-mar-b_0">Edit family</h1>
+                </div>
+                <div class="card__content">
+                    <div class="inputGroup">
+                        <label for="edit-tree_name">Family name</label>
+                        <input type="text" name="edit-tree_name">
+                        <input type="text" name="edit-tree_id" class="u-d_none">
+
+                    </div>
+                </div>
+                <div class="card__footer">
+                    <div class="buttonGroup u-jc_flex-end">
+                        <a href="#" id="delete-tree" class="modal_button--close button danger">Delete</a>
+                        <a href="#" class="modal_button--close button secondary">Cancel</a>
+                        <button type="submit">Save changes</button>
+                    </div>
+                </div>
+                <a href="#" class="modal_button--close iconButton white"><i class="fa fa-times"></i></a>
+            </form>
+        </div>
+
+        <div class="modal medium" data-modal="create-tree_modal">
+            <form id="create-tree_form_modal" class="card modal-dialouge">
+                <div class="card__header">
+                    <h1 class="u-mar-b_0">Create family</h1>
+                </div>
+                <div class="card__content">
+                    <div class="inputGroup">
+                        <label for="create-tree_name">Family name</label>
+                        <input type="text" name="create-tree_name">
+                    </div>
+                </div>
+                <div class="card__footer">
+                    <div class="buttonGroup u-jc_flex-end">
+                        <a href="#" class="modal_button--close button secondary">Cancel</a>
+                        <button type="submit">Create tree</button>
+                    </div>
+                </div>
+                <a href="#" class="modal_button--close iconButton white"><i class="fa fa-times"></i></a>
+            </form>
         </div>
 
     <!-- The core Firebase JS SDK is always required and must be listed first -->

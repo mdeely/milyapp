@@ -14,7 +14,7 @@ const treesRef = db.collection('trees');
 // const notifications = db.collection('notifications');
 
 // signup form
-// const signInForm = document.querySelector("#signup-form");
+const signUpForm = document.querySelector("#sign-up_form");
 const signOutButton = document.querySelector("#sign-out_button");
 const signInForm = document.querySelector("#sign-in_form");
 
@@ -31,6 +31,9 @@ auth.onAuthStateChanged(user => {
         authenticatedView();
         clearAuthMemberVar();
         clearView();
+        familyTreeEl.innerHTML = '';
+        setTreeHash();
+        initiateSetupPage(false);
     }
 })
 
@@ -48,7 +51,9 @@ const getAndSetTreeDocs = async () => {
     window.authMemberTrees = [];
     for await (let treeId of window.authMemberDoc.data().trees) {
         let treeDoc = await treesRef.doc(treeId).get();
-        window.authMemberTrees.push(treeDoc);
+        if (treeDoc.exists) {
+            window.authMemberTrees.push(treeDoc);
+        }
     }
 }
 
@@ -56,19 +61,29 @@ const getAndSetAuthMemberVars = async (user) => {
     let authMember = await membersRef.where('claimed_by', '==', user.uid).limit(1).get();
     for (const doc of authMember.docs) {
         window.authMemberDoc = await doc ? doc : null;
-        window.primaryTreeId = authMemberDoc.data().primary_tree;
+        window.primaryTreeId = authMemberDoc.data().primary_tree ? authMemberDoc.data().primary_tree : null;
     };
 
-    getAndSetCurrenTreeVars();
+    let reqTreeIdFromUrl = getTreeIdFromUrl();
+
+    if (reqTreeIdFromUrl) {
+        getAndSetCurrenTreeVars(reqTreeIdFromUrl);
+    } else {
+        if (!primaryTreeId) {
+            initiateSetupPage();
+            // Render "Create your first tree!" page
+        } else {
+            getAndSetCurrenTreeVars();
+        }
+    }
 }
 
 const getAndSetCurrenTreeVars = async (reqTreeId) => {
     let treeId = reqTreeId ? reqTreeId : window.primaryTreeId;
 
     window.currentTreeDoc = await treesRef.doc(treeId).get();
+    window.currentTreeLeafCollectionRef = treesRef.doc(currentTreeDoc.id).collection('leaves');
 
-    window.currentTreeLeafCollectionRef = treesRef.doc(currentTreeDoc.id).collection('leaves')
-    
     window.currentTreeLeaves = new Array;
 
     let leaves = await treesRef.doc(window.currentTreeDoc.id).collection("leaves").get();
@@ -78,7 +93,15 @@ const getAndSetCurrenTreeVars = async (reqTreeId) => {
     }
 
     await getAndSetTreeDocs();
-    setupView();
+
+    let idFromUrl = getTreeIdFromUrl();
+    let docFromId = idFromUrl ? await getTreeDocFromUrl(idFromUrl) : null;
+    
+    if (docFromId) {
+        setupView(docFromId.id);
+    } else {
+        setupView();
+    }
 }
 
 const clearAuthMemberVar = () => {
@@ -120,32 +143,32 @@ signInForm.addEventListener('submit', (e) => {
     })
 })
 
-// signInForm.addEventListener('submit', (e) => {
-//     e.preventDefault();
+signUpForm.addEventListener('submit', (e) => {
+    e.preventDefault();
 
-//     const email = signInForm['signup-email'].value;
-//     const password = signInForm['signup-password'].value;
+    const email = signUpForm['sign-up_email'].value;
+    const password = signUpForm['sign-up_password'].value;
 
-//     auth.createUserWithEmailAndPassword(email, password)
-//     .then(cred => {
-//         members.add({
-//             "claimed_by": cred.user.uid,
-//             "created_by": cred.user.uid,
-//             "name": {
-//                 firstName: email,
-//                 lastName: null,
-//                 surname: null
-//             },
-//             "email": email,
-//             "trees": [],
-//             "primary_tree": null
-//         }).then(() => {
-//             signInForm.reset();
-//             signInForm.querySelector(".error").innerHTML = '';
-//         }).catch(err => {
-//             signInForm.querySelector(".error").innerHTML = err.message;
-//         })
-//     }).catch(err => {
-//         signInForm.querySelector(".error").innerHTML = err.message;
-//     })
-// })
+    auth.createUserWithEmailAndPassword(email, password)
+    .then(cred => {
+        membersRef.add({
+            "claimed_by": cred.user.uid,
+            "created_by": cred.user.uid,
+            "name": {
+                firstName: null,
+                lastName: null,
+                surname: null
+            },
+            "email": email,
+            "trees": [],
+            "primary_tree": null
+        }).then(() => {
+            signUpForm.reset();
+            signUpForm.querySelector(".error").innerHTML = '';
+        }).catch(err => {
+            signUpForm.querySelector(".error").innerHTML = err.message;
+        })
+    }).catch(err => {
+        signUpForm.querySelector(".error").innerHTML = err.message;
+    })
+})

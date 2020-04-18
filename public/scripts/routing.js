@@ -1,3 +1,42 @@
+// getTreeIdFromUrl();
+// setUrlFromTree();
+
+function getTreeIdFromUrl() {
+    let pathnameArray = window.location.hash.split('/');
+
+    if (pathnameArray[1] === "trees" && pathnameArray[2]) {
+        let treeIndex = pathnameArray.indexOf("trees");
+        treeId = pathnameArray[treeIndex + 1];
+
+        return treeId;
+
+    } else {
+        return false;
+    }
+}
+
+async function getTreeDocFromUrl(reqId) {
+    if (getTreeIdFromUrl()) {
+        let treeDoc = await treesRef.doc(getTreeIdFromUrl()).get();
+        return treeDoc.exists ? treeDoc : false;
+    } else {
+        return false;
+    }
+}
+
+function setTreeHash(reqHash) {
+    if (reqHash) {
+        window.location.hash = `/trees/${reqHash}`;
+    } else {
+        window.location.hash = '';
+    }
+};
+
+// window.addEventListener('hashchange', function(){
+//     console.log("hashchange");
+//     setupView(getTreeDocFromUrl());
+//     setTreeHash(currentTreeDoc.id);
+// })
 
 // // checkForUrl();
 
@@ -31,15 +70,7 @@
 
 // // handleUrl();
 
-// window.addEventListener('hashchange', function(){
-//     setupView(getTreeDocFromUrl());
-//         // IF TREE EXISTS in the pathname,
-//         /// then get that index and move to the next index to grab the tree ID
-//         // Render the view from that ID
-//         // IF NO TREE exists, see if user has a primary tree
 
-//         // updateDocument(state, title, url);
-// })
 
 // async function getTreeDocFromUrl() {
 //     let pathnameArray = window.location.hash.split('/');

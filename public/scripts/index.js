@@ -19,9 +19,21 @@ const addParentButton = document.querySelector("#add-parent-action");
 const addChildButton = document.querySelector("#add-child-action");
 const addSpouseButton = document.querySelector("#add-spouse-action");
 const addSiblingButton = document.querySelector("#add-sibling-action");
+const deleteTreeButton = document.querySelector("#delete-tree");
+const createTreeForm = document.querySelector("#create-tree_form");
+const createTreeFormModal = document.querySelector("#create-tree_form_modal");
+const editTreeForm = document.querySelector("#edit-tree_form");
 
-const excludedDetails = ["children", "parents", "siblings", "spouses", "topMember"];
+const excludedDetails = ["children", "parents", "siblings", "spouses", "topMember", "claimed_by", "created_by"];
 const excludedCategories = ["Name", "Address"];
+
+const treeBlueprint = {
+    "Admins" : { "dataPath" : "admins", "defaultValue" : [] },
+    "Contributors" : { "dataPath" : "contributors", "defaultValue" : [] },
+    "Viewers" : { "dataPath" : "viewers", "defaultValue" : [] },
+    "Created by" : { "dataPath" : "created_by", "defaultValue" : null },
+    "Name" : { "dataPath" : "name", "defaultValue" : null }
+}
 
 const memberBlueprint = {
     "Name" : { "dataPath" : "name", "icon" : "user", 
@@ -50,11 +62,26 @@ const memberBlueprint = {
     "Siblings" : { "dataPath" : "siblings", "defaultValue" : [] },
     "Spouses" : { "dataPath" : "spouses", "defaultValue" : {} },
     "Top Member" : { "dataPath" : "topMember", "defaultValue" : false },
+    "Claimed by" : { "dataPath" : "claimed_by", "defaultValue" : null },
+    "Created by" : { "dataPath" : "created_by", "defaultValue" : null },
+}
+
+const getLocalLeafDocFromId = (reqId) => {
+    return window.currentTreeLeaves.find(doc => doc.id === reqId);
+};
+
+const initiateSetupPage = (initiate = true) => {
+    if (initiate){
+        createTreeForm.classList.remove("u-d_none")
+    } else {
+        createTreeForm.classList.add("u-d_none")
+    }
 }
 
 const setupView = () => {
     clearView();
     populateTreeMenu();
+    initiateSetupPage(false);
 
     familyTree.innerHTML = '';
     
@@ -66,7 +93,8 @@ const setupView = () => {
     if (siblings) {
         for (siblingId of siblings) {
             let siblingBranchEl = createBranchEl("div", "branch")
-            let siblingDoc = window.currentTreeLeaves.find(leafDoc => leafDoc.id === siblingId);
+            let siblingDoc = getLocalLeafDocFromId(reqId);
+            // let siblingDoc = window.currentTreeLeaves.find(leafDoc => leafDoc.id === siblingId);
             let siblingsHtml = renderFamilyFromMember(siblingDoc);
 
             siblingBranchEl.appendChild(siblingsHtml);
@@ -74,6 +102,7 @@ const setupView = () => {
         }
     }
 
+    setTreeHash(currentTreeDoc.id);
     familyTreeEl.appendChild(generatedFamilyTreeHtml);
     generateLines();
 }
@@ -87,15 +116,25 @@ const showModal = (e) => {
 
     for (let close of closeModal) {
         close.addEventListener('click', (e) => {
+            e.preventDefault();
             e.target.closest(".modal").classList.remove("open");
         })
     }
     // targetModal.classList.add("open");
 }
 
+const closeModals = () => {
+    let openModals = document.querySelectorAll(".modal.open");
+
+    for (modal of openModals) {
+        modal.classList.remove("open");
+    }
+}
+
 const initiateModals = () => {
     for (let modalTrigger of modalTriggers) {
         modalTrigger.addEventListener('click', (e) => {
+            console.log("MODAL!");
             e.preventDefault();
             showModal(e);
         })
@@ -138,13 +177,32 @@ const showDropdown = (e) => {
 const populateTreeMenu = () => {
     treeMenuDropdownEl.innerHTML = '';
 
+    let categoryheader = document.createElement("div");
+    let categoryHeaderButton = document.createElement("button");
+
+    categoryHeaderButton.innerHTML = `<i class="fa fa-plus"></i>`;
+    categoryHeaderButton.setAttribute("class", "iconButton u-mar-l_auto");
+    categoryHeaderButton.setAttribute('data-modal-trigger', 'create-tree_modal');
+
+    categoryHeaderButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        showModal(e);   
+    })
+
+    categoryheader.setAttribute("class", "dropdown__item dropdown__label");
+    categoryheader.textContent = "Families"
+    categoryheader.appendChild(categoryHeaderButton);
+
+    treeMenuDropdownEl.appendChild(categoryheader);
+
     for (let treeDoc of window.authMemberTrees) {
         let treeAnchor = document.createElement("li");
+        let editButton = document.createElement("button");
         let className = '';
 
         if (treeDoc.id === window.currentTreeDoc.id) {
             className = "active";
-            treeMenuCurrentTreeEl.innerHTML += treeDoc.data().name;
+            treeMenuCurrentTreeEl.innerHTML += treeDoc.data().name ? treeDoc.data().name : "Unnamed";
         }
 
         if (treeDoc.id === window.primaryTreeId) {
@@ -155,6 +213,21 @@ const populateTreeMenu = () => {
         treeAnchor.setAttribute("class", `dropdown__item ${className}`);
         treeAnchor.textContent += treeDoc.data().name;
 
+        editButton.innerHTML = `<i class="fa fa-pencil-alt"></i>`;
+        editButton.setAttribute("class", "iconButton white u-mar-l_auto");
+        editButton.setAttribute('data-modal-trigger', 'edit-tree_modal');
+
+        editButton.addEventListener('click', (e) => {
+            e.preventDefault();
+
+            let reqTreeId = e.target.closest("[data-id]").getAttribute('data-id');
+            let reqTreeDoc = window.authMemberTrees.find(doc => doc.id === reqTreeId);
+
+            editTreeForm["edit-tree_name"].value = reqTreeDoc.data().name;
+            editTreeForm["edit-tree_id"].value = reqTreeDoc.id;
+            showModal(e);
+        })
+
         treeAnchor.addEventListener('click', (e) => {
             e.preventDefault();
 
@@ -162,6 +235,7 @@ const populateTreeMenu = () => {
             getAndSetCurrenTreeVars(reqTreeId);
         })
 
+        treeAnchor.appendChild(editButton);
         treeMenuDropdownEl.appendChild(treeAnchor);
     }
 
@@ -171,7 +245,7 @@ const populateTreeMenu = () => {
 }
 
 const getLeafEl = (doc) => {
-    let leafName = doc.data().name.firstName ? doc.data().name.firstName : "No name";
+    let leafName = doc.data().name.firstName ? doc.data().name.firstName : "";
     let figure = document.createElement("figure");
     let figcaption = document.createElement("figcaption");
 
@@ -203,7 +277,8 @@ const getLeafEl = (doc) => {
 
 const populateDetailsPanel = (docId) => {
     detailsPanelMetaData.textContent = '';
-    let doc = window.currentTreeLeaves.find(doc => doc.id === docId);
+    let doc = getLocalLeafDocFromId(docId);
+    // let doc = window.currentTreeLeaves.find(doc => doc.id === docId);
     detailsPanelFirstName.textContent = doc.data().name.firstName ? doc.data().name.firstName : "No name";
 
     detailsPanel.setAttribute("data-details-id", docId);
@@ -233,6 +308,7 @@ const populateDetailsPanel = (docId) => {
                 }
             } else {
                 if ( !excludedCategories.includes(key) ) {
+
                     generateDetailElement({data: doc.data()[value["dataPath"]], name: value["dataPath"], icon: value["icon"]});
                 }
             }
@@ -249,7 +325,7 @@ const generateDetailElement = (params) => {
         if (reqName === "birthday" && data) {
             var options = { year: 'numeric', month: 'long', day: 'numeric' };
     
-            let date = new Date(data);
+            let date = new Date(data.replace(/-/g, '\/'));
             data = new Intl.DateTimeFormat('en-US', options).format(date);
         }
 
@@ -280,7 +356,8 @@ const renderFamilyFromMember = (doc) => {
     if (children) {
         let descendantsContainer = createBranchEl("div", "descendants");
         for (childId of children) {
-            let childDoc = window.currentTreeLeaves.find(leafDoc => leafDoc.id === childId);
+            let childDoc = getLocalLeafDocFromId(childId);
+            // let childDoc = window.currentTreeLeaves.find(leafDoc => leafDoc.id === childId);
             descendantsContainer.appendChild(renderFamilyFromMember(childDoc));
         }
         branchEl.appendChild(descendantsContainer);
@@ -290,7 +367,8 @@ const renderFamilyFromMember = (doc) => {
         for (spouse of spouses) {
             let spouseId = spouse[0];
             let spouseStatus = spouse[1];
-            let spouseDoc = window.currentTreeLeaves.find(leafDoc => leafDoc.id === spouseId);
+            let spouseDoc = getLocalLeafDocFromId(spouseId);
+            // let spouseDoc = window.currentTreeLeaves.find(leafDoc => leafDoc.id === spouseId);
             let spouseLeafEl = getLeafEl(spouseDoc);
 
             renderedLeafMembers.push(spouseId);
@@ -303,6 +381,100 @@ const renderFamilyFromMember = (doc) => {
 
     return branchEl;
 }
+
+editTreeForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    let reqTreeId = editTreeForm["edit-tree_id"].value;
+    let newTreeName = editTreeForm["edit-tree_name"].value;
+
+    treesRef.doc(reqTreeId).update({
+        "name" : newTreeName
+    })
+    .then(() => {
+        console.log("Tree updated successfully!");
+        closeModals();
+        location.reload();
+    })
+    .catch(err => {
+        console.log(err.message);
+    })
+})
+
+deleteTreeButton.addEventListener('click', (e) => {
+    e.preventDefault;
+    let reqTreeId = editTreeForm["edit-tree_id"].value;
+
+    treesRef.doc(reqTreeId).delete();
+    // update this on all member's tree lists!
+})
+
+createTreeFormModal.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    treesRef.add(
+        newTreeForFirebase({
+            "admins" : [authMemberDoc.id],
+            "created_by" : authMemberDoc.id,
+            "name" : createTreeFormModal["create-tree_name"].value
+        })
+    ).then(newTreeRef => {
+        newTreeRef.collection('leaves').add(
+            newLeafForFirebase({
+                "created_by" : authMemberDoc.id,
+                "claimed_by" : authMemberDoc.id,
+                "topMember" : true
+            })
+        )
+        membersRef.doc(authMemberDoc.id).update({
+            "trees" : firebase.firestore.FieldValue.arrayUnion(newTreeRef.id)
+        })
+        .then(() => {
+            location.reload();
+        })
+        .catch(err => {
+            console.log(err.message);
+        })
+    })
+    .catch(err => {
+        console.log(err.message)
+    });
+})
+
+createTreeForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    treesRef.add(
+        newTreeForFirebase({
+            "admins" : [authMemberDoc.id],
+            "created_by" : authMemberDoc.id,
+            "name" : createTreeForm["create-tree_name"].value
+        })
+    )
+    .then(newTreeRef => {
+        treesRef.doc(newTreeRef.id).collection('leaves').add(
+            newLeafForFirebase({
+                "claimed_by" : authMemberDoc.id,
+                "created_by" : authMemberDoc.id,
+                "topMember" : true
+            })
+        )
+        .then(newLeafRef => {
+            membersRef.doc(authMemberDoc.id).update({
+                "primary_tree" : newTreeRef.id,
+                "trees" : [newTreeRef.id]
+            })
+            .then(() => {
+                location.reload();
+            })
+            .catch(err => {
+                console.log(err.message);
+            })
+        })
+    })
+    .catch(err => {
+        console.log(err.message);
+    })
+})
 
 removeLeafButton.addEventListener('click', (e) => {
     removeLeaf(e);
@@ -335,8 +507,9 @@ addSiblingButton.addEventListener('click', (e) => {
 })
 
 const getDocFromDetailsPanelId = () => {
-    let id = detailsPanel.getAttribute("data-details-id")
-    return window.currentTreeLeaves.find(leafDoc => leafDoc.id === id);
+    let id = detailsPanel.getAttribute("data-details-id");
+    return getLocalLeafDocFromId(id);
+    // return window.currentTreeLeaves.find(leafDoc => leafDoc.id === id);
 }
 
 const editMember = () => {
@@ -446,7 +619,7 @@ const createMemberInput = (detailName, data, name, type = "text") => {
         type = "date"
     }
 
-    let inputGroup = `<div class="inputGroup">
+    let inputGroup = `<div class="inputGroup inputGroup__horizontal">
                             <label class="u-mar-r_2 u-w_33perc">${detailName}</label>
                             <input class="u-mar-l_auto u-flex_1'" type="${type}" name="${name}" value="${data}">
                         </div>`
@@ -545,6 +718,24 @@ const removeLeaf = async () => {
     }
 }
 
+const newTreeForFirebase = (params) => {
+    let newTreeObject = {};
+
+    for (let [key, value] of Object.entries(treeBlueprint)) {
+        if ( value["defaultValue"] && Object.values(value["defaultValue"]).length > 0 ) {
+            newTreeObject[value["dataPath"]] = {};
+            for (let [detailKey, detailValue] of Object.entries(value["defaultValue"])) {
+                let newValue = params && params[detailValue["dataPath"]] ? params[detailValue["dataPath"]] : detailValue["defaultValue"];
+                newTreeObject[value["dataPath"]][detailValue["dataPath"]] = newValue;
+            }
+        } else {
+            let newValue = params && params[value["dataPath"]] ? params[value["dataPath"]] : value["defaultValue"];
+            newTreeObject[value["dataPath"]] = newValue;
+        }
+    }
+
+    return newTreeObject;
+}
 
 const newLeafForFirebase = (params) => {
     let newLeafObject = {};
@@ -671,7 +862,6 @@ const addChild = (e) => {
 
 const addSpouse = (e) => {
     let addSpouseTo = getDocFromDetailsPanelId();
-
     let spouseArray = [];
 
     if (addSpouseTo.data().spouses) {
@@ -680,15 +870,13 @@ const addSpouse = (e) => {
         }
     }
 
-    console.log(spouseArray);
-
     let spouseObject = {};
     let childrenArray = [];
 
     spouseObject[addSpouseTo.id] = null;
 
     if (addSpouseTo.data().children) {
-        for (childId in addSpouseTo.data().children) {
+        for (childId of addSpouseTo.data().children) {
             childrenArray.push(childId);
         }
     }
@@ -711,41 +899,41 @@ const addSpouse = (e) => {
         })
         .then(() => {
             console.log(`${newSpouseDoc.id} was added as a spouse to ${addSpouseTo.id}`)
+
+            if (childrenArray.length > 0) {
+                for (childId of childrenArray) {
+                    currentTreeLeafCollectionRef.doc(childId).update({
+                        "parents" : firebase.firestore.FieldValue.arrayUnion(childId)
+                    })
+                    .then(() => {
+                        console.log(`${childId} has a new parent: ${newSpouseDoc.id}`)
+                    })
+                    .catch(err => {
+                        console.log(err.message)
+                    })
+                }
+            }
+            
+            if (addSpouseTo.data().spouses) {
+                for (spouseId of spouseArray) {
+                    console.log(`Adding newSPouse to ${spouseId}`);
+                    currentTreeLeafCollectionRef.doc(spouseId).update({
+                        [`spouses.${newSpouseDoc.id}`]: null
+                    })
+                    .then(() => {
+                        console.log("Spouse successfully added")
+                    })
+                    .catch(err => {
+                        console.log(`Spouse not added`);
+                        console.log(err.message);
+                    })
+                }
+            }
+            location.reload();
         })
         .catch(err => {
             console.log(err.message)
         })
-
-        if (childrenArray.length > 0) {
-            for (childId in childrenArray) {
-                currentTreeLeafCollectionRef.doc(childId).update({
-                    "parents" : firebase.firestore.FieldValue.arrayUnion(childId)
-                })
-                .then(() => {
-                    console.log(`${childId} has a new parent: ${newSpouseDoc.id}`)
-                })
-                .catch(err => {
-                    console.log(err.message)
-                })
-            }
-        }
-
-        if (addSpouseTo.data().spouses) {
-            for (spouseId of spouseArray) {
-                console.log(`Adding newSPouse to ${spouseId}`);
-                currentTreeLeafCollectionRef.doc(spouseId).update({
-                    [`spouses.${newSpouseDoc.id}`]: null
-                })
-                .then(() => {
-                    console.log("Spouse successfully added")
-                })
-                .catch(err => {
-                    console.log(`Spouse not added`);
-                    console.log(err.message);
-                })
-            }
-        }
-        location.reload();
     })
 }
 
@@ -834,9 +1022,6 @@ const showDetailPanels = (show) => {
     }
 }
 
-initiateModals();
-initiateDropdowns();
-
 document.addEventListener('keydown', function(event) {
     const key = event.key; // Or const {key} = event; in ES6+
     if (key === "Escape") {
@@ -882,8 +1067,6 @@ const createLine = (branch, element1, element2)  => {
 
         let childLeaves = branch.nextSibling.querySelectorAll(".leaf");
 
-        console.log(childLeaves.length );
-
         if (childLeaves.length > 1) {
             for (childLeaf of childLeaves) {
                 let childToParentMiddleBar = document.createElement("div");
@@ -891,7 +1074,7 @@ const createLine = (branch, element1, element2)  => {
                 childLeaf.insertAdjacentElement('afterbegin', childToParentMiddleBar);
             }
         } else {
-            console.log("not doing it")
+            console.log("no child leaves");
         }
     }
 
@@ -931,3 +1114,6 @@ const createLine = (branch, element1, element2)  => {
     branch.appendChild(spouseLine);
     branch.appendChild(spouseToChildren);
 }
+
+initiateModals();
+initiateDropdowns();

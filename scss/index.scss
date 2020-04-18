@@ -71,7 +71,7 @@ h6 {
     max-height: var(--navHeight);
     position: sticky;
     top: 0;
-    z-index: 999;
+    z-index: 900;
     color: white;
     align-items: center;
     padding-left: 32px;
@@ -79,6 +79,16 @@ h6 {
 
     a {
         color: white;
+    }
+
+    &__decoration {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        width: 100%;
+        height: auto;
+        z-index: -1;
     }
 }
 
@@ -120,9 +130,10 @@ h6 {
     transition: margin-right $detailsRevealTiming ease-in-out;
     overflow: scroll;
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     justify-content: center;
     position: relative;
+    top: 56px;
 }
 
 #detailsPanel {
@@ -234,13 +245,17 @@ h6 {
     // }
 }
 
+.message:empty {
+    display: none;
+}
+
 #treeMenu__currentTree {
     font-size: 20px;
     font-weight: 900;
     padding: 16px 24px;
     border-radius: 4px;
     cursor: pointer;
-    transition: .1s ease-in-out;
+    transition: all .1s ease-in-out;
 
     &:hover {
         box-shadow: 0 0 0 2px rgba(white, .25);
@@ -249,6 +264,7 @@ h6 {
     &:active {
         background-color: rgba(white, .06);
         transform: scale(.98);
+        transition: transform .05s ease-in-out;
     }
 }
 
@@ -312,7 +328,8 @@ h6 {
     }
 
     &:active {
-        transform: scale(.9);
+        transform: scale(.95);
+        transition: all .05s ease-in-out
     }
 
     &.active:before {
@@ -333,6 +350,12 @@ h6 {
         background-color: white;
         box-shadow: var(--leafShadow);
         font-size: 14px;
+
+        &:empty:before {
+            content: "No name";
+            font-style: italic;
+            opacity: .75;
+        }
     }
 }
 
@@ -394,7 +417,17 @@ h6 {
         bottom: calc(-100vh - var(--navHeight));
         top: unset;
         transition: bottom $detailsRevealTiming ease-in-out;
-        max-height: calc(100vh - (var(--navHeight) + 40px));
+        max-height: calc(100vh - (var(--navHeight) + 12vh));
+    }
+
+    .mainNav {
+        align-items: baseline;
+        padding: 24px;
+    }
+
+    #treeMenu {
+        width: calc(100% - 48px);
+        bottom: 24px;
     }
 
     #mainContent {  
@@ -426,6 +459,30 @@ h6 {
     }
 }
 
+// cards
+.card {
+    --cardMaxWidth: 352px;
+    --cardPadding: 24px;
+    width: 100%;
+    max-width: var(--cardMaxWidth);
+    box-shadow: var(--leafShadow);
+    border-radius: 8px;
+    background-color: white;
+    overflow: hidden;
+
+    &__header {
+        padding: var(--cardHeaderPadding, var(--cardPadding));
+    }
+
+    &__content {
+        padding: var(--cardContentPadding, var(--cardPadding));
+    }
+
+    &__footer {
+        padding: var(--cardFooterPadding, var(--cardPadding));
+    }
+}
+
 // inputs
 input[type=text],
 input[type=email],
@@ -438,6 +495,7 @@ select {
     border-radius: 8px;
     font-size: 16px;
     border: 0px solid transparent;
+    background-color: white;
 
     &:hover {
         box-shadow: 0 0 0 2px var(--color_border);
@@ -455,17 +513,25 @@ label {
 }
 
 .inputGroup {
+    --inputGroupLayout: column;
     display: flex;
-    align-items: center;
+    flex-direction: var(--inputGroupLayout);
+
+    &__horizontal {
+        --inputGroupLayout: row;
+        align-items: center;
+
+        label {
+            margin-bottom: unset;
+        }
+    }
 
     & + & {
         margin-top: 16px;
     }
 
-    &:hover {
-        label {
-            font-weight: 900;
-        }
+    label {
+        margin-bottom: 8px;
     }
 }
 
@@ -486,7 +552,8 @@ button,
     transition: all .1s ease-in-out;
     text-decoration: none;
 
-    &:hover {
+    &:hover,
+    &:focus {
         transform: scale(1.05);
     }
 
@@ -496,8 +563,8 @@ button,
     }
 
     &:focus {
-        outline: 4px solid var(--color_outline);
-        border-radius: 8px;
+        box-shadow: 0 0 0 4px var(--color_outline);
+        outline: 0px solid transparent;
     }
 
     &.secondary {
@@ -529,12 +596,33 @@ button,
     align-items: center;
 
     &:focus {
-        border-radius: 50%;
+        box-shadow: 0 0 0 4px var(--color_outline);
     }
 
     i {
         line-height: var(--iconButtonSize);
         pointer-events: none;
+        text-decoration: none;
+    }
+}
+
+.buttonGroup {
+    display: flex;
+    align-content: center;
+
+    > button,
+    .button,
+    .iconButton {
+        margin-left: 4px;
+        margin-right: 4px;
+
+        &:last-child {
+            margin-right: 0px;
+        }
+
+        &:first-child {
+            margin-left: 0px;
+        }
     }
 }
 
@@ -569,7 +657,6 @@ button,
         top: calc(30vh - 5vh);
         max-width: 600px;
         width: 100%;
-        padding: 32px;
         border-radius: 16px;
         box-shadow: 0 0 12px rgba(black, .2);
         background-color: white;
@@ -597,10 +684,13 @@ button,
     border-radius: 8px;
     background-color: white;
     padding: 8px 0;
+    z-index: 999;
 
     &__item {
         padding: 12px 20px;
         font-weight: bold;
+        display: flex;
+        align-items: center;
 
         &:hover {
             background-color: rgba($brand, .08);
@@ -615,7 +705,6 @@ button,
     &__label {
         text-transform: uppercase;
         letter-spacing: 1px;
-        pointer-events: none;
         color: rgba($brand, .5);
         font-weight: bold;
         font-size: 12px;
@@ -652,6 +741,14 @@ button,
     display: flex;
 }
 
+.u-jc_flex-end {
+    justify-content: flex-end;
+}
+
+.u-pad_0 {
+    padding: 0px;
+}
+
 .u-pad_4 {
     padding: 16px;
 }
@@ -671,6 +768,10 @@ button,
 
 .u-mar-l_2 {
     margin-left: 16px;
+}
+
+.u-mar-r_auto {
+    margin-right: auto;
 }
 
 .u-mar-r_2 {
