@@ -11,13 +11,17 @@
 </head>
     <body>
         <nav class="mainNav u-mar-b_6">
-            <h1 class="u-mar-b_0">MILY</h1>
+            <h1 class="u-mar-b_0 u-c_white ">MILY</h1>
             <div class="buttonGroup u-mar-l_auto">
                 <button id="sign-up_button" class="ifAuth--hide">Log in</button>
                 <button class="ifAuth--hide">Sign up</button>
             </div>
-            <button id="sign-out_button" class="ifAuth--show u-mar-l_auto white">Sign out</button>
-            <div id="treeMenu" class="ifAuth--show u-mar-lr_auto">
+            <button id="notification_indicator" data-dropdown-target="notification_menu" class="ifAuth--show u-mar-l_auto iconButton u-d_none"><i class="fa fa-bell"></i></button>
+            <div id="notification_menu" class="dropdown u-p_absolute">
+            </div>
+
+            <button id="sign-out_button" class="ifAuth--show u-mar-l_2 white">Sign out</button>
+            <div id="treeMenu" class="ifAuth--show u-mar-lr_auto u-c_white">
                 <div id="treeMenu__currentTree" data-dropdown-target="treeMenu__options"></div>
                 <ul id="treeMenu__options" class="dropdown u-p_absolute u-d_none"></div>
             </div>
@@ -42,6 +46,7 @@
                 <button class="u-w_full">Log in</button>
             </div>
         </form>
+
         <form id="sign-up_form" class="ifAuth--hide card u-mar-lr_auto">
             <div class="card__header u-pad_0">
                 <img src="/assets/img/wavy-sm--yellow.svg" alt="decoration">
@@ -56,11 +61,13 @@
                     <input type="password" name="sign-up_password" placeholder="Password">
                     <p class="message"></p>
                 </div>
+                <p class="error"></p>
             </div>
             <div class="card__footer">
                 <button class="u-w_full">Sign up</button>
             </div>
         </form>
+
         <form id="create-tree_form" class="card u-mar-lr_auto u-d_none">
             <div class="card__header">
                 <h2 class="u-mar-b_0">Create your first family tree!</h2>
@@ -80,8 +87,8 @@
             <aside id="detailsPanel">
                 <nav class="detailsPanel__actions u-mar-b_4">
                     <button class="iconButton" data-dropdown-target="add-relationship-dropdown"><i class="fa fa-plus"></i></button>
-                    <!-- <button class="iconButton" data-dropdown-target="add-relationship-dropdown" data-modal-trigger="invite-member_modal"><i class="fa fa-plus"></i></button> -->
-                    <button class="iconButton secondary u-mar-l_auto" data-dropdown-target="member-options-dropdown"><i class="fa fa-ellipsis-h"></i></button>
+                    <button class="iconButton secondary u-mar-l_auto" id="invite-member-action" data-modal-trigger="invite-member_modal"><i class="fa fa-envelope"></i></button>
+                    <button class="iconButton secondary u-mar-l_2" data-dropdown-target="member-options-dropdown"><i class="fa fa-ellipsis-h"></i></button>
                     <button class="iconButton secondary details__button--close u-mar-l_2"><i class="fa fa-times"></i></button>
                 </nav>
                 <ul id="member-options-dropdown" class="dropdown u-d_none u-p_fixed">
@@ -109,6 +116,40 @@
                 </form>
             </aside>
         </section>
+
+        <div class="modal medium" data-modal="invite-member_modal">
+            <form id="invite-member_form" class="card modal-dialouge">
+                <div class="card__header">
+                    <h2 class="u-mar-b_0">Invite member</h2>
+                </div>
+                <div class="card__content">
+                    <div class="inputGroup">
+                        <label for="invite-member_email">Email address</label>
+                        <input type="text" name="invite-member_email">
+                        <div class="inputGroup inputGroup__horizontal u-mar-t_2">
+                            <input type="radio" class="u-mar-r_2" name="invite-member_permission" value="admin">
+                            <label for="permission">Admin</label>
+                        </div>
+                        <div class="inputGroup inputGroup__horizontal u-mar-r_2">
+                            <input type="radio" class="u-mar-r_2" name="invite-member_permission" value="contributor">
+                            <label for="permission">Contributor</label>
+                        </div>
+                        <div class="inputGroup inputGroup__horizontal u-mar-r_2">
+                            <input type="radio" class="u-mar-r_2" name="invite-member_permission" value="viewer" checked>
+                            <label for="permission">Viewer</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="card__footer">
+                    <div class="buttonGroup u-jc_flex-end">
+                        <a href="#" class="modal_button--close button secondary">Cancel</a>
+                        <button type="submit">Send invitation</button>
+                    </div>
+                </div>
+                <a href="#" class="modal_button--close iconButton white"><i class="fa fa-times"></i></a>
+            </form>
+        </div>
+
         <div class="modal medium" data-modal="edit-tree_modal">
             <form id="edit-tree_form" class="card modal-dialouge">
                 <div class="card__header">

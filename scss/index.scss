@@ -5,6 +5,7 @@ $brand: #002831;
     --brand: #002831;
     --color_outline: #2D9CDB;
     --color_gray: #BDBDBD;
+    --color_dark_gray: #828282;
     --color_yellow: #FDD3A6;
     --color_text: #333333;
     --color_border: #D9DFE0;
@@ -23,6 +24,7 @@ $brand: #002831;
     --leafShadow: 0px 2px 16px rgba(0, 0, 0, 0.05), 0px 1px 2px rgba(0, 0, 0, 0.07), 0px 4px 24px rgba(0, 0, 0, 0.08);
     --leafCaptionShadow: 0 0 12px rgba(0,0,0, .2);
     --detailsPanelDecorationTopOffset : 0;
+    --spacer: 8px;
 }
 
 * {
@@ -72,7 +74,6 @@ h6 {
     position: sticky;
     top: 0;
     z-index: 900;
-    color: white;
     align-items: center;
     padding-left: 32px;
     padding-right: 32px;
@@ -180,6 +181,17 @@ h6 {
     font-size: 20px;
     color: var(--color_gray);
     vertical-align: middle;
+}
+
+.detailsPanel__img {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background-color: var(--color_yellow);
+}
+
+.detailsPanel__realtiveType {
+    color: var(--color_dark_gray);
 }
 
 .detailsPanel__profileImage {
@@ -292,7 +304,7 @@ h6 {
     transform: translateX(-50%);
 
     .active {
-        text-decoration: underline;
+        font-weight: 900;
     }
 }
 
@@ -350,6 +362,10 @@ h6 {
         background-color: white;
         box-shadow: var(--leafShadow);
         font-size: 14px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: calc(var(--spacer) * 17);
+        overflow: hidden;
 
         &:empty:before {
             content: "No name";
@@ -708,6 +724,7 @@ button,
         color: rgba($brand, .5);
         font-weight: bold;
         font-size: 12px;
+        pointer-events: none;
 
         &:hover {
             background-color: inherit;
@@ -717,12 +734,29 @@ button,
         &:active {
             background-color: inherit;
         }
+
+        .iconButton {
+            pointer-events: initial;
+        }
     }
 }
 
 /// Utility classes
+.u_disabled {
+    pointer-events: none;
+    opacity: .5;
+}
+
 .u-p_fixed {
     position: fixed;
+}
+
+.u-bold {
+    font-weight: bold;
+}
+
+.u-align-items_center {
+    align-items: center;
 }
 
 .u-pe_none {
@@ -780,6 +814,14 @@ button,
 
 .u-mar-b_0 {
     margin-bottom: 0px;
+}
+
+.u-mar-b_point5 {
+    margin-bottom: 4px;
+}
+
+.u-mar-t_2 {
+    margin-top: 16px;
 }
 
 .u-mar-b_1 {
@@ -845,6 +887,10 @@ button,
 /// Color
 .u-c_brand {
     color: var(--brand);
+}
+
+.u-c_white {
+    color: white;
 }
 
 .u-c_danger {

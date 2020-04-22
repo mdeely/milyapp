@@ -2,6 +2,7 @@
   --brand: #002831;
   --color_outline: #2D9CDB;
   --color_gray: #BDBDBD;
+  --color_dark_gray: #828282;
   --color_yellow: #FDD3A6;
   --color_text: #333333;
   --color_border: #D9DFE0;
@@ -19,7 +20,8 @@
   --leafSpacing: 32px;
   --leafShadow: 0px 2px 16px rgba(0, 0, 0, 0.05), 0px 1px 2px rgba(0, 0, 0, 0.07), 0px 4px 24px rgba(0, 0, 0, 0.08);
   --leafCaptionShadow: 0 0 12px rgba(0,0,0, .2);
-  --detailsPanelDecorationTopOffset: 0; }
+  --detailsPanelDecorationTopOffset: 0;
+  --spacer: 8px; }
 
 * {
   box-sizing: border-box; }
@@ -61,7 +63,6 @@ h6 {
   position: sticky;
   top: 0;
   z-index: 900;
-  color: white;
   align-items: center;
   padding-left: 32px;
   padding-right: 32px; }
@@ -137,6 +138,15 @@ h6 {
   color: var(--color_gray);
   vertical-align: middle; }
 
+.detailsPanel__img {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background-color: var(--color_yellow); }
+
+.detailsPanel__realtiveType {
+  color: var(--color_dark_gray); }
+
 .detailsPanel__profileImage {
   max-width: var(--profileImageSize);
   height: var(--profileImageSize); }
@@ -206,7 +216,7 @@ h6 {
   -webkit-transform: translateX(-50%);
   transform: translateX(-50%); }
   #treeMenu .active {
-    text-decoration: underline; }
+    font-weight: 900; }
 
 .leaf {
   height: var(--leafSize);
@@ -250,7 +260,11 @@ h6 {
     margin: 0 auto;
     background-color: white;
     box-shadow: var(--leafShadow);
-    font-size: 14px; }
+    font-size: 14px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: calc(var(--spacer) * 17);
+    overflow: hidden; }
     .leaf .leaf_caption:empty:before {
       content: "No name";
       font-style: italic;
@@ -531,15 +545,28 @@ button,
     letter-spacing: 1px;
     color: rgba(0, 40, 49, 0.5);
     font-weight: bold;
-    font-size: 12px; }
+    font-size: 12px;
+    pointer-events: none; }
     .dropdown__label:hover {
       background-color: inherit;
       cursor: intiial; }
     .dropdown__label:active {
       background-color: inherit; }
+    .dropdown__label .iconButton {
+      pointer-events: initial; }
+
+.u_disabled {
+  pointer-events: none;
+  opacity: .5; }
 
 .u-p_fixed {
   position: fixed; }
+
+.u-bold {
+  font-weight: bold; }
+
+.u-align-items_center {
+  align-items: center; }
 
 .u-pe_none {
   pointer-events: none; }
@@ -583,6 +610,12 @@ button,
 
 .u-mar-b_0 {
   margin-bottom: 0px; }
+
+.u-mar-b_point5 {
+  margin-bottom: 4px; }
+
+.u-mar-t_2 {
+  margin-top: 16px; }
 
 .u-mar-b_1 {
   margin-bottom: 8px; }
@@ -631,6 +664,9 @@ button,
 
 .u-c_brand {
   color: var(--brand); }
+
+.u-c_white {
+  color: white; }
 
 .u-c_danger {
   color: var(--color_danger); }

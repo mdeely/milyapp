@@ -9,9 +9,11 @@
 //     })
 // })
 
+window.currentTreeMemberDocs = new Array;
+
 const membersRef = db.collection('members');
 const treesRef = db.collection('trees');
-// const notifications = db.collection('notifications');
+const notificationsRef = db.collection('notifications');
 
 // signup form
 const signUpForm = document.querySelector("#sign-up_form");
@@ -40,6 +42,7 @@ auth.onAuthStateChanged(user => {
 const clearView = () => {
     treeMenuCurrentTreeEl.textContent = '';
     showDetailPanels(false);
+    notificationMenu.innerHTML = '';
 }
 
 const setupAuthUser = (user) => {
@@ -61,6 +64,7 @@ const getAndSetAuthMemberVars = async (user) => {
     let authMember = await membersRef.where('claimed_by', '==', user.uid).limit(1).get();
     for (const doc of authMember.docs) {
         window.authMemberDoc = await doc ? doc : null;
+        // window.currentTreeMemberDocs.push(doc);
         window.primaryTreeId = authMemberDoc.data().primary_tree ? authMemberDoc.data().primary_tree : null;
     };
 
@@ -78,12 +82,31 @@ const getAndSetAuthMemberVars = async (user) => {
     }
 }
 
+const getAndSetCurrentTreeMemberDocs = async () => {
+
+    // go through leavesdocs. find which are claimed and get them memberDOOOCS
+    for await (leafDoc of window.currentTreeLeaves) {
+
+        if (leafDoc.data().claimed_by) {
+            let memberDoc = await membersRef.doc(leafDoc.data().claimed_by).get();
+            if (memberDoc.exists) {
+                window.currentTreeMemberDocs.push(memberDoc);
+            }
+        }
+    }
+    // let memberDoc = await membersRef.doc(doc.data().claimed_by).get();
+    // window.currentTreeMemberDocs.push(memberDoc);
+    // // Add these to currentMemberTreeDocs
+    // for (doc of currentTreeMemberDocs) {
+    //     console.log(doc.id);
+    // }
+}
+
 const getAndSetCurrenTreeVars = async (reqTreeId) => {
     let treeId = reqTreeId ? reqTreeId : window.primaryTreeId;
 
     window.currentTreeDoc = await treesRef.doc(treeId).get();
     window.currentTreeLeafCollectionRef = treesRef.doc(currentTreeDoc.id).collection('leaves');
-
     window.currentTreeLeaves = new Array;
 
     let leaves = await treesRef.doc(window.currentTreeDoc.id).collection("leaves").get();
@@ -93,6 +116,8 @@ const getAndSetCurrenTreeVars = async (reqTreeId) => {
     }
 
     await getAndSetTreeDocs();
+    await getAndSetCurrentTreeMemberDocs();
+
 
     let idFromUrl = getTreeIdFromUrl();
     let docFromId = idFromUrl ? await getTreeDocFromUrl(idFromUrl) : null;
