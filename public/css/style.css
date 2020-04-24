@@ -82,6 +82,8 @@ h6 {
   position: relative;
   flex: 1;
   transition: background-color 0.2s ease-in-out; }
+  #mainContent:focus {
+    outline: none; }
   #mainContent:not(.showDetails) #familyTree {
     margin-right: 0; }
   #mainContent:not(.showDetails) #detailsPanel {
@@ -94,12 +96,67 @@ h6 {
 #familyTree {
   flex: 1;
   transition: margin-right 0.2s ease-in-out;
-  overflow: scroll;
   display: flex;
+  overflow: scroll;
   flex-wrap: nowrap;
   justify-content: center;
   position: relative;
-  top: 56px; }
+  top: 56px;
+  padding-bottom: 80px; }
+  #familyTree:focus {
+    outline: 0 solid transparent; }
+  #familyTree .view-list_info {
+    display: none; }
+  #familyTree.view_list {
+    justify-content: unset;
+    padding-left: 24px;
+    padding-right: 24px;
+    flex-direction: column;
+    align-items: flex-end; }
+    #familyTree.view_list .connectorLine {
+      display: none; }
+    #familyTree.view_list .view-list_info {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 16px;
+      margin-left: 48px;
+      width: 100%; }
+    #familyTree.view_list > .branch {
+      margin: 0 auto;
+      width: 100%;
+      max-width: 1024px; }
+    #familyTree.view_list .branch,
+    #familyTree.view_list .spouses,
+    #familyTree.view_list .descendants {
+      display: block; }
+    #familyTree.view_list .descendants .leaf {
+      padding-left: 48px; }
+    #familyTree.view_list .leaf {
+      --leafSpacing: 8px;
+      width: 100%;
+      border-radius: 8px;
+      margin-left: 0;
+      height: unset;
+      padding: 16px;
+      justify-content: unset;
+      box-shadow: none;
+      align-items: center; }
+      #familyTree.view_list .leaf:hover {
+        transform: scale(1.01); }
+      #familyTree.view_list .leaf:active {
+        transform: scale(1); }
+      #familyTree.view_list .leaf_caption {
+        display: none; }
+      #familyTree.view_list .leaf__image {
+        --leafSize: 56px; }
+      #familyTree.view_list .leaf__detail-item {
+        flex: 1; }
+      #familyTree.view_list .leaf:before {
+        border-radius: 8px;
+        height: 100%;
+        width: 100%;
+        left: 0;
+        top: 0; }
 
 #detailsPanel {
   position: fixed;
@@ -212,35 +269,33 @@ h6 {
   text-align: center;
   display: flex;
   flex-direction: column;
-  left: 50%;
+  left: calc(50% + 16px);
   -webkit-transform: translateX(-50%);
   transform: translateX(-50%); }
   #treeMenu .active {
     font-weight: 900; }
 
 .leaf {
-  height: var(--leafSize);
-  width: var(--leafSize);
   border-radius: 50%;
   box-shadow: var(--leafShadow);
-  cursor: pointer;
   position: relative;
   display: flex;
   justify-content: center;
   margin: var(--leafSpacing);
   transition: transform 0.2s ease-in-out;
-  background-color: var(--color_yellow); }
+  cursor: pointer; }
   .leaf:before {
     content: "";
     position: absolute;
-    width: calc(var(--leafSize) + 12px);
-    height: calc(var(--leafSize) + 12px);
-    top: -6px;
+    width: calc(var(--leafSize) + 20px);
+    height: calc(var(--leafSize) + 20px);
+    top: -4px;
     border-radius: 100px;
     box-shadow: 0 0 0 4px var(--color_outline);
     opacity: 0;
     transform: scale(0.8);
-    transition: transform 0.2s ease-in-out; }
+    transition: transform 0.2s ease-in-out;
+    z-index: -1; }
   .leaf:hover {
     transform: scale(1.05);
     z-index: 1; }
@@ -269,6 +324,13 @@ h6 {
       content: "No name";
       font-style: italic;
       opacity: .75; }
+  .leaf__image {
+    background-color: var(--color_yellow);
+    width: calc(var(--leafSize) + 12px);
+    max-width: calc(var(--leafSize) + 12px);
+    max-height: calc(var(--leafSize) + 12px);
+    overflow: hidden;
+    border-radius: 50%; }
 
 .parentToChild__middleBar,
 .childToParent__middleBar,
@@ -305,6 +367,9 @@ h6 {
   height: calc( var(--leafSize) - calc( var(--leafSpacing) / 2 ));
   bottom: 0; }
 
+#view-preferences {
+  right: 0; }
+
 @media screen and (max-width: 640px) {
   :root {
     --navHeight: 176px;
@@ -328,7 +393,8 @@ h6 {
 
   #treeMenu {
     width: calc(100% - 48px);
-    bottom: 24px; }
+    bottom: 24px;
+    left: 50%; }
 
   #mainContent:not(.showDetails) #detailsPanel {
     right: unset; }
@@ -500,7 +566,8 @@ button,
   z-index: 9999;
   background-color: rgba(0, 0, 0, 0.35);
   display: flex;
-  justify-content: center; }
+  justify-content: center;
+  overflow: scroll; }
   .modal.medium .modal-dialouge {
     max-width: 480px; }
   .modal.small .modal-dialouge {
@@ -616,6 +683,12 @@ button,
 
 .u-mar-t_2 {
   margin-top: 16px; }
+
+.u-mar-t_3 {
+  margin-top: 24px; }
+
+.u-mar-t_4 {
+  margin-top: 32px; }
 
 .u-mar-b_1 {
   margin-bottom: 8px; }

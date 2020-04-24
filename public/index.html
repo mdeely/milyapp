@@ -20,6 +20,11 @@
             <div id="notification_menu" class="dropdown u-p_absolute">
             </div>
 
+            <button class="ifAuth--show u-mar-l_2 u-mar-r_2 iconButton" data-dropdown-target="view-preferences"><i class="fa fa-eye"></i></button>
+            <div id="view-preferences" class="dropdown u-d_none u-p_absolute">
+                <div id="view-preferences_tree" class="dropdown__item">Tree</div>
+                <div id="view-preferences_list" class="dropdown__item">List</div>
+            </div>
             <button id="sign-out_button" class="ifAuth--show u-mar-l_2 white">Sign out</button>
             <div id="treeMenu" class="ifAuth--show u-mar-lr_auto u-c_white">
                 <div id="treeMenu__currentTree" data-dropdown-target="treeMenu__options"></div>
@@ -87,9 +92,11 @@
             <aside id="detailsPanel">
                 <nav class="detailsPanel__actions u-mar-b_4">
                     <button class="iconButton" data-dropdown-target="add-relationship-dropdown"><i class="fa fa-plus"></i></button>
-                    <button class="iconButton secondary u-mar-l_auto" id="invite-member-action" data-modal-trigger="invite-member_modal"><i class="fa fa-envelope"></i></button>
-                    <button class="iconButton secondary u-mar-l_2" data-dropdown-target="member-options-dropdown"><i class="fa fa-ellipsis-h"></i></button>
-                    <button class="iconButton secondary details__button--close u-mar-l_2"><i class="fa fa-times"></i></button>
+                    <div class="detailsPanel__actions-secondary u-mar-l_auto u-d_flex">
+                        <button class="iconButton secondary " id="invite-member-action" data-modal-trigger="invite-member_modal"><i class="fa fa-envelope"></i></button>
+                        <button class="iconButton secondary u-mar-l_2" data-dropdown-target="member-options-dropdown"><i class="fa fa-ellipsis-h"></i></button>
+                        <button class="iconButton secondary details__button--close u-mar-l_2"><i class="fa fa-times"></i></button> 
+                    </div>
                 </nav>
                 <ul id="member-options-dropdown" class="dropdown u-d_none u-p_fixed">
                     <li id="edit-member-action" class="dropdown__item">Edit member details</li>
@@ -153,14 +160,17 @@
         <div class="modal medium" data-modal="edit-tree_modal">
             <form id="edit-tree_form" class="card modal-dialouge">
                 <div class="card__header">
-                    <h1 class="u-mar-b_0">Edit family</h1>
+                    <h2 class="u-mar-b_0">Edit family</h2>
                 </div>
                 <div class="card__content">
                     <div class="inputGroup">
                         <label for="edit-tree_name">Family name</label>
                         <input type="text" name="edit-tree_name">
                         <input type="text" name="edit-tree_id" class="u-d_none">
+                        <h3 class="u-mar-t_4">Members</h3>
+                        <div id="edit-tree_permissions" class="u-mar-b_2">
 
+                        </div>
                     </div>
                 </div>
                 <div class="card__footer">
@@ -228,10 +238,10 @@
 
     <!-- Compiled and minified JavaScript -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src='https://unpkg.com/panzoom@8.7.3/dist/panzoom.min.js'></script>
     <script src="scripts/auth.js"></script>
     <script src="scripts/index.js"></script>
     <script src="scripts/routing.js"></script>
-    <script src='https://unpkg.com/panzoom@8.7.3/dist/panzoom.min.js'></script>
     <!-- <script src="scripts/leader-line.min.js"></script> -->
 
     </body>

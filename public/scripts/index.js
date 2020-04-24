@@ -28,8 +28,19 @@ const createTreeFormModal = document.querySelector("#create-tree_form_modal");
 const editTreeForm = document.querySelector("#edit-tree_form");
 const notificationIndicator = document.querySelector("#notification_indicator");
 const notificationMenu = document.querySelector("#notification_menu");
+const permissionsContainer = document.querySelector("#edit-tree_permissions");
+const viewPermissionsTree = document.querySelector("#view-preferences_tree");
+const viewPermissionsList = document.querySelector("#view-preferences_list");
 
-const excludedDetails = ["children", "parents", "siblings", "spouses", "topMember", "claimed_by", "created_by"];
+// panzoom(familyTree, {
+//     minZoom: .25, // prevent zooming out
+//     maxZoom: 1, // prevent zooming beyond acceptable levels
+//     // bounds: true, // prevent panning outside of container
+//     boundsPadding: 1, // prevent panning outside of container
+//     // zoomDoubleClickSpeed: 1
+// });
+
+const excludedDetails = ["children", "parents", "siblings", "spouses", "topMember", "claimed_by", "created_by", "profile_photo"];
 const excludedCategories = ["Name", "Address"];
 
 const treeBlueprint = {
@@ -69,6 +80,7 @@ const memberBlueprint = {
     "Top Member" : { "dataPath" : "topMember", "defaultValue" : false },
     "Claimed by" : { "dataPath" : "claimed_by", "defaultValue" : null },
     "Created by" : { "dataPath" : "created_by", "defaultValue" : null },
+    "Profile photo" : { "dataPath" : "profile_photo", "icon" : "picture", "defaultValue" : null }
 }
 
 const getLocalLeafDocFromId = (reqId) => {
@@ -367,6 +379,9 @@ const populateTreeMenu = () => {
 
         editButton.addEventListener('click', (e) => {
             e.preventDefault();
+            e.stopImmediatePropagation();
+
+            console.log("TODO: CONSIDER POPULATING THIS STUFF FROM CURRENTTREE var")
 
             let reqTreeId = e.target.closest("[data-id]").getAttribute('data-id');
             let reqTreeDoc = window.authMemberTrees.find(doc => doc.id === reqTreeId);
@@ -374,16 +389,32 @@ const populateTreeMenu = () => {
             editTreeForm["edit-tree_name"].value = reqTreeDoc.data().name;
             editTreeForm["edit-tree_id"].value = reqTreeDoc.id;
 
+            console.log(`TODO: If an admin, allow changing of permissions`);
+
+            permissionsContainer.innerHTML = '';
+
             for (leafId of reqTreeDoc.data().viewers) {
-                console.log(`${leafId} is a viewer`);
+                makePermissionDetailItem("viewer", leafId);
             }
 
             for (leafId of reqTreeDoc.data().contributors) {
-                console.log(`${leafId} is a contributor`);
+                makePermissionDetailItem("contributor", leafId);
             }
 
             for (leafId of reqTreeDoc.data().admins) {
-                console.log(`${leafId} is an admin`);
+                makePermissionDetailItem("admins", leafId);
+            }
+
+            function makePermissionDetailItem(permType, leafId) {
+                console.log("TODO: Load actual data when showing IMMEDIATE FAMILY section");
+                let el = `<div class="detailsPanel__item u-mar-b_4 u-d_flex u-align-items_center">
+                            <div class="detailsPanel__img u-mar-r_2"></div>
+                                <div class="detailsPanel__text u-mar-r_2">
+                                    <div class="detailsPanel__name u-mar-b_point5 u-bold">${leafId}</div> 
+                                    <div class="detailsPanel__realtiveType">${permType}</div> 
+                                </div>
+                             </div>`
+                permissionsContainer.innerHTML += el;
             }
 
             showModal(e);
@@ -411,8 +442,10 @@ const populateTreeMenu = () => {
 
 const getLeafEl = (doc) => {
     let leafName = doc.data().name.firstName ? doc.data().name.firstName : "";
+    let leafProfilePhoto = doc.data().profile_photo ? doc.data().profile_photo : "https://firebasestorage.googleapis.com/v0/b/mily-4c2a8.appspot.com/o/assets%2Fplaceholder%2Fprofile_placeholder.svg?alt=media&token=d3b939f1-d46b-4315-bcc6-3167d17a18ed";
     let figure = document.createElement("figure");
     let figcaption = document.createElement("figcaption");
+    let img = document.createElement("img");
 
     if (doc.data().claimed_by) {
         let claimedBy = doc.data().claimed_by;
@@ -420,10 +453,17 @@ const getLeafEl = (doc) => {
         figure.setAttribute("data-member-id", reqMemberDoc.id);
     }
 
+    let viewListInfo = getListViewInfo(doc);
+
     figcaption.textContent = leafName;
     figcaption.setAttribute("class", "leaf_caption");
     figure.setAttribute("class", "leaf");
     figure.setAttribute("data-id", doc.id);
+
+    img.setAttribute("class", "leaf__image");
+    img.setAttribute("src", leafProfilePhoto);
+
+    figure.appendChild(img);
     figure.appendChild(figcaption);
 
     figure.addEventListener('click', (e) => {
@@ -450,6 +490,7 @@ const getLeafEl = (doc) => {
         }
     });
 
+    figure.appendChild(viewListInfo);
     return figure;
 }
 
@@ -1063,10 +1104,74 @@ const removeLeaf = async () => {
                     })
                 }
             }
+
+            treesRef.doc(currentTreeDoc.id).update({
+                "admins" : firebase.firestore.FieldValue.arrayRemove(reqRemovalDoc.id),
+                "contributors" : firebase.firestore.FieldValue.arrayRemove(reqRemovalDoc.id),
+                "viewers" : firebase.firestore.FieldValue.arrayRemove(reqRemovalDoc.id)
+            });
     
             currentTreeLeafCollectionRef.doc(reqRemovalDoc.id).delete();
             document.querySelector(`[data-id="${reqRemovalDoc.id}"]`).remove();
         }
+    }
+}
+
+viewPermissionsTree.addEventListener('click', (e) => {
+    e.preventDefault();
+    showListView(false);
+})
+
+viewPermissionsList.addEventListener('click', (e) => {
+    e.preventDefault();
+    showListView();
+})
+
+const getListViewInfo = (leafDoc) => {
+    let viewListInfo = document.createElement("div");
+    viewListInfo.setAttribute("class", "view-list_info");
+    
+    let includeItems = ["name", "email", "phone_number", "address"];
+    let groupItems = ["name", "address"];
+
+    for (let [key, value] of Object.entries(memberBlueprint)) {
+        if ( groupItems.includes(value["dataPath"]) ) {
+            if ( value["defaultValue"] && Object.values(value["defaultValue"]).length > 0 ) {
+                let group = document.createElement("span");
+                group.setAttribute("class", "group");
+                for (let [detailKey, detailValue] of Object.entries(value["defaultValue"])) {
+                    if ( ["firstName", "lastName", "address1", "address2", "city", "zipcode", "country"].includes(detailValue["dataPath"]) ) {
+                        let name = leafDoc.data()[value["dataPath"]][detailValue["dataPath"]] ? leafDoc.data()[value["dataPath"]][detailValue["dataPath"]] : "No data" ;
+                        let detail = `<span class="leaf__detail-item">${name}</span>`;
+                        group.innerHTML += detail;
+                    }
+                }
+                viewListInfo.appendChild(group);
+            } else {
+                if ( includeItems.includes(key) ) {
+                    let detail = `<span>${leafDoc.data()[value["dataPath"]]}</span>`
+                    viewListInfo.innerHTML += detail;
+                }
+            }
+        } else {
+            if ( !excludedDetails.includes(value["dataPath"]) ) {
+                console.log(value["dataPath"]);
+
+                let detail = `<span>${leafDoc.data()[value["dataPath"]]}</span>`
+                viewListInfo.innerHTML += detail;
+            }
+            // do stuff with email phone. 
+        }
+    }
+    return viewListInfo;
+}
+
+const showListView = (show = true) => {
+    if (show) {
+        familyTreeEl.classList.add("view_list");
+        // Generate date for tree view
+    } else {
+        familyTreeEl.classList.remove("view_list");
     }
 }
 
@@ -1208,6 +1313,9 @@ const addChild = (e) => {
                 })
             }
         }
+        treesRef.doc(currentTreeDoc.id).update({
+            "viewers" : firebase.firestore.FieldValue.arrayUnion(newChildRef.id)
+        });
         location.reload();
     })
 }
@@ -1281,6 +1389,9 @@ const addSpouse = (e) => {
                     })
                 }
             }
+            treesRef.doc(currentTreeDoc.id).update({
+                "viewers" : firebase.firestore.FieldValue.arrayUnion(newChildRef.id)
+            });
             location.reload();
         })
         .catch(err => {
@@ -1340,6 +1451,9 @@ const addSibling = (e) => {
                 })
             }
         }
+        treesRef.doc(currentTreeDoc.id).update({
+            "viewers" : firebase.firestore.FieldValue.arrayUnion(newChildRef.id)
+        });
         location.reload();
     })
     .catch(err => {
@@ -1414,7 +1528,7 @@ const createLine = (branch, element1, element2)  => {
 
     if ( branch.nextSibling.classList.contains("descendants") ) {
         let parentToChildMiddleBar = document.createElement("div");
-        parentToChildMiddleBar.setAttribute("class", 'parentToChild__middleBar');
+        parentToChildMiddleBar.setAttribute("class", 'parentToChild__middleBar connectorLine');
         branch.nextSibling.insertAdjacentElement('afterbegin', parentToChildMiddleBar);
 
         let childLeaves = branch.nextSibling.querySelectorAll(".leaf");
@@ -1422,7 +1536,7 @@ const createLine = (branch, element1, element2)  => {
         if (childLeaves.length > 1) {
             for (childLeaf of childLeaves) {
                 let childToParentMiddleBar = document.createElement("div");
-                childToParentMiddleBar.setAttribute("class", 'childToParent__middleBar');
+                childToParentMiddleBar.setAttribute("class", 'childToParent__middleBar connectorLine');
                 childLeaf.insertAdjacentElement('afterbegin', childToParentMiddleBar);
             }
         } else {
@@ -1432,10 +1546,10 @@ const createLine = (branch, element1, element2)  => {
 
 
     let spouseLine = document.createElement("div");
-    spouseLine.setAttribute("class", 'spouseToSpouse__line');
+    spouseLine.setAttribute("class", 'spouseToSpouse__line connectorLine');
 
     let spouseToChildren = document.createElement("div");
-    spouseToChildren.setAttribute("class", 'parentToChildren__downLine');
+    spouseToChildren.setAttribute("class", 'parentToChildren__downLine connectorLine');
     // let spouseLine = document.createElement("div");
     // spouseLine.setAttribute("class", 'spouseLine');
 

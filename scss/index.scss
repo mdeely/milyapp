@@ -98,6 +98,10 @@ h6 {
     position: relative;
     flex: 1;
     transition: background-color $detailsRevealTiming ease-in-out;
+
+    &:focus {
+        outline: none;
+    }
     
     &:not(.showDetails) {
         #familyTree {
@@ -129,12 +133,99 @@ h6 {
 #familyTree {
     flex: 1;
     transition: margin-right $detailsRevealTiming ease-in-out;
-    overflow: scroll;
     display: flex;
+    overflow: scroll;
     flex-wrap: nowrap;
     justify-content: center;
     position: relative;
     top: 56px;
+    padding-bottom: 80px;
+
+    &:focus {
+        outline: 0 solid transparent;
+    }
+
+    .view-list_info {
+        display: none;
+    }
+
+    &.view_list {
+        justify-content: unset;
+        padding-left: 24px;
+        padding-right: 24px;
+        flex-direction: column;
+        align-items: flex-end;
+
+        .connectorLine {
+            display: none;
+        }
+
+        .view-list_info {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 16px;
+            margin-left: 48px;
+            width: 100%;
+        }
+
+        > .branch {
+            margin: 0 auto;
+            width: 100%;
+            max-width: 1024px;
+        }
+        
+        .branch,
+        .spouses,
+        .descendants {
+            display: block;
+        }
+
+        .descendants {
+            .leaf {
+                padding-left: 48px;
+            }
+        }
+
+        .leaf {
+            --leafSpacing: 8px;
+            width: 100%;
+            border-radius: 8px;
+            margin-left: 0;
+            height: unset;
+            padding: 16px;
+            justify-content: unset;
+            box-shadow: none;
+            align-items: center;
+
+            &:hover {
+                transform: scale(1.01);
+            }
+
+            &:active {
+                transform: scale(1);
+            }
+
+            &_caption {
+                display: none;
+            }
+
+            &__image {
+                --leafSize: 56px;
+            }
+
+            &__detail-item {
+                flex: 1;
+            }
+
+            &:before {
+                border-radius: 8px;
+                height: 100%;
+                width: 100%;
+                left: 0;
+                top: 0;
+            }
+        }
+    }
 }
 
 #detailsPanel {
@@ -299,7 +390,7 @@ h6 {
     text-align: center;
     display: flex;
     flex-direction: column;
-    left: 50%;
+    left: calc(50% + 16px);
     -webkit-transform: translateX(-50%);
     transform: translateX(-50%);
 
@@ -309,29 +400,27 @@ h6 {
 }
 
 .leaf {
-    height: var(--leafSize);
-    width: var(--leafSize);
     border-radius: 50%;
     box-shadow: var(--leafShadow);
-    cursor: pointer;
     position: relative;
     display: flex;
     justify-content: center;
     margin: var(--leafSpacing);
     transition: transform $detailsRevealTiming ease-in-out;
-    background-color: var(--color_yellow);
+    cursor: pointer;
 
     &:before {
         content: "";
         position: absolute;
-        width: calc(var(--leafSize) + 12px);
-        height: calc(var(--leafSize) + 12px);
-        top: -6px;
+        width: calc(var(--leafSize) + 20px);
+        height: calc(var(--leafSize) + 20px);
+        top: -4px;
         border-radius: 100px;
         box-shadow: 0 0 0 4px var(--color_outline);
         opacity: 0;
         transform: scale(.8);
         transition: transform $detailsRevealTiming ease-in-out;
+        z-index: -1;
     }
 
     &:hover {
@@ -372,6 +461,16 @@ h6 {
             font-style: italic;
             opacity: .75;
         }
+    }
+
+    &__image {
+        background-color: var(--color_yellow);
+        width: calc(var(--leafSize) + 12px);
+        // height: calc(var(--leafSize) + 12px);
+        max-width: calc(var(--leafSize) + 12px);
+        max-height: calc(var(--leafSize) + 12px);
+        overflow: hidden;
+        border-radius: 50%;
     }
 }
 
@@ -416,6 +515,10 @@ h6 {
     bottom: 0;
 }
 
+#view-preferences {
+    right: 0;
+}
+
 @media screen and (max-width: 640px) {
     :root {
         --navHeight: 176px;
@@ -444,6 +547,7 @@ h6 {
     #treeMenu {
         width: calc(100% - 48px);
         bottom: 24px;
+        left: 50%;
     }
 
     #mainContent {  
@@ -655,6 +759,7 @@ button,
     background-color: rgba( black, .35);
     display: flex;
     justify-content: center;
+    overflow: scroll;
 
     &.medium {
         .modal-dialouge  {
@@ -822,6 +927,14 @@ button,
 
 .u-mar-t_2 {
     margin-top: 16px;
+}
+
+.u-mar-t_3 {
+    margin-top: 24px;
+}
+
+.u-mar-t_4 {
+    margin-top: 32px;
 }
 
 .u-mar-b_1 {
