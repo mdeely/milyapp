@@ -25,6 +25,7 @@ $brand: #002831;
     --leafCaptionShadow: 0 0 12px rgba(0,0,0, .2);
     --detailsPanelDecorationTopOffset : 0;
     --spacer: 8px;
+    --accountMenuSize: 56px;
 }
 
 * {
@@ -164,6 +165,7 @@ h6 {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
             gap: 16px;
+            align-items: center;
             margin-left: 48px;
             width: 100%;
         }
@@ -180,12 +182,6 @@ h6 {
             display: block;
         }
 
-        .descendants {
-            .leaf {
-                padding-left: 48px;
-            }
-        }
-
         .leaf {
             --leafSpacing: 8px;
             width: 100%;
@@ -198,11 +194,15 @@ h6 {
             align-items: center;
 
             &:hover {
-                transform: scale(1.01);
+                transform: none;
+            }
+
+            &:hover:before {
+                transition: none;
             }
 
             &:active {
-                transform: scale(1);
+                transform: none;
             }
 
             &_caption {
@@ -225,6 +225,17 @@ h6 {
                 top: 0;
             }
         }
+    }
+}
+
+#accountMenu {
+    width: var(--accountMenuSize);
+    height: var(--accountMenuSize);
+    border-radius: 8px;
+    background-color: var(--color_yellow);
+
+    &:hover {
+        cursor: pointer;
     }
 }
 
@@ -360,14 +371,16 @@ h6 {
     cursor: pointer;
     transition: all .1s ease-in-out;
 
-    &:hover {
+    &:hover,
+    &:focus {
         box-shadow: 0 0 0 2px rgba(white, .25);
+        transform: scale(1.02);
     }
 
     &:active {
         background-color: rgba(white, .06);
-        transform: scale(.98);
-        transition: transform .05s ease-in-out;
+        transform: scale(1);
+        transition: transform .0s ease-in-out;
     }
 }
 
@@ -903,6 +916,10 @@ button,
 
 .u-mar-l_auto {
     margin-left: auto;
+}
+
+.u-mar-l_1 {
+    margin-left: 8px;
 }
 
 .u-mar-l_2 {

@@ -7,6 +7,7 @@ function getTreeIdFromUrl() {
     if (pathnameArray[1] === "trees" && pathnameArray[2]) {
         let treeIndex = pathnameArray.indexOf("trees");
         treeId = pathnameArray[treeIndex + 1];
+        console.log(treeId);
 
         return treeId;
 

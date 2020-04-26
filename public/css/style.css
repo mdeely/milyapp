@@ -21,7 +21,8 @@
   --leafShadow: 0px 2px 16px rgba(0, 0, 0, 0.05), 0px 1px 2px rgba(0, 0, 0, 0.07), 0px 4px 24px rgba(0, 0, 0, 0.08);
   --leafCaptionShadow: 0 0 12px rgba(0,0,0, .2);
   --detailsPanelDecorationTopOffset: 0;
-  --spacer: 8px; }
+  --spacer: 8px;
+  --accountMenuSize: 56px; }
 
 * {
   box-sizing: border-box; }
@@ -119,6 +120,7 @@ h6 {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
       gap: 16px;
+      align-items: center;
       margin-left: 48px;
       width: 100%; }
     #familyTree.view_list > .branch {
@@ -129,8 +131,6 @@ h6 {
     #familyTree.view_list .spouses,
     #familyTree.view_list .descendants {
       display: block; }
-    #familyTree.view_list .descendants .leaf {
-      padding-left: 48px; }
     #familyTree.view_list .leaf {
       --leafSpacing: 8px;
       width: 100%;
@@ -142,9 +142,11 @@ h6 {
       box-shadow: none;
       align-items: center; }
       #familyTree.view_list .leaf:hover {
-        transform: scale(1.01); }
+        transform: none; }
+      #familyTree.view_list .leaf:hover:before {
+        transition: none; }
       #familyTree.view_list .leaf:active {
-        transform: scale(1); }
+        transform: none; }
       #familyTree.view_list .leaf_caption {
         display: none; }
       #familyTree.view_list .leaf__image {
@@ -157,6 +159,14 @@ h6 {
         width: 100%;
         left: 0;
         top: 0; }
+
+#accountMenu {
+  width: var(--accountMenuSize);
+  height: var(--accountMenuSize);
+  border-radius: 8px;
+  background-color: var(--color_yellow); }
+  #accountMenu:hover {
+    cursor: pointer; }
 
 #detailsPanel {
   position: fixed;
@@ -244,12 +254,13 @@ h6 {
   border-radius: 4px;
   cursor: pointer;
   transition: all .1s ease-in-out; }
-  #treeMenu__currentTree:hover {
-    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.25); }
+  #treeMenu__currentTree:hover, #treeMenu__currentTree:focus {
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.25);
+    transform: scale(1.02); }
   #treeMenu__currentTree:active {
     background-color: rgba(255, 255, 255, 0.06);
-    transform: scale(0.98);
-    transition: transform .05s ease-in-out; }
+    transform: scale(1);
+    transition: transform .0s ease-in-out; }
 
 #treeMenu__options {
   left: 50%;
@@ -665,6 +676,9 @@ button,
 
 .u-mar-l_auto {
   margin-left: auto; }
+
+.u-mar-l_1 {
+  margin-left: 8px; }
 
 .u-mar-l_2 {
   margin-left: 16px; }

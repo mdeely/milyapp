@@ -31,6 +31,7 @@ const notificationMenu = document.querySelector("#notification_menu");
 const permissionsContainer = document.querySelector("#edit-tree_permissions");
 const viewPermissionsTree = document.querySelector("#view-preferences_tree");
 const viewPermissionsList = document.querySelector("#view-preferences_list");
+const addRelationshipButton = document.querySelector(".add-relationship_button");
 
 // panzoom(familyTree, {
 //     minZoom: .25, // prevent zooming out
@@ -105,28 +106,48 @@ const setupView = () => {
     initiateSetupPage(false);
 
     familyTree.innerHTML = '';
+
+    if (authMemberHasPermission()) {
+        window.topMemberDoc = window.currentTreeLeaves.find(doc => doc.data().topMember === true);
+        window.renderedLeafMembers = [];
+        let siblings = topMemberDoc.data().siblings && topMemberDoc.data().siblings.length > 0 ? topMemberDoc.data().siblings : null;
+        let generatedFamilyTreeHtml = renderFamilyFromMember(topMemberDoc);
     
-    window.topMemberDoc = window.currentTreeLeaves.find(doc => doc.data().topMember === true);
-    window.renderedLeafMembers = [];
-    let siblings = topMemberDoc.data().siblings && topMemberDoc.data().siblings.length > 0 ? topMemberDoc.data().siblings : null;
-    let generatedFamilyTreeHtml = renderFamilyFromMember(topMemberDoc);
-
-    if (siblings) {
-        for (siblingId of siblings) {
-            let siblingBranchEl = createBranchEl("div", "branch")
-            let siblingDoc = getLocalLeafDocFromId(siblingId);
-            let siblingsHtml = renderFamilyFromMember(siblingDoc);
-
-            siblingBranchEl.appendChild(siblingsHtml);
-            familyTreeEl.appendChild(siblingsHtml);
+        if (siblings) {
+            for (siblingId of siblings) {
+                let siblingBranchEl = createBranchEl("div", "branch")
+                let siblingDoc = getLocalLeafDocFromId(siblingId);
+                let siblingsHtml = renderFamilyFromMember(siblingDoc);
+    
+                siblingBranchEl.appendChild(siblingsHtml);
+                familyTreeEl.appendChild(siblingsHtml);
+            }
         }
+    
+        setTreeHash(currentTreeDoc.id);
+        familyTreeEl.appendChild(generatedFamilyTreeHtml);
+        generateLines();
+        getNotificationsByAuthMember();
+        getNotificationsByEmail();
+    } else {
+        let msg = `<h1 class="u-mar-lr_auto">You do not have permission to view this family tree</h1>`
+        familyTreeEl.innerHTML = msg;
+    }
+}
+
+const authMemberHasPermission = () => {
+    let viewer = currentTreeDoc.data().viewers.includes(authMemberDoc.id);
+    let contributor = currentTreeDoc.data().contributors.includes(authMemberDoc.id);
+    let admin = currentTreeDoc.data().admins.includes(authMemberDoc.id);
+    let hasPermisison;
+
+    if (viewer || contributor || admin) {
+        hasPermission = true;
+    } else {
+        hasPermission = false;
     }
 
-    setTreeHash(currentTreeDoc.id);
-    familyTreeEl.appendChild(generatedFamilyTreeHtml);
-    generateLines();
-    getNotificationsByAuthMember();
-    getNotificationsByEmail();
+    return hasPermission;
 }
 
 
@@ -138,8 +159,14 @@ const getNotificationsByAuthMember = () => {
 
         if (docs.length > 0) {
             for (doc of docs) {
-                let notificationEl = document.createElement("div")
+                let notificationEl = document.createElement("div");
+                let dismissNotificationButton = document.createElement('button');
+                let icon = `<i class="fa fa-times"></i>`
                 let message;
+
+                dismissNotificationButton.innerHTML = icon;
+                dismissNotificationButton.setAttribute("class", "iconButton white");
+
                 notificationEl.setAttribute("data-notification-id", doc.id);
                 notificationEl.setAttribute("class","dropdown__item");
 
@@ -149,20 +176,37 @@ const getNotificationsByAuthMember = () => {
                     message = `${doc.data().for_email} declined your request`;
                 }
 
-                notificationEl.textContent = message;
+                dismissNotificationButton.addEventListener('click', (e) => {
+                    e.preventDefault();
+
+                    notificationsRef.doc(doc.id).delete()
+                    .then(() => {
+                        console.log("notificaiton was dismissed and deleted");
+                        location.reload();
+                    })
+                    .catch(err => {
+                        console.log(err.message);
+                    })
+                })
+
+                notificationEl.textContent += message;                
+
+                notificationEl.appendChild(dismissNotificationButton);
                 notificationMenu.appendChild(notificationEl);
+                notificationIndicator.classList.remove("u-d_none");
             }
         }
     })
     console.log("TODO: when a user dismisses a declined or accepted invitation, delete notification record");
 }
 
-const getNotificationsByEmail = (email = authMemberDoc.data().email) => {
+const getNotificationsByEmail = async (email = authMemberDoc.data().email) => {
+    console.log(authMemberDoc.data().email);
     let notificationQuery = notificationsRef.where("status", "==", "pending").where("for_email", "==", authMemberDoc.data().email);
 
     notificationQuery.get().then(queryResult  => {
         let docs = queryResult.docs;
-
+        console.log(docs);
         if (docs.length > 0) {
             notificationIndicator.classList.remove("u-d_none");
 
@@ -191,28 +235,44 @@ const getNotificationsByEmail = (email = authMemberDoc.data().email) => {
                 notificationEl.setAttribute("data-notification-id", doc.id);
                 notificationEl.setAttribute("class","dropdown__item");
 
-                notificationEl.textContent = `You have an invitation from ${doc.data().from_member} to take over ${doc.data().for_leaf} in family ${doc.data().for_tree} as an ${doc.data().permission_type}.`;
-
-                notificationEl.appendChild(acceptNotification);
-                notificationEl.appendChild(declinetNotification);
-                notificationMenu.appendChild(notificationEl);
+                membersRef.doc(doc.data().from_member).get()
+                .then(memberDoc => {
+                    if (memberDoc.exists) {
+                        treesRef.doc(doc.data().for_tree).get()
+                        .then((treeDoc) => {
+                            treesRef.doc(doc.data().for_tree).collection("leaves").doc(doc.data().for_leaf).get()
+                            .then((leafDoc) => {
+                                let memberName = memberDoc.data().name && memberDoc.data().name.firstName ? memberDoc.data().name.firstName : "a Mily member";
+                                let leafName = leafDoc.data().name && leafDoc.data().name.firstName ? leafDoc.data().name.firstName : "a leaf";
+                                let treeName = treeDoc.data().name ? treeDoc.data().name : "a tree";
+        
+                                notificationEl.textContent = `You have an invitation from ${memberName} to take over "${leafName}" in family "${treeName}" as a ${doc.data().permission_type}.`;
+        
+                                notificationEl.appendChild(acceptNotification);
+                                notificationEl.appendChild(declinetNotification);
+                                notificationMenu.appendChild(notificationEl);
+                            })
+                        });
+                    } else {
+                        console.log("An invitation exists, but that member is no longer a part of Mily.");
+                    }
+                })
             }            
         } else {
             console.log("No notifications")
-            notificationIndicator.classList.add("u-d_none");
         }
     })
     
 }
 
 const handleNotification = (method, doc) => {
+    let leafToTakeOver = doc.data().for_leaf;
+    let treeToJoin = doc.data().for_tree;
+
+    let reqTreeRef = treesRef.doc(treeToJoin);
+    let reqTreeAndLeafRef = reqTreeRef.collection('leaves').doc(leafToTakeOver);
+
     if (method === "accept") {
-        let leafToTakeOver = doc.data().for_leaf;
-        let treeToJoin = doc.data().for_tree;
-
-        let reqTreeRef = treesRef.doc(treeToJoin);
-        let reqTreeAndLeafRef = reqTreeRef.collection('leaves').doc(leafToTakeOver);
-
         membersRef.doc(authMemberDoc.id).get()
         .then(reqMemberDoc => {
             let permissionType = doc.data().permission_type + "s";
@@ -345,7 +405,7 @@ const populateTreeMenu = () => {
     let categoryHeaderButton = document.createElement("button");
 
     categoryHeaderButton.innerHTML = `<i class="fa fa-plus"></i>`;
-    categoryHeaderButton.setAttribute("class", "iconButton u-mar-l_auto");
+    categoryHeaderButton.setAttribute("class", "iconButton white u-mar-l_auto");
     categoryHeaderButton.setAttribute('data-modal-trigger', 'create-tree_modal');
 
     categoryHeaderButton.addEventListener('click', (e) => {
@@ -363,6 +423,7 @@ const populateTreeMenu = () => {
         let treeAnchor = document.createElement("li");
         let editButton = document.createElement("button");
         let className = '';
+        let isAdminOfTree = treeDoc.data().admins.includes(authMemberDoc.id) ? true : false;
 
         if (treeDoc.id === window.currentTreeDoc.id) {
             className = "active";
@@ -381,6 +442,16 @@ const populateTreeMenu = () => {
             e.preventDefault();
             e.stopImmediatePropagation();
 
+            if (isAdminOfTree) {
+                editTreeForm.querySelector(".edit-tree_save").classList.remove("u-d_none");
+                editTreeForm.querySelector(".edit-tree_delete").classList.remove("u-d_none");
+                editTreeForm["edit-tree_name"].removeAttribute("disabled");
+            } else {
+                editTreeForm.querySelector(".edit-tree_save").classList.add("u-d_none")
+                editTreeForm.querySelector(".edit-tree_delete").classList.add("u-d_none");
+                editTreeForm["edit-tree_name"].setAttribute("disabled", true);
+            }
+
             console.log("TODO: CONSIDER POPULATING THIS STUFF FROM CURRENTTREE var")
 
             let reqTreeId = e.target.closest("[data-id]").getAttribute('data-id');
@@ -389,7 +460,7 @@ const populateTreeMenu = () => {
             editTreeForm["edit-tree_name"].value = reqTreeDoc.data().name;
             editTreeForm["edit-tree_id"].value = reqTreeDoc.id;
 
-            console.log(`TODO: If an admin, allow changing of permissions`);
+            console.log(`TODO: If an admin, allow changing of permissions within the tree settings`);
 
             permissionsContainer.innerHTML = '';
 
@@ -406,7 +477,9 @@ const populateTreeMenu = () => {
             }
 
             function makePermissionDetailItem(permType, leafId) {
+                permType = permType.replace('s', '');
                 console.log("TODO: Load actual data when showing IMMEDIATE FAMILY section");
+                console.log("TODO: If not claimed_by, do not show that leaf");
                 let el = `<div class="detailsPanel__item u-mar-b_4 u-d_flex u-align-items_center">
                             <div class="detailsPanel__img u-mar-r_2"></div>
                                 <div class="detailsPanel__text u-mar-r_2">
@@ -528,36 +601,45 @@ const populateDetailsPanel = (doc, leafDoc) => {
 
     let profileImage = detailsPanel.querySelector(".detailsPanel__profileImage img");
     profileImage.setAttribute('src', placeholderImageUrl);
-
-    if (authLeafPermissionType() === "admin" || authLeafPermissionType() === "contributor") {
+    
+    if (authLeafPermissionType() && authLeafPermissionType() === "admin" || authLeafPermissionType() && authLeafPermissionType() === "contributor") {
         addParentButton.classList.remove("u-d_none")
         inviteMemberButton.classList.remove("u-d_none");
         removeLeafButton.classList.remove("u-d_none");
         editMemberButton.classList.remove("u-d_none");
+        addRelationshipButton.classList.remove("u-d_none");
 
         if (doc.data().topMember !== true) {
             addParentButton.classList.add("u-d_none")
-        }
-
-        if (doc.data().claimed_by) {
-            inviteMemberButton.classList.add("u-d_none");
-            editMemberButton.classList.add("u-d_none");
         }
 
         if (doc.data().invitation) {
             inviteMemberButton.classList.add("u-d_none");
         }
 
-        if (doc.data().claimed_by === authMemberDoc.id || doc.id === authMemberDoc.id) {
-            removeLeafButton.classList.add("u-d_none");
-            editMemberButton.classList.remove("u-d_none");
+        if (doc.data().claimed_by) {
+            if (doc.data().claimed_by === authMemberDoc.id) {
+                removeLeafButton.classList.add("u-d_none");
+                editMemberButton.classList.remove("u-d_none");
+                inviteMemberButton.classList.add("u-d_none");
+            } else {
+                inviteMemberButton.classList.add("u-d_none");
+                editMemberButton.classList.add("u-d_none");
+            }
         }
 
-    } else if (authLeafPermissionType() === "viewer") {
+    } else if (authLeafPermissionType() || authLeafPermissionType() === "viewer") {
         addParentButton.classList.add("u-d_none")
         inviteMemberButton.classList.add("u-d_none");
         removeLeafButton.classList.add("u-d_none");
         editMemberButton.classList.add("u-d_none");
+        addRelationshipButton.classList.add("u-d_none");
+    } else {
+        addParentButton.classList.add("u-d_none")
+        inviteMemberButton.classList.add("u-d_none");
+        removeLeafButton.classList.add("u-d_none");
+        editMemberButton.classList.add("u-d_none");
+        addRelationshipButton.classList.add("u-d_none");
     }
 
     for (let [key, value] of Object.entries(memberBlueprint)) {
@@ -743,44 +825,36 @@ inviteMemberForm.addEventListener('submit', (e) => {
     let emailAlreadyInUse = window.currentTreeMemberDocs.find(memberDoc => memberDoc.data().email === emaillAddress);
     console.log(`${emaillAddress} should take over ${leafId} as a ${permissionType}. Sent by ${authMemberDoc.id}`);
 
-    console.log(window.currentTreeMemberDocs[0].data().email);
-
     if (emailAlreadyInUse) {
-        console.log("This email is already used in this tree");
-    }
-
-    return;
-
-    console.log("TODO: Check invitations for pending and the requested email");
-
-    notificationsRef.add({
-        "type" : "invitation",
-        "from_member" : authMemberDoc.id,
-        "for_email" : emaillAddress,
-        "for_leaf" : leafId,
-        "for_tree" : currentTreeDoc.id,
-        "permission_type" : permissionType,
-        "status" : "pending"
-    })
-    .then(newNotificationRef => {
-        currentTreeLeafCollectionRef.doc(leafId).update({
-            invitation: newNotificationRef.id
+        inviteMemberForm.querySelector(".error").textContent = `${emaillAddress} already belongs to a leaf on this tree.`;
+    } else {
+        notificationsRef.add({
+            "type" : "invitation",
+            "from_member" : authMemberDoc.id,
+            "for_email" : emaillAddress,
+            "for_leaf" : leafId,
+            "for_tree" : currentTreeDoc.id,
+            "permission_type" : permissionType,
+            "status" : "pending"
         })
-        .then(() => {
-            console.log("invitation created successfully!");
-            inviteMemberForm["invite-member_email"].value = '';
-            closeModals();
+        .then(newNotificationRef => {
+            currentTreeLeafCollectionRef.doc(leafId).update({
+                invitation: newNotificationRef.id
+            })
+            .then(() => {
+                console.log("invitation created successfully!");
+                inviteMemberForm["invite-member_email"].value = '';
+                inviteMemberForm.querySelector(".error").textContent = '';
+                closeModals();
+            })
+            .catch(err => {
+                console.log(err.message)
+            })
         })
         .catch(err => {
-            console.log(err.message)
+            console.log(err.message);
         })
-    })
-    .catch(err => {
-        console.log(err.message);
-    })
-
-    // create notification
-    // Invitation request goes on leaf (so you can reference that it is pending or cancel it)
+    }
 })
 
 createTreeFormModal.addEventListener('submit', (e) => {
@@ -899,8 +973,6 @@ const getDocFromDetailsPanelId = (forceLeaf = false) => {
 const editMember = () => {
     let reqEditDoc = getDocFromDetailsPanelId();
     let reqEditDocData = reqEditDoc.data();
-
-    console.log(reqEditDoc);
 
     detailsPanelEdit.classList.remove("u-d_none");
 
@@ -1022,7 +1094,6 @@ const createMemberInput = (detailName, data, name, type = "text") => {
 
 const removeLeaf = async () => {
     let reqRemovalDoc = getDocFromDetailsPanelId();
-    console.log(`I'm tryna remove ${reqRemovalDoc.id}`);
 
     if (reqRemovalDoc.data().claimed_by === authMemberDoc.id) {
         alert("You cannot delete yourself!");
@@ -1106,13 +1177,20 @@ const removeLeaf = async () => {
             }
 
             treesRef.doc(currentTreeDoc.id).update({
-                "admins" : firebase.firestore.FieldValue.arrayRemove(reqRemovalDoc.id),
-                "contributors" : firebase.firestore.FieldValue.arrayRemove(reqRemovalDoc.id),
-                "viewers" : firebase.firestore.FieldValue.arrayRemove(reqRemovalDoc.id)
+                "admins" : firebase.firestore.FieldValue.arrayRemove(reqRemovalDoc.data().claimed_by),
+                "contributors" : firebase.firestore.FieldValue.arrayRemove(reqRemovalDoc.data().claimed_by),
+                "viewers" : firebase.firestore.FieldValue.arrayRemove(reqRemovalDoc.data().claimed_by)
             });
     
-            currentTreeLeafCollectionRef.doc(reqRemovalDoc.id).delete();
-            document.querySelector(`[data-id="${reqRemovalDoc.id}"]`).remove();
+            currentTreeLeafCollectionRef.doc(reqRemovalDoc.id).delete()
+            .then(() => {
+                console.log("user was deleted");
+                location.reload();
+            })
+            .catch(err => {
+                console.log(err.message);
+            })
+            // document.querySelector(`[data-id="${reqRemovalDoc.id}"]`).remove();
         }
     }
 }
@@ -1155,8 +1233,6 @@ const getListViewInfo = (leafDoc) => {
             }
         } else {
             if ( !excludedDetails.includes(value["dataPath"]) ) {
-                console.log(value["dataPath"]);
-
                 let detail = `<span>${leafDoc.data()[value["dataPath"]]}</span>`
                 viewListInfo.innerHTML += detail;
             }
@@ -1313,9 +1389,6 @@ const addChild = (e) => {
                 })
             }
         }
-        treesRef.doc(currentTreeDoc.id).update({
-            "viewers" : firebase.firestore.FieldValue.arrayUnion(newChildRef.id)
-        });
         location.reload();
     })
 }
@@ -1389,9 +1462,6 @@ const addSpouse = (e) => {
                     })
                 }
             }
-            treesRef.doc(currentTreeDoc.id).update({
-                "viewers" : firebase.firestore.FieldValue.arrayUnion(newChildRef.id)
-            });
             location.reload();
         })
         .catch(err => {
@@ -1451,9 +1521,6 @@ const addSibling = (e) => {
                 })
             }
         }
-        treesRef.doc(currentTreeDoc.id).update({
-            "viewers" : firebase.firestore.FieldValue.arrayUnion(newChildRef.id)
-        });
         location.reload();
     })
     .catch(err => {
@@ -1512,6 +1579,7 @@ const generateLines = () => {
 }
 
 const createLine = (branch, element1, element2)  => {
+    return;
     // let e1_box = element1.getBoundingClientRect();
     // let e2_box = element2.getBoundingClientRect();
 

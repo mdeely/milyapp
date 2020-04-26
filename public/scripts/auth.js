@@ -27,8 +27,10 @@ signOutButton.addEventListener('click', (e) => {
 })
 
 auth.onAuthStateChanged(user => {
-    if (user) {
+    if (user && user.emailVerified) {
         setupAuthUser(user);
+    } else if (user && !user.emailVerified) {
+        console.log("User is not verified yet!");
     } else {
         authenticatedView();
         clearAuthMemberVar();
@@ -188,6 +190,16 @@ signUpForm.addEventListener('submit', (e) => {
             "trees": [],
             "primary_tree": null
         }).then(() => {
+            var user = firebase.auth().currentUser;
+
+            user.sendEmailVerification()
+            .then(() => {
+                console.log("Verification email sent!");
+            })
+            .catch(err => {
+                console.log("Error sendign verification email.");
+            })
+
             signUpForm.reset();
             signUpForm.querySelector(".error").innerHTML = '';
         }).catch(err => {
