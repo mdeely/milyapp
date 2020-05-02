@@ -1,7 +1,52 @@
-const familyTreeEl = document.querySelector("#familyTree");
-const treeMenuEl = document.querySelector("#treeMenu");
-const treeMenuDropdownEl = document.querySelector("#treeMenu__options");
-const treeMenuCurrentTreeEl = document.querySelector("#treeMenu__currentTree");
+import router from './routing.js';
+
+const signInForm = document.querySelector("#sign-in_form");
+const signOutButton = document.querySelector("#sign-out_button");
+
+router();
+
+window.onpopstate = function(event) {
+    router();
+}
+
+const listenForSignUpForm = () => {
+    signInForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+    
+        let email = signInForm['sign-in_email'].value;
+        let password = signInForm['sign-in_password'].value;
+    
+        auth.signInWithEmailAndPassword(email, password)
+        .then(() => {
+            console.log("successfully logged in");
+            signInForm.reset();
+            signInForm.querySelector(".message").innerHTML = '';
+        }).catch(err => {
+            signInForm.querySelector(".message").innerHTML = err.message;
+        })
+    })
+}
+
+const listenForSignOutButton = () => {
+    signOutButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        // sign out the user
+        auth.signOut();
+    })
+}
+
+listenForSignOutButton();
+listenForSignUpForm();
+
+
+
+
+// window.addEventListener('hashchange', router());
+// window.addEventListener('onpopstate', router());
+
+///////////
+//////////
+
 const mainContent = document.querySelector("#mainContent");
 const detailsPanel = mainContent.querySelector("#detailsPanel");
 const detailsPanelInfo = detailsPanel.querySelector(".detailsPanel__information");
@@ -12,7 +57,6 @@ const detailsPanelEdit = detailsPanel.querySelector("#detailsPanel__edit");
 const detailsPanelAction = detailsPanel.querySelector(".detailsPanel__actions");
 const placeholderImageUrl = "https://firebasestorage.googleapis.com/v0/b/mily-4c2a8.appspot.com/o/assets%2Fplaceholder%2Fprofile_placeholder.svg?alt=media&token=d3b939f1-d46b-4315-bcc6-3167d17a18ed";
 const modalTriggers = document.querySelectorAll("[data-modal-trigger]");
-const dropdownTriggers = document.querySelectorAll(`[data-dropdown-target]`);
 const memberOptionsDropdown = document.querySelector('[data-dropdown-target="member-options-dropdown"]');
 const removeLeafButton = document.querySelector("#remove-leaf-action");
 const inviteMemberButton = document.querySelector("#invite-member-action");
@@ -22,6 +66,7 @@ const addChildButton = document.querySelector("#add-child-action");
 const addSpouseButton = document.querySelector("#add-spouse-action");
 const addSiblingButton = document.querySelector("#add-sibling-action");
 const deleteTreeButton = document.querySelector("#delete-tree");
+const setProfileForm = document.querySelector("#set-profile_form");
 const createTreeForm = document.querySelector("#create-tree_form");
 const inviteMemberForm = document.querySelector("#invite-member_form");
 const createTreeFormModal = document.querySelector("#create-tree_form_modal");
@@ -84,6 +129,59 @@ const memberBlueprint = {
     "Profile photo" : { "dataPath" : "profile_photo", "icon" : "picture", "defaultValue" : null }
 }
 
+
+// const resetOnAuthStateChanged = auth.onAuthStateChanged(function (user) {
+//     console.log("reset!");
+// });
+
+const initializeGlobalMemberVars = (user) => new Promise(
+    function (resolve, reject) {
+        if (user) {
+            window.memberTreeDocs = [];
+
+            resolve(user.uid);
+            reject(console.log("initiation failed"));
+
+            membersRef.where('claimed_by', '==', user.uid).limit(1).get()
+            .then((queryResult => {
+                window.authMemberDoc = queryResult.docs[0] ? queryResult.docs[0] : null;
+                let iterations = authMemberDoc.data().trees.length;
+
+                for (const [i, treeId] of authMemberDoc.data().trees.entries()) {
+                    console.log(treeId);
+                    treesRef.doc(treeId).get()
+                    .then((reqTreeDoc) => {
+                        if (!window.memberTreeDocs.includes(reqTreeDoc)) {
+                            window.memberTreeDocs.push(reqTreeDoc);
+                        }
+                    })
+                    .catch(err => {
+                        reject(err);
+                    })
+                    if (i === (iterations - 1)) {
+                        resolve(console.log("initialize function resolved!"));
+                    }
+                  }
+            }))
+        }
+    }
+);
+
+const setupEmailVerificationView = (user) => {
+    let msg = `<h2 class="u-mar-lr_auto">You must verify that ${user.email} belongs to you. Check your email.</h2>`
+    let resendButton = document.createElement('button');
+    resendButton.textContent = "Resend verification email"
+    resendButton.setAttribute('class', 'u-d_block u-mar-lr_auto');
+    
+    resendButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        setupEmailVerificationView(user);
+    })
+
+    familyTreeEl.innerHTML += msg;
+    familyTreeEl.appendChild(resendButton);
+}
+
 const getLocalLeafDocFromId = (reqId) => {
     return window.currentTreeLeaves.find(doc => doc.id === reqId);
 };
@@ -94,9 +192,11 @@ const getLocalMemberDocFromId = (reqId) => {
 
 const initiateSetupPage = (initiate = true) => {
     if (initiate){
-        createTreeForm.classList.remove("u-d_none")
+        setProfileForm.classList.remove("u-d_none");
+        // createTreeForm.classList.remove("u-d_none")
     } else {
-        createTreeForm.classList.add("u-d_none")
+        setProfileForm.classList.add("u-d_none");
+        // createTreeForm.classList.add("u-d_none")
     }
 }
 
@@ -201,12 +301,10 @@ const getNotificationsByAuthMember = () => {
 }
 
 const getNotificationsByEmail = async (email = authMemberDoc.data().email) => {
-    console.log(authMemberDoc.data().email);
     let notificationQuery = notificationsRef.where("status", "==", "pending").where("for_email", "==", authMemberDoc.data().email);
 
     notificationQuery.get().then(queryResult  => {
         let docs = queryResult.docs;
-        console.log(docs);
         if (docs.length > 0) {
             notificationIndicator.classList.remove("u-d_none");
 
@@ -259,7 +357,7 @@ const getNotificationsByEmail = async (email = authMemberDoc.data().email) => {
                 })
             }            
         } else {
-            console.log("No notifications")
+            // No notifications!
         }
     })
     
@@ -369,161 +467,22 @@ const initiateModals = () => {
     }
 };
 
-const initiateDropdowns = () => {
-    for (dropdownTrigger of dropdownTriggers) {
-        dropdownTrigger.addEventListener('click', (e) => {
-            e.preventDefault();
-            showDropdown(e);
-        })
-    }
-}
-
-const closeAllDropdowns = () => {
-    for (dropdownTrigger of dropdownTriggers) {
-        let targetClass = dropdownTrigger.getAttribute("data-dropdown-target");
-        let targetEl = document.querySelector(`#${targetClass}`);
-        targetEl.classList.add("u-d_none");
-    }
-}
-
-const showDropdown = (e) => {
-    let targetClass = e.target.getAttribute("data-dropdown-target");
-    let targetEl = document.querySelector(`#${targetClass}`);
-
-    if (targetEl.classList.contains(`u-d_none`)) {
-        closeAllDropdowns();
-        targetEl.classList.remove("u-d_none")
-    } else {
-        targetEl.classList.add("u-d_none")
-    }
-}
-
-const populateTreeMenu = () => {
-    treeMenuDropdownEl.innerHTML = '';
-
-    let categoryheader = document.createElement("div");
-    let categoryHeaderButton = document.createElement("button");
-
-    categoryHeaderButton.innerHTML = `<i class="fa fa-plus"></i>`;
-    categoryHeaderButton.setAttribute("class", "iconButton white u-mar-l_auto");
-    categoryHeaderButton.setAttribute('data-modal-trigger', 'create-tree_modal');
-
-    categoryHeaderButton.addEventListener('click', (e) => {
-        e.preventDefault();
-        showModal(e);   
-    })
-
-    categoryheader.setAttribute("class", "dropdown__item dropdown__label");
-    categoryheader.textContent = "Families"
-    categoryheader.appendChild(categoryHeaderButton);
-
-    treeMenuDropdownEl.appendChild(categoryheader);
-
-    for (let treeDoc of window.authMemberTrees) {
-        let treeAnchor = document.createElement("li");
-        let editButton = document.createElement("button");
-        let className = '';
-        let isAdminOfTree = treeDoc.data().admins.includes(authMemberDoc.id) ? true : false;
-
-        if (treeDoc.id === window.currentTreeDoc.id) {
-            className = "active";
-            treeMenuCurrentTreeEl.innerHTML += treeDoc.data().name ? treeDoc.data().name : "Unnamed";
-        }
-
-        treeAnchor.setAttribute("data-id", treeDoc.id);
-        treeAnchor.setAttribute("class", `dropdown__item ${className}`);
-        treeAnchor.textContent += treeDoc.data().name;
-
-        editButton.innerHTML = `<i class="fa fa-pencil-alt"></i>`;
-        editButton.setAttribute("class", "iconButton white u-mar-l_auto");
-        editButton.setAttribute('data-modal-trigger', 'edit-tree_modal');
-
-        editButton.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopImmediatePropagation();
-
-            if (isAdminOfTree) {
-                editTreeForm.querySelector(".edit-tree_save").classList.remove("u-d_none");
-                editTreeForm.querySelector(".edit-tree_delete").classList.remove("u-d_none");
-                editTreeForm["edit-tree_name"].removeAttribute("disabled");
-            } else {
-                editTreeForm.querySelector(".edit-tree_save").classList.add("u-d_none")
-                editTreeForm.querySelector(".edit-tree_delete").classList.add("u-d_none");
-                editTreeForm["edit-tree_name"].setAttribute("disabled", true);
-            }
-
-            console.log("TODO: CONSIDER POPULATING THIS STUFF FROM CURRENTTREE var")
-
-            let reqTreeId = e.target.closest("[data-id]").getAttribute('data-id');
-            let reqTreeDoc = window.authMemberTrees.find(doc => doc.id === reqTreeId);
-
-            editTreeForm["edit-tree_name"].value = reqTreeDoc.data().name;
-            editTreeForm["edit-tree_id"].value = reqTreeDoc.id;
-
-            console.log(`TODO: If an admin, allow changing of permissions within the tree settings`);
-
-            permissionsContainer.innerHTML = '';
-
-            for (leafId of reqTreeDoc.data().viewers) {
-                makePermissionDetailItem("viewer", leafId);
-            }
-
-            for (leafId of reqTreeDoc.data().contributors) {
-                makePermissionDetailItem("contributor", leafId);
-            }
-
-            for (leafId of reqTreeDoc.data().admins) {
-                makePermissionDetailItem("admins", leafId);
-            }
-
-            function makePermissionDetailItem(permType, leafId) {
-                permType = permType.replace('s', '');
-                console.log("TODO: Load actual data when showing IMMEDIATE FAMILY section");
-                console.log("TODO: If not claimed_by, do not show that leaf");
-                let el = `<div class="detailsPanel__item u-mar-b_4 u-d_flex u-align-items_center">
-                            <div class="detailsPanel__img u-mar-r_2"></div>
-                                <div class="detailsPanel__text u-mar-r_2">
-                                    <div class="detailsPanel__name u-mar-b_point5 u-bold">${leafId}</div> 
-                                    <div class="detailsPanel__realtiveType">${permType}</div> 
-                                </div>
-                             </div>`
-                permissionsContainer.innerHTML += el;
-            }
-
-            showModal(e);
-        })
-
-        if (treeDoc.id === window.primaryTreeId) {
-            treeAnchor.innerHTML += " (Primary) "
-        }
-
-        treeAnchor.addEventListener('click', (e) => {
-            e.preventDefault();
-
-            let reqTreeId = e.target.getAttribute("data-id");
-            getAndSetCurrenTreeVars(reqTreeId);
-        })
-
-        treeAnchor.appendChild(editButton);
-        treeMenuDropdownEl.appendChild(treeAnchor);
-    }
-
-    let caretIcon = `<i class="fa fa-caret-down u-mar-l_2 u-pe_none u-o_75"></i>`;
-
-    treeMenuCurrentTreeEl.innerHTML += caretIcon;
-}
 
 const getLeafEl = (doc) => {
-    let leafName = doc.data().name.firstName ? doc.data().name.firstName : "";
+    let leafName;
     let leafProfilePhoto = doc.data().profile_photo ? doc.data().profile_photo : "https://firebasestorage.googleapis.com/v0/b/mily-4c2a8.appspot.com/o/assets%2Fplaceholder%2Fprofile_placeholder.svg?alt=media&token=d3b939f1-d46b-4315-bcc6-3167d17a18ed";
     let figure = document.createElement("figure");
     let figcaption = document.createElement("figcaption");
     let img = document.createElement("img");
-
+    
     if (doc.data().claimed_by) {
         let claimedBy = doc.data().claimed_by;
         reqMemberDoc = window.currentTreeMemberDocs.find(memberDoc => memberDoc.id === claimedBy);
         figure.setAttribute("data-member-id", reqMemberDoc.id);
+        leafName = reqMemberDoc.data().name.firstName ? reqMemberDoc.data().name.firstName : "";
+    } else {
+        leafName = doc.data().name.firstName ? doc.data().name.firstName : "";
+
     }
 
     let viewListInfo = getListViewInfo(doc);
@@ -549,6 +508,7 @@ const getLeafEl = (doc) => {
 
         if (memberId) {
             memberDoc = getLocalMemberDocFromId(memberId);
+            doc = memberDoc;
         }
 
         if (e.target.classList.contains("active")) {
@@ -556,7 +516,6 @@ const getLeafEl = (doc) => {
             showDetailPanels(false);
         } else {
             removeActiveLeafClass();
-
             e.target.classList.add("active");
             showDetailPanels(true);
             populateDetailsPanel(doc, leafDoc);
@@ -617,14 +576,13 @@ const populateDetailsPanel = (doc, leafDoc) => {
             inviteMemberButton.classList.add("u-d_none");
         }
 
-        if (doc.data().claimed_by) {
-            if (doc.data().claimed_by === authMemberDoc.id) {
+        if (leafDoc.data().claimed_by) {
+            if (leafDoc.data().claimed_by === authMemberDoc.id) {
                 removeLeafButton.classList.add("u-d_none");
                 editMemberButton.classList.remove("u-d_none");
                 inviteMemberButton.classList.add("u-d_none");
             } else {
                 inviteMemberButton.classList.add("u-d_none");
-                editMemberButton.classList.add("u-d_none");
             }
         }
 
@@ -855,6 +813,23 @@ inviteMemberForm.addEventListener('submit', (e) => {
             console.log(err.message);
         })
     }
+})
+
+setProfileForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    membersRef.doc(authMemberDoc.id).update({
+        name : {
+            firstName : setProfileForm["set-profile__firstName"]
+        },
+        birthday : setProfileForm["set-profile__birthday"]
+    })
+    .then(() => {
+        console.log("member was updated");
+    })
+    .catch(err => {
+        console.log(err.message);
+    })
 })
 
 createTreeFormModal.addEventListener('submit', (e) => {
@@ -1650,4 +1625,3 @@ const createLine = (branch, element1, element2)  => {
 }
 
 initiateModals();
-initiateDropdowns();

@@ -79,10 +79,6 @@ h6 {
     padding-left: 32px;
     padding-right: 32px;
 
-    a {
-        color: white;
-    }
-
     &__decoration {
         position: absolute;
         top: 100%;
@@ -623,6 +619,7 @@ input[type=password],
 input[type=number],
 input[type=date],
 select {
+    -webkit-appearance: none;
     padding: 12px 16px;
     box-shadow: 0 0 0 1px var(--color_border);
     border-radius: 8px;
@@ -825,6 +822,8 @@ button,
         font-weight: bold;
         display: flex;
         align-items: center;
+        text-decoration: none;
+        color: var(--color_text);
 
         &:hover {
             background-color: rgba($brand, .08);
@@ -891,6 +890,10 @@ button,
 
 .u-d_flex {
     display: flex;
+}
+
+.u-d_block {
+    display: block;
 }
 
 .u-jc_flex-end {
@@ -1012,6 +1015,11 @@ button,
 
 .u-o_25 {
     opacity: .25;
+}
+
+.u-remove-link-style {
+    text-decoration: none;
+    color: inherit;
 }
 
 /// Color

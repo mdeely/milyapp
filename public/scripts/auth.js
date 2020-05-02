@@ -9,58 +9,84 @@
 //     })
 // })
 
-window.currentTreeMemberDocs = new Array;
 
-const membersRef = db.collection('members');
-const treesRef = db.collection('trees');
-const notificationsRef = db.collection('notifications');
+
+
+window.currentTreeMemberDocs = new Array;
 
 // signup form
 const signUpForm = document.querySelector("#sign-up_form");
-const signOutButton = document.querySelector("#sign-out_button");
-const signInForm = document.querySelector("#sign-in_form");
+// const signOutButton = document.querySelector("#sign-out_button");
 
-signOutButton.addEventListener('click', (e) => {
-    e.preventDefault();
-    // sign out the user
-    auth.signOut();
-})
+// signOutButton.addEventListener('click', (e) => {
+//     e.preventDefault();
+//     auth.signOut();
+//     window.location.hash = "/"
+// })
 
-auth.onAuthStateChanged(user => {
-    if (user && user.emailVerified) {
-        setupAuthUser(user);
-    } else if (user && !user.emailVerified) {
-        console.log("User is not verified yet!");
-    } else {
-        authenticatedView();
-        clearAuthMemberVar();
-        clearView();
-        familyTreeEl.innerHTML = '';
-        setTreeHash();
-        initiateSetupPage(false);
-    }
-})
+// const checkForAuthentication = () => new Promise(
+//     function (resolve, reject) {
+//         if (firebase.auth().currentUser !== null) {
+//             console.log("something");
+//             // membersRef.where('claimed_by', '==', user.uid).limit(1).get()
 
-const clearView = () => {
-    treeMenuCurrentTreeEl.textContent = '';
-    showDetailPanels(false);
-    notificationMenu.innerHTML = '';
-}
+//             resolve(true);
+//         } else {
+//             resolve(false);
+//         }
+//     }
+// );
 
-const setupAuthUser = (user) => {
-    authenticatedView(true);
-    getAndSetAuthMemberVars(user);
-};
+// auth.onAuthStateChanged(user => {
+//     // if (user) {
 
-const getAndSetTreeDocs = async () => {
-    window.authMemberTrees = [];
-    for await (let treeId of window.authMemberDoc.data().trees) {
-        let treeDoc = await treesRef.doc(treeId).get();
-        if (treeDoc.exists) {
-            window.authMemberTrees.push(treeDoc);
-        }
-    }
-}
+//     //     console.log(user);
+//     //     // setAuthMemberDoc(user);
+//     // }
+
+//     // if (user && user.emailVerified) {
+//     //     // router();
+//     //     // setupAuthUser(user);
+//     // } else if (user && !user.emailVerified) {
+//     //     // setupEmailVerificationView(user);
+//     //     // authenticatedView(true);
+//     // } else {
+//     //     // authenticatedView(false);
+//     //     // clearView();
+//     //     // familyTreeEl.innerHTML = '';
+//     //     // setTreeHash();
+//     //     // initiateSetupPage(false);
+//     // }
+// })
+
+// const clearView = () => {
+//     treeMenuCurrentTreeEl.textContent = '';
+//     showDetailPanels(false);
+//     clearAuthMemberVar();
+//     notificationMenu.innerHTML = '';
+// }
+
+// const setupAuthUser = (user) => {
+//     authenticatedView(true);
+//     setAuthMemberDoc(user);
+//     // getAndSetAuthMemberVars(user);
+// };
+
+// const getAndSetTreeDocs = async () => {
+//     window.authMemberTrees = [];
+//     for await (let treeId of window.authMemberDoc.data().trees) {
+//         let treeDoc = await treesRef.doc(treeId).get();
+//         if (treeDoc.exists) {
+//             window.authMemberTrees.push(treeDoc);
+//         }
+//     }
+// }
+
+//////
+//////
+// LEFT OFF TRYING TO GET THE AUTHMEMBERDOC TO SET SO THE TREES VIEW CAN DEFAULT TO PRIMARY TREE IF NEEDED
+//////
+/////
 
 const getAndSetAuthMemberVars = async (user) => {
     let authMember = await membersRef.where('claimed_by', '==', user.uid).limit(1).get();
@@ -88,7 +114,6 @@ const getAndSetCurrentTreeMemberDocs = async () => {
 
     // go through leavesdocs. find which are claimed and get them memberDOOOCS
     for await (leafDoc of window.currentTreeLeaves) {
-
         if (leafDoc.data().claimed_by) {
             let memberDoc = await membersRef.doc(leafDoc.data().claimed_by).get();
             if (memberDoc.exists) {
@@ -156,20 +181,6 @@ const authenticatedView = (isAuthenticated) => {
     }
 }
 
-signInForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const email = signInForm['sign-in_email'].value;
-    const password = signInForm['sign-in_password'].value;
-
-    auth.signInWithEmailAndPassword(email, password)
-    .then(cred => {
-        signInForm.reset();
-        signInForm.querySelector(".message").innerHTML = '';
-    }).catch(err => {
-        signInForm.querySelector(".message").innerHTML = err.message;
-    })
-})
-
 signUpForm.addEventListener('submit', (e) => {
     e.preventDefault();
 
@@ -192,13 +203,7 @@ signUpForm.addEventListener('submit', (e) => {
         }).then(() => {
             var user = firebase.auth().currentUser;
 
-            user.sendEmailVerification()
-            .then(() => {
-                console.log("Verification email sent!");
-            })
-            .catch(err => {
-                console.log("Error sendign verification email.");
-            })
+            sendVerificationEmail(user);
 
             signUpForm.reset();
             signUpForm.querySelector(".error").innerHTML = '';
@@ -209,3 +214,13 @@ signUpForm.addEventListener('submit', (e) => {
         signUpForm.querySelector(".error").innerHTML = err.message;
     })
 })
+
+const sendVerificationEmail = (user) => {
+    user.sendEmailVerification()
+    .then(() => {
+        console.log("Verification email sent!");
+    })
+    .catch(err => {
+        console.log("Error sendign verification email.");
+    })
+}

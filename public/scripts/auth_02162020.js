@@ -37,7 +37,6 @@ auth.onAuthStateChanged(user => {
 
 // signup form
 const signInForm = document.querySelector("#signup-form");
-const signOutButton = document.querySelector("#signout-button");
 const logInForm = document.querySelector("#login-form");
 
 signInForm.addEventListener('submit', (e) => {
@@ -63,12 +62,6 @@ signInForm.addEventListener('submit', (e) => {
     }).catch(err => {
         signInForm.querySelector(".error").innerHTML = err.message;
     })
-})
-
-signOutButton.addEventListener('click', (e) => {
-    e.preventDefault();
-    // sign out the user
-    auth.signOut();
 })
 
 logInForm.addEventListener('submit', (e) => {

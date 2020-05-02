@@ -11,7 +11,7 @@
 </head>
     <body>
         <nav class="mainNav u-mar-b_6">
-            <h1 class="u-mar-b_0 u-c_white ">MILY</h1>
+            <h1 class="u-mar-b_0 u-c_white logo"><a href="/" class="u-remove-link-style">MILY</a></h1>
             <div class="buttonGroup u-mar-l_auto">
                 <button id="sign-up_button" class="ifAuth--hide">Log in</button>
                 <button class="ifAuth--hide">Sign up</button>
@@ -19,16 +19,16 @@
             <button id="notification_indicator" data-dropdown-target="notification_menu" class="u-mar-l_auto iconButton u-d_none"><i class="fa fa-bell"></i></button>
             <div id="notification_menu" class="dropdown u-p_absolute">
             </div>
-
             <button class="u-mar-l_2 u-mar-r_1 iconButton"><i class="fa fa-search"></i></button>
             <button class="ifAuth--show u-mar-l_2 u-mar-r_2 iconButton" data-dropdown-target="view-preferences"><i class="fa fa-eye"></i></button>
             <div id="view-preferences" class="dropdown u-d_none u-p_absolute">
                 <div id="view-preferences_tree" class="dropdown__item">Tree</div>
                 <div id="view-preferences_list" class="dropdown__item">List</div>
             </div>
-            <div id="accountMenu" class="ifAuth--show u-mar-l_1" data-dropdown-target="accountMenu__dropdown"></div>
-            <div id="accountMenu__dropdown" class="dropdown u-p_absolute">
-                <div class="dropdown__item">View profile</div>
+            <div id="accountMenu" class="u-mar-l_1" data-dropdown-target="accountMenu__dropdown"></div>
+            <div id="accountMenu__dropdown" class="dropdown u-p_absolute u-d_none">
+                <a href="#/profile" class="dropdown__item">View profile</a>
+                <a href="#/settings" class="dropdown__item">Account settings</a>
                 <div id="sign-out_button" class=" dropdown__item">Sign out</div>
             </div>
 
@@ -38,46 +38,88 @@
             </div>
             <img src="/assets/img/wavy-lg-dark.svg" alt="decoration" class="mainNav__decoration"/>
         </nav>
-        <form id="sign-in_form" class="ifAuth--hide card u-mar-lr_auto">
-            <div class="card__header u-pad_0">
-                <img src="/assets/img/wavy-sm--yellow.svg" alt="decoration">
-            </div>
-            <div class="card__content">
-                <div class="inputGroup">
-                    <label for="sign_in_email">Email</label>
-                    <input type="email" name="sign-in_email" placeholder="Email">
-                </div>
-                <div class="inputGroup">
-                    <label for="password">Password</label>
-                    <input type="password" name="sign-in_password" placeholder="Password">
-                    <p class="message"></p>
-                </div>
-            </div>
-            <div class="card__footer">
-                <button class="u-w_full">Log in</button>
-            </div>
-        </form>
 
-        <form id="sign-up_form" class="ifAuth--hide card u-mar-lr_auto">
-            <div class="card__header u-pad_0">
-                <img src="/assets/img/wavy-sm--yellow.svg" alt="decoration">
-            </div>
-            <div class="card__content">
-                <div class="inputGroup">
-                    <label for="sign_up_email">Email</label>
-                    <input type="email" name="sign-up_email" placeholder="Email">
+        <div style="display:none" data-view="tree">
+            <div class="debugMessage"></div>
+            <section id="familyTree"></section>
+        </div>
+
+        <div style="display:none" data-view="profile">
+            <div class="debugMessage"></div>
+            <form id="set-profile_form" class="card u-mar-lr_auto">
+                <div class="card__header">
+                    <h2 class="u-mar-b_0">Profile</h2>
                 </div>
-                <div class="inputGroup">
-                    <label for="sign-up_password">Password</label>
-                    <input type="password" name="sign-up_password" placeholder="Password">
-                    <p class="message"></p>
+                <div class="card__content">
+                    <div class="inputGroup">
+                        <label for="set-profile__firstname">First name</label>
+                        <input type="text" name="set-profile__firstname">
+                    </div>
+                    <div class="inputGroup">
+                        <label for="set-profile__birthday">Birthday</label>
+                        <input type="date" name="set-profile__birthday">
+                    </div>
                 </div>
-                <p class="error"></p>
-            </div>
-            <div class="card__footer">
-                <button class="u-w_full">Sign up</button>
-            </div>
-        </form>
+                <div class="card__footer">
+                    <button class="u-w_full">Continue</button>
+                </div>
+            </form>
+        </div>
+
+        <div style="display:none" data-view="settings">
+            <div class="debugMessage"></div>
+            <h1>Settings</h1>
+        </div>
+
+        <div id="home" class="u-d_flex" style="display:none" data-view="homepage">
+            <div class="debugMessage"></div>
+            <form id="sign-in_form" class="card u-mar-lr_auto">
+                <div class="card__header u-pad_0">
+                    <img src="/assets/img/wavy-sm--yellow.svg" alt="decoration">
+                </div>
+                <div class="card__content">
+                    <h2>Log in</h2>
+                    <div class="inputGroup">
+                        <label for="sign_in_email">Email</label>
+                        <input type="email" name="sign-in_email" placeholder="Email">
+                    </div>
+                    <div class="inputGroup">
+                        <label for="password">Password</label>
+                        <input type="password" name="sign-in_password" placeholder="Password">
+                        <p class="message"></p>
+                    </div>
+                </div>
+                <div class="card__footer">
+                    <button type="submit" class="u-w_full">Log in</button>
+                </div>
+            </form>
+    
+            <form id="sign-up_form" class="ifAuth--hide card u-mar-lr_auto">
+                <div class="card__header u-pad_0">
+                    <img src="/assets/img/wavy-sm--yellow.svg" alt="decoration">
+                </div>
+                <div class="card__content">
+                    <h2>Sign up</h2>
+                    <div class="inputGroup">
+                        <label for="sign_up_email">Email</label>
+                        <input type="email" name="sign-up_email" placeholder="Email">
+                    </div>
+                    <div class="inputGroup">
+                        <label for="sign-up_password">Password</label>
+                        <input type="password" name="sign-up_password" placeholder="Password">
+                        <p class="message"></p>
+                    </div>
+                    <div class="inputGroup">
+                        <input type="checkbox">
+                        <label for="I am 13 years of age or older."></label>
+                    </div>
+                    <p class="error"></p>
+                </div>
+                <div class="card__footer">
+                    <button class="u-w_full">Sign up</button>
+                </div>
+            </form>
+        </div>
 
         <form id="create-tree_form" class="card u-mar-lr_auto u-d_none">
             <div class="card__header">
@@ -94,7 +136,7 @@
             </div>
         </form>
         <section id="mainContent">
-            <section id="familyTree" class="ifAuth--show"></section>
+            <!-- <section id="familyTree" class="ifAuth--show"></section> -->
             <aside id="detailsPanel">
                 <nav class="detailsPanel__actions u-mar-b_4">
                     <button class="iconButton add-relationship_button" data-dropdown-target="add-relationship-dropdown"><i class="fa fa-plus"></i></button>
@@ -241,14 +283,23 @@
         const db = firebase.firestore();
         const functions = firebase.functions();
         const storage = firebase.storage();
+
+        const membersRef = db.collection('members');
+        const treesRef = db.collection('trees');
+        const notificationsRef = db.collection('notifications');
     </script>
 
     <!-- Compiled and minified JavaScript -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <script src='https://unpkg.com/panzoom@8.7.3/dist/panzoom.min.js'></script>
-    <script src="scripts/auth.js"></script>
-    <script src="scripts/index.js"></script>
-    <script src="scripts/routing.js"></script>
+    <!-- <script src="scripts/auth.js"></script> -->
+    <script type="module" src="scripts/index.js"></script>
+    <!-- <script src="scripts/routing.js"></script>
+    <script src="scripts/profile.js"></script> -->
+    <!-- <script type="module" src="scripts/homepage.js"></script>
+    <script src="scripts/settings.js"></script> -->
+    <script src="scripts/dropdown.js"></script>
+
     <!-- <script src="scripts/leader-line.min.js"></script> -->
 
     </body>

@@ -67,8 +67,6 @@ h6 {
   align-items: center;
   padding-left: 32px;
   padding-right: 32px; }
-  .mainNav a {
-    color: white; }
   .mainNav__decoration {
     position: absolute;
     top: 100%;
@@ -444,6 +442,7 @@ input[type=password],
 input[type=number],
 input[type=date],
 select {
+  -webkit-appearance: none;
   padding: 12px 16px;
   box-shadow: 0 0 0 1px var(--color_border);
   border-radius: 8px;
@@ -611,7 +610,9 @@ button,
     padding: 12px 20px;
     font-weight: bold;
     display: flex;
-    align-items: center; }
+    align-items: center;
+    text-decoration: none;
+    color: var(--color_text); }
     .dropdown__item:hover {
       background-color: rgba(0, 40, 49, 0.08);
       cursor: pointer; }
@@ -657,6 +658,9 @@ button,
 
 .u-d_flex {
   display: flex; }
+
+.u-d_block {
+  display: block; }
 
 .u-jc_flex-end {
   justify-content: flex-end; }
@@ -748,6 +752,10 @@ button,
 
 .u-o_25 {
   opacity: .25; }
+
+.u-remove-link-style {
+  text-decoration: none;
+  color: inherit; }
 
 .u-c_brand {
   color: var(--brand); }
