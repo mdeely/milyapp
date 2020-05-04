@@ -1,58 +1,46 @@
 import * as TreeMenu from '../components/treeMenu.js'
+import * as TreeBranch from '../components/treeBranch.js'
 
 let treeViewEl = document.querySelector(`[data-view="tree"]`);
 let treeDebugMsg = treeViewEl.querySelector(`.debugMessage`);
-const treeMenuCurrentTreeEl = document.querySelector("#treeMenu__currentTree");
 
 export default function setup(treeId) {
-    treesRef.doc(treeId).get()
-    .then((reqTreeDoc) => {
-        window.currentTreeDoc = reqTreeDoc.exists ? reqTreeDoc : null;
-        populateCurrentTreeDisplay();
+    clear();
+    variablizeCurrentTreeDoc(treeId)
+    .then((response) => {
+        if (response) {
+            pageTitle.innerHTML = currentTreeDoc ? currentTreeDoc.data().name : "Tree not found!";
+            // TreeMenu.populateCurrentTreeDisplay();
+            variablizeCurrentTreeLeafDocs(currentTreeDoc.id)
+            .then(() => {
+                TreeBranch.initiate();
+                console.log("TODO: change the treeBranch abilities based on authentication and permission status");
+            })
+        }
     })
 }
 
 export const treeViewOnAuthChange = (user) => {
     if (user) {
         console.log("authenticated!");
-        variablizeMemberDoc()
+        variablizeMemberTreeDocs()
         .then(() => {
-            variablizeMemberTreeDocs()
-            .then(() => {
-                TreeMenu.populate();
-                // function to populate tree menu!
-            })
+            // TreeMenu.populate();
         })
     } else {
+        treeDebugMsg.textContent += "Sign up/in to join this tree";
         console.log("tree auth change!");
-        TreeMenu.clear();
         console.log("not authenticated!");
-        generateFamilyTree({
-            showDetails: false,
-            message: "Sign up to join this tree."
-        });
     }
 }
 
-const populateCurrentTreeDisplay = () => {
-    treeMenuCurrentTreeEl.textContent = currentTreeDoc.data().name;
-    let caretIcon = `<i class="fa fa-caret-down u-mar-l_2 u-pe_none u-o_75"></i>`;
-    treeMenuCurrentTreeEl.innerHTML += caretIcon;
+const clear = () => {
+    TreeBranch.clear();
 }
 
-
-// const setupTreeView = (treeId) => {
-//     treeMenuDropdownEl.innerHTML = '';
-//     treeDebugMsg.innerHTML = '';
-
-//     treesRef.doc(treeId).get()
-//     .then((reqTreeDoc) => {
-//         window.currentTreeDoc = reqTreeDoc.exists ? reqTreeDoc : null;
-//         populateCurrentTreeDisplay();
-//     })
-// }
-
 const generateFamilyTree = (params) => {
+    // get top member > branch from top member > individual leafs
+    // get siblings of top member > branch > 
     console.log(`Show details: ${params["showDetails"]}`);
 
     if (params["message"]) {
@@ -60,32 +48,60 @@ const generateFamilyTree = (params) => {
     }
 }
 
-const variablizeMemberTreeDocs = (memberId) => new Promise(
+export const variablizeMemberTreeDocs = () => new Promise(
     function(resolve, reject) {
-        window.memberTreeDocs = [];
-        for (let treeId of memberDoc.data().trees) {
-            treesRef.doc(treeId).get()
-            .then((reqTreeDoc) => {
-                window.memberTreeDocs.push(reqTreeDoc);
-                resolve(console.log("successfully set tree doc"));
-            })
-            .catch(() => {
-                reject(console.log("error getting a tree"));
-            })
+        if (window.memberDoc.data().trees) {
+            window.memberTreeDocs = [];
+            if ( memberDoc.data().trees && memberDoc.data().trees.length > 0) {
+                for (let treeId of memberDoc.data().trees) {
+                    treesRef.doc(treeId).get()
+                    .then((reqTreeDoc) => {
+                        window.memberTreeDocs.push(reqTreeDoc);
+                        resolve("successfully set tree doc");
+                    })
+                    .catch(() => {
+                        reject(console.log("error getting a tree"));
+                    })
+                }
+            } else {
+                reject(console.log("Member has no trees"));
+            }
         }
     }
 );
 
-const variablizeMemberDoc = (uid = auth.currentUser.uid) => new Promise(
+const variablizeCurrentTreeDoc = (treeId) => new Promise(
     function(resolve, reject) {
-        membersRef.where('claimed_by', '==', uid).limit(1).get()
-        .then((queryResult) => {
-            window.memberDoc = queryResult.docs[0];
-            resolve(console.log("successfully set member doc"));
+        treesRef.doc(treeId).get()
+        .then((reqTreeDoc) => {
+            window.currentTreeDoc = reqTreeDoc.exists ? reqTreeDoc : null;
+            resolve(true);
         })
         .catch(err => {
-            reject(console.log(err.message));
+            reject(err.message);
         })
+    }
+)
+
+const variablizeCurrentTreeLeafDocs = (treeId) => new Promise(
+    function (resolve, reject) {
+        window.currentLeafDocs = [];
+        if (treeId) {
+            treesRef.doc(treeId).collection('leaves').get()
+            .then((reqTreeLeafDocs) => {
+                if (reqTreeLeafDocs.docs.length > 0) {
+                    for (let doc of reqTreeLeafDocs.docs) {
+                        window.currentLeafDocs.push(doc);
+                    }
+                    resolve(true);
+                } else {
+                    resolve(false);
+                }
+            })
+            .catch(err => {
+                console.log(err.message);
+            })
+        }
     }
 )
 

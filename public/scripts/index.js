@@ -1,8 +1,5 @@
 import router from './routing.js';
 
-const signInForm = document.querySelector("#sign-in_form");
-const signOutButton = document.querySelector("#sign-out_button");
-
 router();
 
 window.onpopstate = function(event) {
@@ -10,6 +7,41 @@ window.onpopstate = function(event) {
 }
 
 const listenForSignUpForm = () => {
+    signUpForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+    
+        let email = signUpForm['sign-up_email'].value;
+        let password = signUpForm['sign-up_password'].value;
+        let ageVerification = signUpForm.querySelector(`input[name="sign-up_age-verification"]:checked`);
+    
+        if (ageVerification) {
+            auth.createUserWithEmailAndPassword(email, password)
+            .then((user) => {
+                console.log(user);
+                console.log("successfully created user");
+                signUpForm.reset();
+                signUpForm.querySelector(".message").innerHTML = '';
+                sendVerificationEmail(auth.currentUser);
+            }).catch(err => {
+                signUpForm.querySelector(".message").innerHTML = err.message;
+            })
+        } else {
+            signUpForm.querySelector(".message").innerHTML = 'You must be 13 years or older to have an account.';
+        }
+    })
+}
+
+const sendVerificationEmail = (user) => {
+    user.sendEmailVerification()
+    .then(() => {
+        console.log("Verification email sent!");
+    })
+    .catch(err => {
+        console.log("Error sendign verification email.");
+    })
+}
+
+const listenForSignInForm = () => {
     signInForm.addEventListener("submit", (e) => {
         e.preventDefault();
     
@@ -37,7 +69,7 @@ const listenForSignOutButton = () => {
 
 listenForSignOutButton();
 listenForSignUpForm();
-
+listenForSignInForm();
 
 
 
@@ -46,7 +78,6 @@ listenForSignUpForm();
 
 ///////////
 //////////
-
 const mainContent = document.querySelector("#mainContent");
 const detailsPanel = mainContent.querySelector("#detailsPanel");
 const detailsPanelInfo = detailsPanel.querySelector(".detailsPanel__information");
@@ -85,50 +116,6 @@ const addRelationshipButton = document.querySelector(".add-relationship_button")
 //     boundsPadding: 1, // prevent panning outside of container
 //     // zoomDoubleClickSpeed: 1
 // });
-
-const excludedDetails = ["children", "parents", "siblings", "spouses", "topMember", "claimed_by", "created_by", "profile_photo"];
-const excludedCategories = ["Name", "Address"];
-
-const treeBlueprint = {
-    "Admins" : { "dataPath" : "admins", "defaultValue" : [] },
-    "Contributors" : { "dataPath" : "contributors", "defaultValue" : [] },
-    "Viewers" : { "dataPath" : "viewers", "defaultValue" : [] },
-    "Created by" : { "dataPath" : "created_by", "defaultValue" : null },
-    "Name" : { "dataPath" : "name", "defaultValue" : null }
-}
-
-const memberBlueprint = {
-    "Name" : { "dataPath" : "name", "icon" : "user", 
-                "defaultValue" : {
-                    "First Name" : { "dataPath" : "firstName", "defaultValue" : null, "icon" : "user" },
-                    "Middle Name" : { "dataPath" : "middleName", "defaultValue" : null, "icon" : "user" },
-                    "Last Name" : { "dataPath" : "lastName", "defaultValue" : null, "icon" : "user" },
-                    "Surname" : { "dataPath" : "surname", "defaultValue" : null, "icon" : "user" },
-                    "Nickname" : { "dataPath" : "nickname", "defaultValue" : null, "icon" : "user" }
-                }
-            },
-    "Email" : { "dataPath" : "email", "defaultValue" : null, "icon" : "envelope" },
-    "Birthday" : { "dataPath" : "birthday", "defaultValue" : null, "icon" : "birthday-cake" },
-    "Address" : { "dataPath" : "address", "icon" : "map-pin", 
-                "defaultValue" : {
-                    "Address 1" : { "dataPath" : "address1", "defaultValue" : null, "icon" : "" },
-                    "Address 2" : { "dataPath" : "address2", "defaultValue" : null, "icon" : "" },
-                    "City" : { "dataPath" : "city", "defaultValue" : null, "icon" : "" },
-                    "Zipcode" : { "dataPath" : "zipcode", "defaultValue" : null, "icon" : "" },
-                    "Country" : { "dataPath" : "country", "defaultValue" : null, "icon" : "" }
-                }
-            },
-    "Occupation" : { "dataPath" : "occupation", "defaultValue" : null, "icon" : "briefcase" },
-    "Children" : { "dataPath" : "children", "defaultValue" : [] },
-    "Parents" : { "dataPath" : "parents", "defaultValue" : [] },
-    "Siblings" : { "dataPath" : "siblings", "defaultValue" : [] },
-    "Spouses" : { "dataPath" : "spouses", "defaultValue" : {} },
-    "Top Member" : { "dataPath" : "topMember", "defaultValue" : false },
-    "Claimed by" : { "dataPath" : "claimed_by", "defaultValue" : null },
-    "Created by" : { "dataPath" : "created_by", "defaultValue" : null },
-    "Profile photo" : { "dataPath" : "profile_photo", "icon" : "picture", "defaultValue" : null }
-}
-
 
 // const resetOnAuthStateChanged = auth.onAuthStateChanged(function (user) {
 //     console.log("reset!");
@@ -997,41 +984,41 @@ const editMember = () => {
         ref = currentTreeLeafCollectionRef;
     }
 
-    saveButton.addEventListener("click", (e) => {
-        e.preventDefault();
-        let reqEditDoc = getDocFromDetailsPanelId();
+    // saveButton.addEventListener("click", (e) => {
+    //     e.preventDefault();
+    //     let reqEditDoc = getDocFromDetailsPanelId();
 
-        ref.doc(reqEditDoc.id).update({
-            "name" : {
-                "firstName" : detailsPanelEdit["firstName"].value,
-                "lastName" : detailsPanelEdit["lastName"].value,
-                "middleName" : detailsPanelEdit["middleName"].value,
-                "surname" : detailsPanelEdit["surname"].value,
-                "nickname" : detailsPanelEdit["nickname"].value,
-            },
-            "address" : {
-                "address1" : detailsPanelEdit["address1"].value,
-                "address2" : detailsPanelEdit["address2"].value,
-                "city" : detailsPanelEdit["city"].value,
-                "zipcode" : detailsPanelEdit["zipcode"].value,
-                "country" : detailsPanelEdit["country"].value,
-            },
-            "birthday" : detailsPanelEdit["birthday"].value,
+    //     ref.doc(reqEditDoc.id).update({
+    //         "name" : {
+    //             "firstName" : detailsPanelEdit["firstName"].value,
+    //             "lastName" : detailsPanelEdit["lastName"].value,
+    //             "middleName" : detailsPanelEdit["middleName"].value,
+    //             "surname" : detailsPanelEdit["surname"].value,
+    //             "nickname" : detailsPanelEdit["nickname"].value,
+    //         },
+    //         "address" : {
+    //             "address1" : detailsPanelEdit["address1"].value,
+    //             "address2" : detailsPanelEdit["address2"].value,
+    //             "city" : detailsPanelEdit["city"].value,
+    //             "zipcode" : detailsPanelEdit["zipcode"].value,
+    //             "country" : detailsPanelEdit["country"].value,
+    //         },
+    //         "birthday" : detailsPanelEdit["birthday"].value,
 
-            "occupation" : detailsPanelEdit["occupation"].value,
-            "email" : detailsPanelEdit["email"].value,
-        })
-        .then(() => {
-            console.log("Updated!");
-            detailsPanelAction.classList.remove("u-d_none");
-            detailsPanelEdit.classList.add("u-d_none");
-            detailsPanelInfo.classList.remove("u-d_none");
-            location.reload();
-        })
-        .catch(err => {
-            console.log(err.message)
-        })
-    });
+    //         "occupation" : detailsPanelEdit["occupation"].value,
+    //         "email" : detailsPanelEdit["email"].value,
+    //     })
+    //     .then(() => {
+    //         console.log("Updated!");
+    //         detailsPanelAction.classList.remove("u-d_none");
+    //         detailsPanelEdit.classList.add("u-d_none");
+    //         detailsPanelInfo.classList.remove("u-d_none");
+    //         location.reload();
+    //     })
+    //     .catch(err => {
+    //         console.log(err.message)
+    //     })
+    // });
 
     cancelButton.addEventListener("click", (e) => {
         e.preventDefault();
@@ -1245,6 +1232,7 @@ const newTreeForFirebase = (params) => {
     return newTreeObject;
 }
 
+// TODO: Make the below function available. Abstract the foor loop with the exclude/include arrays and such!!!
 const newLeafForFirebase = (params) => {
     let newLeafObject = {};
 

@@ -2,27 +2,210 @@ let profileViewEl = document.querySelector(`[data-view="profile"]`);
 let profileDebugMsg = profileViewEl.querySelector(`.debugMessage`);
 
 export default function setup() {
-    console.log("requested profile!")
+    pageTitle.innerHTML = "Profile";
 }
 
 export const profileViewOnAuthChange = (user) => {
+    profileViewEl.innerHTML = '';
+    window.location.hash = "/profile";
+    profileDebugMsg.textContent = "Authenticated";
+
     if (user) {
-        profileDebugMsg.textContent = "Authenticated";
-        console.log("authenticated. do profile things")
+        editProfileEl();
     } else {
+        profileViewEl.innerHTML = '';
         profileDebugMsg.textContent = "Not authenticated";
     }
 }
 
-// OnAuthStateChange:
-// If user:
-// Load member details
+const editProfileEl = () => {
+    let form = createElementWithClass("form", "card u-mar-lr_auto");
+    let cardContent = document.createElement("div");
+    let cardHeader = createElementWithClass("div", "card__header");
+    let cardFooter = createElementWithClass("div", "card__footer");
+    let button = createElementWithClass("button", "u-w_full", "Save");
+    let header = createElementWithClass("h2", "u-mar-b_0", "Your profile");
 
-const setupProfileView = (authenticated) => {
-    // profileDebugMsg.innerHTML = '';
-    // if (auth.currentUser) {
-    //     profileDebugMsg.innerHTML = "Authenticated. This is your profile"
-    // } else {
-    //     profileDebugMsg.innerHTML = "Not authenticated. Please log in"
-    // }
+    form.setAttribute("id", "set-profile_form");
+    cardContent.setAttribute("class", "card__content");
+    
+    loopThroughMemberBlueprint({
+        "functionCall" : handleProfileItems
+    });
+
+    function handleProfileItems(key, value, parentValue) {
+        let inputValue = "";
+
+        if (window.memberDoc) {
+            inputValue = memberDoc.data()[value["dataPath"]];
+            if (parentValue) {
+                inputValue = memberDoc.data()[parentValue["dataPath"]][value["dataPath"]];
+            }
+        } else {
+            if (key === "Email") {
+                inputValue = auth.currentUser.email;
+            }
+        }
+
+        let el = generateInputItem({
+            "value" : inputValue,
+            "name" : value["dataPath"],
+            "label" : key,
+            "type" : value["dataType"] || "text"
+        });
+        cardContent.appendChild(el);
+    }
+
+    if (window.memberDoc) {
+        updateMember(button, form);
+    } else {
+        newMember(button, form);
+        header.textContent = "Create your profile";
+    }
+
+    cardFooter.appendChild(button);
+
+    cardHeader.appendChild(header)
+
+    form.appendChild(cardHeader);
+    form.appendChild(cardContent);
+    form.appendChild(cardFooter);
+
+    profileViewEl.appendChild(form);
+}
+
+const generateInputItem = (args) => {
+    let inputGroupEl = createElementWithClass("div", "inputGroup");
+    let labelEl = createElementWithClass("label");
+    let inputEl = createElementWithClass("input");
+
+    labelEl.textContent = args.label;
+    labelEl.setAttribute("for", args.name);
+
+    inputEl.setAttribute("name", args.name);
+    inputEl.setAttribute("value", args.value);
+    inputEl.setAttribute("type", args.type);
+
+    inputGroupEl.appendChild(labelEl);
+    inputGroupEl.appendChild(inputEl);
+
+    return inputGroupEl;
+}
+
+export const createElementWithClass = (elementType, classname = null, content = null) => {
+    let el = document.createElement(elementType);
+
+    if (classname) {
+        el.setAttribute("class", classname);
+    }
+
+    if (content) {
+        el.textContent = content;
+    }
+
+    return el;
+}
+
+const updateMember = (button, form) => {
+    button.addEventListener("click", (e) => {
+        e.preventDefault();
+
+        membersRef.doc(memberDoc.id).update({
+            "name" : {
+                "firstName" : form["firstName"].value,
+                "lastName" : form["lastName"].value,
+                "middleName" : form["middleName"].value,
+                "surname" : form["surname"].value,
+                "nickname" : form["nickname"].value,
+            },
+            "address" : {
+                "address1" : form["address1"].value,
+                "address2" : form["address2"].value,
+                "city" : form["city"].value,
+                "zipcode" : form["zipcode"].value,
+                "country" : form["country"].value,
+            },
+            "birthday" : form["birthday"].value,
+
+            "occupation" : form["occupation"].value,
+            "email" : form["email"].value,
+        })
+        .then(() => {
+            console.log("Updated!");
+            location.reload();
+        })
+        .catch(err => {
+            console.log(err.message)
+        })
+    });
+}
+
+const newMember = (button, form) => {
+    button.addEventListener("click", (e) => {
+        e.preventDefault();
+
+        console.log("TODO: Handle profile photo");
+        membersRef.add({
+            "claimed_by" : auth.currentUser.uid,
+            "created_by" : auth.currentUser.uid,
+            "name" : {
+                "firstName" : form["firstName"].value,
+                "lastName" : form["lastName"].value,
+                "middleName" : form["middleName"].value,
+                "surname" : form["surname"].value,
+                "nickname" : form["nickname"].value,
+            },
+            "address" : {
+                "address1" : form["address1"].value,
+                "address2" : form["address2"].value,
+                "city" : form["city"].value,
+                "zipcode" : form["zipcode"].value,
+                "country" : form["country"].value,
+            },
+            "birthday" : form["birthday"].value,
+
+            "occupation" : form["occupation"].value,
+            "email" : form["email"].value,
+        })
+        .then(() => {
+            console.log("new member created!");
+            location.reload();
+        })
+        .catch(err => {
+            console.log(err.message)
+        })
+    });
+}
+
+
+const loopThroughMemberBlueprint = (args) => {
+    let defaults = ["claimed_by", "topMember", "created_by", "children", "parents", "siblings", "spouses"];
+    let ignoreGroupLabels = args.ignoreGroupLabels ? args.ignoreGroupLabels : [];
+    if (!args.ignoreDefaults) {
+        ignoreGroupLabels.push(...defaults);
+    }
+    let ignoreItems = args.ignoreItems ? args.ignoreItems : [];
+    let functionCall = args.functionCall;
+
+    for (let [key, value] of Object.entries(memberBlueprint)) {
+        if (ignoreGroupLabels.includes(value["dataPath"]) || ignoreItems.includes(value["dataPath"])) {
+            if ( value["defaultValue"] && Object.values(value["defaultValue"]).length > 0 ) {
+                loopSubItems(key, value)
+            }
+        } else {
+            if ( value["defaultValue"] && Object.values(value["defaultValue"] ).length > 0 ) {
+                loopSubItems(key, value)
+            } else {
+                functionCall(key, value);
+            }
+        }
+
+        function loopSubItems(key, value) {
+            for (let [detailKey, detailValue] of Object.entries(value["defaultValue"])) {
+                if (!ignoreItems.includes(detailValue["dataPath"])) {
+                    functionCall(detailKey, detailValue, value);
+                }
+            }
+        }
+    };
 }

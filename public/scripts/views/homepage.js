@@ -1,5 +1,3 @@
-const signInForm = document.querySelector("#sign-in_form");
-const signOutButton = document.querySelector("#sign-out_button");
 let homepageViewEl = document.querySelector(`[data-view="homepage"]`);
 let homepageDebugMsg = homepageViewEl.querySelector(`.debugMessage`);
 

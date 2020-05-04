@@ -359,53 +359,19 @@ h6 {
     display: none;
 }
 
-#treeMenu__currentTree {
-    font-size: 20px;
+#pageTitle {
+    min-width: 375px;
+    left: 50%;
+    font-size: 24px;
     font-weight: 900;
     padding: 16px 24px;
     border-radius: 4px;
-    cursor: pointer;
     transition: all .1s ease-in-out;
-
-    &:hover,
-    &:focus {
-        box-shadow: 0 0 0 2px rgba(white, .25);
-        transform: scale(1.02);
-    }
-
-    &:active {
-        background-color: rgba(white, .06);
-        transform: scale(1);
-        transition: transform .0s ease-in-out;
-    }
-}
-
-#treeMenu__options {
-    left: 50%;
-    -webkit-transform: translateX(-50%);
-    transform: translateX(-50%);
-    width: 100%;
-    min-width: 375px;
-    background-color: white;
-    border-radius: 8px;
-    color: initial;
-    top: calc(100% + 8px);
-    box-shadow: var(--leafShadow);
-}
-
-#treeMenu {
-    position: absolute;
     margin: 0 auto;
     text-align: center;
-    display: flex;
-    flex-direction: column;
-    left: calc(50% + 16px);
+    // left: calc(50% + 16px); //when editable, consider putting this back in
     -webkit-transform: translateX(-50%);
     transform: translateX(-50%);
-
-    .active {
-        font-weight: 900;
-    }
 }
 
 .leaf {
@@ -553,7 +519,7 @@ h6 {
         padding: 24px;
     }
 
-    #treeMenu {
+    #pageTitle {
         width: calc(100% - 48px);
         bottom: 24px;
         left: 50%;

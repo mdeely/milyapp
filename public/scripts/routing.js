@@ -1,16 +1,26 @@
-import { dataViews } from './vars.js'
-import treeView, { treeViewOnAuthChange } from './views/tree.js';
+import * as Helpers from './helpers.js'
+import * as Nav from './components/nav.js'
+
+import treeView, { treeViewOnAuthChange, variablizeMemberTreeDocs } from './views/tree.js';
 import homepageView, { homepageViewOnAuthChange } from './views/homepage.js';
 import profileView, { profileViewOnAuthChange } from './views/profile.js';
 import settingsView, { settingsViewOnAuthChange } from './views/settings.js';
 import errorView from './views/error.js';
+import accountVerificationView, { accountVerificationViewOnAuthChange } from './views/account-verification.js';
+
+import myTreesView, { myTreesViewOnAuthChange } from './views/myTrees.js';
+
+const dataViews = document.querySelectorAll(`[data-view]`);
 
 export default function router (user) {
     let routes = {
+        "my-trees" : {"name": "my-trees", "controller": myTreesView, "onAuthController": myTreesViewOnAuthChange},
         "trees" : {"name": "tree", "controller": treeView, "onAuthController": treeViewOnAuthChange},
         "profile" : {"name": "profile", "controller": profileView, "onAuthController": profileViewOnAuthChange},
         "settings" : {"name": "settings", "controller": settingsView, "onAuthController": settingsViewOnAuthChange},
         "/" : {"name": "homepage", "controller": homepageView, "onAuthController": homepageViewOnAuthChange},
+        "account-verification" : {"name": "account-verification", "controller": accountVerificationView, "onAuthController": accountVerificationViewOnAuthChange},
+
     }
 
     let pathnameArray = window.location.hash.split('/');
@@ -45,8 +55,35 @@ export default function router (user) {
 
     auth.onAuthStateChanged(function(user) {
         if (user) {
-            reqRoute.onAuthController(user);
+            Nav.update(user);
+            if (user.emailVerified) {
+                console.log("You're verified!");
+                Helpers.variablizeMemberDoc()
+                .then((memberDocExists) => {
+                    if (memberDocExists) {
+                        if (window.memberDoc.data().trees) {
+                            variablizeMemberTreeDocs()
+                            .then(() => {
+                                console.log("settings auth member from router")
+                                reqRoute.onAuthController(user);
+                            })
+                            .catch(err => {
+                                console.log(err);
+                            })
+                        } else {
+                            reqRoute.onAuthController(user);
+                        }
+                    } else {
+                        // User needs to create a member
+                        profileViewOnAuthChange(user);
+                    }
+                })
+            } else {
+                accountVerificationViewOnAuthChange(user);
+                console.log("Go verify yourself");
+            }
         } else {
+            Nav.update();
             reqRoute.onAuthController();
         }
     });

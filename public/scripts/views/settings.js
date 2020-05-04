@@ -2,7 +2,7 @@ let settingsViewEl = document.querySelector(`[data-view="settings"]`);
 let settingsDebugMsg = settingsViewEl.querySelector(`.debugMessage`);
 
 export default function setup() {
-    console.log("requested settings!")
+    pageTitle.innerHTML = "Settings";
 }
 
 export const settingsViewOnAuthChange = (user) => {

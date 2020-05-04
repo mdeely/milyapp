@@ -13,31 +13,43 @@
         <nav class="mainNav u-mar-b_6">
             <h1 class="u-mar-b_0 u-c_white logo"><a href="/" class="u-remove-link-style">MILY</a></h1>
             <div class="buttonGroup u-mar-l_auto">
-                <button id="sign-up_button" class="ifAuth--hide">Log in</button>
-                <button class="ifAuth--hide">Sign up</button>
+                <button id="log-in_button">Log in</button>
+                <button id="sign-up_button">Sign up</button>
             </div>
             <button id="notification_indicator" data-dropdown-target="notification_menu" class="u-mar-l_auto iconButton u-d_none"><i class="fa fa-bell"></i></button>
             <div id="notification_menu" class="dropdown u-p_absolute">
             </div>
-            <button class="u-mar-l_2 u-mar-r_1 iconButton"><i class="fa fa-search"></i></button>
-            <button class="ifAuth--show u-mar-l_2 u-mar-r_2 iconButton" data-dropdown-target="view-preferences"><i class="fa fa-eye"></i></button>
+            <button id="search_button" class="u-mar-l_2 u-mar-r_1 iconButton"><i class="fa fa-search"></i></button>
+            <button id="view-preferences_button" class="u-mar-l_2 u-mar-r_2 iconButton" data-dropdown-target="view-preferences"><i class="fa fa-eye"></i></button>
             <div id="view-preferences" class="dropdown u-d_none u-p_absolute">
                 <div id="view-preferences_tree" class="dropdown__item">Tree</div>
                 <div id="view-preferences_list" class="dropdown__item">List</div>
             </div>
-            <div id="accountMenu" class="u-mar-l_1" data-dropdown-target="accountMenu__dropdown"></div>
+            <button id="accountMenu" class="u-mar-l_1" data-dropdown-target="accountMenu__dropdown"></button>
             <div id="accountMenu__dropdown" class="dropdown u-p_absolute u-d_none">
-                <a href="#/profile" class="dropdown__item">View profile</a>
-                <a href="#/settings" class="dropdown__item">Account settings</a>
+                <a href="#/my-trees" class="dropdown__item">My trees</a>
+                <a href="#/profile" class="dropdown__item">Profile</a>
+                <a href="#/settings" class="dropdown__item">Settings</a>
                 <div id="sign-out_button" class=" dropdown__item">Sign out</div>
             </div>
 
-            <div id="treeMenu" class="ifAuth--show u-mar-lr_auto u-c_white">
-                <div id="treeMenu__currentTree" data-dropdown-target="treeMenu__options"></div>
-                <ul id="treeMenu__options" class="dropdown u-p_absolute u-d_none"></div>
-            </div>
+            <div id="pageTitle" class="u-mar-lr_auto u-c_white u-p_absolute"></div>
+            
             <img src="/assets/img/wavy-lg-dark.svg" alt="decoration" class="mainNav__decoration"/>
         </nav>
+
+        <div style="display:none" data-view="account-verification">
+            <div class="debugMessage"></div>
+        </div>
+
+        <div style="display:none" data-view="my-trees">
+            <div class="debugMessage"></div>
+        </div>
+
+        <div style="display:none" data-view="error">
+            <h1 class="u-mar-lr_auto">Not found</h1>
+            <div class="debugMessage"></div>
+        </div>
 
         <div style="display:none" data-view="tree">
             <div class="debugMessage"></div>
@@ -46,24 +58,6 @@
 
         <div style="display:none" data-view="profile">
             <div class="debugMessage"></div>
-            <form id="set-profile_form" class="card u-mar-lr_auto">
-                <div class="card__header">
-                    <h2 class="u-mar-b_0">Profile</h2>
-                </div>
-                <div class="card__content">
-                    <div class="inputGroup">
-                        <label for="set-profile__firstname">First name</label>
-                        <input type="text" name="set-profile__firstname">
-                    </div>
-                    <div class="inputGroup">
-                        <label for="set-profile__birthday">Birthday</label>
-                        <input type="date" name="set-profile__birthday">
-                    </div>
-                </div>
-                <div class="card__footer">
-                    <button class="u-w_full">Continue</button>
-                </div>
-            </form>
         </div>
 
         <div style="display:none" data-view="settings">
@@ -107,12 +101,12 @@
                     <div class="inputGroup">
                         <label for="sign-up_password">Password</label>
                         <input type="password" name="sign-up_password" placeholder="Password">
-                        <p class="message"></p>
                     </div>
                     <div class="inputGroup">
-                        <input type="checkbox">
-                        <label for="I am 13 years of age or older."></label>
+                        <input name="sign-up_age-verification" type="checkbox">
+                        <label for="sign-up_age-verification.">I'm 13 years or older.</label>
                     </div>
+                    <p class="message"></p>
                     <p class="error"></p>
                 </div>
                 <div class="card__footer">
@@ -290,9 +284,11 @@
     </script>
 
     <!-- Compiled and minified JavaScript -->
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <script src='https://unpkg.com/panzoom@8.7.3/dist/panzoom.min.js'></script>
     <!-- <script src="scripts/auth.js"></script> -->
+    <script src="scripts/vars.js"></script>
     <script type="module" src="scripts/index.js"></script>
     <!-- <script src="scripts/routing.js"></script>
     <script src="scripts/profile.js"></script> -->
