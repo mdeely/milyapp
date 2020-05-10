@@ -3,6 +3,7 @@ const logInButton = document.querySelector("#log-in_button");
 const accountMenuButton = document.querySelector("#accountMenu");
 const searchButton = document.querySelector("#search_button");
 const viewPreferencesButton = document.querySelector("#view-preferences_button");
+const navLogo = document.querySelector("#mainNav_logo");
 
 let hideWhenAuthenticated = [signUpButton, logInButton];
 let showWhenAuthenticated = [accountMenuButton, searchButton, viewPreferencesButton];
@@ -15,7 +16,7 @@ export function update(user) {
         for (let item of showWhenAuthenticated) {
             item.style.display = "";
         }
-        console.log("change nav for auth user");
+        navLogo.setAttribute("href", "#/my-trees");
     } else {
         for (let item of hideWhenAuthenticated) {
             item.style.display = "";
@@ -23,6 +24,6 @@ export function update(user) {
         for (let item of showWhenAuthenticated) {
             item.style.display = "none";
         }
-        console.log("change nav for unauth")
+        navLogo.setAttribute("href", "/");
     }
 }

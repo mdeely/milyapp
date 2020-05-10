@@ -3,7 +3,7 @@ export const variablizeMemberDoc = (uid = auth.currentUser.uid) => new Promise(
         membersRef.where('claimed_by', '==', uid).limit(1).get()
         .then((queryResult) => {
             if (queryResult.docs[0]) {
-                window.memberDoc = queryResult.docs[0] ? queryResult.docs[0] : null;
+                LocalDocs.member = queryResult.docs[0] ? queryResult.docs[0] : null;
                 resolve(true);
             } else {
                 resolve(false)

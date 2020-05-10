@@ -11,7 +11,9 @@
 </head>
     <body>
         <nav class="mainNav u-mar-b_6">
-            <h1 class="u-mar-b_0 u-c_white logo"><a href="/" class="u-remove-link-style">MILY</a></h1>
+            <h1 class="u-mar-b_0 u-c_white logo">
+                <a id="mainNav_logo" href="/" class="u-remove-link-style">MILY</a>
+            </h1>
             <div class="buttonGroup u-mar-l_auto">
                 <button id="log-in_button">Log in</button>
                 <button id="sign-up_button">Sign up</button>
@@ -34,8 +36,7 @@
             </div>
 
             <div id="pageTitle" class="u-mar-lr_auto u-c_white u-p_absolute"></div>
-            
-            <img src="/assets/img/wavy-lg-dark.svg" alt="decoration" class="mainNav__decoration"/>
+            <div class="mainNav__decoration"></div>
         </nav>
 
         <div style="display:none" data-view="account-verification">
@@ -53,7 +54,43 @@
 
         <div style="display:none" data-view="tree">
             <div class="debugMessage"></div>
+            <section id="mainContent">
+
             <section id="familyTree"></section>
+                <aside id="detailsPanel">
+                    <nav class="detailsPanel__actions u-mar-b_4">
+                        <button class="iconButton add-relationship_button" data-dropdown-target="add-relationship-dropdown"><i class="fa fa-plus"></i></button>
+                        <div class="detailsPanel__actions-secondary u-mar-l_auto u-d_flex">
+                            <button class="iconButton secondary" id="invite-member-action" data-modal-trigger="invite-member_modal"><i class="fa fa-envelope"></i></button>
+                            <button class="iconButton secondary u-mar-l_2" data-dropdown-target="member-options-dropdown"><i class="fa fa-ellipsis-h"></i></button>
+                            <button class="iconButton secondary details__button--close u-mar-l_2"><i class="fa fa-times"></i></button> 
+                        </div>
+                    </nav>
+                    <ul id="member-options-dropdown" class="dropdown u-d_none u-p_fixed">
+                        <li id="edit-member-action" class="dropdown__item">Edit member details</li>
+                        <li id="remove-leaf-action" class="dropdown__item u-c_danger">Remove from tree</li>
+                    </ul>
+                    <ul id="add-relationship-dropdown" class="dropdown u-d_none u-p_fixed">
+                        <li class="dropdown__item dropdown__label">Add relationship</li>
+                        <li id="add-parent-action" class="dropdown__item">Parent</li>
+                        <li id="add-child-action" class="dropdown__item">Child</li>
+                        <li id="add-spouse-action" class="dropdown__item">Spouse</li>
+                        <li id="add-sibling-action" class="dropdown__item">Sibling</li>
+                    </ul>
+                    <div class="detailsPanel__information">
+                        <div class="detailsPanel__profileImage u-mar-lr_auto u-mar-b_3">
+                            <img src="" alt="">
+                        </div>
+                        <div class="detailsPanel__firstName u-mar-lr_auto header_m u-ta_center u-mar-b_5"></div>
+                        <h6 class="u-mar-b_4">Details</h6>
+                        <div class="detailsPanel__metaData u-mar-b_7"></div>
+                        <h6 class="u-mar-b_4">Immediate family</h6>
+                        <div class="detailsPanel__immediateFamily"></div>
+                    </div>
+                    <form id="detailsPanel__edit" class="u-pad-b_10">
+                    </form>
+                </aside>
+            </section>
         </div>
 
         <div style="display:none" data-view="profile">
@@ -129,9 +166,9 @@
                 <button class="u-w_full">Create tree</button>
             </div>
         </form>
-        <section id="mainContent">
+        <!-- <section id="mainContent"> -->
             <!-- <section id="familyTree" class="ifAuth--show"></section> -->
-            <aside id="detailsPanel">
+            <!-- <aside id="detailsPanel">
                 <nav class="detailsPanel__actions u-mar-b_4">
                     <button class="iconButton add-relationship_button" data-dropdown-target="add-relationship-dropdown"><i class="fa fa-plus"></i></button>
                     <div class="detailsPanel__actions-secondary u-mar-l_auto u-d_flex">
@@ -163,8 +200,8 @@
                 </div>
                 <form id="detailsPanel__edit" class="u-pad-b_10">
                 </form>
-            </aside>
-        </section>
+            </aside> -->
+        <!-- </section> -->
 
         <div class="modal medium" data-modal="invite-member_modal">
             <form id="invite-member_form" class="card modal-dialouge">

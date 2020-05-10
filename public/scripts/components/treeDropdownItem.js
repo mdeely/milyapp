@@ -4,7 +4,7 @@ export const TreeDropdownItem = (treeDoc) => {
     let className = '';
     let isAdminOfTree = treeDoc.data().admins.includes(memberDoc.id) ? true : false;
 
-    if (treeDoc.id === window.currentTreeDoc.id) {
+    if (treeDoc.id === LocalDocs.tree.id) {
         className = "active";
     }
 

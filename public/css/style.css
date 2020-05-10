@@ -10,6 +10,7 @@
   --color_danger: #B90B00;
   --brand_lighter: #E3F2F5;
   --navHeight: 104px;
+  --navDecorationHeight: 24px;
   --detailsWidth: 352px;
   --bounceEasing: cubic-bezier(0.51, 0.92, 0.24, 1.15);
   --iconButtonSize: 44px;
@@ -74,7 +75,12 @@ h6 {
     right: 0;
     width: 100%;
     height: auto;
-    z-index: -1; }
+    z-index: -1;
+    background-image: url("../assets/img/wavy-lg-dark.svg");
+    background-size: 100vw 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    height: var(--navDecorationHeight); }
 
 #mainContent {
   display: flex;
@@ -207,7 +213,10 @@ h6 {
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background-color: var(--color_yellow); }
+  background-color: var(--color_yellow);
+  overflow: hidden; }
+  .detailsPanel__img img {
+    max-width: 100%; }
 
 .detailsPanel__realtiveType {
   color: var(--color_dark_gray); }
@@ -241,6 +250,13 @@ h6 {
   display: flex;
   flex-direction: row;
   position: relative; }
+
+.spouses .leaf {
+  margin-left: -4px;
+  margin-right: -4px; }
+  .spouses .leaf:only-child {
+    margin-left: var(--leafSpacing);
+    margin-right: var(--leafSpacing); }
 
 .message:empty {
   display: none; }

@@ -3,20 +3,21 @@ import * as TreeLeaf from '../components/treeLeaf.js'
 const familyTreeEl = document.querySelector("#familyTree");
 
 export function initiate() {
-    let topMemberDoc = window.currentLeafDocs.find(leafDoc => leafDoc.data().topMember === true);
+    let topMemberDoc = LocalDocs.leaves.find(leafDoc => leafDoc.data().topMember === true);
     let siblings = topMemberDoc.data().siblings ? topMemberDoc.data().siblings : null;
 
     let topMemberBranchEl = renderBranchByDoc(topMemberDoc);
 
     if (siblings && siblings.length > 0) {
         for (let siblingId of siblings) {
-            let siblingDoc = window.currentLeafDocs.find(leafDoc => leafDoc.id === siblingId);
+            let siblingDoc = LocalDocs.leaves.find(leafDoc => leafDoc.id === siblingId);
             let siblingBranchEl = renderBranchByDoc(siblingDoc);
             familyTreeEl.appendChild(siblingBranchEl);
         }
     }
 
     familyTreeEl.appendChild(topMemberBranchEl);
+    connectLines();
 }
 
 export function clear() {
@@ -32,19 +33,19 @@ const renderBranchByDoc = (memberDoc) => {
     
     if (spouses &&  Object.keys(spouses).length > 0) {
         for (let spouseId of Object.keys(spouses)) {
-            let topSpouseMemberDoc = window.currentLeafDocs.find(leafDoc => leafDoc.id === spouseId);
-            spousesBranchEl.insertAdjacentHTML("beforeEnd", TreeLeaf.create(topSpouseMemberDoc));
+            let topSpouseMemberDoc = LocalDocs.leaves.find(leafDoc => leafDoc.id === spouseId);
+            spousesBranchEl.appendChild(TreeLeaf.create(topSpouseMemberDoc));
         }
     }
 
-    spousesBranchEl.insertAdjacentHTML("afterBegin", TreeLeaf.create(memberDoc));
+    spousesBranchEl.appendChild(TreeLeaf.create(memberDoc));
     branchEl.appendChild(spousesBranchEl);
 
     if (children && children.length > 0) {
         let descendantBranchEL = createGroupEl("descendants");
 
         for (let childId of children) {
-            let childMemberDoc = window.currentLeafDocs.find(leafDoc => leafDoc.id === childId);
+            let childMemberDoc = LocalDocs.leaves.find(leafDoc => leafDoc.id === childId);
             let childBranchEl = renderBranchByDoc(childMemberDoc);
 
             descendantBranchEL.appendChild(childBranchEl);
@@ -52,8 +53,6 @@ const renderBranchByDoc = (memberDoc) => {
 
         branchEl.appendChild(descendantBranchEL);
     }
-
-
 
     return branchEl;
 }

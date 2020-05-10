@@ -9,10 +9,13 @@ export default function setup(treeId) {
     variablizeCurrentTreeDoc(treeId)
     .then((response) => {
         if (response) {
-            pageTitle.innerHTML = currentTreeDoc ? currentTreeDoc.data().name : "Tree not found!";
-            // TreeMenu.populateCurrentTreeDisplay();
-            variablizeCurrentTreeLeafDocs(currentTreeDoc.id)
-            .then(() => {
+            pageTitle.innerHTML = LocalDocs.tree ? LocalDocs.tree.data().name : "Tree not found!";
+            treesRef.doc(LocalDocs.tree.id).collection('leaves').get()
+            .then((response) => {
+
+                LocalDocs.leaves = response.docs;
+                window.currentTreeLeafCollectionRef = treesRef.doc(LocalDocs.tree.id).collection('leaves');
+
                 TreeBranch.initiate();
                 console.log("TODO: change the treeBranch abilities based on authentication and permission status");
             })
@@ -22,7 +25,6 @@ export default function setup(treeId) {
 
 export const treeViewOnAuthChange = (user) => {
     if (user) {
-        console.log("authenticated!");
         variablizeMemberTreeDocs()
         .then(() => {
             // TreeMenu.populate();
@@ -38,25 +40,25 @@ const clear = () => {
     TreeBranch.clear();
 }
 
-const generateFamilyTree = (params) => {
-    // get top member > branch from top member > individual leafs
-    // get siblings of top member > branch > 
-    console.log(`Show details: ${params["showDetails"]}`);
+// const generateFamilyTree = (params) => {
+//     // get top member > branch from top member > individual leafs
+//     // get siblings of top member > branch > 
+//     console.log(`Show details: ${params["showDetails"]}`);
 
-    if (params["message"]) {
-        treeDebugMsg.textContent += ` ${params["message"]}`
-    }
-}
+//     if (params["message"]) {
+//         treeDebugMsg.textContent += ` ${params["message"]}`
+//     }
+// }
 
 export const variablizeMemberTreeDocs = () => new Promise(
     function(resolve, reject) {
-        if (window.memberDoc.data().trees) {
-            window.memberTreeDocs = [];
-            if ( memberDoc.data().trees && memberDoc.data().trees.length > 0) {
-                for (let treeId of memberDoc.data().trees) {
+        if (LocalDocs.member.data().trees) {
+            LocalDocs.trees = [];
+            if ( LocalDocs.member.data().trees && LocalDocs.member.data().trees.length > 0) {
+                for (let treeId of LocalDocs.member.data().trees) {
                     treesRef.doc(treeId).get()
                     .then((reqTreeDoc) => {
-                        window.memberTreeDocs.push(reqTreeDoc);
+                        LocalDocs.trees.push(reqTreeDoc);
                         resolve("successfully set tree doc");
                     })
                     .catch(() => {
@@ -74,7 +76,7 @@ const variablizeCurrentTreeDoc = (treeId) => new Promise(
     function(resolve, reject) {
         treesRef.doc(treeId).get()
         .then((reqTreeDoc) => {
-            window.currentTreeDoc = reqTreeDoc.exists ? reqTreeDoc : null;
+            LocalDocs.tree = reqTreeDoc.exists ? reqTreeDoc : null;
             resolve(true);
         })
         .catch(err => {
@@ -83,28 +85,12 @@ const variablizeCurrentTreeDoc = (treeId) => new Promise(
     }
 )
 
-const variablizeCurrentTreeLeafDocs = (treeId) => new Promise(
-    function (resolve, reject) {
-        window.currentLeafDocs = [];
-        if (treeId) {
-            treesRef.doc(treeId).collection('leaves').get()
-            .then((reqTreeLeafDocs) => {
-                if (reqTreeLeafDocs.docs.length > 0) {
-                    for (let doc of reqTreeLeafDocs.docs) {
-                        window.currentLeafDocs.push(doc);
-                    }
-                    resolve(true);
-                } else {
-                    resolve(false);
-                }
-            })
-            .catch(err => {
-                console.log(err.message);
-            })
-        }
-    }
-)
-
+// const variablizeLeafMemberDocs = (memberId) => {
+//     membersRef.doc(memberId).get()
+//     .then((reqMemberDoc) => {
+//         LocalDocs.claimedMembers.push(reqMemberDoc);
+//     })
+// }
 
 // ///// FUNCTYIONS BLOW ARE BEING SLOWLY REWRITTEN BY THE ONES ABOVE, WHICH AR MEANT TO ME MORE EFFICICENT.
 

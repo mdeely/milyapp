@@ -3,7 +3,6 @@ let myTreesDebugMsg = myTreesViewEl.querySelector(`.debugMessage`);
 
 export default function setup() {
     pageTitle.innerHTML = "My trees";
-
 }
 
 export const myTreesViewOnAuthChange = (user) => {
@@ -28,9 +27,9 @@ const populateMyTreesList = () => {
 
     myTreesDebugMsg.innerHTML += `Your trees:`;
 
-    if (window.memberTreeDocs) {
-        for (let memberTreeDoc of memberTreeDocs) {
-            let anchor = `<a href="#/trees/${memberTreeDoc.id}">${memberTreeDoc.data().name}</a>`
+    if (LocalDocs.trees) {
+        for (let treeDoc of LocalDocs.trees) {
+            let anchor = `<a href="#/trees/${treeDoc.id}">${treeDoc.data().name}</a>`
     
             myTreesDebugMsg.innerHTML += anchor;
         }

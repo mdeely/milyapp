@@ -61,10 +61,9 @@ export default function router (user) {
                 Helpers.variablizeMemberDoc()
                 .then((memberDocExists) => {
                     if (memberDocExists) {
-                        if (window.memberDoc.data().trees) {
+                        if (LocalDocs.member.data().trees) {
                             variablizeMemberTreeDocs()
                             .then(() => {
-                                console.log("settings auth member from router")
                                 reqRoute.onAuthController(user);
                             })
                             .catch(err => {

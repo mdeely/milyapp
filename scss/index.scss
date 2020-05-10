@@ -13,6 +13,7 @@ $brand: #002831;
     --color_danger: #B90B00;
     --brand_lighter: #E3F2F5;
     --navHeight: 104px;
+    --navDecorationHeight: 24px;
     --detailsWidth: 352px;
     --bounceEasing: cubic-bezier(0.51, 0.92, 0.24, 1.15);
     --iconButtonSize: 44px;
@@ -87,6 +88,11 @@ h6 {
         width: 100%;
         height: auto;
         z-index: -1;
+        background-image: url("../assets/img/wavy-lg-dark.svg");
+        background-size: 100vw 100%;
+        background-position: center;
+        background-repeat: no-repeat;
+        height: var(--navDecorationHeight);
     }
 }
 
@@ -286,6 +292,11 @@ h6 {
     height: 64px;
     border-radius: 50%;
     background-color: var(--color_yellow);
+    overflow: hidden;
+
+    img {
+        max-width: 100%;
+    }
 }
 
 .detailsPanel__realtiveType {
@@ -329,6 +340,16 @@ h6 {
 }
 
 .spouses {
+
+    .leaf {
+        margin-left: -4px;
+        margin-right: -4px;
+
+        &:only-child {
+            margin-left: var(--leafSpacing);
+            margin-right: var(--leafSpacing);
+        }
+    }
     // position: relative;
 
     // &:before {

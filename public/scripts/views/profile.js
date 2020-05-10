@@ -29,21 +29,23 @@ const editProfileEl = () => {
     form.setAttribute("id", "set-profile_form");
     cardContent.setAttribute("class", "card__content");
     
-    loopThroughMemberBlueprint({
+    MemberBlueprint.loop({
         "functionCall" : handleProfileItems
     });
 
     function handleProfileItems(key, value, parentValue) {
         let inputValue = "";
 
-        if (window.memberDoc) {
-            inputValue = memberDoc.data()[value["dataPath"]];
+        if (LocalDocs.member) {
+            inputValue = LocalDocs.member.data()[value["dataPath"]];
             if (parentValue) {
-                inputValue = memberDoc.data()[parentValue["dataPath"]][value["dataPath"]];
+                inputValue = LocalDocs.member.data()[parentValue["dataPath"]][value["dataPath"]];
             }
         } else {
-            if (key === "Email") {
+            if (key === "Email" && !LocalDocs.member.data()[value["dataPath"]]) {
                 inputValue = auth.currentUser.email;
+            } else {
+                inputValue = LocalDocs.member.data()[value["dataPath"]];
             }
         }
 
@@ -56,7 +58,7 @@ const editProfileEl = () => {
         cardContent.appendChild(el);
     }
 
-    if (window.memberDoc) {
+    if (LocalDocs.member) {
         updateMember(button, form);
     } else {
         newMember(button, form);
@@ -72,6 +74,25 @@ const editProfileEl = () => {
     form.appendChild(cardFooter);
 
     profileViewEl.appendChild(form);
+
+    const setProfileForm = document.querySelector("#set-profile_form");
+
+    setProfileForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+    
+        membersRef.doc(authMemberDoc.id).update({
+            name : {
+                firstName : setProfileForm["set-profile__firstName"]
+            },
+            birthday : setProfileForm["set-profile__birthday"]
+        })
+        .then(() => {
+            console.log("member was updated");
+        })
+        .catch(err => {
+            console.log(err.message);
+        })
+    })
 }
 
 const generateInputItem = (args) => {
@@ -178,34 +199,34 @@ const newMember = (button, form) => {
 }
 
 
-const loopThroughMemberBlueprint = (args) => {
-    let defaults = ["claimed_by", "topMember", "created_by", "children", "parents", "siblings", "spouses"];
-    let ignoreGroupLabels = args.ignoreGroupLabels ? args.ignoreGroupLabels : [];
-    if (!args.ignoreDefaults) {
-        ignoreGroupLabels.push(...defaults);
-    }
-    let ignoreItems = args.ignoreItems ? args.ignoreItems : [];
-    let functionCall = args.functionCall;
+// const loopThroughMemberBlueprint = (args) => {
+//     let defaults = ["claimed_by", "topMember", "created_by", "children", "parents", "siblings", "spouses"];
+//     let ignoreGroupLabels = args.ignoreGroupLabels ? args.ignoreGroupLabels : [];
+//     if (!args.ignoreDefaults) {
+//         ignoreGroupLabels.push(...defaults);
+//     }
+//     let ignoreItems = args.ignoreItems ? args.ignoreItems : [];
+//     let functionCall = args.functionCall;
 
-    for (let [key, value] of Object.entries(memberBlueprint)) {
-        if (ignoreGroupLabels.includes(value["dataPath"]) || ignoreItems.includes(value["dataPath"])) {
-            if ( value["defaultValue"] && Object.values(value["defaultValue"]).length > 0 ) {
-                loopSubItems(key, value)
-            }
-        } else {
-            if ( value["defaultValue"] && Object.values(value["defaultValue"] ).length > 0 ) {
-                loopSubItems(key, value)
-            } else {
-                functionCall(key, value);
-            }
-        }
+//     for (let [key, value] of Object.entries(memberBlueprint)) {
+//         if (ignoreGroupLabels.includes(value["dataPath"]) || ignoreItems.includes(value["dataPath"])) {
+//             if ( value["defaultValue"] && Object.values(value["defaultValue"]).length > 0 ) {
+//                 loopSubItems(key, value)
+//             }
+//         } else {
+//             if ( value["defaultValue"] && Object.values(value["defaultValue"] ).length > 0 ) {
+//                 loopSubItems(key, value)
+//             } else {
+//                 functionCall(key, value);
+//             }
+//         }
 
-        function loopSubItems(key, value) {
-            for (let [detailKey, detailValue] of Object.entries(value["defaultValue"])) {
-                if (!ignoreItems.includes(detailValue["dataPath"])) {
-                    functionCall(detailKey, detailValue, value);
-                }
-            }
-        }
-    };
-}
+//         function loopSubItems(key, value) {
+//             for (let [detailKey, detailValue] of Object.entries(value["defaultValue"])) {
+//                 if (!ignoreItems.includes(detailValue["dataPath"])) {
+//                     functionCall(detailKey, detailValue, value);
+//                 }
+//             }
+//         }
+//     };
+// }

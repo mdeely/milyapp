@@ -12,7 +12,8 @@
 
 
 
-window.currentTreeMemberDocs = new Array;
+// window.currentTreeMemberDocs = new Array;
+
 
 // signup form
 const signUpForm = document.querySelector("#sign-up_form");
@@ -37,27 +38,7 @@ const signUpForm = document.querySelector("#sign-up_form");
 //     }
 // );
 
-// auth.onAuthStateChanged(user => {
-//     // if (user) {
 
-//     //     console.log(user);
-//     //     // setAuthMemberDoc(user);
-//     // }
-
-//     // if (user && user.emailVerified) {
-//     //     // router();
-//     //     // setupAuthUser(user);
-//     // } else if (user && !user.emailVerified) {
-//     //     // setupEmailVerificationView(user);
-//     //     // authenticatedView(true);
-//     // } else {
-//     //     // authenticatedView(false);
-//     //     // clearView();
-//     //     // familyTreeEl.innerHTML = '';
-//     //     // setTreeHash();
-//     //     // initiateSetupPage(false);
-//     // }
-// })
 
 // const clearView = () => {
 //     treeMenuCurrentTreeEl.textContent = '';
@@ -88,26 +69,56 @@ const signUpForm = document.querySelector("#sign-up_form");
 //////
 /////
 
+auth.onAuthStateChanged(user => {
+    getAndSetAuthMemberVars(user)
+    .then(() => {
+        getAndSetCurrentTreeMemberDocs();
+    })
+
+    // if (user) {
+
+    //     console.log(user);
+    //     // setAuthMemberDoc(user);
+    // }
+
+    // if (user && user.emailVerified) {
+    //     // router();
+    //     // setupAuthUser(user);
+    // } else if (user && !user.emailVerified) {
+    //     // setupEmailVerificationView(user);
+    //     // authenticatedView(true);
+    // } else {
+    //     // authenticatedView(false);
+    //     // clearView();
+    //     // familyTreeEl.innerHTML = '';
+    //     // setTreeHash();
+    //     // initiateSetupPage(false);
+    // }
+})
+
 const getAndSetAuthMemberVars = async (user) => {
-    let authMember = await membersRef.where('claimed_by', '==', user.uid).limit(1).get();
-    for (const doc of authMember.docs) {
-        window.authMemberDoc = await doc ? doc : null;
-        // window.currentTreeMemberDocs.push(doc);
-        window.primaryTreeId = authMemberDoc.data().primary_tree ? authMemberDoc.data().primary_tree : null;
-    };
-
-    let reqTreeIdFromUrl = getTreeIdFromUrl();
-
-    if (reqTreeIdFromUrl) {
-        getAndSetCurrenTreeVars(reqTreeIdFromUrl);
-    } else {
-        if (!primaryTreeId) {
-            initiateSetupPage();
-            // Render "Create your first tree!" page
+    membersRef.where('claimed_by', '==', user.uid).limit(1).get()
+    .then((resDoc) => {
+        for (const doc of resDoc.docs) {
+            window.authMemberDoc = await doc ? doc : null;
+            // window.currentTreeMemberDocs.push(doc);
+            window.primaryTreeId = authMemberDoc.data().primary_tree ? authMemberDoc.data().primary_tree : null;
+        };
+    
+        let reqTreeIdFromUrl = getTreeIdFromUrl();
+    
+        if (reqTreeIdFromUrl) {
+            getAndSetCurrenTreeVars(reqTreeIdFromUrl);
         } else {
-            getAndSetCurrenTreeVars();
+            if (!primaryTreeId) {
+                initiateSetupPage();
+                // Render "Create your first tree!" page
+            } else {
+                getAndSetCurrenTreeVars();
+            }
         }
-    }
+    })
+
 }
 
 const getAndSetCurrentTreeMemberDocs = async () => {
@@ -132,11 +143,11 @@ const getAndSetCurrentTreeMemberDocs = async () => {
 const getAndSetCurrenTreeVars = async (reqTreeId) => {
     let treeId = reqTreeId ? reqTreeId : window.primaryTreeId;
 
-    window.currentTreeDoc = await treesRef.doc(treeId).get();
-    window.currentTreeLeafCollectionRef = treesRef.doc(currentTreeDoc.id).collection('leaves');
-    window.currentTreeLeaves = new Array;
+    // LocalDocs.tree = await treesRef.doc(treeId).get();
+    // window.currentTreeLeafCollectionRef = treesRef.doc(currentTreeDoc.id).collection('leaves');
+    // window.currentTreeLeaves = new Array;
 
-    let leaves = await treesRef.doc(window.currentTreeDoc.id).collection("leaves").get();
+    let leaves = await treesRef.doc(LocalDocs.tree.id).collection("leaves").get();
 
     for await (const leafDoc of leaves.docs) {
         window.currentTreeLeaves.push(leafDoc);
