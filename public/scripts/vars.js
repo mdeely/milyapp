@@ -8,6 +8,7 @@ const treeBlueprint = {
 
 const familyTreeEl = document.querySelector("#familyTree");
 const mainContent = document.querySelector("#mainContent");
+const leafConnections = document.querySelector("#leaf_connections");
 
 const detailsPanel = mainContent.querySelector("#detailsPanel");
 const detailsPanelInfo = detailsPanel.querySelector(".detailsPanel__information");
@@ -27,6 +28,7 @@ const signOutButton = document.querySelector("#sign-out_button");
 const excludedDetails = ["children", "parents", "siblings", "spouses", "topMember", "claimed_by", "created_by", "profile_photo"];
 const excludedCategories = ["Name", "Address"];
 
+
 const addParentButton = document.querySelector("#add-parent-action");
 const addChildButton = document.querySelector("#add-child-action");
 const addSpouseButton = document.querySelector("#add-spouse-action");
@@ -37,6 +39,9 @@ const editMemberButton = document.querySelector("#edit-member-action");
 const removeLeafButton = document.querySelector("#remove-leaf-action");
 
 const placeholderImageUrl = "https://firebasestorage.googleapis.com/v0/b/mily-4c2a8.appspot.com/o/assets%2Fplaceholder%2Fprofile_placeholder.svg?alt=media&token=d3b939f1-d46b-4315-bcc6-3167d17a18ed";
+
+const createTreeForm = document.querySelector("#create-tree_form");
+const createTreeFormModal = document.querySelector("#create-tree_form_modal");
 ///////
 
 let Leaf = {};
@@ -855,39 +860,136 @@ function newLeafForFirebase(params) {
     return newLeafObject;
 }
 
-function connectLines() {
-    let topMemberDoc = LocalDocs.leaves.find(leafDoc => leafDoc.data().topMember === true);
-    let siblings = topMemberDoc.data().siblings ? topMemberDoc.data().siblings : null;
-    
-    connectLinesToDoc(topMemberDoc);
+let connectionArray = {};
 
-    if (siblings && siblings.length > 0) {
-        for (let siblingId of siblings) {
-            let siblingDoc = LocalDocs.leaves.find(leafDoc => leafDoc.id === siblingId);
-            connectLinesToDoc(siblingDoc);
+function connectLines() {
+    for (let leafDoc of LocalDocs.leaves) {
+        let children = leafDoc.data().children ? leafDoc.data().children : null;
+        if (children && children.length > 0) {
+            connectionArray[`${leafDoc.id}`] = children;
         }
     }
 
+    iterateOverConnections();
+}
+
+function iterateOverConnections() {
+    for (let [parentId, value] of Object.entries(connectionArray)) {
+        let parentEl = familyTreeEl.querySelector(`[data-id="${parentId}"]`);
+        let parrentAttributes = parentEl.getBoundingClientRect();
+
+        for (let childId of value) {
+            let childEl = familyTreeEl.querySelector(`[data-id="${childId}"]`);
+            let childAttributes = childEl.getBoundingClientRect();
+
+            createSVG(parrentAttributes, childAttributes, parentEl);
+        }
+    } 
+}
+
+function createSVG(parentAttributes, childAttributes, parentEl) {
+    let style = getComputedStyle(parentEl);
+    let width = parentEl.offsetWidth;
+    let height = width;
+    let halfWidth = width / 2;
+    let captionOffset = 12;
+    let singleMargin = parseInt(style.marginTop);
+    let distanceDif;
+
+    console.log(height + captionOffset);
+    // let height = parseInt(style.width);
+    // let margins = parseInt(style.marginLeft) + parseInt(style.marginRight);
+    // let margin = parseInt(style.marginTop);
+
+    // let captionOffset = 10;
+
+    // let leafCaptionOffset = 8;
+    // let leafSpacing = 32;
+
+    // let height = parentAttributes.height;
+    // let heightWithCaptionOffset = height + leafCaptionOffset;
+    // let parentWidthWithSpacing = parentWidth + leafSpacing;
+    // let halfparentWidth = parentWidth / 2;
+
+    // let childMidY = childAttributes.x + (childAttributes.width / 2);
+    // let childTop = childAttributes.y + (childAttributes.parentWidth / 2);
+
+    if (parentAttributes.x > childAttributes.x) {
+        distanceDif = (-1 * (parentAttributes.x - childAttributes.x)) + halfWidth;
+    } else {
+        distanceDif = (childAttributes.x - parentAttributes.x) + halfWidth;
+    }
+
+    let d = `M${halfWidth} ${height + captionOffset} L${halfWidth} ${height + captionOffset + singleMargin} L${distanceDif} ${height + captionOffset + singleMargin} L${distanceDif} ${height + captionOffset + (singleMargin*2)}`;
+    // let points = `${parentWidth/2} ${height + captionOffset/2} ${parentWidth/2} ${height + margin} ${distanceDif} ${height + margin} ${distanceDif} ${height + margins}`;
+
+    // let parentBottomY = (parentAttributes.y + parentAttributes.height);
+
+
+
+    // let parentChildMidY = childTop - parentBottomY;
+
+    let xmlns = "http://www.w3.org/2000/svg";
+
+    let svgElem = document.createElementNS(xmlns, "svg");
+    svgElem.setAttributeNS(null, "viewBox", "0 0 " + width + " " + width);
+    svgElem.setAttributeNS(null, "width", width);
+    svgElem.setAttributeNS(null, "height", width);
+    svgElem.setAttributeNS(null, "class", "leaf_connections");
+    // svgElem.setAttributeNS(null, "preserveAspectRatio", "none");
+
+    let svgNS = "http://www.w3.org/2000/svg";  
+    path = document.createElementNS(svgNS, "path");
+    path.setAttributeNS(null, "d", d);
+    // path.setAttributeNS(null, "points", points);
+
+    // let svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    // svg.setAttribute('style', 'border: 1px solid black');
+    // svg.setAttribute('width', '600');
+    // svg.setAttribute('height', '250');
+    // svg.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:xlink", "http://www.w3.org/1999/xlink");
+    // svg.setAttribute("class", `leaf_connections`);
+
+    // svg.setAttribute("viewBox", "0 0 200 100");
+    // svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+    // svg.setAttribute("class", `connectionLine`);
+    // svg.setAttribute("width", `100`);
+    // svg.setAttribute("height", `100`);
+
+    svgElem.appendChild(path);
+    parentEl.appendChild(svgElem);
+
+    console.log(path);
+
+    // return polylineConnector;
+}
+
+function initiateModals() {
+    let modalTriggers = document.querySelectorAll("[data-modal-trigger]");
+    for (let modalTrigger of modalTriggers) {
+        modalTrigger.addEventListener('click', (e) => {
+            e.preventDefault();
+            showModal(e);
+        })
+        // show modal
+        // attached eventlisterners to have buttons close the modal.
+        // bring focus to modal
+        // addeventlisteners for onBlur
+    }
 };
 
-function connectLinesToDoc(memberDoc) {
-    console.log(memberDoc.id)
+function showModal(e) {
+    let targetModalName = e.target.getAttribute("data-modal-trigger");
+    let targetModal = document.querySelector('[data-modal="'+targetModalName+'"]');
+    let closeModal = targetModal.querySelectorAll(".modal_button--close");
 
-    let children = memberDoc.data().children ? memberDoc.data().children : null;
-    let spouses = memberDoc.data().spouses ? memberDoc.data().spouses : null;
-    
-    if (spouses &&  Object.keys(spouses).length > 0) {
-        for (let spouseId of Object.keys(spouses)) {
-            let spouseMemberDoc = LocalDocs.leaves.find(leafDoc => leafDoc.id === spouseId);
-            // spouse lines!
-            console.log(spouseMemberDoc.id);
-        }
-    }
+    targetModal.classList.add("open");
 
-    if (children && children.length > 0) {
-        for (let childId of children) {
-            let childMemberDoc = LocalDocs.leaves.find(leafDoc => leafDoc.id === childId);
-            connectLinesToDoc(childMemberDoc);
-        }
+    for (let close of closeModal) {
+        close.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.target.closest(".modal").classList.remove("open");
+        })
     }
+    // targetModal.classList.add("open");
 }

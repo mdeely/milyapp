@@ -54,6 +54,7 @@ const renderBranchByDoc = (memberDoc) => {
         branchEl.appendChild(descendantBranchEL);
     }
 
+    
     return branchEl;
 }
 

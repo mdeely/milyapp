@@ -42,10 +42,8 @@ const editProfileEl = () => {
                 inputValue = LocalDocs.member.data()[parentValue["dataPath"]][value["dataPath"]];
             }
         } else {
-            if (key === "Email" && !LocalDocs.member.data()[value["dataPath"]]) {
+            if (key === "Email") {
                 inputValue = auth.currentUser.email;
-            } else {
-                inputValue = LocalDocs.member.data()[value["dataPath"]];
             }
         }
 

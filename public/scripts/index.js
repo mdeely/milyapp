@@ -112,13 +112,11 @@ addSiblingButton.addEventListener('click', (e) => {
 
 ///////////
 //////////
-const modalTriggers = document.querySelectorAll("[data-modal-trigger]");
 const memberOptionsDropdown = document.querySelector('[data-dropdown-target="member-options-dropdown"]');
 const inviteMemberButton = document.querySelector("#invite-member-action");
 const deleteTreeButton = document.querySelector("#delete-tree");
-const createTreeForm = document.querySelector("#create-tree_form");
+
 const inviteMemberForm = document.querySelector("#invite-member_form");
-const createTreeFormModal = document.querySelector("#create-tree_form_modal");
 const editTreeForm = document.querySelector("#edit-tree_form");
 const notificationIndicator = document.querySelector("#notification_indicator");
 const notificationMenu = document.querySelector("#notification_menu");
@@ -127,12 +125,13 @@ const viewPermissionsTree = document.querySelector("#view-preferences_tree");
 const viewPermissionsList = document.querySelector("#view-preferences_list");
 const addRelationshipButton = document.querySelector(".add-relationship_button");
 
-// panzoom(familyTree, {
+// panzoom(familyTreeEl, {
 //     minZoom: .25, // prevent zooming out
 //     maxZoom: 1, // prevent zooming beyond acceptable levels
 //     // bounds: true, // prevent panning outside of container
-//     boundsPadding: 1, // prevent panning outside of container
+//     // boundsPadding: .5, // prevent panning outside of container
 //     // zoomDoubleClickSpeed: 1
+//     zoomSpeed: 0.065 // 6.5% per mouse wheel event
 // });
 
 // const resetOnAuthStateChanged = auth.onAuthStateChanged(function (user) {
@@ -254,7 +253,6 @@ const authMemberHasPermission = () => {
 
     return hasPermission;
 }
-
 
 const getNotificationsByAuthMember = () => {
     let notificationUpdateQuery = notificationsRef.where("from_member", "==", authMemberDoc.id).where("status", "in", ["declined", "accepted"]);
@@ -435,22 +433,6 @@ const handleNotification = (method, doc) => {
     }
 }
 
-const showModal = (e) => {
-    let targetModalName = e.target.getAttribute("data-modal-trigger");
-    let targetModal = document.querySelector('[data-modal="'+targetModalName+'"]');
-    let closeModal = targetModal.querySelectorAll(".modal_button--close");
-
-    targetModal.classList.add("open");
-
-    for (let close of closeModal) {
-        close.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.target.closest(".modal").classList.remove("open");
-        })
-    }
-    // targetModal.classList.add("open");
-}
-
 const closeModals = () => {
     let openModals = document.querySelectorAll(".modal.open");
 
@@ -458,20 +440,6 @@ const closeModals = () => {
         modal.classList.remove("open");
     }
 }
-
-const initiateModals = () => {
-    for (let modalTrigger of modalTriggers) {
-        modalTrigger.addEventListener('click', (e) => {
-            e.preventDefault();
-            showModal(e);
-        })
-        // show modal
-        // attached eventlisterners to have buttons close the modal.
-        // bring focus to modal
-        // addeventlisteners for onBlur
-    }
-};
-
 
 const getLeafEl = (doc) => {
     let leafName;
@@ -825,27 +793,41 @@ createTreeFormModal.addEventListener('submit', (e) => {
 
     treesRef.add(
         newTreeForFirebase({
-            "admins" : [authMemberDoc.id],
-            "created_by" : authMemberDoc.id,
+            "admins" : [LocalDocs.member.id],
+            "created_by" : LocalDocs.member.id,
             "name" : createTreeFormModal["create-tree_name"].value
         })
     ).then(newTreeRef => {
         newTreeRef.collection('leaves').add(
             newLeafForFirebase({
-                "created_by" : authMemberDoc.id,
-                "claimed_by" : authMemberDoc.id,
+                "created_by" : LocalDocs.member.id,
+                "claimed_by" : LocalDocs.member.id,
                 "topMember" : true
             })
         )
-        membersRef.doc(authMemberDoc.id).update({
-            "trees" : firebase.firestore.FieldValue.arrayUnion(newTreeRef.id)
-        })
-        .then(() => {
-            location.reload();
-        })
-        .catch(err => {
-            console.log(err.message);
-        })
+        if (!LocalDocs.member.primary_tree)
+            membersRef.doc(LocalDocs.member.id).update({
+                "trees" : firebase.firestore.FieldValue.arrayUnion(newTreeRef.id),
+                "primary_tree" : newTreeRef.id
+            })
+            .then(() => {
+                location.reload();
+            })
+            .catch(err => {
+                console.log(err.message);
+            })
+        else {
+            membersRef.doc(LocalDocs.member.id).update({
+                "trees" : firebase.firestore.FieldValue.arrayUnion(newTreeRef.id),
+            })   
+            .then(() => {
+                location.reload();
+            })
+            .catch(err => {
+                console.log(err.message);
+            })
+        }
+
     })
     .catch(err => {
         console.log(err.message)
@@ -857,30 +839,21 @@ createTreeForm.addEventListener('submit', (e) => {
 
     treesRef.add(
         newTreeForFirebase({
-            "admins" : [authMemberDoc.id],
-            "created_by" : authMemberDoc.id,
+            "admins" : [LocalDocs.member.id],
+            "created_by" : LocalDocs.member.id,
             "name" : createTreeForm["create-tree_name"].value
         })
     )
     .then(newTreeRef => {
-        treesRef.doc(newTreeRef.id).collection('leaves').add(
-            newLeafForFirebase({
-                "claimed_by" : authMemberDoc.id,
-                "created_by" : authMemberDoc.id,
-                "topMember" : true
-            })
-        )
-        .then(newLeafRef => {
-            membersRef.doc(authMemberDoc.id).update({
-                "primary_tree" : newTreeRef.id,
-                "trees" : [newTreeRef.id]
-            })
-            .then(() => {
-                location.reload();
-            })
-            .catch(err => {
-                console.log(err.message);
-            })
+        membersRef.doc(LocalDocs.member.id).update({
+            "primary_tree" : newTreeRef.id,
+            "trees" : [newTreeRef.id]
+        })
+        .then(() => {
+            location.reload();
+        })
+        .catch(err => {
+            console.log(err.message);
         })
     })
     .catch(err => {
@@ -1423,75 +1396,75 @@ const generateLines = () => {
     }
 }
 
-const createLine = (branch, element1, element2)  => {
-    return;
-    // let e1_box = element1.getBoundingClientRect();
-    // let e2_box = element2.getBoundingClientRect();
+// const createLine = (branch, element1, element2)  => {
+//     return;
+//     // let e1_box = element1.getBoundingClientRect();
+//     // let e2_box = element2.getBoundingClientRect();
 
-    // console.log(e1_box);
-    // console.log(e2_box);
+//     // console.log(e1_box);
+//     // console.log(e2_box);
 
-    // let e1_x = (e1_box.width / 2) + e1_box.x;
-    // let e1_y = (e1_box.height / 2) + e1_box.y;
+//     // let e1_x = (e1_box.width / 2) + e1_box.x;
+//     // let e1_y = (e1_box.height / 2) + e1_box.y;
 
-    // let e2_x = (e2_box.width / 2) + e2_box.x;
-    // let e2_y = (e2_box.height / 2) + e2_box.y;
+//     // let e2_x = (e2_box.width / 2) + e2_box.x;
+//     // let e2_y = (e2_box.height / 2) + e2_box.y;
 
-    // let midpoint = (e2_box.y + e2_box.x) / 2;
+//     // let midpoint = (e2_box.y + e2_box.x) / 2;
 
-    if ( branch.nextSibling.classList.contains("descendants") ) {
-        let parentToChildMiddleBar = document.createElement("div");
-        parentToChildMiddleBar.setAttribute("class", 'parentToChild__middleBar connectorLine');
-        branch.nextSibling.insertAdjacentElement('afterbegin', parentToChildMiddleBar);
+//     if ( branch.nextSibling.classList.contains("descendants") ) {
+//         let parentToChildMiddleBar = document.createElement("div");
+//         parentToChildMiddleBar.setAttribute("class", 'parentToChild__middleBar connectorLine');
+//         branch.nextSibling.insertAdjacentElement('afterbegin', parentToChildMiddleBar);
 
-        let childLeaves = branch.nextSibling.querySelectorAll(".leaf");
+//         let childLeaves = branch.nextSibling.querySelectorAll(".leaf");
 
-        if (childLeaves.length > 1) {
-            for (childLeaf of childLeaves) {
-                let childToParentMiddleBar = document.createElement("div");
-                childToParentMiddleBar.setAttribute("class", 'childToParent__middleBar connectorLine');
-                childLeaf.insertAdjacentElement('afterbegin', childToParentMiddleBar);
-            }
-        } else {
-            console.log("no child leaves");
-        }
-    }
+//         if (childLeaves.length > 1) {
+//             for (childLeaf of childLeaves) {
+//                 let childToParentMiddleBar = document.createElement("div");
+//                 childToParentMiddleBar.setAttribute("class", 'childToParent__middleBar connectorLine');
+//                 childLeaf.insertAdjacentElement('afterbegin', childToParentMiddleBar);
+//             }
+//         } else {
+//             console.log("no child leaves");
+//         }
+//     }
 
 
-    let spouseLine = document.createElement("div");
-    spouseLine.setAttribute("class", 'spouseToSpouse__line connectorLine');
+//     let spouseLine = document.createElement("div");
+//     spouseLine.setAttribute("class", 'spouseToSpouse__line connectorLine');
 
-    let spouseToChildren = document.createElement("div");
-    spouseToChildren.setAttribute("class", 'parentToChildren__downLine connectorLine');
-    // let spouseLine = document.createElement("div");
-    // spouseLine.setAttribute("class", 'spouseLine');
+//     let spouseToChildren = document.createElement("div");
+//     spouseToChildren.setAttribute("class", 'parentToChildren__downLine connectorLine');
+//     // let spouseLine = document.createElement("div");
+//     // spouseLine.setAttribute("class", 'spouseLine');
 
-//     let svg = `
-//     <svg height="210" width="500" class="spouseLine">
-//         <polyline points="
-//             ${0},${0}
-//             ${e2_x},${e2_y}
-//         "
-//         fill="none" stroke="black" />
-//     </svg>
-//   `
+// //     let svg = `
+// //     <svg height="210" width="500" class="spouseLine">
+// //         <polyline points="
+// //             ${0},${0}
+// //             ${e2_x},${e2_y}
+// //         "
+// //         fill="none" stroke="black" />
+// //     </svg>
+// //   `
 
-    // let svg = document.createElement("svg");
-    // let polyline = document.createElement("polyline");
+//     // let svg = document.createElement("svg");
+//     // let polyline = document.createElement("polyline");
 
-    // polyline.setAttribute("points", `${e1_x},${e1_y} ${e2_x},${e2_y}`);
-    // polyline.setAttribute("fill", `none`);
-    // polyline.setAttribute("stroke", `black`);
+//     // polyline.setAttribute("points", `${e1_x},${e1_y} ${e2_x},${e2_y}`);
+//     // polyline.setAttribute("fill", `none`);
+//     // polyline.setAttribute("stroke", `black`);
 
-    // svg.setAttribute("class", `spouseLine`);
-    // svg.setAttribute("width", `100`);
-    // svg.setAttribute("height", `100`);
+//     // svg.setAttribute("class", `spouseLine`);
+//     // svg.setAttribute("width", `100`);
+//     // svg.setAttribute("height", `100`);
 
-    // svg.appendChild(polyline);
+//     // svg.appendChild(polyline);
 
-    // familyTree.appendChild(svg);
-    branch.appendChild(spouseLine);
-    branch.appendChild(spouseToChildren);
-}
+//     // familyTree.appendChild(svg);
+//     branch.appendChild(spouseLine);
+//     branch.appendChild(spouseToChildren);
+// }
 
 initiateModals();

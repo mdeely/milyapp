@@ -16,24 +16,23 @@ export const myTreesViewOnAuthChange = (user) => {
 
 const populateMyTreesList = () => {
     let button = document.createElement("button");
-    button.setAttribute("id", "new-tree_button");
-    button.textContent = "Create a tree";
+    button.setAttribute("class", "new-tree_button");
+    button.setAttribute("data-modal-trigger", "create-tree_modal");
 
-    button.addEventListener('click', e => {
-        e.preventDefault();
-        doSomething();
-        alert("TODO: make a new tree");
-    })
+    button.textContent = "Create a tree";
 
     myTreesDebugMsg.innerHTML += `Your trees:`;
 
-    if (LocalDocs.trees) {
-        for (let treeDoc of LocalDocs.trees) {
-            let anchor = `<a href="#/trees/${treeDoc.id}">${treeDoc.data().name}</a>`
-    
-            myTreesDebugMsg.innerHTML += anchor;
+    if (LocalDocs.member.data().trees) {
+        for (let treeId of LocalDocs.member.data().trees) {
+            treesRef.doc(treeId).get()
+            .then((reqTreeDoc) => {
+                let anchor = `<a href="#/trees/${reqTreeDoc.id}">${reqTreeDoc.data().name}</a>`
+                myTreesDebugMsg.innerHTML += anchor;
+            })
         }
     }
 
     myTreesViewEl.appendChild(button);
+    initiateModals();
 }

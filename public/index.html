@@ -45,6 +45,27 @@
 
         <div style="display:none" data-view="my-trees">
             <div class="debugMessage"></div>
+            
+            <div class="modal medium" data-modal="create-tree_modal">
+                <form id="create-tree_form_modal" class="card modal-dialouge">
+                    <div class="card__header">
+                        <h1 class="u-mar-b_0">Create family</h1>
+                    </div>
+                    <div class="card__content">
+                        <div class="inputGroup">
+                            <label for="create-tree_name">Family name</label>
+                            <input type="text" name="create-tree_name">
+                        </div>
+                    </div>
+                    <div class="card__footer">
+                        <div class="buttonGroup u-jc_flex-end">
+                            <a href="#" class="modal_button--close button secondary">Cancel</a>
+                            <button type="submit">Create tree</button>
+                        </div>
+                    </div>
+                    <a href="#" class="modal_button--close iconButton white"><i class="fa fa-times"></i></a>
+                </form>
+            </div>
         </div>
 
         <div style="display:none" data-view="error">
@@ -57,6 +78,7 @@
             <section id="mainContent">
 
             <section id="familyTree"></section>
+            <!-- <svg id="leaf_connections" width="160" height="280" xmlns="http://www.w3.org/2000/svg" version="1.1"></svg> -->
                 <aside id="detailsPanel">
                     <nav class="detailsPanel__actions u-mar-b_4">
                         <button class="iconButton add-relationship_button" data-dropdown-target="add-relationship-dropdown"><i class="fa fa-plus"></i></button>
@@ -258,27 +280,6 @@
                         <a href="#" id="delete-tree" class="modal_button--close button danger edit-tree_delete">Delete</a>
                         <a href="#" class="modal_button--close button secondary">Close</a>
                         <button class="edit-tree_save" type="submit">Save changes</button>
-                    </div>
-                </div>
-                <a href="#" class="modal_button--close iconButton white"><i class="fa fa-times"></i></a>
-            </form>
-        </div>
-
-        <div class="modal medium" data-modal="create-tree_modal">
-            <form id="create-tree_form_modal" class="card modal-dialouge">
-                <div class="card__header">
-                    <h1 class="u-mar-b_0">Create family</h1>
-                </div>
-                <div class="card__content">
-                    <div class="inputGroup">
-                        <label for="create-tree_name">Family name</label>
-                        <input type="text" name="create-tree_name">
-                    </div>
-                </div>
-                <div class="card__footer">
-                    <div class="buttonGroup u-jc_flex-end">
-                        <a href="#" class="modal_button--close button secondary">Cancel</a>
-                        <button type="submit">Create tree</button>
                     </div>
                 </div>
                 <a href="#" class="modal_button--close iconButton white"><i class="fa fa-times"></i></a>

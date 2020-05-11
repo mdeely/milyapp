@@ -15,10 +15,10 @@
   --bounceEasing: cubic-bezier(0.51, 0.92, 0.24, 1.15);
   --iconButtonSize: 44px;
   --color_border: #D9DFE0;
-  --leafSize: 96px;
+  --leafSize: 72px;
   --profileImageSize: 128px;
   --leafCaptionOffset: 12px;
-  --leafSpacing: 32px;
+  --leafSpacing: 24px;
   --leafShadow: 0px 2px 16px rgba(0, 0, 0, 0.05), 0px 1px 2px rgba(0, 0, 0, 0.07), 0px 4px 24px rgba(0, 0, 0, 0.08);
   --leafCaptionShadow: 0 0 12px rgba(0,0,0, .2);
   --detailsPanelDecorationTopOffset: 0;
@@ -82,10 +82,27 @@ h6 {
     background-repeat: no-repeat;
     height: var(--navDecorationHeight); }
 
+polyline,
+path {
+  fill: none;
+  stroke: var(--color_border);
+  stroke-width: 2; }
+
+.leaf_connections {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible; }
+
 #mainContent {
   display: flex;
   position: relative;
   flex: 1;
+  overflow: hidden;
   transition: background-color 0.2s ease-in-out; }
   #mainContent:focus {
     outline: none; }
@@ -98,16 +115,32 @@ h6 {
   #mainContent.showDetails #detailsPanel {
     right: 0; }
 
+.connection {
+  --halfLeafSize: calc(var(--leafSize) / 2);
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: -1;
+  background-color: red; }
+  .connection_parentToChild {
+    height: calc(var(--leafSize) + 12px);
+    width: 10px;
+    top: var(--leafSpacing); }
+  .connection_childToParent {
+    height: calc(var(--leafSize) + 12px);
+    width: 10px;
+    bottom: var(--leafSpacing); }
+
 #familyTree {
   flex: 1;
   transition: margin-right 0.2s ease-in-out;
   display: flex;
-  overflow: scroll;
   flex-wrap: nowrap;
   justify-content: center;
   position: relative;
   top: 56px;
-  padding-bottom: 80px; }
+  padding-bottom: 80px;
+  overflow: scroll; }
   #familyTree:focus {
     outline: 0 solid transparent; }
   #familyTree .view-list_info {
@@ -274,6 +307,18 @@ h6 {
   -webkit-transform: translateX(-50%);
   transform: translateX(-50%); }
 
+.spouses .leaf svg {
+  z-index: -2; }
+  .spouses .leaf svg path {
+    stroke-linejoin: arcs; }
+
+.spouses:hover .leaf svg {
+  z-index: -1; }
+  .spouses:hover .leaf svg path {
+    transition: all .1s ease-in-out;
+    stroke: var(--color_outline);
+    stroke-width: 4; }
+
 .leaf {
   border-radius: 50%;
   box-shadow: var(--leafShadow);
@@ -293,13 +338,8 @@ h6 {
     box-shadow: 0 0 0 4px var(--color_outline);
     opacity: 0;
     transform: scale(0.8);
-    transition: transform 0.2s ease-in-out;
-    z-index: -1; }
-  .leaf:hover {
-    transform: scale(1.05);
-    z-index: 1; }
+    transition: transform 0.2s ease-in-out; }
   .leaf:active {
-    transform: scale(0.95);
     transition: all 0.05s ease-in-out; }
   .leaf.active:before {
     opacity: 1;
