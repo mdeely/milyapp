@@ -1,15 +1,16 @@
 let homepageViewEl = document.querySelector(`[data-view="homepage"]`);
 let homepageDebugMsg = homepageViewEl.querySelector(`.debugMessage`);
 
-export default function setup() {
+const homepageSetup = () => {
+    let auth = firebase.auth();
     homepageDebugMsg.innerHTML = "";
 
-    if (auth.currentUser) {
+    if (firebase.auth().currentUser) {
         homepageViewOnAuthChange(auth.currentUser);
     }
 }
 
-export const homepageViewOnAuthChange = (user) => {
+const homepageViewOnAuthChange = (user) => {
     if (user) {
         homepageDebugMsg.textContent = "Authenticated";
     } else {

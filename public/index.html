@@ -45,7 +45,7 @@
 
         <div style="display:none" data-view="my-trees">
             <div class="debugMessage"></div>
-            
+
             <div class="modal medium" data-modal="create-tree_modal">
                 <form id="create-tree_form_modal" class="card modal-dialouge">
                     <div class="card__header">
@@ -310,15 +310,6 @@
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         firebase.analytics();
-
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-        const functions = firebase.functions();
-        const storage = firebase.storage();
-
-        const membersRef = db.collection('members');
-        const treesRef = db.collection('trees');
-        const notificationsRef = db.collection('notifications');
     </script>
 
     <!-- Compiled and minified JavaScript -->
@@ -327,14 +318,15 @@
     <script src='https://unpkg.com/panzoom@8.7.3/dist/panzoom.min.js'></script>
     <!-- <script src="scripts/auth.js"></script> -->
     <script src="scripts/vars.js"></script>
-    <script type="module" src="scripts/index.js"></script>
-    <!-- <script src="scripts/routing.js"></script>
-    <script src="scripts/profile.js"></script> -->
-    <!-- <script type="module" src="scripts/homepage.js"></script>
-    <script src="scripts/settings.js"></script> -->
+    <script src="scripts/components/nav.js"></script>
+    <script src="scripts/components/treeMenu.js"></script>
+    <script src="scripts/views/tree.js"></script>
+    <script src="scripts/views/myTrees.js"></script>
+    <script src="scripts/views/profile.js"></script>
+    <script src="scripts/views/homepage.js"></script>
+    <script src="scripts/routing.js"></script>
+    <script src="scripts/index.js"></script>
+    <!-- <script src="scripts/settings.js"></script> -->
     <script src="scripts/dropdown.js"></script>
-
-    <!-- <script src="scripts/leader-line.min.js"></script> -->
-
     </body>
 </html>

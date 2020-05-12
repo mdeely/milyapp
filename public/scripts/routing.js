@@ -1,26 +1,11 @@
-import * as Helpers from './helpers.js'
-import * as Nav from './components/nav.js'
-
-import treeView, { treeViewOnAuthChange, variablizeMemberTreeDocs } from './views/tree.js';
-import homepageView, { homepageViewOnAuthChange } from './views/homepage.js';
-import profileView, { profileViewOnAuthChange } from './views/profile.js';
-import settingsView, { settingsViewOnAuthChange } from './views/settings.js';
-import errorView from './views/error.js';
-import accountVerificationView, { accountVerificationViewOnAuthChange } from './views/account-verification.js';
-
-import myTreesView, { myTreesViewOnAuthChange } from './views/myTrees.js';
-
-const dataViews = document.querySelectorAll(`[data-view]`);
-
-export default function router (user) {
+window.router = function(user) {
     let routes = {
-        "my-trees" : {"name": "my-trees", "controller": myTreesView, "onAuthController": myTreesViewOnAuthChange},
-        "trees" : {"name": "tree", "controller": treeView, "onAuthController": treeViewOnAuthChange},
-        "profile" : {"name": "profile", "controller": profileView, "onAuthController": profileViewOnAuthChange},
+        "my-trees" : {"name": "my-trees", "controller": myTreesSetup, "onAuthController": myTreesViewOnAuthChange},
+        "trees" : {"name": "tree", "controller": Tree.setup, "onAuthController": Tree.treeViewOnAuthChange},
+        "profile" : {"name": "profile", "controller": profileSetup, "onAuthController": profileViewOnAuthChange},
         "settings" : {"name": "settings", "controller": settingsView, "onAuthController": settingsViewOnAuthChange},
-        "/" : {"name": "homepage", "controller": homepageView, "onAuthController": homepageViewOnAuthChange},
+        "/" : {"name": "homepage", "controller": homepageSetup, "onAuthController": homepageViewOnAuthChange},
         "account-verification" : {"name": "account-verification", "controller": accountVerificationView, "onAuthController": accountVerificationViewOnAuthChange},
-
     }
 
     let pathnameArray = window.location.hash.split('/');
@@ -58,24 +43,43 @@ export default function router (user) {
             Nav.update(user);
             if (user.emailVerified) {
                 console.log("You're verified!");
-                Helpers.variablizeMemberDoc()
-                .then((memberDocExists) => {
-                    if (memberDocExists) {
-                        if (LocalDocs.member.data().trees && LocalDocs.member.data().trees.length > 0) {
-                            variablizeMemberTreeDocs()
-                            .then(() => {
+                let uid = firebase.auth().currentUser.uid;
+                membersRef.where('claimed_by', '==', uid).limit(1).get()
+                .then((queryResult) => {
+                    if (queryResult.docs[0]) {
+                        LocalDocs.member = queryResult.docs[0] ? queryResult.docs[0] : null;
+                        if (LocalDocs.member) {
+                            if (LocalDocs.member.data().trees && LocalDocs.member.data().trees.length > 0) {
+                                if (LocalDocs.member.data().trees) {
+                                    LocalDocs.trees = [];
+                                    if ( LocalDocs.member.data().trees && LocalDocs.member.data().trees.length > 0) {
+                                        for (let treeId of LocalDocs.member.data().trees) {
+                                            treesRef.doc(treeId).get()
+                                            .then((reqTreeDoc) => {
+                                                LocalDocs.trees.push(reqTreeDoc);
+                                                reqRoute.onAuthController(user);
+                                            })
+                                            .catch(() => {
+                                                console.log("error getting a tree");
+                                            })
+                                        }
+                                    } else {
+                                        console.log("Member has no trees");
+                                    }
+                                }
+                            } else {
                                 reqRoute.onAuthController(user);
-                            })
-                            .catch(err => {
-                                console.log(err);
-                            })
+                            }
                         } else {
-                            reqRoute.onAuthController(user);
+                            // User needs to create a member
+                            profileViewOnAuthChange(user);
                         }
                     } else {
-                        // User needs to create a member
-                        profileViewOnAuthChange(user);
+                        resolve(false)
                     }
+                })
+                .catch(err => {
+                    reject(console.log(err.message));
                 })
             } else {
                 accountVerificationViewOnAuthChange(user);
@@ -87,6 +91,24 @@ export default function router (user) {
         }
     });
 }
+
+function settingsView() {
+    // do something
+};
+function settingsViewOnAuthChange() {
+    // do something
+};
+
+function accountVerificationView() {
+    // do something
+};
+function accountVerificationViewOnAuthChange() {
+    // do something
+};
+
+function errorView() {
+    // do something
+};
 
 function getTreeIdFromUrl() {
     let treeId;
@@ -101,6 +123,45 @@ function getTreeIdFromUrl() {
 
     return treeId;
 }
+
+// const variablizeMemberDoc = (uid = firebase.auth().currentUser.uid) => new Promise(
+//     function(resolve, reject) {
+//         // membersRef.where('claimed_by', '==', uid).limit(1).get()
+//         // .then((queryResult) => {
+//         //     if (queryResult.docs[0]) {
+//         //         LocalDocs.member = queryResult.docs[0] ? queryResult.docs[0] : null;
+//         //         resolve(true);
+//         //     } else {
+//         //         resolve(false)
+//         //     }
+//         // })
+//         // .catch(err => {
+//         //     reject(console.log(err.message));
+//         // })
+//     }
+// )
+
+// const variablizeMemberTreeDocs = () => new Promise(
+//     function(resolve, reject) {
+//         // if (LocalDocs.member.data().trees) {
+//         //     LocalDocs.trees = [];
+//         //     if ( LocalDocs.member.data().trees && LocalDocs.member.data().trees.length > 0) {
+//         //         for (let treeId of LocalDocs.member.data().trees) {
+//         //             treesRef.doc(treeId).get()
+//         //             .then((reqTreeDoc) => {
+//         //                 LocalDocs.trees.push(reqTreeDoc);
+//         //                 resolve("successfully set tree doc");
+//         //             })
+//         //             .catch(() => {
+//         //                 reject(console.log("error getting a tree"));
+//         //             })
+//         //         }
+//         //     } else {
+//         //         reject(console.log("Member has no trees"));
+//         //     }
+//         // }
+//     }
+// );
 
 // getTreeIdFromUrl();
 // setUrlFromTree();

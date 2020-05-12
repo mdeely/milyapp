@@ -36,7 +36,6 @@ auth.onAuthStateChanged(user => {
 })
 
 // signup form
-const signInForm = document.querySelector("#signup-form");
 const logInForm = document.querySelector("#login-form");
 
 signInForm.addEventListener('submit', (e) => {

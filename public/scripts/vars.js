@@ -1,3 +1,22 @@
+const auth = firebase.auth();
+const db = firebase.firestore();
+const functions = firebase.functions();
+const storage = firebase.storage();
+
+const membersRef = db.collection('members');
+const treesRef = db.collection('trees');
+const notificationsRef = db.collection('notifications');
+
+const addParentButton = document.querySelector("#add-parent-action");
+const addChildButton = document.querySelector("#add-child-action");
+const addSpouseButton = document.querySelector("#add-spouse-action");
+const addSiblingButton = document.querySelector("#add-sibling-action");
+
+const removeLeafButton = document.querySelector("#remove-leaf-action");
+const editMemberButton = document.querySelector("#edit-member-action");
+
+const dataViews = document.querySelectorAll(`[data-view]`);
+
 const treeBlueprint = {
     "Admins" : { "dataPath" : "admins", "defaultValue" : [] },
     "Contributors" : { "dataPath" : "contributors", "defaultValue" : [] },
@@ -21,27 +40,10 @@ const detailsPanelFirstName = detailsPanel.querySelector(".detailsPanel__firstNa
 
 const pageTitle = document.querySelector("#pageTitle")
 
-const signUpForm = document.querySelector("#sign-up_form");
-const signInForm = document.querySelector("#sign-in_form");
-const signOutButton = document.querySelector("#sign-out_button");
-
 const excludedDetails = ["children", "parents", "siblings", "spouses", "topMember", "claimed_by", "created_by", "profile_photo"];
 const excludedCategories = ["Name", "Address"];
 
-
-const addParentButton = document.querySelector("#add-parent-action");
-const addChildButton = document.querySelector("#add-child-action");
-const addSpouseButton = document.querySelector("#add-spouse-action");
-const addSiblingButton = document.querySelector("#add-sibling-action");
-
-const editMemberButton = document.querySelector("#edit-member-action");
-
-const removeLeafButton = document.querySelector("#remove-leaf-action");
-
 const placeholderImageUrl = "https://firebasestorage.googleapis.com/v0/b/mily-4c2a8.appspot.com/o/assets%2Fplaceholder%2Fprofile_placeholder.svg?alt=media&token=d3b939f1-d46b-4315-bcc6-3167d17a18ed";
-
-const createTreeForm = document.querySelector("#create-tree_form");
-const createTreeFormModal = document.querySelector("#create-tree_form_modal");
 ///////
 
 let Leaf = {};
@@ -896,7 +898,6 @@ function createSVG(parentAttributes, childAttributes, parentEl) {
     let singleMargin = parseInt(style.marginTop);
     let distanceDif;
 
-    console.log(height + captionOffset);
     // let height = parseInt(style.width);
     // let margins = parseInt(style.marginLeft) + parseInt(style.marginRight);
     // let margin = parseInt(style.marginTop);
@@ -958,8 +959,6 @@ function createSVG(parentAttributes, childAttributes, parentEl) {
 
     svgElem.appendChild(path);
     parentEl.appendChild(svgElem);
-
-    console.log(path);
 
     // return polylineConnector;
 }

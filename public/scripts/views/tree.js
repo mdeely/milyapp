@@ -1,10 +1,9 @@
-import * as TreeMenu from '../components/treeMenu.js'
-import * as TreeBranch from '../components/treeBranch.js'
-
 let treeViewEl = document.querySelector(`[data-view="tree"]`);
 let treeDebugMsg = treeViewEl.querySelector(`.debugMessage`);
 
-export default function setup(treeId) {
+let Tree = {};
+
+Tree.setup = function(treeId) {
     clear();
     variablizeCurrentTreeDoc(treeId)
     .then((response) => {
@@ -23,12 +22,9 @@ export default function setup(treeId) {
     })
 }
 
-export const treeViewOnAuthChange = (user) => {
+Tree.treeViewOnAuthChange = function(user) {
     if (user) {
-        variablizeMemberTreeDocs()
-        .then(() => {
-            // TreeMenu.populate();
-        })
+        // huh?
     } else {
         treeDebugMsg.textContent += "Sign up/in to join this tree";
         console.log("tree auth change!");
@@ -39,38 +35,6 @@ export const treeViewOnAuthChange = (user) => {
 const clear = () => {
     TreeBranch.clear();
 }
-
-// const generateFamilyTree = (params) => {
-//     // get top member > branch from top member > individual leafs
-//     // get siblings of top member > branch > 
-//     console.log(`Show details: ${params["showDetails"]}`);
-
-//     if (params["message"]) {
-//         treeDebugMsg.textContent += ` ${params["message"]}`
-//     }
-// }
-
-export const variablizeMemberTreeDocs = () => new Promise(
-    function(resolve, reject) {
-        if (LocalDocs.member.data().trees) {
-            LocalDocs.trees = [];
-            if ( LocalDocs.member.data().trees && LocalDocs.member.data().trees.length > 0) {
-                for (let treeId of LocalDocs.member.data().trees) {
-                    treesRef.doc(treeId).get()
-                    .then((reqTreeDoc) => {
-                        LocalDocs.trees.push(reqTreeDoc);
-                        resolve("successfully set tree doc");
-                    })
-                    .catch(() => {
-                        reject(console.log("error getting a tree"));
-                    })
-                }
-            } else {
-                reject(console.log("Member has no trees"));
-            }
-        }
-    }
-);
 
 const variablizeCurrentTreeDoc = (treeId) => new Promise(
     function(resolve, reject) {
@@ -85,325 +49,108 @@ const variablizeCurrentTreeDoc = (treeId) => new Promise(
     }
 )
 
-// const variablizeLeafMemberDocs = (memberId) => {
-//     membersRef.doc(memberId).get()
-//     .then((reqMemberDoc) => {
-//         LocalDocs.claimedMembers.push(reqMemberDoc);
-//     })
-// }
+const TreeBranch = {};
 
-// ///// FUNCTYIONS BLOW ARE BEING SLOWLY REWRITTEN BY THE ONES ABOVE, WHICH AR MEANT TO ME MORE EFFICICENT.
+TreeBranch.initiate =  function() {
+    let topMemberDoc = LocalDocs.leaves.find(leafDoc => leafDoc.data().topMember === true);
+    let siblings = topMemberDoc.data().siblings ? topMemberDoc.data().siblings : null;
 
-// const setupTreeViewzzz = (treeId) => {
-//     treeDebugMsg.innerHTML = '';
-//     treeMenuDropdownEl.innerHTML = '';
+    let topMemberBranchEl = TreeBranch.renderBranchByDoc(topMemberDoc);
 
-//     setGlobalActiveTreeDoc(treeId)
-//     .then((tree) => {
-//         if (tree) {
-//             treeDebugMsg.innerHTML += "Tree exists!";
+    if (siblings && siblings.length > 0) {
+        for (let siblingId of siblings) {
+            let siblingDoc = LocalDocs.leaves.find(leafDoc => leafDoc.id === siblingId);
+            let siblingBranchEl = TreeBranch.renderBranchByDoc(siblingDoc);
+            familyTreeEl.appendChild(siblingBranchEl);
+        }
+    }
 
-//             if (auth.currentUser) {
-//                 membersRef.where('claimed_by', '==', auth.currentUser.uid).limit(1).get()
-//                 .then((queryDocs) => {
-//                     window.authMemberDoc = queryDocs.docs[0];
-//                     window.authMemberTreeDocs = [];
+    familyTreeEl.appendChild(topMemberBranchEl);
+    connectLines();
+}
 
-//                     let treeIds = authMemberDoc.data().trees;
-//                     for (treeId of treeIds) {
-//                         treesRef.doc(treeId).get()
-//                         .then((treeDoc) => {
-//                             window.authMemberTreeDocs.push(treeDoc);
-//                             populateTreeMenu();
-//                             setupFamilyTree();
-//                         })
-//                         .catch(err => {
-//                             console.log(err.message);
-//                         })
-//                     }
-//                 })
-//                 treeDebugMsg.innerHTML += "Authenticated";
-//             //         // Set authMemberDoc
-//             //         // User is not authenticated
-//             } else {
-//                 treeDebugMsg.innerHTML += "Not authenticated";
-//             //         // populate treemenu with tree title header (just header, not menu)
-//             //         // generate watered down tree
-//             //         // message: log in if you are supposed to have permission
-//             //         // message: send request to be a part of the tree
-//             }
+TreeBranch.clear = function() {
+    familyTreeEl.innerHTML = '';
+}
 
-//         } else {
-//             treeDebugMsg.innerHTML += "Tree does not exists :(";
-//         }
+ TreeBranch.renderBranchByDoc = function (memberDoc) {
+    let branchEl = createGroupEl("branch");
+    let spousesBranchEl = createGroupEl("spouses");
 
-//     });
-
-
-// }
-
-// const prepTreePermissions = () => {
-//     if (activeTreeDoc) {
-//         if (activeTreeDoc.data().viewers.length > 0 && activeTreeDoc.data().viewers.includes(authMemberDoc.id)) {
-//             treeDebugMsg.innerHTML += "You have permission and you are a VIEWER";
-//         }
+    let children = memberDoc.data().children ? memberDoc.data().children : null;
+    let spouses = memberDoc.data().spouses ? memberDoc.data().spouses : null;
     
-//         if (activeTreeDoc.data().contributors.length > 0 && activeTreeDoc.data().contributors.includes(authMemberDoc.id)) {
-//             treeDebugMsg.innerHTML += "You have permission and you are a CONTRIBUTOR";
-//         }
-    
-//         if (activeTreeDoc.data().admins.length > 0 && activeTreeDoc.data().admins.includes(authMemberDoc.id)) {
-//             treeDebugMsg.innerHTML += "You have permission and you are an ADMIN";
-//         }
-//     }
-// }
+    if (spouses &&  Object.keys(spouses).length > 0) {
+        for (let spouseId of Object.keys(spouses)) {
+            let topSpouseMemberDoc = LocalDocs.leaves.find(leafDoc => leafDoc.id === spouseId);
+            spousesBranchEl.appendChild(TreeLeaf.create(topSpouseMemberDoc));
+        }
+    }
 
-// const setGlobalActiveTreeDoc = (treeId) => new Promise(
-//     function(resolve, reject) {
-//         fetchTreeDocById(treeId)
-//         .then((treeDoc) => {
-//             // If tree exists, render tree.
-//             if (treeDoc) {
-//                 setGlobalActiveLeafDocs(treeId)
-//                 .then((leafDocs) => {
-//                     if (leafDocs) {
-//                         window.activeLeafDocs = [...leafDocs];
-//                     }
-//                 })
-//                 window.activeTreeDoc = treeDoc;
-//                 resolve(treeId);
-//             // If tree does not exists, let the user know.
-//             } else {
-//                 window.activeLeafDocs = null;
-//                 window.activeTreeDoc = null;
-//                 resolve(false);
-//             }
-//         })
-//     }
-// );
+    spousesBranchEl.appendChild(TreeLeaf.create(memberDoc));
+    branchEl.appendChild(spousesBranchEl);
 
-// const setGlobalActiveLeafDocs = (treeId) => new Promise(
-//     function (resolve, reject) {
-//         let leafDocs = [];
-//         if (treeId) {
-//             treesRef.doc(treeId).collection('leaves').get()
-//             .then((reqTreeLeafDocs) => {
-//                 if (reqTreeLeafDocs.docs.length > 0) {
-//                     for (doc of reqTreeLeafDocs.docs) {
-//                         leafDocs.push(doc);
-//                     }
-//                     resolve(leafDocs);
-//                 } else {
-//                     resolve(false);
-//                 }
-//             })
-//             .catch(err => {
-//                 console.log(err.message);
-//             })
-//         }
-//     }
-// )
+    if (children && children.length > 0) {
+        let descendantBranchEL = createGroupEl("descendants");
 
-// const fetchTreeDocById = (treeId) => new Promise(
-//     function (resolve, reject) {
-//         if (treeId) {
-//             treesRef.doc(treeId).get()
-//             .then((reqTreeDoc) => {
-//                 if (reqTreeDoc.exists) {
-//                     resolve(reqTreeDoc);
-//                 } else {
-//                     resolve(false);
-//                 }
-//             })
-//         }
-//     }
-// )
+        for (let childId of children) {
+            let childMemberDoc = LocalDocs.leaves.find(leafDoc => leafDoc.id === childId);
+            let childBranchEl = TreeBranch.renderBranchByDoc(childMemberDoc);
 
-// const setupFamilyTree = () => {
-//     window.topMemberDoc = window.activeLeafDocs.find(doc => doc.data().topMember === true);
+            descendantBranchEL.appendChild(childBranchEl);
+        }
 
-//     let siblings = topMemberDoc.data().siblings && topMemberDoc.data().siblings.length > 0 ? topMemberDoc.data().siblings : null;
-//     // RENDER FAMILY for each SIBLING
-//     // RENDER FAMILY from TOPMEMBER
-//     if (siblings) {
-//         for (siblingId of siblings) {
-//             // let siblingsHtml = renderFamilyFromMember(siblingDoc);
-//         }
-//     }
+        branchEl.appendChild(descendantBranchEL);
+    }
 
-//     for (leafDoc of activeLeafDocs) {
-//         // Using a promise funciton might allow you to simply make the elements and THEN attache an event handler.
-//         createLeafEl(leafDoc)
-//         .then((docId) => {
-//             let targetLeafEl = document.querySelector(`[data-id="${docId}"]`);
-//             targetLeafEl.addEventListener('click', (e) => {
-//                 e.preventDefault();
-//                 console.log(`You clicked on ${docId}.`);
-//                 if (e.target.classList.contains("active")) {
-//                     e.target.classList.remove("active");
-//                     showDetailPanels(false);
-//                 } else {
-//                     removeActiveLeafClass();
-//                     e.target.classList.add("active");
-//                     showDetailPanels(true);
-//                     // populateDetailsPanel(doc, leafDoc);
-//                 }
-//             });
+    return branchEl;
+}
 
-//         // figure.addEventListener('click', (e) => {
-//         //     let memberId = e.target.getAttribute("data-member-id");
-//         //     let leafId = e.target.getAttribute("data-id");
-//         //     let memberDoc = null;
-//         //     let leafDoc = getLocalLeafDocFromId(leafId);
+const createGroupEl = (className = null) => {
+    let newGroupEl = document.createElement("div");
+    newGroupEl.setAttribute("class", `${className}`);
 
-//         //     if (memberId) {
-//         //         memberDoc = getLocalMemberDocFromId(memberId);
-//         //         doc = memberDoc;
-//         //     }
-//         // });
-        
-//         })
-//     }
-// }
+    return newGroupEl;
+}
 
-// const createLeafEl = (doc) => new Promise(
-//         function(resolve, reject) {
-//         let leafName;
-//         let leafProfilePhoto = doc.data().profile_photo ? doc.data().profile_photo : "https://firebasestorage.googleapis.com/v0/b/mily-4c2a8.appspot.com/o/assets%2Fplaceholder%2Fprofile_placeholder.svg?alt=media&token=d3b939f1-d46b-4315-bcc6-3167d17a18ed";
-        
-//         if (doc.data().claimed_by) {
-//         //     let claimedBy = doc.data().claimed_by;
-//         //     reqMemberDoc = window.currentTreeMemberDocs.find(memberDoc => memberDoc.id === claimedBy);
-//         //     figure.setAttribute("data-member-id", reqMemberDoc.id);
-//         //     leafName = reqMemberDoc.data().name.firstName ? reqMemberDoc.data().name.firstName : "";
-//         } else {
-//             leafName = doc.data().name.firstName ? doc.data().name.firstName : "";
-//         }
+const TreeLeaf = {};
 
-//         // TODO: Make view list version!!
-//         // let viewListInfo = getListViewInfo(doc);
+TreeLeaf.create = function (doc) {
+    let data = doc.data();
 
-//         let leafEl =
-//         `<figure class="leaf" data-id="${doc.id}">
-//             <img class="leaf__image" src="${leafProfilePhoto}" alt="${leafName}"/>
-//             <figcaption class="leaf_caption">${leafName}</figCaption>
-//         </figure>`
+    let leafName = data.name.firstName ? data.name.firstName : "No name";
+    let leafProfilePhoto = data.profile_photo ? data.profile_photo : "https://firebasestorage.googleapis.com/v0/b/mily-4c2a8.appspot.com/o/assets%2Fplaceholder%2Fprofile_placeholder.svg?alt=media&token=d3b939f1-d46b-4315-bcc6-3167d17a18ed";
 
-//         familyTreeEl.insertAdjacentHTML("beforeBegin", leafEl);
+    let figure = document.createElement("figure");
+    let image = document.createElement("img");
+    let figCaption = document.createElement("figcaption");
 
-//         resolve(doc.id);
-// })
-// const populateTreeMenu = () => new Promise(
-// function(resolve, reject) {
-//     let categoryheader = document.createElement("div");
-//     let categoryHeaderButton = document.createElement("button");
+    figure.setAttribute("class", "leaf");
+    figure.setAttribute("data-id", doc.id);
 
-//     categoryHeaderButton.innerHTML = `<i class="fa fa-plus"></i>`;
-//     categoryHeaderButton.setAttribute("class", "iconButton white u-mar-l_auto");
-//     categoryHeaderButton.setAttribute('data-modal-trigger', 'create-tree_modal');
+    image.setAttribute("src", leafProfilePhoto);
+    image.setAttribute("alt", leafName);
+    image.setAttribute("class", "leaf__image");
 
-//     categoryHeaderButton.addEventListener('click', (e) => {
-//         e.preventDefault();
-//         showModal(e);   
-//     })
+    figCaption.setAttribute("class", "leaf_caption");
+    figCaption.textContent = leafName;
 
-//     categoryheader.setAttribute("class", "dropdown__item dropdown__label");
-//     categoryheader.textContent = "Families"
-//     categoryheader.appendChild(categoryHeaderButton);
+    figure.appendChild(figCaption);
+    figure.appendChild(image);
 
-//     treeMenuDropdownEl.appendChild(categoryheader);
+    figure.addEventListener("click", (e) => {
+        e.preventDefault();
 
-//     for (let treeDoc of window.authMemberTreeDocs) {
-//         let treeAnchor = document.createElement("a");
-//         let editButton = document.createElement("button");
-//         let className = '';
-//         let isAdminOfTree = treeDoc.data().admins.includes(authMemberDoc.id) ? true : false;
+        let leafTarget = e.target;
 
-//         if (treeDoc.id === window.activeTreeDoc.id) {
-//             className = "active";
-//             treeMenuCurrentTreeEl.innerHTML += treeDoc.data().name ? treeDoc.data().name : "Unnamed";
-//         } else {
-//             treeMenuCurrentTreeEl.innerHTML += "Choose a tree";
-//         }
+        DetailsPanel.show(doc.id);
+        Leaf.setActive(leafTarget);
+        DetailsPanel.populate(doc);
+    })
 
-//         treeAnchor.setAttribute("href", `#/trees/${treeDoc.id}`);
-//         treeAnchor.setAttribute("data-id", treeDoc.id);
-//         treeAnchor.setAttribute("class", `dropdown__item ${className}`);
-//         treeAnchor.textContent += treeDoc.data().name;
-
-//         editButton.innerHTML = `<i class="fa fa-pencil-alt"></i>`;
-//         editButton.setAttribute("class", "iconButton white u-mar-l_auto");
-//         editButton.setAttribute('data-modal-trigger', 'edit-tree_modal');
-
-//         editButton.addEventListener('click', (e) => {
-//             e.preventDefault();
-//             e.stopImmediatePropagation();
-
-//             if (isAdminOfTree) {
-//                 editTreeForm.querySelector(".edit-tree_save").classList.remove("u-d_none");
-//                 editTreeForm.querySelector(".edit-tree_delete").classList.remove("u-d_none");
-//                 editTreeForm["edit-tree_name"].removeAttribute("disabled");
-//             } else {
-//                 editTreeForm.querySelector(".edit-tree_save").classList.add("u-d_none")
-//                 editTreeForm.querySelector(".edit-tree_delete").classList.add("u-d_none");
-//                 editTreeForm["edit-tree_name"].setAttribute("disabled", true);
-//             }
-
-//             let reqTreeId = e.target.closest("[data-id]").getAttribute('data-id');
-//             let reqTreeDoc = window.authMemberTrees.find(doc => doc.id === reqTreeId);
-
-//             editTreeForm["edit-tree_name"].value = reqTreeDoc.data().name;
-//             editTreeForm["edit-tree_id"].value = reqTreeDoc.id;
-
-//             console.log(`TODO: If an admin, allow changing of permissions within the tree settings`);
-
-//             permissionsContainer.innerHTML = '';
-
-//             for (leafId of reqTreeDoc.data().viewers) {
-//                 makePermissionDetailItem("viewer", leafId);
-//             }
-
-//             for (leafId of reqTreeDoc.data().contributors) {
-//                 makePermissionDetailItem("contributor", leafId);
-//             }
-
-//             for (leafId of reqTreeDoc.data().admins) {
-//                 makePermissionDetailItem("admins", leafId);
-//             }
-
-//             function makePermissionDetailItem(permType, leafId) {
-//                 permType = permType.replace('s', '');
-//                 console.log("TODO: Load actual data when showing IMMEDIATE FAMILY section");
-//                 console.log("TODO: If not claimed_by, do not show that leaf");
-//                 let el = `<div class="detailsPanel__item u-mar-b_4 u-d_flex u-align-items_center">
-//                             <div class="detailsPanel__img u-mar-r_2"></div>
-//                                 <div class="detailsPanel__text u-mar-r_2">
-//                                     <div class="detailsPanel__name u-mar-b_point5 u-bold">${leafId}</div> 
-//                                     <div class="detailsPanel__realtiveType">${permType}</div> 
-//                                 </div>
-//                                 </div>`
-//                 permissionsContainer.innerHTML += el;
-//             }
-
-//             showModal(e);
-//         })
-
-//         if (treeDoc.id === window.primaryTreeId) {
-//             treeAnchor.innerHTML += " (Primary) "
-//         }
-
-//         treeAnchor.addEventListener('click', (e) => {
-//             // e.preventDefault();
-
-//             // let reqTreeId = e.target.getAttribute("data-id");
-//             // getAndSetCurrenTreeVars(reqTreeId);
-//         })
-
-//         treeAnchor.appendChild(editButton);
-//         treeMenuDropdownEl.appendChild(treeAnchor);
-//     }
-
-//     let caretIcon = `<i class="fa fa-caret-down u-mar-l_2 u-pe_none u-o_75"></i>`;
-
-//     treeMenuCurrentTreeEl.innerHTML += caretIcon;
-// });
+    return figure;
+    // generate leaf
+    // generate leaf list items
+    // claimed members -> promise to swap that information.
+    // return leaf El;
+}

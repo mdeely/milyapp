@@ -8,7 +8,9 @@ const navLogo = document.querySelector("#mainNav_logo");
 let hideWhenAuthenticated = [signUpButton, logInButton];
 let showWhenAuthenticated = [accountMenuButton, searchButton, viewPreferencesButton];
 
-export function update(user) {
+let Nav = {};
+
+Nav.update = function(user) {
     if (user) {
         for (let item of hideWhenAuthenticated) {
             item.style.display = "none";

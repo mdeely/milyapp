@@ -1,11 +1,13 @@
 let myTreesViewEl = document.querySelector(`[data-view="my-trees"]`);
 let myTreesDebugMsg = myTreesViewEl.querySelector(`.debugMessage`);
 
-export default function setup() {
+let MyTrees = {};
+
+const myTreesSetup = () => {
     pageTitle.innerHTML = "My trees";
 }
 
-export const myTreesViewOnAuthChange = (user) => {
+const myTreesViewOnAuthChange = (user) => {
     if (user) {
         myTreesDebugMsg.textContent = "Authenticated";
         populateMyTreesList();

@@ -1,12 +1,12 @@
-import router from './routing.js';
-
-router();
+window.router();
 
 window.onpopstate = function(event) {
-    router();
+    window.router();
 }
 
 const listenForSignUpForm = () => {
+    const signUpForm = document.querySelector("#sign-up_form");
+
     signUpForm.addEventListener("submit", (e) => {
         e.preventDefault();
     
@@ -42,13 +42,15 @@ const sendVerificationEmail = (user) => {
 }
 
 const listenForSignInForm = () => {
+    const signInForm = document.querySelector("#sign-in_form");
+
     signInForm.addEventListener("submit", (e) => {
         e.preventDefault();
     
         let email = signInForm['sign-in_email'].value;
         let password = signInForm['sign-in_password'].value;
     
-        auth.signInWithEmailAndPassword(email, password)
+        firebase.auth().signInWithEmailAndPassword(email, password)
         .then(() => {
             console.log("successfully logged in");
             signInForm.reset();
@@ -60,6 +62,8 @@ const listenForSignInForm = () => {
 }
 
 const listenForSignOutButton = () => {
+    const signOutButton = document.querySelector("#sign-out_button");
+
     signOutButton.addEventListener('click', (e) => {
         e.preventDefault();
         // sign out the user
@@ -194,50 +198,50 @@ const setupEmailVerificationView = (user) => {
 //     return window.currentTreeMemberDocs.find(doc => doc.id === reqId);
 // };
 
-const initiateSetupPage = (initiate = true) => {
-    if (initiate){
-        setProfileForm.classList.remove("u-d_none");
-        // createTreeForm.classList.remove("u-d_none")
-    } else {
-        setProfileForm.classList.add("u-d_none");
-        // createTreeForm.classList.add("u-d_none")
-    }
-}
+// const initiateSetupPage = (initiate = true) => {
+//     if (initiate){
+//         setProfileForm.classList.remove("u-d_none");
+//         // createTreeForm.classList.remove("u-d_none")
+//     } else {
+//         setProfileForm.classList.add("u-d_none");
+//         // createTreeForm.classList.add("u-d_none")
+//     }
+// }
 
-const setupView = () => {
-    clearView();
-    populateTreeMenu();
-    initiateSetupPage(false);
+// const setupView = () => {
+//     clearView();
+//     populateTreeMenu();
+//     initiateSetupPage(false);
 
-    familyTree.innerHTML = '';
+//     familyTree.innerHTML = '';
 
-    if (authMemberHasPermission()) {
-        window.topMemberDoc = window.currentTreeLeaves.find(doc => doc.data().topMember === true);
-        window.renderedLeafMembers = [];
-        let siblings = topMemberDoc.data().siblings && topMemberDoc.data().siblings.length > 0 ? topMemberDoc.data().siblings : null;
-        let generatedFamilyTreeHtml = renderFamilyFromMember(topMemberDoc);
+//     if (authMemberHasPermission()) {
+//         window.topMemberDoc = window.currentTreeLeaves.find(doc => doc.data().topMember === true);
+//         window.renderedLeafMembers = [];
+//         let siblings = topMemberDoc.data().siblings && topMemberDoc.data().siblings.length > 0 ? topMemberDoc.data().siblings : null;
+//         let generatedFamilyTreeHtml = renderFamilyFromMember(topMemberDoc);
     
-        if (siblings) {
-            for (siblingId of siblings) {
-                let siblingBranchEl = createBranchEl("div", "branch")
-                let siblingDoc = getLocalLeafDocFromId(siblingId);
-                let siblingsHtml = renderFamilyFromMember(siblingDoc);
+//         if (siblings) {
+//             for (siblingId of siblings) {
+//                 let siblingBranchEl = createBranchEl("div", "branch")
+//                 let siblingDoc = getLocalLeafDocFromId(siblingId);
+//                 let siblingsHtml = renderFamilyFromMember(siblingDoc);
     
-                siblingBranchEl.appendChild(siblingsHtml);
-                familyTreeEl.appendChild(siblingsHtml);
-            }
-        }
+//                 siblingBranchEl.appendChild(siblingsHtml);
+//                 familyTreeEl.appendChild(siblingsHtml);
+//             }
+//         }
     
-        setTreeHash(currentTreeDoc.id);
-        familyTreeEl.appendChild(generatedFamilyTreeHtml);
-        generateLines();
-        getNotificationsByAuthMember();
-        getNotificationsByEmail();
-    } else {
-        let msg = `<h1 class="u-mar-lr_auto">You do not have permission to view this family tree</h1>`
-        familyTreeEl.innerHTML = msg;
-    }
-}
+//         setTreeHash(currentTreeDoc.id);
+//         familyTreeEl.appendChild(generatedFamilyTreeHtml);
+//         generateLines();
+//         getNotificationsByAuthMember();
+//         getNotificationsByEmail();
+//     } else {
+//         let msg = `<h1 class="u-mar-lr_auto">You do not have permission to view this family tree</h1>`
+//         familyTreeEl.innerHTML = msg;
+//     }
+// }
 
 const authMemberHasPermission = () => {
     let viewer = currentTreeDoc.data().viewers.includes(authMemberDoc.id);
@@ -788,6 +792,7 @@ inviteMemberForm.addEventListener('submit', (e) => {
     }
 })
 
+const createTreeFormModal = document.querySelector("#create-tree_form_modal");
 createTreeFormModal.addEventListener('submit', (e) => {
     e.preventDefault();
 
@@ -834,6 +839,7 @@ createTreeFormModal.addEventListener('submit', (e) => {
     });
 })
 
+const createTreeForm = document.querySelector("#create-tree_form");
 createTreeForm.addEventListener('submit', (e) => {
     e.preventDefault();
 
@@ -1386,15 +1392,15 @@ const newTreeForFirebase = (params) => {
 //         removeActiveLeafClass();
 //     }
 // }
-const generateLines = () => {
-    let spousesElArray = document.querySelectorAll(".spouses");
+// const generateLines = () => {
+//     let spousesElArray = document.querySelectorAll(".spouses");
 
-    for (spouseContainer of spousesElArray) {
-        if (spouseContainer.childNodes.length > 1) {
-            createLine(spouseContainer, spouseContainer.childNodes[0], spouseContainer.childNodes[1]);
-        }
-    }
-}
+//     for (spouseContainer of spousesElArray) {
+//         if (spouseContainer.childNodes.length > 1) {
+//             createLine(spouseContainer, spouseContainer.childNodes[0], spouseContainer.childNodes[1]);
+//         }
+//     }
+// }
 
 // const createLine = (branch, element1, element2)  => {
 //     return;

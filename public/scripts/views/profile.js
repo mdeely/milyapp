@@ -1,11 +1,11 @@
 let profileViewEl = document.querySelector(`[data-view="profile"]`);
 let profileDebugMsg = profileViewEl.querySelector(`.debugMessage`);
 
-export default function setup() {
+function profileSetup() {
     pageTitle.innerHTML = "Profile";
 }
 
-export const profileViewOnAuthChange = (user) => {
+const profileViewOnAuthChange = (user) => {
     profileViewEl.innerHTML = '';
     window.location.hash = "/profile";
     profileDebugMsg.textContent = "Authenticated";
@@ -111,7 +111,7 @@ const generateInputItem = (args) => {
     return inputGroupEl;
 }
 
-export const createElementWithClass = (elementType, classname = null, content = null) => {
+function createElementWithClass(elementType, classname = null, content = null) {
     let el = document.createElement(elementType);
 
     if (classname) {
