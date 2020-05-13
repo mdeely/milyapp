@@ -4,6 +4,7 @@ const accountMenuButton = document.querySelector("#accountMenu");
 const searchButton = document.querySelector("#search_button");
 const viewPreferencesButton = document.querySelector("#view-preferences_button");
 const navLogo = document.querySelector("#mainNav_logo");
+const navProfileImage = document.querySelector(".mainNav__profile-image");
 
 let hideWhenAuthenticated = [signUpButton, logInButton];
 let showWhenAuthenticated = [accountMenuButton, searchButton, viewPreferencesButton];

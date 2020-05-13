@@ -104,9 +104,16 @@ DetailsPanel.getActiveDoc = function() {
 }
 
 DetailsPanel.populate = function(leafDoc) {
+    let dataSource = leafDoc.data();
+    
+    if (leafDoc.data().claimed_by) {
+        reqMemberDoc = LocalDocs.members.find(memberDoc => memberDoc.id === leafDoc.data().claimed_by);
+        dataSource = reqMemberDoc.data();
+    }
+
     detailsPanelMetaData.textContent = '';
     detailsPanelImmediateFamily.textContent = '';
-    detailsPanelFirstName.textContent = leafDoc.data().name.firstName ? leafDoc.data().name.firstName : "No name";
+    detailsPanelFirstName.textContent = dataSource.name.firstName ? dataSource.name.firstName : "No name";
     detailsPanel.setAttribute("data-details-id", leafDoc.id);
 
     if (leafDoc.data().topMember === true) {
@@ -117,8 +124,10 @@ DetailsPanel.populate = function(leafDoc) {
 
     if (leafDoc.data().claimed_by) {
         editMemberButton.classList.add("u-d_none");
+        detailsPanel.setAttribute("data-details-member-id", leafDoc.data().claimed_by);
     } else {
         editMemberButton.classList.remove("u-d_none");
+        detailsPanel.removeAttribute("data-details-member-id");
     }
 
     if (leafDoc.data().claimed_by === LocalDocs.member.id) {
@@ -126,16 +135,11 @@ DetailsPanel.populate = function(leafDoc) {
     }
 
     // Determine if leafDoc has a memberDoc.
-    // if (leafDoc.data().claimed_by) {
-    //     memberDoc = LocalDocs.getMemberDocByIdFromCurrentTree(leafDoc.data().claimed_by);
-    //     detailsPanel.setAttribute("data-member-details-id", memberDoc.id);
-    // }
+    if (detailsPanel.hasAttribute("data-details-member-id")) {
 
-    // if (doc.ref.parent.path === "members") {
-    //     detailsPanel.setAttribute("data-member-details-id", doc.id);
-    // } else {
-    //     detailsPanel.setAttribute("data-member-details-id", '');
-    // }
+        // do something if is claimed member
+    }
+
 
     let profileImage = detailsPanel.querySelector(".detailsPanel__profileImage img");
     profileImage.setAttribute('src', placeholderImageUrl);
@@ -191,8 +195,8 @@ DetailsPanel.populate = function(leafDoc) {
     function generateDetailElement(key, value, parentValue = null) {
         let reqName = value["dataPath"];
         let reqIcon = value["icon"];
-        let data = leafDoc.data()[reqName];
-    
+        let data = dataSource[reqName];
+
         if (data) {
             if (reqName === "birthday" && data) {
                 var options = { year: 'numeric', month: 'long', day: 'numeric' };
@@ -329,7 +333,8 @@ DetailsPanel.editMember = function() {
                 "country" : detailsPanelEdit["country"].value,
             },
             "birthday" : detailsPanelEdit["birthday"].value,
-
+            "instagram" : detailsPanelEdit["instagram"].value,
+            "facebook" : detailsPanelEdit["facebook"].value,
             "occupation" : detailsPanelEdit["occupation"].value,
             "email" : detailsPanelEdit["email"].value,
         })
@@ -376,6 +381,8 @@ MemberBlueprint.object = {
                     "Nickname" : { "dataPath" : "nickname", "defaultValue" : null, "icon" : "user" }
                 }
             },
+    "Facebook" : { "dataPath" : "facebook", "defaultValue" : null, "icon" : "facebook" },
+    "Instagram" : { "dataPath" : "instagram", "defaultValue" : null, "icon" : "instagram" },
     "Email" : { "dataPath" : "email", "defaultValue" : null, "icon" : "envelope" },
     "Birthday" : { "dataPath" : "birthday", "defaultValue" : null, "icon" : "birthday-cake", "dataType": "date" },
     "Address" : { "dataPath" : "address", "icon" : "map-pin", 
@@ -402,7 +409,7 @@ MemberBlueprint.loop = function(args) {
     let functionCall = args.functionCall;
     let relationships = ["children", "parents", "siblings", "spouses"];
     let metaDetails = ["claimed_by", "topMember", "created_by"];
-    let basicDetails = ["email", "birthday", "occupation", "profile_photo"];
+    let basicDetails = ["email", "birthday", "occupation", "profile_photo", "facebook", "instagram"];
     let groups = ["name", "address"];
     let groupDetails = ["firstName", "middleName", "lastName", "nickname", "surname", "address1", "address2", "city", "zipcode", "country"];
 
@@ -481,6 +488,8 @@ LocalDocs.leaves = [];
 LocalDocs.claimedMembers = new Array;
 LocalDocs.trees = [];
 LocalDocs.member;
+LocalDocs.members = new Array;
+
 
 LocalDocs.getMemberDocByIdFromCurrentTree = function(reqId) {
     return LocalDocs.claimedMembers.find(doc => doc.id === reqId);
@@ -898,22 +907,6 @@ function createSVG(parentAttributes, childAttributes, parentEl) {
     let singleMargin = parseInt(style.marginTop);
     let distanceDif;
 
-    // let height = parseInt(style.width);
-    // let margins = parseInt(style.marginLeft) + parseInt(style.marginRight);
-    // let margin = parseInt(style.marginTop);
-
-    // let captionOffset = 10;
-
-    // let leafCaptionOffset = 8;
-    // let leafSpacing = 32;
-
-    // let height = parentAttributes.height;
-    // let heightWithCaptionOffset = height + leafCaptionOffset;
-    // let parentWidthWithSpacing = parentWidth + leafSpacing;
-    // let halfparentWidth = parentWidth / 2;
-
-    // let childMidY = childAttributes.x + (childAttributes.width / 2);
-    // let childTop = childAttributes.y + (childAttributes.parentWidth / 2);
 
     if (parentAttributes.x > childAttributes.x) {
         distanceDif = (-1 * (parentAttributes.x - childAttributes.x)) + halfWidth;
@@ -921,14 +914,8 @@ function createSVG(parentAttributes, childAttributes, parentEl) {
         distanceDif = (childAttributes.x - parentAttributes.x) + halfWidth;
     }
 
-    let d = `M${halfWidth} ${height + captionOffset} L${halfWidth} ${height + captionOffset + singleMargin} L${distanceDif} ${height + captionOffset + singleMargin} L${distanceDif} ${height + captionOffset + (singleMargin*2)}`;
-    // let points = `${parentWidth/2} ${height + captionOffset/2} ${parentWidth/2} ${height + margin} ${distanceDif} ${height + margin} ${distanceDif} ${height + margins}`;
+    let d = `M${halfWidth} ${height + captionOffset} L${halfWidth} ${height + (captionOffset/2) + singleMargin} L${distanceDif} ${height + (captionOffset/2) + singleMargin} L${distanceDif} ${height + captionOffset + (singleMargin*2)}`;
 
-    // let parentBottomY = (parentAttributes.y + parentAttributes.height);
-
-
-
-    // let parentChildMidY = childTop - parentBottomY;
 
     let xmlns = "http://www.w3.org/2000/svg";
 
@@ -942,20 +929,6 @@ function createSVG(parentAttributes, childAttributes, parentEl) {
     let svgNS = "http://www.w3.org/2000/svg";  
     path = document.createElementNS(svgNS, "path");
     path.setAttributeNS(null, "d", d);
-    // path.setAttributeNS(null, "points", points);
-
-    // let svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    // svg.setAttribute('style', 'border: 1px solid black');
-    // svg.setAttribute('width', '600');
-    // svg.setAttribute('height', '250');
-    // svg.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:xlink", "http://www.w3.org/1999/xlink");
-    // svg.setAttribute("class", `leaf_connections`);
-
-    // svg.setAttribute("viewBox", "0 0 200 100");
-    // svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-    // svg.setAttribute("class", `connectionLine`);
-    // svg.setAttribute("width", `100`);
-    // svg.setAttribute("height", `100`);
 
     svgElem.appendChild(path);
     parentEl.appendChild(svgElem);

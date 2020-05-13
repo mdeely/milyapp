@@ -117,6 +117,7 @@ const TreeLeaf = {};
 
 TreeLeaf.create = function (doc) {
     let data = doc.data();
+    let memberDoc;
 
     let leafName = data.name.firstName ? data.name.firstName : "No name";
     let leafProfilePhoto = data.profile_photo ? data.profile_photo : "https://firebasestorage.googleapis.com/v0/b/mily-4c2a8.appspot.com/o/assets%2Fplaceholder%2Fprofile_placeholder.svg?alt=media&token=d3b939f1-d46b-4315-bcc6-3167d17a18ed";
@@ -146,7 +147,11 @@ TreeLeaf.create = function (doc) {
         DetailsPanel.show(doc.id);
         Leaf.setActive(leafTarget);
         DetailsPanel.populate(doc);
-    })
+    });
+
+    if (doc.data().claimed_by) {
+        replaceNameAndImageWithMemberDoc(doc.id, doc.data().claimed_by);
+    }
 
     return figure;
     // generate leaf
@@ -154,3 +159,20 @@ TreeLeaf.create = function (doc) {
     // claimed members -> promise to swap that information.
     // return leaf El;
 }
+
+const replaceNameAndImageWithMemberDoc = (leafDocId, claimedById) => new Promise(
+    function(resolve, reject) {
+        membersRef.doc(claimedById).get()
+        .then((reqMemberDoc) => {
+            LocalDocs.members.push(reqMemberDoc);
+            memberDocData = reqMemberDoc.data();
+            memberName = memberDocData.name.firstName ? memberDocData.name.firstName : "No name (member)";
+            memberProfilePhoto = memberDocData.profile_photo ? memberDocData.profile_photo : "https://firebasestorage.googleapis.com/v0/b/mily-4c2a8.appspot.com/o/assets%2Fplaceholder%2Fprofile_placeholder.svg?alt=media&token=d3b939f1-d46b-4315-bcc6-3167d17a18ed";
+            
+            let targetLeaf = document.querySelector(`[data-id="${leafDocId}"]`);
+            targetLeaf.querySelector(".leaf__image").setAttribute("src", memberProfilePhoto);
+            targetLeaf.querySelector(".leaf_caption").textContent = memberName;
+            targetLeaf.setAttribute("data-member-id", reqMemberDoc.id);
+        })
+    }
+)

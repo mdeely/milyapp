@@ -175,6 +175,49 @@ const addRelationshipButton = document.querySelector(".add-relationship_button")
 //     }
 // );
 
+const dropdownTriggers = document.querySelectorAll(`[data-dropdown-target]`);
+let offset = 8;
+
+const initiateDropdowns = () => {
+    for (dropdownTrigger of dropdownTriggers) {
+        dropdownTrigger.addEventListener('click', (e) => {
+            e.preventDefault();
+            showDropdown(e);
+        })
+    }
+}
+
+const showDropdown = (e) => {
+    let triggerData = e.target.getBoundingClientRect();
+    let triggerX = triggerData.x;
+    let triggerY = triggerData.y;
+    let triggerWidth = triggerData.width;
+    let triggerHeight = triggerData.height;
+
+    let targetClass = e.target.getAttribute("data-dropdown-target");
+    let targetEl = document.querySelector(`#${targetClass}`);
+
+    if (targetEl.classList.contains(`u-d_none`)) {
+        closeAllDropdowns();
+        targetEl.classList.remove("u-d_none");
+        console.log(e.target);
+        console.log(triggerData);
+        targetEl.style.left = `${triggerX - triggerWidth + offset}px`;
+        targetEl.style.top = `${triggerY + triggerHeight + offset}px`;
+
+    } else {
+        targetEl.classList.add("u-d_none")
+    }
+}
+
+const closeAllDropdowns = () => {
+    for (dropdownTrigger of dropdownTriggers) {
+        let targetClass = dropdownTrigger.getAttribute("data-dropdown-target");
+        let targetEl = document.querySelector(`#${targetClass}`);
+        targetEl.classList.add("u-d_none");
+    }
+}
+
 const setupEmailVerificationView = (user) => {
     let msg = `<h2 class="u-mar-lr_auto">You must verify that ${user.email} belongs to you. Check your email.</h2>`
     let resendButton = document.createElement('button');
@@ -1474,3 +1517,4 @@ const newTreeForFirebase = (params) => {
 // }
 
 initiateModals();
+initiateDropdowns();
