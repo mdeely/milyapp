@@ -1,12 +1,12 @@
 const ageVerificationView = document.querySelector(`[data-view="account-verification"]`);
 
-export default function setup() {
+function accountVerificationSetup() {
     ageVerificationView.style.display = "";
 
     accountVerificationViewOnAuthChange();
 }
 
-export function accountVerificationViewOnAuthChange(user) {
+function accountVerificationViewOnAuthChange(user) {
     window.location.hash = "/account-verification";
 
     if (auth.currentUser) {
@@ -28,14 +28,12 @@ export function accountVerificationViewOnAuthChange(user) {
     console.log("auth change verificaiton")
 }
 
-
-
 const verificationMessage = () => new Promise(
     function(resolve, reject) {
         let html = `
         <h1 class="u-ta_center">Please verify your email</h1>
-        <p class="u-ta_center u-mar-b_4">Check your email to verify your account. Can't find the email?</p>
-        <button id="resend-verification_button" class="u-mar-lr_auto">Resend email</button>`
+        <p class="u-ta_center u-mar-b_4">Check your email to verify your account. Can't find the email? <a href="#" id="resend-verification_button">Resend verification email</a></p>
+        <button onclick="location.reload();" class="u-mar-lr_auto secondary">Refresh page</button>`
 
         ageVerificationView.innerHTML = html;
 

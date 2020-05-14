@@ -329,7 +329,7 @@ DetailsPanel.editMember = function() {
                 currentTreeLeafCollectionRef.doc(reqEditDoc.id).update({
                     "profile_photo" : snapshot.metadata.fullPath
                 })
-                .then((ref) => {
+                .then(() => {
                     goUpdateLeaf(snapshot.metadata.fullPath);
                 })
                 .catch(err => {
@@ -338,7 +338,7 @@ DetailsPanel.editMember = function() {
             });
         }
 
-        function goUpdateLeaf(photoFile = LocalDocs.member.profile_photo || null) {
+        function goUpdateLeaf(photoFile = LocalDocs.member.data().profile_photo || null) {
             ref.doc(reqEditDoc.id).update({
                 "name" : {
                     "firstName" : detailsPanelEdit["firstName"].value,
@@ -356,8 +356,6 @@ DetailsPanel.editMember = function() {
                 },
                 "birthday" : detailsPanelEdit["birthday"].value,
                 "profile_photo" : photoFile,
-                "instagram" : detailsPanelEdit["instagram"].value,
-                "facebook" : detailsPanelEdit["facebook"].value,
                 "occupation" : detailsPanelEdit["occupation"].value,
                 "email" : detailsPanelEdit["email"].value,
             })
@@ -405,8 +403,6 @@ MemberBlueprint.object = {
                     "Nickname" : { "dataPath" : "nickname", "defaultValue" : null, "icon" : "user" }
                 }
             },
-    "Facebook" : { "dataPath" : "facebook", "defaultValue" : null, "icon" : "facebook" },
-    "Instagram" : { "dataPath" : "instagram", "defaultValue" : null, "icon" : "instagram" },
     "Email" : { "dataPath" : "email", "defaultValue" : null, "icon" : "envelope" },
     "Birthday" : { "dataPath" : "birthday", "defaultValue" : null, "icon" : "birthday-cake", "dataType": "date" },
     "Address" : { "dataPath" : "address", "icon" : "map-pin", 

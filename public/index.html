@@ -48,8 +48,7 @@
         </div>
 
         <div style="display:none" data-view="my-trees">
-            <div class="debugMessage"></div>
-
+            <div class="debugMessage u-ta_center u-mar-b_2"></div>
             <div class="modal medium" data-modal="create-tree_modal">
                 <form id="create-tree_form_modal" class="card modal-dialouge">
                     <div class="card__header">
@@ -87,7 +86,7 @@
                     <nav class="detailsPanel__actions u-mar-b_4">
                         <button class="iconButton add-relationship_button" data-dropdown-target="add-relationship-dropdown"><i class="fa fa-plus"></i></button>
                         <div class="detailsPanel__actions-secondary u-mar-l_auto u-d_flex">
-                            <button class="iconButton secondary" id="invite-member-action" data-modal-trigger="invite-member_modal"><i class="fa fa-envelope"></i></button>
+                            <button class="iconButton secondary" id="invite-member-action" data-modal-trigger="invite-member_modal"><i class="fa fa-envelope u-d_none"></i></button>
                             <button class="iconButton secondary u-mar-l_2" data-dropdown-target="member-options-dropdown"><i class="fa fa-ellipsis-h"></i></button>
                             <button class="iconButton secondary details__button--close u-mar-l_2"><i class="fa fa-times"></i></button> 
                         </div>
@@ -130,7 +129,7 @@
 
         <div id="home" class="u-d_flex" style="display:none" data-view="homepage">
             <div class="debugMessage"></div>
-            <form id="sign-in_form" class="card u-mar-lr_auto">
+            <form id="sign-in_form" class="card u-mar-l_auto u-mar-r_2">
                 <div class="card__header u-pad_0">
                     <img src="/assets/img/wavy-sm--yellow.svg" alt="decoration">
                 </div>
@@ -151,7 +150,7 @@
                 </div>
             </form>
     
-            <form id="sign-up_form" class="ifAuth--hide card u-mar-lr_auto">
+            <form id="sign-up_form" class="ifAuth--hide card u-mar-r_auto u-mar-l_2">
                 <div class="card__header u-pad_0">
                     <img src="/assets/img/wavy-sm--yellow.svg" alt="decoration">
                 </div>
@@ -327,6 +326,7 @@
     <script src="scripts/views/tree.js"></script>
     <script src="scripts/views/myTrees.js"></script>
     <script src="scripts/views/profile.js"></script>
+    <script src="scripts/views/account-verification.js"></script>
     <script src="scripts/views/homepage.js"></script>
     <script src="scripts/routing.js"></script>
     <script src="scripts/index.js"></script>

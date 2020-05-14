@@ -222,7 +222,7 @@ const setupEmailVerificationView = (user) => {
     let msg = `<h2 class="u-mar-lr_auto">You must verify that ${user.email} belongs to you. Check your email.</h2>`
     let resendButton = document.createElement('button');
     resendButton.textContent = "Resend verification email"
-    resendButton.setAttribute('class', 'u-d_block u-mar-lr_auto');
+    resendButton.setAttribute('class', 'u-d_block u-mar-lr_auto secondary');
     
     resendButton.addEventListener('click', (e) => {
         e.preventDefault();

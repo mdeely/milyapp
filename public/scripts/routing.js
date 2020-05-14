@@ -5,7 +5,7 @@ window.router = function(user) {
         "profile" : {"name": "profile", "controller": profileSetup, "onAuthController": profileViewOnAuthChange},
         "settings" : {"name": "settings", "controller": settingsView, "onAuthController": settingsViewOnAuthChange},
         "/" : {"name": "homepage", "controller": homepageSetup, "onAuthController": homepageViewOnAuthChange},
-        "account-verification" : {"name": "account-verification", "controller": accountVerificationView, "onAuthController": accountVerificationViewOnAuthChange},
+        "account-verification" : {"name": "account-verification", "controller": accountVerificationSetup, "onAuthController": accountVerificationViewOnAuthChange},
     }
 
     let pathnameArray = window.location.hash.split('/');
@@ -52,7 +52,7 @@ window.router = function(user) {
 
                             navProfileImage.setAttribute("src", LocalDocs.member.data().profileImage || placeholderImageUrl);
                             navProfileImage.setAttribute("alt", `${LocalDocs.member.data().name.firstName}'s profile image` || "Profile image");
-                            
+
                             if (LocalDocs.member.data().trees && LocalDocs.member.data().trees.length > 0) {
                                 if (LocalDocs.member.data().trees) {
                                     LocalDocs.trees = [];
@@ -79,11 +79,11 @@ window.router = function(user) {
                             profileViewOnAuthChange(user);
                         }
                     } else {
-                        resolve(false)
+                        profileViewOnAuthChange(user);
                     }
                 })
                 .catch(err => {
-                    reject(console.log(err.message));
+                    console.log(err.message);
                 })
             } else {
                 accountVerificationViewOnAuthChange(user);
@@ -100,13 +100,6 @@ function settingsView() {
     // do something
 };
 function settingsViewOnAuthChange() {
-    // do something
-};
-
-function accountVerificationView() {
-    // do something
-};
-function accountVerificationViewOnAuthChange() {
     // do something
 };
 

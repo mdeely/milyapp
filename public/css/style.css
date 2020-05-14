@@ -89,6 +89,9 @@ img {
     width: 100%;
     height: 100%; }
 
+a {
+  color: var(--brand); }
+
 polyline,
 path {
   fill: none;

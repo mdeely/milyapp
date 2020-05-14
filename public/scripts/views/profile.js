@@ -10,7 +10,7 @@ const profileViewOnAuthChange = (user) => {
     profileViewEl.innerHTML = '';
     window.location.hash = "/profile";
     profileDebugMsg.textContent = "Authenticated";
-
+    console.log("yeas edit me baby")
     if (user) {
         editProfileEl();
     } else {

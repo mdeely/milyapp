@@ -9,7 +9,7 @@ const myTreesSetup = () => {
 
 const myTreesViewOnAuthChange = (user) => {
     if (user) {
-        myTreesDebugMsg.textContent = "Authenticated";
+        // myTreesDebugMsg.textContent = "Authenticated";
         populateMyTreesList();
     } else {
         myTreesDebugMsg.textContent = "Not authenticated";
@@ -18,12 +18,12 @@ const myTreesViewOnAuthChange = (user) => {
 
 const populateMyTreesList = () => {
     let button = document.createElement("button");
-    button.setAttribute("class", "new-tree_button");
+    button.setAttribute("class", "new-tree_button u-mar-lr_auto");
     button.setAttribute("data-modal-trigger", "create-tree_modal");
 
     button.textContent = "Create a tree";
 
-    myTreesDebugMsg.innerHTML += `Your trees:`;
+    myTreesDebugMsg.innerHTML += `<h2 class="u-ta_center">Your trees:</h2>`;
 
     if (LocalDocs.member.data().trees) {
         for (let treeId of LocalDocs.member.data().trees) {
