@@ -3,6 +3,8 @@ const db = firebase.firestore();
 const functions = firebase.functions();
 const storage = firebase.storage();
 
+const urlForPhotos = "https://firebasestorage.googleapis.com/v0/b/mily-4c2a8.appspot.com/o/";
+
 const membersRef = db.collection('members');
 const treesRef = db.collection('trees');
 const notificationsRef = db.collection('notifications');
@@ -136,10 +138,8 @@ DetailsPanel.populate = function(leafDoc) {
 
     // Determine if leafDoc has a memberDoc.
     if (detailsPanel.hasAttribute("data-details-member-id")) {
-
         // do something if is claimed member
     }
-
 
     let profileImage = detailsPanel.querySelector(".detailsPanel__profileImage img");
     profileImage.setAttribute('src', placeholderImageUrl);
@@ -184,6 +184,7 @@ DetailsPanel.populate = function(leafDoc) {
     // }
 
     MemberBlueprint.loop({
+        "exclude" : ["profile_photo"],
         "functionCall": generateDetailElement
     });
 
@@ -317,37 +318,60 @@ DetailsPanel.editMember = function() {
     saveButton.addEventListener("click", (e) => {
         e.preventDefault();
 
-        ref.doc(reqEditDoc.id).update({
-            "name" : {
-                "firstName" : detailsPanelEdit["firstName"].value,
-                "lastName" : detailsPanelEdit["lastName"].value,
-                "middleName" : detailsPanelEdit["middleName"].value,
-                "surname" : detailsPanelEdit["surname"].value,
-                "nickname" : detailsPanelEdit["nickname"].value,
-            },
-            "address" : {
-                "address1" : detailsPanelEdit["address1"].value,
-                "address2" : detailsPanelEdit["address2"].value,
-                "city" : detailsPanelEdit["city"].value,
-                "zipcode" : detailsPanelEdit["zipcode"].value,
-                "country" : detailsPanelEdit["country"].value,
-            },
-            "birthday" : detailsPanelEdit["birthday"].value,
-            "instagram" : detailsPanelEdit["instagram"].value,
-            "facebook" : detailsPanelEdit["facebook"].value,
-            "occupation" : detailsPanelEdit["occupation"].value,
-            "email" : detailsPanelEdit["email"].value,
-        })
-        .then(() => {
-            console.log("Updated!");
-            detailsPanelAction.classList.remove("u-d_none");
-            detailsPanelEdit.classList.add("u-d_none");
-            detailsPanelInfo.classList.remove("u-d_none");
-            location.reload();
-        })
-        .catch(err => {
-            console.log(err.message)
-        })
+        if (detailsPanelEdit["profile_photo"].files.length == 0) {
+            goUpdateLeaf();
+        } else {
+            let profilePhotoFile = detailsPanelEdit["profile_photo"].files[0];
+            let fileName = profilePhotoFile.name;
+            let leafProfilePhotoRef = storageRef.child(`trees/${LocalDocs.tree.id}/${reqEditDoc.id}/${fileName}`);
+
+            leafProfilePhotoRef.put(profilePhotoFile).then(function(snapshot) {
+                currentTreeLeafCollectionRef.doc(reqEditDoc.id).update({
+                    "profile_photo" : snapshot.metadata.fullPath
+                })
+                .then((ref) => {
+                    goUpdateLeaf(snapshot.metadata.fullPath);
+                })
+                .catch(err => {
+                    console.log(err.message);
+                })
+            });
+        }
+
+        function goUpdateLeaf(photoFile = LocalDocs.member.profile_photo || null) {
+            ref.doc(reqEditDoc.id).update({
+                "name" : {
+                    "firstName" : detailsPanelEdit["firstName"].value,
+                    "lastName" : detailsPanelEdit["lastName"].value,
+                    "middleName" : detailsPanelEdit["middleName"].value,
+                    "surname" : detailsPanelEdit["surname"].value,
+                    "nickname" : detailsPanelEdit["nickname"].value,
+                },
+                "address" : {
+                    "address1" : detailsPanelEdit["address1"].value,
+                    "address2" : detailsPanelEdit["address2"].value,
+                    "city" : detailsPanelEdit["city"].value,
+                    "zipcode" : detailsPanelEdit["zipcode"].value,
+                    "country" : detailsPanelEdit["country"].value,
+                },
+                "birthday" : detailsPanelEdit["birthday"].value,
+                "profile_photo" : photoFile,
+                "instagram" : detailsPanelEdit["instagram"].value,
+                "facebook" : detailsPanelEdit["facebook"].value,
+                "occupation" : detailsPanelEdit["occupation"].value,
+                "email" : detailsPanelEdit["email"].value,
+            })
+            .then(() => {
+                console.log("Updated!");
+                detailsPanelAction.classList.remove("u-d_none");
+                detailsPanelEdit.classList.add("u-d_none");
+                detailsPanelInfo.classList.remove("u-d_none");
+                location.reload();
+            })
+            .catch(err => {
+                console.log(err.message)
+            })
+        }
     });
 
     cancelButton.addEventListener("click", (e) => {
@@ -406,9 +430,10 @@ MemberBlueprint.object = {
 }
 
 MemberBlueprint.loop = function(args) {
+    let exclude = args.exclude || [];
     let functionCall = args.functionCall;
     let relationships = ["children", "parents", "siblings", "spouses"];
-    let metaDetails = ["claimed_by", "topMember", "created_by"];
+    let metaDetails = ["claimed_by", "topMember", "created_by", ];
     let basicDetails = ["email", "birthday", "occupation", "profile_photo", "facebook", "instagram"];
     let groups = ["name", "address"];
     let groupDetails = ["firstName", "middleName", "lastName", "nickname", "surname", "address1", "address2", "city", "zipcode", "country"];
@@ -416,9 +441,9 @@ MemberBlueprint.loop = function(args) {
     let excludeItems = new Array;
 
     if (args.onlyRelationships === true) {
-        excludeItems = [...metaDetails, ...basicDetails, ...groups, ...groupDetails];
+        excludeItems = [...metaDetails, ...basicDetails, ...groups, ...groupDetails, ...exclude];
     } else {
-        excludeItems = [...metaDetails, ...relationships, ...groups];
+        excludeItems = [...metaDetails, ...relationships, ...groups, ...exclude];
     };
     
     for (let [key, value] of Object.entries(MemberBlueprint.object)) {
@@ -515,7 +540,7 @@ Relationship.addParent = function() {
     let childrenArray = [addParentTo.id];
 
     if (addParentTo.data().siblings) {
-    childrenArray.push(...addParentTo.data().siblings);
+        childrenArray.push(...addParentTo.data().siblings);
     };
 
     currentTreeLeafCollectionRef.add(      
@@ -690,7 +715,7 @@ Relationship.addSibling = function() {
     let addSiblingTo = DetailsPanel.getActiveDoc();
     console.log(`I'm finna add a sibling to ${addSiblingTo.id}`);
 
-    let parentArray = [];
+    let parentArray = new Array;
     let siblingArray = [addSiblingTo.id];
 
     if (addSiblingTo.data().siblings) {
@@ -704,6 +729,8 @@ Relationship.addSibling = function() {
             parentArray.push(parentId);
         }
     }
+
+    // Left off trying to figure out why adding a sibling won't add other siblnigs's parents to the new sibling
 
     currentTreeLeafCollectionRef.add(
         newLeafForFirebase({

@@ -493,7 +493,7 @@ const getLeafEl = (doc) => {
     let leafProfilePhoto = doc.data().profile_photo ? doc.data().profile_photo : "https://firebasestorage.googleapis.com/v0/b/mily-4c2a8.appspot.com/o/assets%2Fplaceholder%2Fprofile_placeholder.svg?alt=media&token=d3b939f1-d46b-4315-bcc6-3167d17a18ed";
     let figure = document.createElement("figure");
     let figcaption = document.createElement("figcaption");
-    let img = document.createElement("img");
+    let img = document.createElement("div");
     
     if (doc.data().claimed_by) {
         let claimedBy = doc.data().claimed_by;
@@ -513,7 +513,7 @@ const getLeafEl = (doc) => {
     figure.setAttribute("data-id", doc.id);
 
     img.setAttribute("class", "leaf__image");
-    img.setAttribute("src", leafProfilePhoto);
+    img.setAttribute("background-image", `url(${leafProfilePhoto})`);
 
     figure.appendChild(img);
     figure.appendChild(figcaption);

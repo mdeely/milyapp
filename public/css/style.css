@@ -143,7 +143,6 @@ path {
   transition: margin-right 0.2s ease-in-out;
   display: flex;
   flex-wrap: nowrap;
-  justify-content: center;
   position: relative;
   top: 56px;
   padding-bottom: 80px;
@@ -203,6 +202,8 @@ path {
         width: 100%;
         left: 0;
         top: 0; }
+      #familyTree.view_list .leaf path {
+        display: none; }
 
 #accountMenu {
   width: var(--accountMenuSize);
@@ -284,7 +285,8 @@ path {
 .branch {
   display: flex;
   align-items: center;
-  flex-direction: column; }
+  flex-direction: column;
+  margin: 0 auto; }
 
 .descendants,
 .spouses {
@@ -320,9 +322,11 @@ path {
   .spouses .leaf svg path {
     stroke-linejoin: arcs; }
 
-.spouses:hover .leaf svg {
+.spouses:hover .leaf svg,
+.spouses:hover + .descendants .leaf svg {
   z-index: -1; }
-  .spouses:hover .leaf svg path {
+  .spouses:hover .leaf svg path,
+  .spouses:hover + .descendants .leaf svg path {
     transition: all .1s ease-in-out;
     stroke: var(--color_outline);
     stroke-width: 4; }
@@ -374,10 +378,14 @@ path {
   .leaf__image {
     background-color: var(--color_yellow);
     width: calc(var(--leafSize) + 12px);
+    height: calc(var(--leafSize) + 12px);
     max-width: calc(var(--leafSize) + 12px);
     max-height: calc(var(--leafSize) + 12px);
     overflow: hidden;
-    border-radius: 50%; }
+    border-radius: 50%;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center; }
 
 .parentToChild__middleBar,
 .childToParent__middleBar,

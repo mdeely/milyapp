@@ -1,5 +1,6 @@
 let profileViewEl = document.querySelector(`[data-view="profile"]`);
 let profileDebugMsg = profileViewEl.querySelector(`.debugMessage`);
+var storageRef = firebase.storage().ref()
 
 function profileSetup() {
     pageTitle.innerHTML = "Profile";
@@ -53,6 +54,7 @@ const editProfileEl = () => {
             "label" : key,
             "type" : value["dataType"] || "text"
         });
+
         cardContent.appendChild(el);
     }
 
@@ -74,7 +76,7 @@ const editProfileEl = () => {
     profileViewEl.appendChild(form);
 
     const setProfileForm = document.querySelector("#set-profile_form");
-
+    
     setProfileForm.addEventListener('submit', (e) => {
         e.preventDefault();
     
@@ -128,34 +130,57 @@ function createElementWithClass(elementType, classname = null, content = null) {
 const updateMember = (button, form) => {
     button.addEventListener("click", (e) => {
         e.preventDefault();
+        
+        if (form["profile_photo"].files.length == 0) {
+            goUpdateMember();
+        } else {
+            let profilePhotoFile = form["profile_photo"].files[0];
+            let fileName = profilePhotoFile.name;
+            let memberProfilePhotoRef = storageRef.child(`members/${LocalDocs.member.id}/${fileName}`);
 
-        membersRef.doc(memberDoc.id).update({
-            "name" : {
-                "firstName" : form["firstName"].value,
-                "lastName" : form["lastName"].value,
-                "middleName" : form["middleName"].value,
-                "surname" : form["surname"].value,
-                "nickname" : form["nickname"].value,
-            },
-            "address" : {
-                "address1" : form["address1"].value,
-                "address2" : form["address2"].value,
-                "city" : form["city"].value,
-                "zipcode" : form["zipcode"].value,
-                "country" : form["country"].value,
-            },
-            "birthday" : form["birthday"].value,
+            memberProfilePhotoRef.put(profilePhotoFile).then(function(snapshot) {
+                membersRef.doc(LocalDocs.member.id).update({
+                    "profile_photo" : snapshot.metadata.fullPath
+                })
+                .then((ref) => {
+                    goUpdateMember(snapshot.metadata.fullPath);
+                })
+                .catch(err => {
+                    console.log(err.message);
+                })
+            });
+        }
 
-            "occupation" : form["occupation"].value,
-            "email" : form["email"].value,
-        })
-        .then(() => {
-            console.log("Updated!");
-            location.reload();
-        })
-        .catch(err => {
-            console.log(err.message)
-        })
+        function goUpdateMember(photoFile = LocalDocs.member.profile_photo) { 
+            membersRef.doc(LocalDocs.member.id).update({
+                "name" : {
+                    "firstName" : form["firstName"].value,
+                    "lastName" : form["lastName"].value,
+                    "middleName" : form["middleName"].value,
+                    "surname" : form["surname"].value,
+                    "nickname" : form["nickname"].value,
+                },
+                "address" : {
+                    "address1" : form["address1"].value,
+                    "address2" : form["address2"].value,
+                    "city" : form["city"].value,
+                    "zipcode" : form["zipcode"].value,
+                    "country" : form["country"].value,
+                },
+                "birthday" : form["birthday"].value,
+                "profile_photo" : photoFile,
+                "occupation" : form["occupation"].value,
+                "email" : form["email"].value,
+            })
+            .then(() => {
+                console.log("Updated!");
+                location.reload();
+            })
+            .catch(err => {
+                console.log(err.message)
+            })
+        };
+
     });
 }
 
