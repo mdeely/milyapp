@@ -39,6 +39,18 @@ const detailsPanelAction = detailsPanel.querySelector(".detailsPanel__actions");
 const detailsPanelMetaData = detailsPanel.querySelector(".detailsPanel__metaData");
 const detailsPanelImmediateFamily = detailsPanel.querySelector(".detailsPanel__immediateFamily");
 const detailsPanelFirstName = detailsPanel.querySelector(".detailsPanel__firstName");
+const detailsPanelProfileImage = detailsPanel.querySelector(".detailsPanel__profileImage");
+
+const signUpButton = document.querySelector("#sign-up_button");
+const logInButton = document.querySelector("#log-in_button");
+const accountMenuButton = document.querySelector("#accountMenu");
+// const searchButton = document.querySelector("#search_button");
+const viewPreferencesButton = document.querySelector("#view-preferences_button");
+const navLogo = document.querySelector("#mainNav_logo");
+const navProfileImage = document.querySelector(".mainNav__profile-image");
+
+let hideWhenAuthenticated = [signUpButton, logInButton];
+let showWhenAuthenticated = [accountMenuButton, viewPreferencesButton];
 
 const pageTitle = document.querySelector("#pageTitle")
 
@@ -105,8 +117,9 @@ DetailsPanel.getActiveDoc = function() {
     // return window.currentTreeLeaves.find(leafDoc => leafDoc.id === id);
 }
 
-DetailsPanel.populate = function(leafDoc) {
+DetailsPanel.populate = function(leafDoc, leafEl) {
     let dataSource = leafDoc.data();
+    let detailsPhoto = leafEl.querySelector(".leaf__image").getAttribute("style");
     
     if (leafDoc.data().claimed_by) {
         reqMemberDoc = LocalDocs.members.find(memberDoc => memberDoc.id === leafDoc.data().claimed_by);
@@ -132,6 +145,8 @@ DetailsPanel.populate = function(leafDoc) {
         detailsPanel.removeAttribute("data-details-member-id");
     }
 
+    console.log(LocalDocs.member);
+
     if (leafDoc.data().claimed_by === LocalDocs.member.id) {
         editMemberButton.classList.remove("u-d_none");
     }
@@ -141,8 +156,7 @@ DetailsPanel.populate = function(leafDoc) {
         // do something if is claimed member
     }
 
-    let profileImage = detailsPanel.querySelector(".detailsPanel__profileImage img");
-    profileImage.setAttribute('src', placeholderImageUrl);
+    detailsPanelProfileImage.setAttribute("style", detailsPhoto);
     
     // if (authLeafPermissionType() && authLeafPermissionType() === "admin" || authLeafPermissionType() && authLeafPermissionType() === "contributor") {
     //     addParentButton.classList.remove("u-d_none")
@@ -236,9 +250,11 @@ DetailsPanel.populate = function(leafDoc) {
             //     familyDoc = LocalDocs.getMemberDocByIdFromCurrentTree(reqId);
             // }
 
-            let firstName = familyDoc ? familyDoc.data().name.firstName : "No name";
+            let firstName = familyDoc.data().name.firstName || "No name";
             let label;
             let spouseAction = '';
+            let leafEl = document.querySelector(`[data-id="${reqId}"]`);
+            let profileImage = leafEl ? leafEl.querySelector(".leaf__image").getAttribute("style") : null;
     
             if (relativeType === "parents") {
                 label = "Parent"
@@ -251,17 +267,55 @@ DetailsPanel.populate = function(leafDoc) {
                 spouseAction = `<button class="iconButton white u-mar-l_auto"><i class="fa fa-pencil-alt"></i></button>`
             }
 
-            let el = `<div class="detailsPanel__item u-mar-b_4 u-d_flex u-align-items_center">
-                        <div class="detailsPanel__img u-mar-r_2"><img src="${placeholderImageUrl}" alt="${firstName}"/></div>
+            let detailsPanelItem = createElementWithClass("div", "detailsPanel__item u-mar-b_3 u-d_flex u-align-items_center");
+            // let detailsPanelImage = createElementWithClass("img", "u-mar-r_2");
+            // let detailsPanelText = createElementWithClass("div", "detailsPanel__text", "u-mar-r_2");
+            // let detailsPanelName = createElementWithClass("div", "detailsPanel__name u-mar-b_point5 u-bold");
+            // let detailsPanelRelativeType = createElementWithClass("div", "detailsPanel__realtiveType");
+
+            // detailsPanelImage.setAttribute("style", profileImage || placeholderImageUrl);
+            // detailsPanelName.textContent = firstName;
+            // detailsPanelRelativeType.textContent = label;
+
+            let content = `
+                        <div class="detailsPanel__img u-mar-r_2" style='${profileImage || placeholderImageUrl}'></div>
                         <div class="detailsPanel__text u-mar-r_2">
                             <div class="detailsPanel__name u-mar-b_point5 u-bold">${firstName}</div> 
                             <div class="detailsPanel__realtiveType">${label}</div> 
                         </div>
-                            ${spouseAction}
-                    </div>`
-            detailsPanelImmediateFamily.innerHTML += el;
+                        ${spouseAction}`
+
+            detailsPanelItem.innerHTML += content;
+
+            detailsPanelItem.addEventListener("mouseover", (e) => {
+                let leafImageEl = leafEl.querySelector(".leaf__image");
+                leafImageEl.classList.add("highlight");
+                // highlight the person on the family tree
+            })
+
+            detailsPanelItem.addEventListener("mouseout", (e) => {
+                let leafImageEl = leafEl.querySelector(".leaf__image");
+                leafImageEl.classList.remove("highlight");
+                // highlight the person on the family tree
+            })
+
+            detailsPanelImmediateFamily.appendChild(detailsPanelItem);
         }
     }
+}
+
+function createElementWithClass(elementType, classname = null, content = null) {
+    let el = document.createElement(elementType);
+
+    if (classname) {
+        el.setAttribute("class", classname);
+    }
+
+    if (content) {
+        el.textContent = content;
+    }
+
+    return el;
 }
 
 DetailsPanel.editMember = function() {
@@ -584,6 +638,7 @@ Relationship.addChild = function() {
 
     if (addChildTo.data().spouses) {
         for (spouseId of Object.keys(addChildTo.data().spouses)) {
+            console.log(`${spouseId} should be added as a parent to the new child`)
             parentArray.push(spouseId);
         }
     }
@@ -591,9 +646,6 @@ Relationship.addChild = function() {
     if (addChildTo.data().children) {
         siblingsArray.push(...addChildTo.data().children);
     }
-
-    console.log(siblingsArray);
-    console.log(parentArray);
 
     currentTreeLeafCollectionRef.add(
         newLeafForFirebase({

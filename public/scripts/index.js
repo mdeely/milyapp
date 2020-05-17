@@ -200,8 +200,6 @@ const showDropdown = (e) => {
     if (targetEl.classList.contains(`u-d_none`)) {
         closeAllDropdowns();
         targetEl.classList.remove("u-d_none");
-        console.log(e.target);
-        console.log(triggerData);
         targetEl.style.left = `${triggerX - triggerWidth + offset}px`;
         targetEl.style.top = `${triggerY + triggerHeight + offset}px`;
 

@@ -1,14 +1,3 @@
-const signUpButton = document.querySelector("#sign-up_button");
-const logInButton = document.querySelector("#log-in_button");
-const accountMenuButton = document.querySelector("#accountMenu");
-const searchButton = document.querySelector("#search_button");
-const viewPreferencesButton = document.querySelector("#view-preferences_button");
-const navLogo = document.querySelector("#mainNav_logo");
-const navProfileImage = document.querySelector(".mainNav__profile-image");
-
-let hideWhenAuthenticated = [signUpButton, logInButton];
-let showWhenAuthenticated = [accountMenuButton, searchButton, viewPreferencesButton];
-
 let Nav = {};
 
 Nav.update = function(user) {
@@ -20,6 +9,15 @@ Nav.update = function(user) {
             item.style.display = "";
         }
         navLogo.setAttribute("href", "#/my-trees");
+
+        if (LocalDocs.member && LocalDocs.member.data().profile_photo) {
+            let profileFileReference = storage.ref(`${LocalDocs.member.data().profile_photo}`);
+            profileFileReference.getDownloadURL().then(function(url) {
+                accountMenuButton.style.backgroundImage = `url(${url})`;
+            })
+        } else {
+            accountMenuButton.style.backgroundImage = `url(${placeholderImageUrl})`;
+        }
     } else {
         for (let item of hideWhenAuthenticated) {
             item.style.display = "";

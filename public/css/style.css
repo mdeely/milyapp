@@ -213,7 +213,10 @@ path {
   height: var(--accountMenuSize);
   border-radius: 8px;
   background-color: var(--color_yellow);
-  padding: 0; }
+  padding: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat; }
   #accountMenu:hover {
     cursor: pointer; }
 
@@ -239,13 +242,29 @@ path {
     background-image: url("../assets/img/wavy-sm.svg");
     background-repeat: no-repeat;
     background-position: top;
-    background-size: contain;
+    background-size: cover;
     background-size: 100%;
     height: 400px;
     z-index: -1; }
 
 .detailsPanel__actions {
   display: flex; }
+
+.detailsPanel__item {
+  position: relative; }
+  .detailsPanel__item:hover:before {
+    content: "";
+    position: absolute;
+    width: calc(100% + 16px);
+    height: calc(100% + 16px);
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    border-radius: 8px;
+    background-color: rgba(0, 0, 0, 0.08);
+    transform: translate(-8px, -8px);
+    z-index: -1; }
 
 .detailsPanel__icon {
   width: 24px;
@@ -259,24 +278,27 @@ path {
   height: 64px;
   border-radius: 50%;
   background-color: var(--color_yellow);
-  overflow: hidden; }
-  .detailsPanel__img img {
-    max-width: 100%; }
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat; }
 
 .detailsPanel__realtiveType {
   color: var(--color_dark_gray); }
 
 .detailsPanel__profileImage {
   max-width: var(--profileImageSize);
-  height: var(--profileImageSize); }
-  .detailsPanel__profileImage img {
-    max-width: var(--profileImageSize);
-    width: var(--profileImageSize);
-    height: var(--profileImageSize);
-    border-radius: 8px;
-    display: block;
-    background-color: lightgray;
-    background-color: var(--color_yellow); }
+  height: var(--profileImageSize);
+  max-width: var(--profileImageSize);
+  width: var(--profileImageSize);
+  height: var(--profileImageSize);
+  border-radius: 8px;
+  display: block;
+  background-color: lightgray;
+  background-color: var(--color_yellow);
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center; }
 
 .formActions {
   position: fixed;
@@ -331,7 +353,6 @@ path {
   .spouses:hover .leaf svg path,
   .spouses:hover + .descendants .leaf svg path {
     transition: all .1s ease-in-out;
-    stroke: var(--color_outline);
     stroke-width: 4; }
 
 .leaf {
@@ -350,15 +371,17 @@ path {
     height: calc(var(--leafSize) + 20px);
     top: -4px;
     border-radius: 100px;
-    box-shadow: 0 0 0 4px white inset, 0 0 0 4px var(--color_outline);
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0) inset, 0 0 0 4px var(--color_outline);
     opacity: 0;
     transform: scale(0.8);
-    transition: transform 0.2s ease-in-out; }
+    transition: transform 0.2s cubic-bezier(0.66, 0.23, 0.33, 1.02); }
   .leaf:active {
-    transition: all 0.05s ease-in-out; }
+    transition: all 0.05s cubic-bezier(0.66, 0.23, 0.33, 1.02); }
   .leaf.active:before {
+    transition: transform 0.2s cubic-bezier(0.66, 0.23, 0.33, 1.02);
     opacity: 1;
-    transform: scale(1); }
+    transform: scale(1);
+    box-shadow: 0 0 0 4px white inset, 0 0 0 4px var(--color_outline); }
   .leaf > * {
     pointer-events: none; }
   .leaf .leaf_caption {
@@ -389,6 +412,10 @@ path {
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center; }
+    .leaf__image.highlight {
+      transform: scale(1.1);
+      transition: all 0.2s ease-in-out;
+      z-index: -1; }
 
 .parentToChild__middleBar,
 .childToParent__middleBar,
@@ -717,11 +744,35 @@ button,
 .u-pad_0 {
   padding: 0px; }
 
-.u-pad_4 {
+.u-pad_1 {
   padding: 16px; }
+
+.u-pad_2 {
+  padding: 16px; }
+
+.u-pad_3 {
+  padding: 24px; }
+
+.u-pad_4 {
+  padding: 32px; }
 
 .u-pad-b_10 {
   padding-bottom: 80px; }
+
+.u-mar_0 {
+  margin: 0px; }
+
+.u-mar_1 {
+  margin: 16px; }
+
+.u-mar_2 {
+  margin: 16px; }
+
+.u-mar_3 {
+  margin: 24px; }
+
+.u-mar_4 {
+  margin: 32px; }
 
 .u-mar-lr_auto {
   margin-left: auto;
@@ -792,6 +843,12 @@ button,
 
 .u-flex_1 {
   flex: 1; }
+
+.u-fd_column {
+  flex-direction: column; }
+
+.u-ai_center {
+  align-items: center; }
 
 .u-o_75 {
   opacity: .75; }

@@ -26,7 +26,7 @@ Tree.treeViewOnAuthChange = function(user) {
     if (user) {
         // huh?
     } else {
-        treeDebugMsg.textContent += "Sign up/in to join this tree";
+        treeDebugMsg.innerHTML += `<h1 class="u-mar-lr_auto u-ta_center">Sign up/in to join this tree</h2>`;
         console.log("tree auth change!");
         console.log("not authenticated!");
     }
@@ -153,7 +153,7 @@ TreeLeaf.create = function (doc) {
 
         DetailsPanel.show(doc.id);
         Leaf.setActive(leafTarget);
-        DetailsPanel.populate(doc);
+        DetailsPanel.populate(doc, e.target);
     });
 
     if (doc.data().claimed_by) {

@@ -11,9 +11,9 @@ const homepageSetup = () => {
 }
 
 const homepageViewOnAuthChange = (user) => {
-    if (user) {
-        homepageDebugMsg.textContent = "Authenticated";
-    } else {
-        homepageDebugMsg.textContent = "Not authenticated";
-    }
+    // if (user) {
+    //     homepageDebugMsg.textContent = "Authenticated";
+    // } else {
+    //     homepageDebugMsg.textContent = "Not authenticated";
+    // }
 }

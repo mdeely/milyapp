@@ -49,10 +49,7 @@ window.router = function(user) {
                     if (queryResult.docs[0]) {
                         LocalDocs.member = queryResult.docs[0] ? queryResult.docs[0] : null;
                         if (LocalDocs.member) {
-
-                            navProfileImage.setAttribute("src", LocalDocs.member.data().profileImage || placeholderImageUrl);
-                            navProfileImage.setAttribute("alt", `${LocalDocs.member.data().name.firstName}'s profile image` || "Profile image");
-
+                            Nav.update(user);
                             if (LocalDocs.member.data().trees && LocalDocs.member.data().trees.length > 0) {
                                 if (LocalDocs.member.data().trees) {
                                     LocalDocs.trees = [];

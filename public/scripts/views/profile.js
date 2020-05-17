@@ -113,20 +113,6 @@ const generateInputItem = (args) => {
     return inputGroupEl;
 }
 
-function createElementWithClass(elementType, classname = null, content = null) {
-    let el = document.createElement(elementType);
-
-    if (classname) {
-        el.setAttribute("class", classname);
-    }
-
-    if (content) {
-        el.textContent = content;
-    }
-
-    return el;
-}
-
 const updateMember = (button, form) => {
     button.addEventListener("click", (e) => {
         e.preventDefault();
@@ -188,7 +174,6 @@ const newMember = (button, form) => {
     button.addEventListener("click", (e) => {
         e.preventDefault();
 
-        console.log("TODO: Handle profile photo");
         membersRef.add({
             "claimed_by" : auth.currentUser.uid,
             "created_by" : auth.currentUser.uid,
@@ -213,7 +198,8 @@ const newMember = (button, form) => {
         })
         .then(() => {
             console.log("new member created!");
-            location.reload();
+            window.location.href = "#/my-trees";
+            // location.reload();
         })
         .catch(err => {
             console.log(err.message)

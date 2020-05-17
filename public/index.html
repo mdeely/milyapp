@@ -17,21 +17,19 @@
                 <a id="mainNav_logo" href="/" class="u-remove-link-style">MILY</a>
             </h1>
             <div class="buttonGroup u-mar-l_auto">
-                <button id="log-in_button">Log in</button>
-                <button id="sign-up_button">Sign up</button>
+                <a class="button" id="log-in_button" href="/">Log in</a>
+                <a class="button" id="sign-up_button" href="/">Sign up</a>
             </div>
             <button id="notification_indicator" data-dropdown-target="notification_menu" class="u-mar-l_auto iconButton u-d_none"><i class="fa fa-bell"></i></button>
             <div id="notification_menu" class="dropdown u-p_absolute">
             </div>
-            <button id="search_button" class="u-mar-l_2 u-mar-r_1 iconButton"><i class="fa fa-search"></i></button>
+            <!-- <button id="search_button" class="u-mar-l_2 u-mar-r_1 iconButton"><i class="fa fa-search"></i></button> -->
             <button id="view-preferences_button" class="u-mar-l_2 u-mar-r_2 iconButton" data-dropdown-target="view-preferences"><i class="fa fa-eye"></i></button>
             <div id="view-preferences" class="dropdown u-d_none u-p_absolute">
                 <div id="view-preferences_tree" class="dropdown__item">Tree</div>
                 <div id="view-preferences_list" class="dropdown__item">List</div>
             </div>
-            <button id="accountMenu" class="u-mar-l_1" data-dropdown-target="accountMenu__dropdown">
-                <img src="" alt="" class="mainNav__profile-image">
-            </button>
+            <button id="accountMenu" class="u-mar-l_1" data-dropdown-target="accountMenu__dropdown"></button>
             <div id="accountMenu__dropdown" class="dropdown u-p_absolute u-d_none">
                 <a href="#/my-trees" class="dropdown__item">My trees</a>
                 <a href="#/profile" class="dropdown__item">Profile</a>
@@ -48,7 +46,8 @@
         </div>
 
         <div style="display:none" data-view="my-trees">
-            <div class="debugMessage u-ta_center u-mar-b_2"></div>
+            <div class="debugMessage u-mar-lr_auto u-mar-b_2 u-d_flex" style="max-width: 800px;"></div>
+            <ul id="myTree__list" class="u-d_flex u-fd_column u-ai_center u-jc_center"></ul>
             <div class="modal medium" data-modal="create-tree_modal">
                 <form id="create-tree_form_modal" class="card modal-dialouge">
                     <div class="card__header">
@@ -103,9 +102,7 @@
                         <li id="add-sibling-action" class="dropdown__item">Sibling</li>
                     </ul>
                     <div class="detailsPanel__information">
-                        <div class="detailsPanel__profileImage u-mar-lr_auto u-mar-b_3">
-                            <img src="" alt="">
-                        </div>
+                        <div class="detailsPanel__profileImage u-mar-lr_auto u-mar-b_3"></div>
                         <div class="detailsPanel__firstName u-mar-lr_auto header_m u-ta_center u-mar-b_5"></div>
                         <h6 class="u-mar-b_4">Details</h6>
                         <div class="detailsPanel__metaData u-mar-b_7"></div>
