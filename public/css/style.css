@@ -283,6 +283,9 @@ path {
   background-position: center;
   background-repeat: no-repeat; }
 
+#detailsPanel__edit {
+  padding-bottom: 128px; }
+
 .detailsPanel__realtiveType {
   color: var(--color_dark_gray); }
 
@@ -412,10 +415,13 @@ path {
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center; }
-    .leaf__image.highlight {
-      transform: scale(1.1);
-      transition: all 0.2s ease-in-out;
-      z-index: -1; }
+  .leaf.highlight .leaf__image,
+  .leaf.highlight .leaf_caption {
+    transform: scale(1.1);
+    transition: all 0.2s ease-in-out;
+    z-index: 2; }
+  .leaf.highlight .leaf_caption {
+    z-index: 5; }
 
 .parentToChild__middleBar,
 .childToParent__middleBar,
@@ -599,6 +605,15 @@ button,
     button.secondary:hover,
     .iconButton.secondary:hover {
       background-color: rgba(0, 0, 0, 0.05); }
+    .button.secondary.danger,
+    button.secondary.danger,
+    .iconButton.secondary.danger {
+      background-color: white;
+      color: var(--color_danger); }
+      .button.secondary.danger:hover,
+      button.secondary.danger:hover,
+      .iconButton.secondary.danger:hover {
+        background-color: white; }
   .button.white,
   button.white,
   .iconButton.white {
@@ -807,6 +822,18 @@ button,
 
 .u-mar-t_4 {
   margin-top: 32px; }
+
+.u-mar-t_5 {
+  margin-top: 40px; }
+
+.u-mar-t_6 {
+  margin-top: 48px; }
+
+.u-mar-t_7 {
+  margin-top: 56px; }
+
+.u-mar-t_8 {
+  margin-top: 64px; }
 
 .u-mar-b_1 {
   margin-bottom: 8px; }

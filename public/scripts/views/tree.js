@@ -151,9 +151,11 @@ TreeLeaf.create = function (doc) {
 
         let leafTarget = e.target;
 
-        DetailsPanel.show(doc.id);
-        Leaf.setActive(leafTarget);
-        DetailsPanel.populate(doc, e.target);
+        if (auth.currentUser) {
+            DetailsPanel.show(doc.id);
+            Leaf.setActive(leafTarget);
+            DetailsPanel.populate(doc, e.target);
+        }
     });
 
     if (doc.data().claimed_by) {

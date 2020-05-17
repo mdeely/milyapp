@@ -85,15 +85,14 @@
                     <nav class="detailsPanel__actions u-mar-b_4">
                         <button class="iconButton add-relationship_button" data-dropdown-target="add-relationship-dropdown"><i class="fa fa-plus"></i></button>
                         <div class="detailsPanel__actions-secondary u-mar-l_auto u-d_flex">
-                            <button class="iconButton secondary" id="invite-member-action" data-modal-trigger="invite-member_modal"><i class="fa fa-envelope u-d_none"></i></button>
-                            <button class="iconButton secondary u-mar-l_2" data-dropdown-target="member-options-dropdown"><i class="fa fa-ellipsis-h"></i></button>
+                            <button class="iconButton secondary" id="invite-member-action" data-modal-trigger="invite-member_modal"><i class="fa fa-envelope"></i></button>
+                            <button class="iconButton secondary u-mar-l_2" id="edit-member-action"><i class="fa fa-pencil-alt"></i></button>
                             <button class="iconButton secondary details__button--close u-mar-l_2"><i class="fa fa-times"></i></button> 
                         </div>
                     </nav>
-                    <ul id="member-options-dropdown" class="dropdown u-d_none u-p_fixed">
+                    <!-- <ul id="member-options-dropdown" class="dropdown u-d_none u-p_fixed">
                         <li id="edit-member-action" class="dropdown__item">Edit member details</li>
-                        <li id="remove-leaf-action" class="dropdown__item u-c_danger">Remove from tree</li>
-                    </ul>
+                    </ul> -->
                     <ul id="add-relationship-dropdown" class="dropdown u-d_none u-p_fixed">
                         <li class="dropdown__item dropdown__label">Add relationship</li>
                         <li id="add-parent-action" class="dropdown__item">Parent</li>
@@ -108,8 +107,9 @@
                         <div class="detailsPanel__metaData u-mar-b_7"></div>
                         <h6 class="u-mar-b_4">Immediate family</h6>
                         <div class="detailsPanel__immediateFamily"></div>
+                        <li id="remove-leaf-action" class="button danger secondary u-w_full u-mar-t_8">Remove from tree</li>
                     </div>
-                    <form id="detailsPanel__edit" class="u-pad-b_10">
+                    <form id="detailsPanel__edit">
                     </form>
                 </aside>
             </section>

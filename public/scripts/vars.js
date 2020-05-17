@@ -138,9 +138,11 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
     }
 
     if (leafDoc.data().claimed_by) {
+        inviteMemberButton.classList.add("u-d_none");
         editMemberButton.classList.add("u-d_none");
         detailsPanel.setAttribute("data-details-member-id", leafDoc.data().claimed_by);
     } else {
+        inviteMemberButton.classList.remove("u-d_none");
         editMemberButton.classList.remove("u-d_none");
         detailsPanel.removeAttribute("data-details-member-id");
     }
@@ -288,14 +290,12 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
             detailsPanelItem.innerHTML += content;
 
             detailsPanelItem.addEventListener("mouseover", (e) => {
-                let leafImageEl = leafEl.querySelector(".leaf__image");
-                leafImageEl.classList.add("highlight");
+                leafEl.classList.add("highlight");
                 // highlight the person on the family tree
             })
 
             detailsPanelItem.addEventListener("mouseout", (e) => {
-                let leafImageEl = leafEl.querySelector(".leaf__image");
-                leafImageEl.classList.remove("highlight");
+                leafEl.classList.remove("highlight");
                 // highlight the person on the family tree
             })
 
