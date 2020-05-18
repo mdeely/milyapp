@@ -121,7 +121,7 @@ path {
   #mainContent:not(.showDetails) #detailsPanel {
     right: calc( (var(--detailsWidth) * -1 )); }
   #mainContent.showDetails #familyTree {
-    margin-right: var(--detailsWidth); }
+    width: calc(100vw - var(--detailsWidth)); }
   #mainContent.showDetails #detailsPanel {
     right: 0; }
 
@@ -141,15 +141,26 @@ path {
     width: 10px;
     bottom: var(--leafSpacing); }
 
+#myTree__list {
+  max-width: 800px;
+  margin: 0 auto; }
+  #myTree__list .myTree__item {
+    border-radius: 8px;
+    text-decoration: none; }
+    #myTree__list .myTree__item:hover {
+      background-color: var(--brand_lighter); }
+    #myTree__list .myTree__item:active {
+      background-color: rgba(0, 0, 0, 0.05); }
+
 #familyTree {
-  flex: 1;
-  transition: margin-right 0.2s ease-in-out;
+  transition: width 0.2s ease-in-out;
   display: flex;
   flex-wrap: nowrap;
   position: relative;
   top: 56px;
   padding-bottom: 80px;
-  overflow: scroll; }
+  overflow: scroll;
+  width: 100vw; }
   #familyTree:focus {
     outline: 0 solid transparent; }
   #familyTree .view-list_info {
@@ -263,6 +274,7 @@ path {
     bottom: 0;
     border-radius: 8px;
     background-color: rgba(0, 0, 0, 0.08);
+    background-color: var(--brand_lighter);
     transform: translate(-8px, -8px);
     z-index: -1; }
 
@@ -271,7 +283,12 @@ path {
   text-align: center;
   font-size: 20px;
   color: var(--color_gray);
-  vertical-align: middle; }
+  color: var(--brand);
+  vertical-align: middle;
+  opacity: .3; }
+
+.detailsPanel__fullName:empty {
+  display: none; }
 
 .detailsPanel__img {
   width: 64px;
@@ -303,6 +320,15 @@ path {
   background-repeat: no-repeat;
   background-position: center; }
 
+.detailsEditInput__profile_photo {
+  min-height: 200px;
+  background-color: var(--color_yellow);
+  width: 200px;
+  border-radius: 8px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat; }
+
 .formActions {
   position: fixed;
   right: 0;
@@ -328,6 +354,10 @@ path {
   .spouses .leaf:only-child {
     margin-left: var(--leafSpacing);
     margin-right: var(--leafSpacing); }
+  .spouses .leaf:first-child {
+    margin-left: 8px; }
+  .spouses .leaf:last-child {
+    margin-right: 16px; }
 
 .message:empty {
   display: none; }
@@ -347,8 +377,6 @@ path {
 
 .spouses .leaf svg {
   z-index: -2; }
-  .spouses .leaf svg path {
-    stroke-linejoin: arcs; }
 
 .spouses:hover .leaf svg,
 .spouses:hover + .descendants .leaf svg {
@@ -356,6 +384,7 @@ path {
   .spouses:hover .leaf svg path,
   .spouses:hover + .descendants .leaf svg path {
     transition: all .1s ease-in-out;
+    stroke: var(--color_outline);
     stroke-width: 4; }
 
 .leaf {
@@ -399,7 +428,9 @@ path {
     text-overflow: ellipsis;
     white-space: nowrap;
     max-width: calc(var(--spacer) * 17);
-    overflow: hidden; }
+    overflow: hidden;
+    backface-visibility: hidden;
+    z-index: 5; }
     .leaf .leaf_caption:empty:before {
       content: "No name";
       font-style: italic;
@@ -414,14 +445,15 @@ path {
     border-radius: 50%;
     background-size: cover;
     background-repeat: no-repeat;
-    background-position: center; }
+    background-position: center;
+    backface-visibility: hidden;
+    z-index: 2; }
+  .leaf__image, .leaf_caption {
+    transition: transform 0.2s ease-in-out; }
   .leaf.highlight .leaf__image,
   .leaf.highlight .leaf_caption {
-    transform: scale(1.1);
-    transition: all 0.2s ease-in-out;
-    z-index: 2; }
-  .leaf.highlight .leaf_caption {
-    z-index: 5; }
+    transform: scale3d(1.2, 1.2, 1.2);
+    transition: transform 0.2s ease-in-out; }
 
 .parentToChild__middleBar,
 .childToParent__middleBar,
@@ -706,6 +738,7 @@ button,
     color: var(--color_text); }
     .dropdown__item:hover {
       background-color: rgba(0, 40, 49, 0.08);
+      background-color: var(--brand_lighter);
       cursor: pointer; }
     .dropdown__item:active {
       background-color: rgba(0, 40, 49, 0.04);
@@ -728,6 +761,15 @@ button,
 .u_disabled {
   pointer-events: none;
   opacity: .5; }
+
+.u-text_lowest {
+  color: rgba(0, 0, 0, 0.55); }
+
+.u-text_low {
+  color: rgba(0, 0, 0, 0.65); }
+
+.u-font-size_14 {
+  font-size: 14px; }
 
 .u-p_fixed {
   position: fixed; }
@@ -813,6 +855,9 @@ button,
 
 .u-mar-b_point5 {
   margin-bottom: 4px; }
+
+.u-mar-t_1 {
+  margin-top: 8px; }
 
 .u-mar-t_2 {
   margin-top: 16px; }

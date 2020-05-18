@@ -126,7 +126,11 @@ TreeLeaf.create = function (doc) {
     let leafName = data.name.firstName ? data.name.firstName : "No name";
     let leafProfilePhoto = "https://firebasestorage.googleapis.com/v0/b/mily-4c2a8.appspot.com/o/assets%2Fplaceholder%2Fprofile_placeholder.svg?alt=media&token=d3b939f1-d46b-4315-bcc6-3167d17a18ed";
 
-    if (data.profile_photo) {
+    if (doc.data().deleted === true) {
+        image.style.backgroundImage = '';
+        image.style.backgroundColor = "white";
+        leafName = "(deleted)";
+    } else if (data.profile_photo) {
         let profileFileReference = storage.ref(`${data.profile_photo}`);
         profileFileReference.getDownloadURL().then(function(url) {
             image.style.backgroundImage = `url(${url})`;
@@ -158,7 +162,7 @@ TreeLeaf.create = function (doc) {
         }
     });
 
-    if (doc.data().claimed_by) {
+    if (doc.data().claimed_by && doc.data().deleted !== true) {
         replaceNameAndImageWithMemberDoc(doc.id, doc.data().claimed_by);
     }
 

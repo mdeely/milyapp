@@ -21,12 +21,12 @@ const populateMyTreesList = async () => {
     myTreeListEl.textContent = '';
 
     let button = document.createElement("button");
-    button.setAttribute("class", "new-tree_button u-mar-l_auto");
+    button.setAttribute("class", "new-tree_button u-mar-l_auto u-mar-r_2");
     button.setAttribute("data-modal-trigger", "create-tree_modal");
 
     button.textContent = "Create a tree";
 
-    myTreesDebugMsg.innerHTML += `<h2 class="u-ta_center">Your trees:</h2>`;
+    myTreesDebugMsg.innerHTML += `<h2 class="u-ta_center u-mar-l_2">Your trees:</h2>`;
     myTreesDebugMsg.appendChild(button);
 
     if (LocalDocs.member.data().trees) {
@@ -36,8 +36,12 @@ const populateMyTreesList = async () => {
             if (!ranThrough.includes(treeId)) {
                 treesRef.doc(treeId).get()
                 .then((reqTreeDoc) => {
-                    let anchor = `<li><a class="button secondary myTree__item u-d_block" href="#/trees/${reqTreeDoc.id}">${reqTreeDoc.data().name}</a></li>`;
-                    myTreeListEl.innerHTML += anchor;
+                    let anchor = `<li class="u-w_full u-mar-r_2"><a class="myTree__item u-pad_3 u-w_full u-d_block" href="#/trees/${reqTreeDoc.id}">${reqTreeDoc.data().name}</a></li>`;
+                    let existingLeaf = myTreeListEl.querySelector(`[href*="${reqTreeDoc.id}"]`);
+                    console.log(existingLeaf);
+                    if (!existingLeaf) {
+                        myTreeListEl.innerHTML += anchor;
+                    }
                 })
                 ranThrough.push(treeId);
             }

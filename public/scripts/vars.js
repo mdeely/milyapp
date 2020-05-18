@@ -39,6 +39,7 @@ const detailsPanelAction = detailsPanel.querySelector(".detailsPanel__actions");
 const detailsPanelMetaData = detailsPanel.querySelector(".detailsPanel__metaData");
 const detailsPanelImmediateFamily = detailsPanel.querySelector(".detailsPanel__immediateFamily");
 const detailsPanelFirstName = detailsPanel.querySelector(".detailsPanel__firstName");
+const detailsPanelFullName = detailsPanel.querySelector(".detailsPanel__fullName");
 const detailsPanelProfileImage = detailsPanel.querySelector(".detailsPanel__profileImage");
 
 const signUpButton = document.querySelector("#sign-up_button");
@@ -129,6 +130,7 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
     detailsPanelMetaData.textContent = '';
     detailsPanelImmediateFamily.textContent = '';
     detailsPanelFirstName.textContent = dataSource.name.firstName ? dataSource.name.firstName : "No name";
+    detailsPanelFullName.textContent = createFullName(leafDoc);
     detailsPanel.setAttribute("data-details-id", leafDoc.id);
 
     if (leafDoc.data().topMember === true) {
@@ -266,7 +268,7 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
                 label = "Sibling"
             } else if (relativeType === "spouses") {
                 label = "Spouse"
-                spouseAction = `<button class="iconButton white u-mar-l_auto"><i class="fa fa-pencil-alt"></i></button>`
+                spouseAction = `<button class="iconButton white u-mar-l_auto"><i class="fa fa-ellipsis-h"></i></button>`
             }
 
             let detailsPanelItem = createElementWithClass("div", "detailsPanel__item u-mar-b_3 u-d_flex u-align-items_center");
@@ -304,6 +306,26 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
     }
 }
 
+function createFullName(leafDoc) {
+    let fullName;
+    let firstName = leafDoc.data().name.firstName ? leafDoc.data().name.firstName : null;
+    let middleName = leafDoc.data().name.middleName ? leafDoc.data().name.middleName : null;
+    let nickname = leafDoc.data().name.nickname ? `(${leafDoc.data().name.nickname})` : null;
+    let lastName = leafDoc.data().name.lastName ? leafDoc.data().name.lastName : null;
+
+    if (firstName && !middleName && !nickname && !lastName) {
+        fullName = ``;
+    } else if (firstName && !middleName && !nickname && lastName) {
+        fullName = `${lastName}`;
+    } else if (!firstName && !middleName && !nickname && !lastName) {
+        fullName = ``;
+    } else {
+        fullName = `${firstName} ${nickname} ${middleName} ${lastName}`;
+    }
+
+    return fullName;
+}
+
 function createElementWithClass(elementType, classname = null, content = null) {
     let el = document.createElement(elementType);
 
@@ -335,6 +357,8 @@ DetailsPanel.editMember = function() {
     function createMemberInput(key, value, parentValue) {
         let inputType = value.dataType ? value.dataType : "text";
         let data = '';
+        let backgroundImageStyle;
+        let leafElement;
 
         if (parentValue) {
             data = reqEditDocData[parentValue.dataPath][value.dataPath] || data;
@@ -342,9 +366,16 @@ DetailsPanel.editMember = function() {
             data = reqEditDocData[value.dataPath] || data;;
         }
 
+        console.log(value.dataPath);
+
+        if (value.dataPath === "profile_photo") {
+            leafElement = document.querySelector(`[data-id="${reqEditDoc.id}"] .leaf__image`);
+            backgroundImageStyle = leafElement.style.backgroundImage ? `style='background-image: ${leafElement.style.backgroundImage}'` : null
+        }
+
         let inputGroup = `<div class="inputGroup inputGroup__horizontal">
                                 <label class="u-mar-r_2 u-w_33perc">${key}</label>
-                                <input class="u-mar-l_auto u-flex_1'" type="${inputType}" name="${value.dataPath}" value="${data}">
+                                <input class="u-mar-l_auto u-flex_1 detailsEditInput__${value.dataPath}" type="${inputType}" name="${value.dataPath}" value="${data}" ${backgroundImageStyle}">
                             </div>`
     
         detailsPanelEdit.innerHTML += inputGroup;
@@ -392,7 +423,7 @@ DetailsPanel.editMember = function() {
             });
         }
 
-        function goUpdateLeaf(photoFile = LocalDocs.member.data().profile_photo || null) {
+        function goUpdateLeaf(photoFile = null) {
             ref.doc(reqEditDoc.id).update({
                 "name" : {
                     "firstName" : detailsPanelEdit["firstName"].value,
@@ -412,6 +443,7 @@ DetailsPanel.editMember = function() {
                 "profile_photo" : photoFile,
                 "occupation" : detailsPanelEdit["occupation"].value,
                 "email" : detailsPanelEdit["email"].value,
+                "deceased" : detailsPanelEdit["deceased"].checked ? true : false,
             })
             .then(() => {
                 console.log("Updated!");
@@ -476,7 +508,8 @@ MemberBlueprint.object = {
     "Top Member" : { "dataPath" : "topMember", "defaultValue" : false },
     "Claimed by" : { "dataPath" : "claimed_by", "defaultValue" : null },
     "Created by" : { "dataPath" : "created_by", "defaultValue" : null },
-    "Profile photo" : { "dataPath" : "profile_photo", "icon" : "picture", "defaultValue" : null , "dataType": "file"}
+    "Profile photo" : { "dataPath" : "profile_photo", "icon" : "picture", "defaultValue" : null , "dataType": "file"},
+    "Deceased" : { "dataPath" : "deceased", "defaultValue" : false, "icon" : "hand-peace", "dataType" : "checkbox" },
 }
 
 MemberBlueprint.loop = function(args) {
@@ -725,7 +758,7 @@ Relationship.addSpouse = function() {
             if (childrenArray.length > 0) {
                 for (childId of childrenArray) {
                     currentTreeLeafCollectionRef.doc(childId).update({
-                        "parents" : firebase.firestore.FieldValue.arrayUnion(childId)
+                        "parents" : firebase.firestore.FieldValue.arrayUnion(newSpouseDoc.id)
                     })
                     .then(() => {
                         console.log(`${childId} has a new parent: ${newSpouseDoc.id}`)
@@ -778,6 +811,12 @@ Relationship.addSibling = function() {
         }
     }
 
+    // get other siblings, make sure this new sibling is added to them
+    // get parents, make sure new sibling is added as child to each
+    
+    console.log(parentArray);
+    console.log(siblingArray);
+
     // Left off trying to figure out why adding a sibling won't add other siblnigs's parents to the new sibling
 
     currentTreeLeafCollectionRef.add(
@@ -817,10 +856,6 @@ Relationship.addSibling = function() {
     .catch(err => {
         console.log(err.message);
     })
-
-    // Get your siblings and add them as siblings to the newSibling
-    // add newSibilng to your siblings
-    // If you have parent(s), add newSibling as a child
 }
 
 Relationship.removeLeaf = function() {
@@ -828,19 +863,19 @@ Relationship.removeLeaf = function() {
 
     if (reqRemovalDoc.data().claimed_by === LocalDocs.member.id) {
         alert("You cannot delete yourself!");
-        return
+        return;
     } else {
-        if (0 > 0) {
-            console.log("do nothing?")
-            // Dont remove completely, but mark as "empty connection"?
+        if (reqRemovalDoc.data().children.length > 0 && Object.keys(reqRemovalDoc.data().spouses).length < 1) {
+            currentTreeLeafCollectionRef.doc(reqRemovalDoc.id).update({
+                "deleted" : true
+            });
+            location.reload();
         }
         else {
-    
             if (reqRemovalDoc.data().topMember === true) {
                 console.log(`TopMember deleted. Top Member reassigned to ${reqRemovalDoc.data().children[0]}`);
                 currentTreeLeafCollectionRef.doc(reqRemovalDoc.data().children[0]).update({topMember: true});
             }
-    
             if (reqRemovalDoc.data().parents && reqRemovalDoc.data().parents.length > 0) {
                 for (parentId of reqRemovalDoc.data().parents) {
                     console.log(`Updating parent ${parentId}`);
