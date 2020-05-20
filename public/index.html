@@ -29,6 +29,10 @@
             <div id="view-preferences" class="dropdown u-d_none u-p_absolute">
                 <div id="view-preferences_tree" class="dropdown__item">Tree</div>
                 <div id="view-preferences_list" class="dropdown__item">List</div>
+                <div id="view-preferences_list" class="dropdown__item">
+                    <button class="iconButton view-preferences_zoomIn"><i class="fa fa-plus"></i></button>
+                    <button class="iconButton u-mar-l_auto view-preferences_zoomOut"><i class="fa fa-minus"></i></button>
+                </div>
             </div>
             <button id="accountMenu" class="u-mar-l_1" data-dropdown-target="accountMenu__dropdown"></button>
             <div id="accountMenu__dropdown" class="dropdown u-p_absolute u-d_none">
@@ -81,6 +85,7 @@
             <section id="mainContent">
 
             <section id="familyTree"></section>
+            <div id="panzoomNode"></div>
             <!-- <svg id="leaf_connections" width="160" height="280" xmlns="http://www.w3.org/2000/svg" version="1.1"></svg> -->
                 <aside id="detailsPanel">
                     <nav class="detailsPanel__actions u-mar-b_4">

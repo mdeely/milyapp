@@ -112,7 +112,6 @@ path {
   display: flex;
   position: relative;
   flex: 1;
-  overflow: hidden;
   transition: background-color 0.2s ease-in-out; }
   #mainContent:focus {
     outline: none; }
@@ -159,7 +158,6 @@ path {
   position: relative;
   top: 56px;
   padding-bottom: 80px;
-  overflow: scroll;
   width: 100vw; }
   #familyTree:focus {
     outline: 0 solid transparent; }

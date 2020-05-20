@@ -130,15 +130,6 @@ const viewPermissionsTree = document.querySelector("#view-preferences_tree");
 const viewPermissionsList = document.querySelector("#view-preferences_list");
 const addRelationshipButton = document.querySelector(".add-relationship_button");
 
-// panzoom(familyTreeEl, {
-//     minZoom: .25, // prevent zooming out
-//     maxZoom: 1, // prevent zooming beyond acceptable levels
-//     // bounds: true, // prevent panning outside of container
-//     // boundsPadding: .5, // prevent panning outside of container
-//     // zoomDoubleClickSpeed: 1
-//     zoomSpeed: 0.065 // 6.5% per mouse wheel event
-// });
-
 // const resetOnAuthStateChanged = auth.onAuthStateChanged(function (user) {
 //     console.log("reset!");
 // });

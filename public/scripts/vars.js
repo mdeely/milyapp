@@ -47,6 +47,7 @@ const logInButton = document.querySelector("#log-in_button");
 const accountMenuButton = document.querySelector("#accountMenu");
 // const searchButton = document.querySelector("#search_button");
 const viewPreferencesButton = document.querySelector("#view-preferences_button");
+
 const navLogo = document.querySelector("#mainNav_logo");
 const navProfileImage = document.querySelector(".mainNav__profile-image");
 
@@ -59,6 +60,17 @@ const excludedDetails = ["children", "parents", "siblings", "spouses", "topMembe
 const excludedCategories = ["Name", "Address"];
 
 const placeholderImageUrl = "https://firebasestorage.googleapis.com/v0/b/mily-4c2a8.appspot.com/o/assets%2Fplaceholder%2Fprofile_placeholder.svg?alt=media&token=d3b939f1-d46b-4315-bcc6-3167d17a18ed";
+
+document.querySelector(".view-preferences_zoomIn").addEventListener('click', (e) => {
+    console.log("zoom in");
+});
+
+document.querySelector(".view-preferences_zoomOut").addEventListener('click', (e) => {
+    console.log("zoom out");
+});
+
+
+
 ///////
 
 let Leaf = {};

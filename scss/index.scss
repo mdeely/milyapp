@@ -143,7 +143,7 @@ path {
     display: flex;
     position: relative;
     flex: 1;
-    overflow: hidden;
+    // overflow: hidden;
     transition: background-color $detailsRevealTiming ease-in-out;
 
     &:focus {
@@ -226,7 +226,7 @@ path {
     position: relative;
     top: 56px;
     padding-bottom: 80px;
-    overflow: scroll;
+    // overflow: scroll;
     width: 100vw;
 
     &:focus {
@@ -696,6 +696,7 @@ path {
 #view-preferences {
     right: 0;
 }
+
 
 @media screen and (max-width: 640px) {
     :root {
