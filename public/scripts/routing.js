@@ -6,6 +6,8 @@ window.router = function(user) {
         "settings" : {"name": "settings", "controller": settingsView, "onAuthController": settingsViewOnAuthChange},
         "/" : {"name": "homepage", "controller": homepageSetup, "onAuthController": homepageViewOnAuthChange},
         "account-verification" : {"name": "account-verification", "controller": accountVerificationSetup, "onAuthController": accountVerificationViewOnAuthChange},
+        "sign-up" : {"name": "sign-up", "controller": signUpSetup, "onAuthController": signUpViewOnAuthChange},
+        "log-in" : {"name": "log-in", "controller": logInSetup, "onAuthController": logInViewOnAuthChange}
     }
 
     let pathnameArray = window.location.hash.split('/');
@@ -42,7 +44,6 @@ window.router = function(user) {
         if (user) {
             Nav.update(user);
             if (user.emailVerified) {
-                console.log("You're verified!");
                 let uid = firebase.auth().currentUser.uid;
                 membersRef.where('claimed_by', '==', uid).limit(1).get()
                 .then((queryResult) => {
@@ -50,6 +51,7 @@ window.router = function(user) {
                         LocalDocs.member = queryResult.docs[0] ? queryResult.docs[0] : null;
                         if (LocalDocs.member) {
                             Nav.update(user);
+                            DetailsPanel.close();
                             if (LocalDocs.member.data().trees && LocalDocs.member.data().trees.length > 0) {
                                 if (LocalDocs.member.data().trees) {
                                     LocalDocs.trees = [];

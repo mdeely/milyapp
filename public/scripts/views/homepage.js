@@ -11,6 +11,9 @@ const homepageSetup = () => {
 }
 
 const homepageViewOnAuthChange = (user) => {
+    if (user) {
+        window.location.hash= '/my-trees';
+     }
     // if (user) {
     //     homepageDebugMsg.textContent = "Authenticated";
     // } else {

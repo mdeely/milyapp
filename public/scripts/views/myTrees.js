@@ -12,7 +12,7 @@ const myTreesViewOnAuthChange = (user) => {
     if (user) {
         populateMyTreesList();
     } else {
-        myTreesDebugMsg.textContent = "Not authenticated";
+        window.location.hash = "#/log-in"
     }
 }
 
@@ -38,7 +38,6 @@ const populateMyTreesList = async () => {
                 .then((reqTreeDoc) => {
                     let anchor = `<li class="u-w_full u-mar-r_2"><a class="myTree__item u-pad_3 u-w_full u-d_block" href="#/trees/${reqTreeDoc.id}">${reqTreeDoc.data().name}</a></li>`;
                     let existingLeaf = myTreeListEl.querySelector(`[href*="${reqTreeDoc.id}"]`);
-                    console.log(existingLeaf);
                     if (!existingLeaf) {
                         myTreeListEl.innerHTML += anchor;
                     }
@@ -46,6 +45,9 @@ const populateMyTreesList = async () => {
                 ranThrough.push(treeId);
             }
         }
+    } else {
+        let el = `<p class="u-mar-lr_auto">Get started by creating your first tree!</p>`;
+        myTreeListEl.innerHTML += el;
     }
 
     initiateModals();

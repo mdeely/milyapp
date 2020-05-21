@@ -52,7 +52,6 @@ const listenForSignInForm = () => {
     
         firebase.auth().signInWithEmailAndPassword(email, password)
         .then(() => {
-            console.log("successfully logged in");
             signInForm.reset();
             signInForm.querySelector(".message").innerHTML = '';
         }).catch(err => {
@@ -167,16 +166,21 @@ const addRelationshipButton = document.querySelector(".add-relationship_button")
 //     }
 // );
 
-const dropdownTriggers = document.querySelectorAll(`[data-dropdown-target]`);
+let dropdownTriggers = document.querySelectorAll(`[data-dropdown-target]`);
 let offset = 8;
 
 const initiateDropdowns = () => {
+    dropdownTriggers = document.querySelectorAll(`[data-dropdown-target]`);
     for (dropdownTrigger of dropdownTriggers) {
-        dropdownTrigger.addEventListener('click', (e) => {
-            e.preventDefault();
-            showDropdown(e);
-        })
+        initiateDropdown(dropdownTrigger);
     }
+}
+
+function initiateDropdown(trigger) {
+    trigger.addEventListener('click', (e) => {
+        e.preventDefault();
+        showDropdown(e);
+    })
 }
 
 const showDropdown = (e) => {

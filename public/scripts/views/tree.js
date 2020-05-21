@@ -57,20 +57,21 @@ TreeBranch.initiate =  function() {
 
     let topMemberBranchEl = TreeBranch.renderBranchByDoc(topMemberDoc);
 
+    console.log(topMemberDoc.id);
+
     if (siblings && siblings.length > 0) {
         for (let siblingId of siblings) {
             let siblingDoc = LocalDocs.leaves.find(leafDoc => leafDoc.id === siblingId);
             let siblingBranchEl = TreeBranch.renderBranchByDoc(siblingDoc);
-            familyTreeEl.appendChild(siblingBranchEl);
+            branchContainer.appendChild(siblingBranchEl);
         }
     }
 
-    familyTreeEl.appendChild(topMemberBranchEl);
+    branchContainer.appendChild(topMemberBranchEl);
     connectLines();
-    let panzoomNode = document.querySelector("#familyTree > .branch");
-    panzoom(panzoomNode, {
+    panzoom(branchContainer, {
         minZoom: .25, // prevent zooming out
-        maxZoom: 1, // prevent zooming beyond acceptable levels
+        maxZoom: 2, // prevent zooming beyond acceptable levels
         // bounds: true, // prevent panning outside of container
         // boundsPadding: .5, // prevent panning outside of container
         // zoomDoubleClickSpeed: 1
@@ -79,7 +80,7 @@ TreeBranch.initiate =  function() {
 }
 
 TreeBranch.clear = function() {
-    familyTreeEl.innerHTML = '';
+    branchContainer.innerHTML = '';
 }
 
  TreeBranch.renderBranchByDoc = function (memberDoc) {

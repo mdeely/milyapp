@@ -29,6 +29,7 @@ const treeBlueprint = {
 
 const familyTreeEl = document.querySelector("#familyTree");
 const mainContent = document.querySelector("#mainContent");
+const branchContainer = document.querySelector("#branchContainer");
 const leafConnections = document.querySelector("#leaf_connections");
 
 const detailsPanel = mainContent.querySelector("#detailsPanel");
@@ -61,14 +62,13 @@ const excludedCategories = ["Name", "Address"];
 
 const placeholderImageUrl = "https://firebasestorage.googleapis.com/v0/b/mily-4c2a8.appspot.com/o/assets%2Fplaceholder%2Fprofile_placeholder.svg?alt=media&token=d3b939f1-d46b-4315-bcc6-3167d17a18ed";
 
-document.querySelector(".view-preferences_zoomIn").addEventListener('click', (e) => {
-    console.log("zoom in");
-});
+// document.querySelector(".view-preferences_zoomIn").addEventListener('click', (e) => {
+//     console.log("zoom in");
+// });
 
-document.querySelector(".view-preferences_zoomOut").addEventListener('click', (e) => {
-    console.log("zoom out");
-});
-
+// document.querySelector(".view-preferences_zoomOut").addEventListener('click', (e) => {
+//     console.log("zoom out");
+// });
 
 
 ///////
@@ -161,8 +161,6 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
         detailsPanel.removeAttribute("data-details-member-id");
     }
 
-    console.log(LocalDocs.member);
-
     if (leafDoc.data().claimed_by === LocalDocs.member.id) {
         editMemberButton.classList.remove("u-d_none");
     }
@@ -213,10 +211,20 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
     //     addRelationshipButton.classList.add("u-d_none");
     // }
 
+    const detailsHeader =`<h6 class="u-mar-b_4 u-mar-t_8">Details</h6>`;
+
+    let hasDetails = false;
+
     MemberBlueprint.loop({
         "exclude" : ["profile_photo"],
         "functionCall": generateDetailElement
     });
+
+    if (hasDetails) {
+        detailsPanelMetaData.insertAdjacentHTML("afterBegin", detailsHeader);
+        // const detailsNoInfo =`<div class="u-italic u-text_low u-font-size_13">No details</div>`;
+        // detailsPanelMetaData.innerHTML += detailsNoInfo;
+    }
 
     MemberBlueprint.loop({
         "onlyRelationships" : true,
@@ -227,6 +235,10 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
         let reqName = value["dataPath"];
         let reqIcon = value["icon"];
         let data = dataSource[reqName];
+
+        if (data) {
+            hasDetails = true;
+        }
 
         if (data) {
             if (reqName === "birthday" && data) {
@@ -261,12 +273,17 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
         }
 
         function renderRelationship(reqId) {
-            let familyDoc = LocalDocs.getLeafById(reqId);
-            // if (familyDoc.data().claimed_by) {
-            //     familyDoc = LocalDocs.getMemberDocByIdFromCurrentTree(reqId);
-            // }
+            let familyLeafDoc = LocalDocs.getLeafById(reqId);
+            let familyMemberDoc = null;
+            
+            if (familyLeafDoc.data().claimed_by) {
+                familyMemberDoc = LocalDocs.getMemberDocByIdFromCurrentTree(familyLeafDoc.data().claimed_by);
+            }
 
-            let firstName = familyDoc.data().name.firstName || "No name";
+            let docData = familyMemberDoc ? familyMemberDoc : familyLeafDoc;
+
+            let firstName = docData.data().name.firstName || "No name";
+            let lastName = docData.data().name.lastName ? ` ${docData.data().name.lastName}` : '';
             let label;
             let spouseAction = '';
             let leafEl = document.querySelector(`[data-id="${reqId}"]`);
@@ -279,11 +296,26 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
             } else if (relativeType === "siblings") {
                 label = "Sibling"
             } else if (relativeType === "spouses") {
-                label = "Spouse"
-                spouseAction = `<button class="iconButton white u-mar-l_auto"><i class="fa fa-ellipsis-h"></i></button>`
+                if (familyLeafDoc.data().spouses[`${leafDoc.id}`] !== null) {
+                    let spouseType = `${familyLeafDoc.data().spouses[`${leafDoc.id}`]}`;
+                    label = `${spouseType}`
+                } else {
+                    label = `Spouse`
+                }
+                spouseAction = `<button class="iconButton white u-mar-l_auto" data-dropdown-target="spouse_options_menu__${familyLeafDoc.id}">
+                                    <i class="fa fa-ellipsis-h"></i>
+                                </button>
+                                <div id="spouse_options_menu__${familyLeafDoc.id}" class="dropdown u-d_none u-p_fixed">
+                                    <div class="dropdown__item" data-value="Dating">Dating</div>
+                                    <div class="dropdown__item" data-value="Engaged">Engaged</div>
+                                    <div class="dropdown__item" data-value="Married">Married</div>
+                                    <div class="dropdown__item" data-value="Divorced">Divorced</div>
+                                    <div class="dropdown__item" data-value="Separated">Separated</div>
+                                </div>`
             }
 
             let detailsPanelItem = createElementWithClass("div", "detailsPanel__item u-mar-b_3 u-d_flex u-align-items_center");
+            detailsPanelItem.setAttribute("data-leaf-id", familyLeafDoc.id);
             // let detailsPanelImage = createElementWithClass("img", "u-mar-r_2");
             // let detailsPanelText = createElementWithClass("div", "detailsPanel__text", "u-mar-r_2");
             // let detailsPanelName = createElementWithClass("div", "detailsPanel__name u-mar-b_point5 u-bold");
@@ -296,8 +328,8 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
             let content = `
                         <div class="detailsPanel__img u-mar-r_2" style='${profileImage || placeholderImageUrl}'></div>
                         <div class="detailsPanel__text u-mar-r_2">
-                            <div class="detailsPanel__name u-mar-b_point5 u-bold">${firstName}</div> 
-                            <div class="detailsPanel__realtiveType">${label}</div> 
+                            <div class="detailsPanel__name u-mar-b_point5 u-bold">${firstName}${lastName}</div> 
+                            <div class="detailsPanel__relativeType">${label}</div> 
                         </div>
                         ${spouseAction}`
 
@@ -314,25 +346,91 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
             })
 
             detailsPanelImmediateFamily.appendChild(detailsPanelItem);
+
+            if (relativeType === "spouses") {
+                initiateSpouseOptions(familyLeafDoc.id);
+            }
         }
     }
 }
 
+function initiateSpouseOptions(leafId) {
+    let spouseDropdownTrigger = detailsPanelImmediateFamily.querySelector(`[data-leaf-id="${leafId}"] [data-dropdown-target="spouse_options_menu__${leafId}"]
+    `);
+    let spouseOptionEl = detailsPanelImmediateFamily.querySelector(`[data-leaf-id="${leafId}"] #spouse_options_menu__${leafId}
+    `);
+    let spouseOptions = spouseOptionEl.querySelectorAll(".dropdown__item");
+
+    initiateDropdown(spouseDropdownTrigger);
+
+    for (option of spouseOptions) {
+        option.addEventListener('click', (e) => {
+            e.preventDefault();
+
+            let value = e.target.getAttribute("data-value");
+            let targetLeafId = DetailsPanel.getLeafDoc().id;
+
+            console.log(value);
+            console.log(leafId);
+            console.log(targetLeafId);
+
+            currentTreeLeafCollectionRef.doc(leafId).update({
+                [`spouses.${targetLeafId}`] : value
+            })
+            .then(() => {
+                console.log("First spouses updated succesfully");
+            })
+
+            currentTreeLeafCollectionRef.doc(targetLeafId).update({
+                [`spouses.${leafId}`] : value
+            })
+            .then(() => {
+                console.log("Second spouse updated succesfully");
+                location.reload();
+            })
+        })
+    }
+}
+
 function createFullName(leafDoc) {
+    let memberDoc = null;
+
+    if (leafDoc.data().claimed_by) {
+        memberDoc = LocalDocs.getMemberDocByIdFromCurrentTree(leafDoc.data().claimed_by);
+    }
+
+    let docData = memberDoc ? memberDoc : leafDoc;
+
     let fullName;
-    let firstName = leafDoc.data().name.firstName ? leafDoc.data().name.firstName : null;
-    let middleName = leafDoc.data().name.middleName ? leafDoc.data().name.middleName : null;
-    let nickname = leafDoc.data().name.nickname ? `(${leafDoc.data().name.nickname})` : null;
-    let lastName = leafDoc.data().name.lastName ? leafDoc.data().name.lastName : null;
+    let firstName = docData.data().name.firstName ? docData.data().name.firstName : null;
+    let middleName = docData.data().name.middleName ? docData.data().name.middleName : null;
+    let nickname = docData.data().name.nickname ? docData.data().name.nickname : null;
+    let lastName = docData.data().name.lastName ? docData.data().name.lastName : null;
 
     if (firstName && !middleName && !nickname && !lastName) {
+        // if only firstName
         fullName = ``;
+    } else if (firstName && middleName && !nickname && !lastName) {
+        // if only middle name
+        fullName = `Middle name: ${middleName}`;
+    } else if (!firstName && !middleName && !nickname && lastName) {
+        // if only last name
+        fullName = ``;
+    } else if (firstName && middleName && !nickname && lastName) {
+        // if only firstname, lastname, and middlename
+        fullName = `${firstName} ${middleName} ${lastName}`;
+    } else if (firstName && !middleName && nickname && !lastName) {
+        // if only last name
+        fullName = `Nickname: ${nickname}`;
     } else if (firstName && !middleName && !nickname && lastName) {
+        // if firstname AND lastname
         fullName = `${lastName}`;
     } else if (!firstName && !middleName && !nickname && !lastName) {
+        // if none
         fullName = ``;
     } else {
-        fullName = `${firstName} ${nickname} ${middleName} ${lastName}`;
+        // anything else
+        fullName = `${firstName} (${nickname}) ${middleName} ${lastName}`;
     }
 
     return fullName;
@@ -357,6 +455,14 @@ DetailsPanel.editMember = function() {
 
     let reqEditDoc = DetailsPanel.getLeafDoc();
     let reqEditDocData = reqEditDoc.data();
+    let memberDoc = null;
+
+    if (reqEditDocData.claimed_by) {
+        memberDoc = LocalDocs.getMemberDocByIdFromCurrentTree(reqEditDocData.claimed_by);
+        console.log(memberDoc);
+    }
+
+    let docData = memberDoc ? memberDoc.data() : reqEditDocData;
 
     detailsPanelAction.classList.add("u-d_none");
     detailsPanelInfo.classList.add("u-d_none");
@@ -373,12 +479,10 @@ DetailsPanel.editMember = function() {
         let leafElement;
 
         if (parentValue) {
-            data = reqEditDocData[parentValue.dataPath][value.dataPath] || data;
+            data = docData[parentValue.dataPath][value.dataPath] || data;
         } else {
-            data = reqEditDocData[value.dataPath] || data;;
+            data = docData[value.dataPath] || data;;
         }
-
-        console.log(value.dataPath);
 
         if (value.dataPath === "profile_photo") {
             leafElement = document.querySelector(`[data-id="${reqEditDoc.id}"] .leaf__image`);
@@ -406,28 +510,46 @@ DetailsPanel.editMember = function() {
     cancelButton.setAttribute("href", "#");
 
     let ref;
-    if (reqEditDoc.ref.parent.path === "members") {
+    let docId;
+
+    if (memberDoc) {
         ref = membersRef;
+        docId = memberDoc.id;
     } else {
         ref = currentTreeLeafCollectionRef;
+        docId = reqEditDoc.id;
     }
 
     saveButton.addEventListener("click", (e) => {
         e.preventDefault();
 
-        if (detailsPanelEdit["profile_photo"].files.length == 0) {
-            goUpdateLeaf();
-        } else {
-            let profilePhotoFile = detailsPanelEdit["profile_photo"].files[0];
-            let fileName = profilePhotoFile.name;
-            let leafProfilePhotoRef = storageRef.child(`trees/${LocalDocs.tree.id}/${reqEditDoc.id}/${fileName}`);
+        console.log(`TODO: Profile images are setting to null on the member when updating a claimed leaf`);
 
-            leafProfilePhotoRef.put(profilePhotoFile).then(function(snapshot) {
-                currentTreeLeafCollectionRef.doc(reqEditDoc.id).update({
+        if (detailsPanelEdit["profile_photo"].files.length == 0) {
+            // No photo to upload
+            let photoFile = reqEditDoc.data().profile_photo;
+            if (memberDoc) {
+                photoFile = memberDoc.data().profile_photo;
+            }
+            goUpdateDoc(photoFile);
+        } else {
+            // Photo to upload
+            let uploadedPhotoFile = detailsPanelEdit["profile_photo"].files[0];
+            let fileName = uploadedPhotoFile.name;
+            let profilePhotoRef;
+
+            if (memberDoc) {
+                profilePhotoRef = storageRef.child(`members/${memberDoc.id}/${fileName}`);
+            } else {
+                profilePhotoRef = storageRef.child(`trees/${LocalDocs.tree.id}/${reqEditDoc.id}/${fileName}`);
+            }
+
+            profilePhotoRef.put(uploadedPhotoFile).then(function(snapshot) {
+                ref.doc(docId).update({
                     "profile_photo" : snapshot.metadata.fullPath
                 })
                 .then(() => {
-                    goUpdateLeaf(snapshot.metadata.fullPath);
+                    goUpdateDoc(snapshot.metadata.fullPath);
                 })
                 .catch(err => {
                     console.log(err.message);
@@ -435,8 +557,8 @@ DetailsPanel.editMember = function() {
             });
         }
 
-        function goUpdateLeaf(photoFile = null) {
-            ref.doc(reqEditDoc.id).update({
+        function goUpdateDoc(photoFile = null) {
+            ref.doc(docId).update({
                 "name" : {
                     "firstName" : detailsPanelEdit["firstName"].value,
                     "lastName" : detailsPanelEdit["lastName"].value,
@@ -612,7 +734,7 @@ LocalDocs.members = new Array;
 
 
 LocalDocs.getMemberDocByIdFromCurrentTree = function(reqId) {
-    return LocalDocs.claimedMembers.find(doc => doc.id === reqId);
+    return LocalDocs.members.find(doc => doc.id === reqId);
 }
 
 LocalDocs.getMemberById = function(reqId) {
@@ -1008,6 +1130,8 @@ function connectLines() {
 
 function iterateOverConnections() {
     for (let [parentId, value] of Object.entries(connectionArray)) {
+        console.log(parentId);
+
         let parentEl = familyTreeEl.querySelector(`[data-id="${parentId}"]`);
         let parrentAttributes = parentEl.getBoundingClientRect();
 
@@ -1087,3 +1211,26 @@ function showModal(e) {
     }
     // targetModal.classList.add("open");
 }
+
+function signUpSetup() {
+    pageTitle.innerHTML = "Sign up";
+};
+
+
+function signUpViewOnAuthChange(user) {
+    if (user) {
+       window.location.hash= '/my-trees';
+    }
+};
+
+
+function logInSetup() {
+    pageTitle.innerHTML = "Log in";
+};
+
+
+function logInViewOnAuthChange(user) {
+    if (user) {
+        window.location.hash = '/my-trees';
+    }
+};

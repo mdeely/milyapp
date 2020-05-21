@@ -22,10 +22,7 @@ function accountVerificationViewOnAuthChange(user) {
                 })
             })
         }
-    } else {
-        ageVerificationView.innerHTML = "Create an account to get started";
     }
-    console.log("auth change verificaiton")
 }
 
 const verificationMessage = () => new Promise(

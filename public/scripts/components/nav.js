@@ -76,6 +76,8 @@ const getNotificationsByAuthMember = () => {
                 notificationMenu.appendChild(notificationEl);
                 notificationIndicator.classList.remove("u-d_none");
             }
+        } else {
+            notificationMenu.classList.add("u-d_none");
         }
     })
     console.log("TODO: when a user dismisses a declined or accepted invitation, delete notification record");
@@ -139,7 +141,7 @@ const getNotificationsByEmail = async (email) => {
                     })
                 }            
             } else {
-                // No notifications!
+                notificationMenu.classList.add("u-d_none");
             }
         })
     }

@@ -9,13 +9,10 @@ function profileSetup() {
 const profileViewOnAuthChange = (user) => {
     profileViewEl.innerHTML = '';
     window.location.hash = "/profile";
-    profileDebugMsg.textContent = "Authenticated";
-    console.log("yeas edit me baby")
     if (user) {
         editProfileEl();
     } else {
         profileViewEl.innerHTML = '';
-        profileDebugMsg.textContent = "Not authenticated";
     }
 }
 
@@ -48,11 +45,23 @@ const editProfileEl = () => {
             }
         }
 
+        let imageUrl = null;
+        if (value["dataPath"] === "profile_photo") {
+            imageUrl = accountMenuButton.style.backgroundImage;
+        }
+
+        let isRequired = false;
+        if (value["dataPath"] === "email") {
+            isRequired = true;
+        }
+
         let el = generateInputItem({
             "value" : inputValue,
             "name" : value["dataPath"],
             "label" : key,
-            "type" : value["dataType"] || "text"
+            "backgroundImage" : imageUrl,
+            "type" : value["dataType"] || "text",
+            "required" : isRequired
         });
 
         cardContent.appendChild(el);
@@ -107,6 +116,14 @@ const generateInputItem = (args) => {
     inputEl.setAttribute("value", args.value);
     inputEl.setAttribute("type", args.type);
 
+    if (args.backgroundImage !== null) {
+        inputEl.style.backgroundImage = args.backgroundImage;
+    }
+
+    if (args.required === true) {
+        inputEl.setAttribute("required", "true");
+    }
+
     inputGroupEl.appendChild(labelEl);
     inputGroupEl.appendChild(inputEl);
 
@@ -137,7 +154,7 @@ const updateMember = (button, form) => {
             });
         }
 
-        function goUpdateMember(photoFile = LocalDocs.member.profile_photo) { 
+        function goUpdateMember(photoFile = LocalDocs.member.data().profile_photo) { 
             membersRef.doc(LocalDocs.member.id).update({
                 "name" : {
                     "firstName" : form["firstName"].value,
