@@ -16,7 +16,7 @@
   --iconButtonSize: 44px;
   --color_border: #D9DFE0;
   --leafSize: 72px;
-  --profileImageSize: 128px;
+  --profileImageSize: 160px;
   --leafCaptionOffset: 12px;
   --leafSpacing: 24px;
   --leafShadow: 0px 2px 16px rgba(0, 0, 0, 0.05), 0px 1px 2px rgba(0, 0, 0, 0.07), 0px 4px 24px rgba(0, 0, 0, 0.08);
@@ -94,6 +94,18 @@ img {
 
 a {
   color: var(--brand); }
+  a:focus {
+    outline-offset: 2px;
+    outline: 3px solid var(--color_outline); }
+
+hr {
+  border-top: 1px solid var(--color_border);
+  border-bottom: 0px solid transparent;
+  border-left: 0px solid transparent;
+  border-right: 0px solid transparent;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  margin: 0; }
 
 polyline,
 path {
@@ -149,7 +161,8 @@ path {
   #myTree__list .myTree__item {
     border-radius: 8px;
     text-decoration: none; }
-    #myTree__list .myTree__item:hover {
+    #myTree__list .myTree__item:hover, #myTree__list .myTree__item:focus {
+      outline: none;
       background-color: var(--brand_lighter); }
     #myTree__list .myTree__item:active {
       background-color: rgba(0, 0, 0, 0.05); }
@@ -191,7 +204,7 @@ path {
       width: 100%;
       max-width: 1024px; }
     #familyTree.view_list .branch,
-    #familyTree.view_list .spouses,
+    #familyTree.view_list .partners,
     #familyTree.view_list .descendants {
       display: block; }
     #familyTree.view_list .leaf {
@@ -226,6 +239,9 @@ path {
         display: none; }
   #familyTree > .branch {
     will-change: transform; }
+
+.error:empty {
+  display: none; }
 
 #accountMenu {
   width: var(--accountMenuSize);
@@ -262,7 +278,7 @@ path {
     background-repeat: no-repeat;
     background-position: top;
     background-size: cover;
-    background-size: 100%;
+    background-size: 100% 200px;
     height: 400px;
     z-index: -1; }
 
@@ -285,6 +301,9 @@ path {
     background-color: var(--brand_lighter);
     transform: translate(-8px, -8px);
     z-index: -1; }
+
+.detailsPanel__text {
+  pointer-events: none; }
 
 .detailsPanel__icon {
   width: 24px;
@@ -317,6 +336,8 @@ path {
 .detailsPanel__relativeType {
   opacity: .5;
   color: var(--brand); }
+  .detailsPanel__relativeType:empty {
+    display: none; }
 
 .detailsPanel__profileImage {
   max-width: var(--profileImageSize);
@@ -356,21 +377,19 @@ input[name*="profile_photo"] {
   margin: 0 auto; }
 
 .descendants,
-.spouses {
+.partners {
   display: flex;
   flex-direction: row;
   position: relative; }
 
-.spouses .leaf {
-  margin-left: -4px;
-  margin-right: -4px; }
-  .spouses .leaf:only-child {
-    margin-left: var(--leafSpacing);
-    margin-right: var(--leafSpacing); }
-  .spouses .leaf:first-child {
-    margin-left: 8px; }
-  .spouses .leaf:last-child {
-    margin-right: 16px; }
+.partners .apart,
+.partners .together {
+  display: flex; }
+  .partners .apart:empty,
+  .partners .together:empty {
+    display: none; }
+.partners .together {
+  margin-right: -56px; }
 
 .message:empty {
   display: none; }
@@ -388,14 +407,14 @@ input[name*="profile_photo"] {
   -webkit-transform: translateX(-50%);
   transform: translateX(-50%); }
 
-.spouses .leaf svg {
+.partners .leaf svg {
   z-index: -2; }
 
-.spouses:hover .leaf svg,
-.spouses:hover + .descendants .leaf svg {
+.partners:hover .leaf svg,
+.partners:hover + .descendants .leaf svg {
   z-index: -1; }
-  .spouses:hover .leaf svg path,
-  .spouses:hover + .descendants .leaf svg path {
+  .partners:hover .leaf svg path,
+  .partners:hover + .descendants .leaf svg path {
     transition: all .1s ease-in-out;
     stroke: var(--color_outline);
     stroke-width: 4; }
@@ -412,11 +431,11 @@ input[name*="profile_photo"] {
   .leaf:before {
     content: "";
     position: absolute;
-    width: calc(var(--leafSize) + 20px);
-    height: calc(var(--leafSize) + 20px);
-    top: -4px;
+    width: calc(var(--leafSize) + 24px);
+    height: calc(var(--leafSize) + 24px);
+    top: -6px;
     border-radius: 100px;
-    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0) inset, 0 0 0 4px var(--color_outline);
+    box-shadow: 0 0 0 6px rgba(255, 255, 255, 0) inset, 0 0 0 4px var(--color_outline);
     opacity: 0;
     transform: scale(0.8);
     transition: transform 0.2s cubic-bezier(0.66, 0.23, 0.33, 1.02); }
@@ -426,7 +445,7 @@ input[name*="profile_photo"] {
     transition: transform 0.2s cubic-bezier(0.66, 0.23, 0.33, 1.02);
     opacity: 1;
     transform: scale(1);
-    box-shadow: 0 0 0 4px white inset, 0 0 0 4px var(--color_outline); }
+    box-shadow: 0 0 0 6px white inset, 0 0 0 4px var(--color_outline); }
   .leaf > * {
     pointer-events: none; }
   .leaf .leaf_caption {
@@ -467,41 +486,6 @@ input[name*="profile_photo"] {
   .leaf.highlight .leaf_caption {
     transform: scale3d(1.2, 1.2, 1.2);
     transition: transform 0.2s ease-in-out; }
-
-.parentToChild__middleBar,
-.childToParent__middleBar,
-.spouseToSpouse__line,
-.parentToChildren__downLine {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  margin: 0 auto;
-  z-index: -1;
-  background-color: var(--color_border);
-  transition: all .2s ease-in-out;
-  transform: scale(0.95);
-  height: 1px;
-  pointer-events: none; }
-
-.spouseToSpouse__line {
-  top: calc( var(--leafSize) / 2 + var(--leafSpacing) );
-  bottom: 0;
-  width: calc( 100% - var(--leafSize)); }
-
-.parentToChild__middleBar {
-  top: 0;
-  width: calc( 100% - calc( var(--leafSpacing) + var(--leafSize) )); }
-
-.childToParent__middleBar {
-  width: 1px;
-  height: var(--leafSpacing);
-  top: calc( var(--leafSpacing) * -1); }
-
-.parentToChildren__downLine {
-  width: 1px;
-  height: calc( var(--leafSize) - calc( var(--leafSpacing) / 2 ));
-  bottom: 0; }
 
 #view-preferences {
   right: 0; }
@@ -571,6 +555,7 @@ input[type=email],
 input[type=password],
 input[type=number],
 input[type=date],
+input[type=tel],
 select {
   -webkit-appearance: none;
   padding: 12px 16px;
@@ -578,12 +563,14 @@ select {
   border-radius: 8px;
   font-size: 16px;
   border: 0px solid transparent;
-  background-color: white; }
+  background-color: white;
+  color: var(--color_text); }
   input[type=text]:hover,
   input[type=email]:hover,
   input[type=password]:hover,
   input[type=number]:hover,
   input[type=date]:hover,
+  input[type=tel]:hover,
   select:hover {
     box-shadow: 0 0 0 2px var(--color_border); }
   input[type=text]:focus,
@@ -591,6 +578,7 @@ select {
   input[type=password]:focus,
   input[type=number]:focus,
   input[type=date]:focus,
+  input[type=tel]:focus,
   select:focus {
     outline: 0px solid transparent;
     box-shadow: 0 0 0 2px var(--color_outline); }
@@ -612,6 +600,23 @@ label {
     margin-top: 16px; }
   .inputGroup label {
     margin-bottom: 8px; }
+  .inputGroup.checkbox {
+    --inputGroupLayout: row;
+    align-items: center; }
+    .inputGroup.checkbox input[type=checkbox] {
+      -webkit-appearance: none;
+      box-shadow: 0 0 0 1px var(--color_border);
+      height: 24px;
+      width: 24px;
+      border-radius: 4px; }
+      .inputGroup.checkbox input[type=checkbox]:checked {
+        background-color: var(--color_outline); }
+      .inputGroup.checkbox input[type=checkbox]:focus, .inputGroup.checkbox input[type=checkbox]:hover {
+        outline: none;
+        box-shadow: 0 0 0 2px var(--color_outline); }
+    .inputGroup.checkbox label {
+      margin-left: 16px;
+      margin-bottom: 0; }
 
 .button,
 button,
@@ -751,7 +756,8 @@ button,
     display: flex;
     align-items: center;
     text-decoration: none;
-    color: var(--color_text); }
+    color: var(--color_text);
+    font-size: 16px; }
     .dropdown__item:hover {
       background-color: rgba(0, 40, 49, 0.08);
       background-color: var(--brand_lighter);
@@ -784,6 +790,12 @@ button,
 .u-text_low {
   color: rgba(0, 0, 0, 0.65); }
 
+.u-font-size_18 {
+  font-size: 18px; }
+
+.u-font-size_15 {
+  font-size: 15px; }
+
 .u-font-size_14 {
   font-size: 14px; }
 
@@ -807,6 +819,9 @@ button,
 
 .u-p_absolute {
   position: absolute; }
+
+.u-visibility_hidden {
+  visibility: hidden; }
 
 .u-d_none {
   display: none; }
@@ -901,6 +916,21 @@ button,
 
 .u-mar-t_8 {
   margin-top: 64px; }
+
+.u-mar-t_8 {
+  margin-top: 64px; }
+
+.u-mar-t_9 {
+  margin-top: 72px; }
+
+.u-mar-t_10 {
+  margin-top: 80px; }
+
+.u-mar-t_11 {
+  margin-top: 88px; }
+
+.u-mar-t_12 {
+  margin-top: 96px; }
 
 .u-mar-b_1 {
   margin-bottom: 8px; }

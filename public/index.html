@@ -21,12 +21,12 @@
                 <a class="button" id="log-in_button" href="/#/log-in">Log in</a>
                 <a class="button" id="sign-up_button" href="/#/sign-up">Sign up</a>
             </div>
-            <button id="notification_indicator" data-dropdown-target="notification_menu" class="u-mar-l_auto iconButton u-d_none"><i class="fa fa-bell"></i></button>
+            <button id="notification_indicator" data-dropdown-target="notification_menu" class="u-mar-l_auto iconButton u-visibility_hidden"><i class="fa fa-bell"></i></button>
             <div id="notification_menu" class="dropdown u-p_absolute">
             </div>
             <!-- <button id="search_button" class="u-mar-l_2 u-mar-r_1 iconButton"><i class="fa fa-search"></i></button> -->
-            <button id="view-preferences_button" class="u-mar-l_2 u-mar-r_2 iconButton u-d_none" data-dropdown-target="view-preferences"><i class="fa fa-eye"></i></button>
-            <div id="view-preferences" class="dropdown u-d_none u-p_absolute">
+            <button id="view-preferences_button" class="u-mar-l_2 u-mar-r_2 iconButton u-visibility_hidden" data-dropdown-target="view-preferences"><i class="fa fa-eye"></i></button>
+            <div id="view-preferences" class="dropdown u-visibility_hidden u-p_absolute">
                 <div id="view-preferences_tree" class="dropdown__item">Tree</div>
                 <div id="view-preferences_list" class="dropdown__item">List</div>
                 <!-- <div id="view-preferences_list" class="dropdown__item">
@@ -35,7 +35,7 @@
                 </div> -->
             </div>
             <button id="accountMenu" class="u-mar-l_1" data-dropdown-target="accountMenu__dropdown"></button>
-            <div id="accountMenu__dropdown" class="dropdown u-p_absolute u-d_none">
+            <div id="accountMenu__dropdown" class="dropdown u-p_absolute u-visibility_hidden">
                 <a href="#/my-trees" class="dropdown__item">My trees</a>
                 <a href="#/profile" class="dropdown__item">Profile</a>
                 <a href="#/settings" class="dropdown__item">Settings</a>
@@ -65,7 +65,7 @@
                         <label for="sign-up_password">Password</label>
                         <input type="password" name="sign-up_password" placeholder="Password">
                     </div>
-                    <div class="inputGroup">
+                    <div class="inputGroup checkbox u-mar-t_2">
                         <input name="sign-up_age-verification" type="checkbox">
                         <label for="sign-up_age-verification.">I'm 13 years or older.</label>
                     </div>
@@ -74,6 +74,7 @@
                 </div>
                 <div class="card__footer">
                     <button class="u-w_full">Sign up</button>
+                    <p class="u-ta_center u-mar-lr_auto">Already have an account? <a href="#/log-in">Log in</a></p>
                 </div>
             </form>
         </div>
@@ -97,13 +98,14 @@
                 </div>
                 <div class="card__footer">
                     <button type="submit" class="u-w_full">Log in</button>
+                    <p class="u-ta_center u-mar-lr_auto">Don't have an account? <a href="#/sign-up">Sign up</a></p>
                 </div>
             </form>
         </div>
 
         <div style="display:none" data-view="my-trees">
-            <div class="debugMessage u-mar-lr_auto u-mar-b_2 u-d_flex" style="max-width: 800px;"></div>
-            <ul id="myTree__list" class="u-d_flex u-fd_column u-ai_center u-jc_center"></ul>
+            <div class="debugMessage u-mar-lr_auto u-mar-b_2 u-d_flex u-align-items_center" style="max-width: 600px;"></div>
+            <ul id="myTree__list" class="u-d_flex u-fd_column u-ai_center u-jc_center" style="max-width: 600px"></ul>
             <div class="modal medium" data-modal="create-tree_modal">
                 <form id="create-tree_form_modal" class="card modal-dialouge">
                     <div class="card__header">
@@ -124,6 +126,28 @@
                     <a href="#" class="modal_button--close iconButton white"><i class="fa fa-times"></i></a>
                 </form>
             </div>
+
+            <!-- <div class="modal medium" data-modal="rename-tree_modal">
+                <form id="rename-tree_form_modal" class="card modal-dialouge">
+                    <div class="card__header">
+                        <h1 class="u-mar-b_0">Create family</h1>
+                    </div>
+                    <div class="card__content">
+                        <div class="inputGroup">
+                            <label for="rename-tree_name">Family name</label>
+                            <input type="text" name="rename-tree_name">
+                        </div>
+                    </div>
+                    <div class="card__footer">
+                        <div class="buttonGroup u-jc_flex-end">
+                            <a href="#" class="modal_button--close button secondary">Cancel</a>
+                            <button type="submit">Rename tree</button>
+                        </div>
+                    </div>
+                    <a href="#" class="modal_button--close iconButton white"><i class="fa fa-times"></i></a>
+                </form>
+            </div> -->
+
         </div>
 
         <div style="display:none" data-view="error">
@@ -140,7 +164,7 @@
             </section>
             <!-- <svg id="leaf_connections" width="160" height="280" xmlns="http://www.w3.org/2000/svg" version="1.1"></svg> -->
                 <aside id="detailsPanel">
-                    <nav class="detailsPanel__actions u-mar-b_4">
+                    <nav class="detailsPanel__actions u-mar-b_6 u-mar-t_1">
                         <button class="iconButton add-relationship_button" data-dropdown-target="add-relationship-dropdown"><i class="fa fa-plus"></i></button>
                         <div class="detailsPanel__actions-secondary u-mar-l_auto u-d_flex">
                             <button class="iconButton secondary" id="invite-member-action" data-modal-trigger="invite-member_modal"><i class="fa fa-envelope"></i></button>
@@ -151,22 +175,23 @@
                     <!-- <ul id="member-options-dropdown" class="dropdown u-d_none u-p_fixed">
                         <li id="edit-member-action" class="dropdown__item">Edit member details</li>
                     </ul> -->
-                    <ul id="add-relationship-dropdown" class="dropdown u-d_none u-p_fixed">
+                    <ul id="add-relationship-dropdown" class="dropdown u-visibility_hidden u-p_fixed">
                         <li class="dropdown__item dropdown__label">Add relationship</li>
                         <li id="add-parent-action" class="dropdown__item">Parent</li>
                         <li id="add-child-action" class="dropdown__item">Child</li>
-                        <li id="add-spouse-action" class="dropdown__item">Spouse</li>
                         <li id="add-sibling-action" class="dropdown__item">Sibling</li>
+                        <li id="add-partner-action" class="dropdown__item">Partner</li>
+
                     </ul>
                     <div class="detailsPanel__information">
                         <div class="detailsPanel__profileImage u-mar-lr_auto u-mar-b_3"></div>
                         <div class="detailsPanel__firstName u-mar-lr_auto header_m u-ta_center"></div>
                         <p class="detailsPanel__fullName u-mar-lr_auto u-ta_center u-mar-b_6 u-font-size_14 u-mar-t_1"></p>
                         <!-- <h6 class="u-mar-b_4">Details</h6> -->
-                        <div class="detailsPanel__metaData u-mar-b_7 u-mar-t_7"></div>
-                        <h6 class="u-mar-b_4">Immediate family</h6>
+                        <div class="detailsPanel__metaData u-mar-b_7 u-mar-t_10"></div>
+                        <!-- <h6 class="u-mar-b_4">Immediate family</h6> -->
                         <div class="detailsPanel__immediateFamily"></div>
-                        <li id="remove-leaf-action" class="button danger secondary u-w_full u-mar-t_8">Remove from tree</li>
+                        <li id="remove-leaf-action" class="button danger secondary u-w_full u-mar-t_12">Remove from tree</li>
                     </div>
                     <form id="detailsPanel__edit">
                     </form>
@@ -220,7 +245,7 @@
                     <li class="dropdown__item dropdown__label">Add relationship</li>
                     <li id="add-parent-action" class="dropdown__item">Parent</li>
                     <li id="add-child-action" class="dropdown__item">Child</li>
-                    <li id="add-spouse-action" class="dropdown__item">Spouse</li>
+                    <li id="add-partner-action" class="dropdown__item">Partner</li>
                     <li id="add-sibling-action" class="dropdown__item">Sibling</li>
                 </ul>
                 <div class="detailsPanel__information">
@@ -272,27 +297,22 @@
             </form>
         </div>
 
-        <div class="modal medium" data-modal="edit-tree_modal">
-            <form id="edit-tree_form" class="card modal-dialouge">
+        <div class="modal medium" data-modal="rename-tree_modal">
+            <form id="rename-tree_form" class="card modal-dialouge">
                 <div class="card__header">
-                    <h2 class="u-mar-b_0">Edit family</h2>
+                    <h2 class="u-mar-b_0">Rename family</h2>
                 </div>
                 <div class="card__content">
                     <div class="inputGroup">
-                        <label for="edit-tree_name">Family name</label>
-                        <input type="text" name="edit-tree_name">
-                        <input type="text" name="edit-tree_id" class="u-d_none">
-                        <h6 class="u-mar-t_4">Members</h6>
-                        <div id="edit-tree_permissions" class="u-mar-b_2">
-
-                        </div>
+                        <label for="rename-tree_name">Family name</label>
+                        <input type="text" name="rename-tree_name">
+                        <input type="text" name="rename-tree_id" class="u-d_none">
                     </div>
                 </div>
                 <div class="card__footer">
                     <div class="buttonGroup u-jc_flex-end">
-                        <a href="#" id="delete-tree" class="modal_button--close button danger edit-tree_delete">Delete</a>
                         <a href="#" class="modal_button--close button secondary">Close</a>
-                        <button class="edit-tree_save" type="submit">Save changes</button>
+                        <button class="rename-tree_save" type="submit">Rename</button>
                     </div>
                 </div>
                 <a href="#" class="modal_button--close iconButton white"><i class="fa fa-times"></i></a>

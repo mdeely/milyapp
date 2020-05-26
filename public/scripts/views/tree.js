@@ -57,15 +57,14 @@ TreeBranch.initiate =  function() {
 
     let topMemberBranchEl = TreeBranch.renderBranchByDoc(topMemberDoc);
 
-    console.log(topMemberDoc.id);
-
-    if (siblings && siblings.length > 0) {
-        for (let siblingId of siblings) {
+    if (siblings && Object.keys(siblings).length > 0) {
+        for (let siblingId of Object.keys(siblings)) {
             let siblingDoc = LocalDocs.leaves.find(leafDoc => leafDoc.id === siblingId);
             let siblingBranchEl = TreeBranch.renderBranchByDoc(siblingDoc);
             branchContainer.appendChild(siblingBranchEl);
         }
     }
+    
 
     branchContainer.appendChild(topMemberBranchEl);
     connectLines();
@@ -85,22 +84,36 @@ TreeBranch.clear = function() {
 
  TreeBranch.renderBranchByDoc = function (memberDoc) {
     let branchEl = createGroupEl("branch");
-    let spousesBranchEl = createGroupEl("spouses");
+    let partnerBranchEl = createGroupEl("partners");
+    let partnerTogetherEl = createGroupEl("together");
+    let partnerApartEl = createGroupEl("apart");
 
-    let children = memberDoc.data().children ? memberDoc.data().children : null;
-    let spouses = memberDoc.data().spouses ? memberDoc.data().spouses : null;
+    let children = Object.keys(memberDoc.data().children).length > 0 ? Object.keys(memberDoc.data().children) : null;
+    let partners = Object.keys(memberDoc.data().partners).length > 0 ?  Object.keys(memberDoc.data().partners) : null;
     
-    if (spouses &&  Object.keys(spouses).length > 0) {
-        for (let spouseId of Object.keys(spouses)) {
-            let topSpouseMemberDoc = LocalDocs.leaves.find(leafDoc => leafDoc.id === spouseId);
-            spousesBranchEl.appendChild(TreeLeaf.create(topSpouseMemberDoc));
+    let togetherPartnerTypes = ["Married", "Engaged", "Dating"];
+    let apartPartnerTypes = ["Separated", "Divorced", "Widowed"];
+
+    if (partners) {
+        for (let partnerId of partners) {
+            let topPartnerMemberDoc = LocalDocs.leaves.find(leafDoc => leafDoc.id === partnerId);
+            let partnerType = topPartnerMemberDoc.data().partners[memberDoc.id] ? topPartnerMemberDoc.data().partners[memberDoc.id] : null;
+            
+            if (togetherPartnerTypes.includes(partnerType)|| !partnerType) {
+                partnerTogetherEl.appendChild(TreeLeaf.create(topPartnerMemberDoc));
+            } else if (apartPartnerTypes.includes(partnerType)) {
+                partnerApartEl.appendChild(TreeLeaf.create(topPartnerMemberDoc));
+            }
         }
     }
 
-    spousesBranchEl.appendChild(TreeLeaf.create(memberDoc));
-    branchEl.appendChild(spousesBranchEl);
+    partnerBranchEl.appendChild(partnerTogetherEl);
+    partnerBranchEl.appendChild(TreeLeaf.create(memberDoc));
+    partnerBranchEl.appendChild(partnerApartEl);
 
-    if (children && children.length > 0) {
+    branchEl.appendChild(partnerBranchEl);
+
+    if (children) {
         let descendantBranchEL = createGroupEl("descendants");
 
         for (let childId of children) {
@@ -184,7 +197,6 @@ TreeLeaf.create = function (doc) {
 }
 
 const replaceNameAndImageWithMemberDoc = (leafDocId, claimedById) => new Promise(
-
     function(resolve, reject) {
         membersRef.doc(claimedById).get()
         .then((reqMemberDoc) => {

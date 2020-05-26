@@ -74,10 +74,10 @@ const getNotificationsByAuthMember = () => {
 
                 notificationEl.appendChild(dismissNotificationButton);
                 notificationMenu.appendChild(notificationEl);
-                notificationIndicator.classList.remove("u-d_none");
+                notificationIndicator.classList.remove("u-visibility_hidden");
             }
         } else {
-            notificationMenu.classList.add("u-d_none");
+            notificationMenu.classList.add("u-visibility_hidden");
         }
     })
     console.log("TODO: when a user dismisses a declined or accepted invitation, delete notification record");
@@ -90,7 +90,7 @@ const getNotificationsByEmail = async (email) => {
         notificationQuery.get().then(queryResult  => {
             let docs = queryResult.docs;
             if (docs.length > 0) {
-                notificationIndicator.classList.remove("u-d_none");
+                notificationIndicator.classList.remove("u-visibilty_hidden");
     
                 for (doc of docs) {
                     let notificationEl = document.createElement("div");
@@ -141,7 +141,7 @@ const getNotificationsByEmail = async (email) => {
                     })
                 }            
             } else {
-                notificationMenu.classList.add("u-d_none");
+                notificationMenu.classList.add("u-visibility_hidden");
             }
         })
     }

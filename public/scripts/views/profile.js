@@ -27,8 +27,21 @@ const editProfileEl = () => {
     form.setAttribute("id", "set-profile_form");
     cardContent.setAttribute("class", "card__content");
     
+
+    let imageUrl = accountMenuButton.style.backgroundImage;
+    let profilePhotoInputEl = generateInputItem({
+        "value" : LocalDocs.member ? LocalDocs.member.data().profile_photo : null,
+        "name" : "profile_photo",
+        "label" : "Profile photo",
+        "backgroundImage" : imageUrl,
+        "type" : "file"
+    });
+
+    cardContent.appendChild(profilePhotoInputEl);
+
     MemberBlueprint.loop({
-        "functionCall" : handleProfileItems
+        "functionCall" : handleProfileItems,
+        "exclude" : ["profile_photo"]
     });
 
     function handleProfileItems(key, value, parentValue) {
@@ -45,11 +58,6 @@ const editProfileEl = () => {
             }
         }
 
-        let imageUrl = null;
-        if (value["dataPath"] === "profile_photo") {
-            imageUrl = accountMenuButton.style.backgroundImage;
-        }
-
         let isRequired = false;
         if (value["dataPath"] === "email") {
             isRequired = true;
@@ -59,7 +67,6 @@ const editProfileEl = () => {
             "value" : inputValue,
             "name" : value["dataPath"],
             "label" : key,
-            "backgroundImage" : imageUrl,
             "type" : value["dataType"] || "text",
             "required" : isRequired
         });
@@ -160,7 +167,7 @@ const updateMember = (button, form) => {
                     "firstName" : form["firstName"].value,
                     "lastName" : form["lastName"].value,
                     "middleName" : form["middleName"].value,
-                    "surname" : form["surname"].value,
+                    "birthName" : form["birthName"].value,
                     "nickname" : form["nickname"].value,
                 },
                 "address" : {
@@ -198,7 +205,7 @@ const newMember = (button, form) => {
                 "firstName" : form["firstName"].value,
                 "lastName" : form["lastName"].value,
                 "middleName" : form["middleName"].value,
-                "surname" : form["surname"].value,
+                "birthName" : form["birthName"].value,
                 "nickname" : form["nickname"].value,
             },
             "address" : {

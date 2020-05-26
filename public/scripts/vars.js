@@ -11,7 +11,7 @@ const notificationsRef = db.collection('notifications');
 
 const addParentButton = document.querySelector("#add-parent-action");
 const addChildButton = document.querySelector("#add-child-action");
-const addSpouseButton = document.querySelector("#add-spouse-action");
+const addPartnerButton = document.querySelector("#add-partner-action");
 const addSiblingButton = document.querySelector("#add-sibling-action");
 
 const removeLeafButton = document.querySelector("#remove-leaf-action");
@@ -43,6 +43,8 @@ const detailsPanelFirstName = detailsPanel.querySelector(".detailsPanel__firstNa
 const detailsPanelFullName = detailsPanel.querySelector(".detailsPanel__fullName");
 const detailsPanelProfileImage = detailsPanel.querySelector(".detailsPanel__profileImage");
 
+const renameTreeForm = document.querySelector("#rename-tree_form");
+
 const signUpButton = document.querySelector("#sign-up_button");
 const logInButton = document.querySelector("#log-in_button");
 const accountMenuButton = document.querySelector("#accountMenu");
@@ -57,7 +59,7 @@ let showWhenAuthenticated = [accountMenuButton, viewPreferencesButton];
 
 const pageTitle = document.querySelector("#pageTitle")
 
-const excludedDetails = ["children", "parents", "siblings", "spouses", "topMember", "claimed_by", "created_by", "profile_photo"];
+const excludedDetails = ["children", "parents", "siblings", "partners", "topMember", "claimed_by", "created_by", "profile_photo"];
 const excludedCategories = ["Name", "Address"];
 
 const placeholderImageUrl = "https://firebasestorage.googleapis.com/v0/b/mily-4c2a8.appspot.com/o/assets%2Fplaceholder%2Fprofile_placeholder.svg?alt=media&token=d3b939f1-d46b-4315-bcc6-3167d17a18ed";
@@ -171,47 +173,52 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
     }
 
     detailsPanelProfileImage.setAttribute("style", detailsPhoto);
+    memberPermissionType = authLeafPermissionType();
     
-    // if (authLeafPermissionType() && authLeafPermissionType() === "admin" || authLeafPermissionType() && authLeafPermissionType() === "contributor") {
-    //     addParentButton.classList.remove("u-d_none")
-    //     inviteMemberButton.classList.remove("u-d_none");
-    //     removeLeafButton.classList.remove("u-d_none");
-    //     editMemberButton.classList.remove("u-d_none");
-    //     addRelationshipButton.classList.remove("u-d_none");
+    if (memberPermissionType && memberPermissionType === "admin" || memberPermissionType && memberPermissionType === "contributor") {
+        addParentButton.classList.remove("u-d_none")
+        inviteMemberButton.classList.remove("u-d_none");
+        removeLeafButton.classList.remove("u-d_none");
+        editMemberButton.classList.remove("u-d_none");
+        addRelationshipButton.classList.remove("u-d_none");
 
-    //     if (doc.data().topMember !== true) {
-    //         addParentButton.classList.add("u-d_none")
-    //     }
+        if (leafDoc.data().topMember !== true) {
+            addParentButton.classList.add("u-d_none")
+        }
 
-    //     if (doc.data().invitation) {
-    //         inviteMemberButton.classList.add("u-d_none");
-    //     }
+        if (memberPermissionType === "contributor" && leafDoc.data().created_by !== LocalDocs.member.id) {
+            console.log("should not have removed button");
+        }
 
-    //     if (leafDoc.data().claimed_by) {
-    //         if (leafDoc.data().claimed_by === authMemberDoc.id) {
-    //             removeLeafButton.classList.add("u-d_none");
-    //             editMemberButton.classList.remove("u-d_none");
-    //             inviteMemberButton.classList.add("u-d_none");
-    //         } else {
-    //             inviteMemberButton.classList.add("u-d_none");
-    //         }
-    //     }
+        if (leafDoc.data().invitation) {
+            inviteMemberButton.classList.add("u-d_none");
+        }
 
-    // } else if (authLeafPermissionType() || authLeafPermissionType() === "viewer") {
-    //     addParentButton.classList.add("u-d_none")
-    //     inviteMemberButton.classList.add("u-d_none");
-    //     removeLeafButton.classList.add("u-d_none");
-    //     editMemberButton.classList.add("u-d_none");
-    //     addRelationshipButton.classList.add("u-d_none");
-    // } else {
-    //     addParentButton.classList.add("u-d_none")
-    //     inviteMemberButton.classList.add("u-d_none");
-    //     removeLeafButton.classList.add("u-d_none");
-    //     editMemberButton.classList.add("u-d_none");
-    //     addRelationshipButton.classList.add("u-d_none");
-    // }
+        if (leafDoc.data().claimed_by) {
+            if (leafDoc.data().claimed_by === LocalDocs.member.id) {
+                removeLeafButton.classList.add("u-d_none");
+                editMemberButton.classList.remove("u-d_none");
+                inviteMemberButton.classList.add("u-d_none");
+            } else {
+                inviteMemberButton.classList.add("u-d_none");
+            }
+        }
 
-    const detailsHeader =`<h6 class="u-mar-b_4 u-mar-t_8">Details</h6>`;
+    } else if (memberPermissionType || memberPermissionType === "viewer") {
+        addParentButton.classList.add("u-d_none")
+        inviteMemberButton.classList.add("u-d_none");
+        removeLeafButton.classList.add("u-d_none");
+        editMemberButton.classList.add("u-d_none");
+        addRelationshipButton.classList.add("u-d_none");
+    } else {
+        addParentButton.classList.add("u-d_none")
+        inviteMemberButton.classList.add("u-d_none");
+        removeLeafButton.classList.add("u-d_none");
+        editMemberButton.classList.add("u-d_none");
+        addRelationshipButton.classList.add("u-d_none");
+    }
+
+    const detailsHeader =`<h6 class="u-mar-b_3 u-mar-t_8">Details</h6>`;
 
     let hasDetails = false;
 
@@ -233,40 +240,53 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
 
     function generateDetailElement(key, value, parentValue = null) {
         let reqName = value["dataPath"];
+        let reqParentName = parentValue ? parentValue["dataPath"] : null;
         let reqIcon = value["icon"];
-        let data = dataSource[reqName];
+        let data = reqParentName ? dataSource[reqParentName][reqName] : dataSource[reqName];
 
         if (data) {
             hasDetails = true;
         }
 
         if (data) {
-            if (reqName === "birthday" && data) {
+            if (data && reqName === "birthday" || reqName === "deathdate") {
                 var options = { year: 'numeric', month: 'long', day: 'numeric' };
         
                 let date = new Date(data.replace(/-/g, '\/'));
                 data = new Intl.DateTimeFormat('en-US', options).format(date);
             }
     
-            let infoEl = `<div class="detailsPanel__item detailsPanel__${reqName} u-mar-b_4"><i class="fa fa-${reqIcon} detailsPanel__icon u-mar-r_2"></i>${data}</div>`
+            let infoEl = `<div class="detailsPanel__item detailsPanel__${reqName} u-mar-b_3"><i class="fa fa-${reqIcon} detailsPanel__icon u-mar-r_2"></i>${data}</div>`
     
-            detailsPanelMetaData.innerHTML += infoEl;
+            if (reqParentName === "address") {
+                // add to address element
+            } else if (reqParentName !== 'name') {
+                detailsPanelMetaData.innerHTML += infoEl;
+            }
         }
     };
 
     function generateImmediateFamilyElement(key, value, parentValue) {
         let relativeType = value["dataPath"];
         let docDataPath = leafDoc.data()[relativeType] ? leafDoc.data()[relativeType] : null;
-
-        if (relativeType === "spouses") {
+                
+        if (relativeType === "partners") {
             if ( docDataPath && Object.keys(docDataPath).length > 0 ) {
-                for ( let reqId in docDataPath ) {
+                let relationshipHeader = document.createElement('h6');
+                relationshipHeader.textContent = `${relativeType}`;
+                relationshipHeader.setAttribute("class", "u-mar-t_6 u-mar-b_3");
+                detailsPanelImmediateFamily.appendChild(relationshipHeader);
+                for ( let reqId of Object.keys(docDataPath) ) {
                     renderRelationship(reqId);
                 }
             }
         } else {
-            if (docDataPath && docDataPath.length > 0 ) {
-                for ( let reqId of docDataPath ) {
+            if (docDataPath && Object.keys(docDataPath).length > 0 ) {
+                let relationshipHeader = document.createElement('h6');
+                relationshipHeader.textContent = `${relativeType}`;
+                relationshipHeader.setAttribute("class", "u-mar-t_6 u-mar-b_3");
+                detailsPanelImmediateFamily.appendChild(relationshipHeader);
+                for ( let reqId of Object.keys(docDataPath) ) {
                     renderRelationship(reqId);
                 }
             }
@@ -285,36 +305,77 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
             let firstName = docData.data().name.firstName || "No name";
             let lastName = docData.data().name.lastName ? ` ${docData.data().name.lastName}` : '';
             let label;
-            let spouseAction = '';
+            let partnerAction = '';
+            let childAction = '';
+            let parentAction = '';
             let leafEl = document.querySelector(`[data-id="${reqId}"]`);
             let profileImage = leafEl ? leafEl.querySelector(".leaf__image").getAttribute("style") : null;
     
             if (relativeType === "parents") {
-                label = "Parent"
-            } else if (relativeType === "children") {
-                label = "Child"
-            } else if (relativeType === "siblings") {
-                label = "Sibling"
-            } else if (relativeType === "spouses") {
-                if (familyLeafDoc.data().spouses[`${leafDoc.id}`] !== null) {
-                    let spouseType = `${familyLeafDoc.data().spouses[`${leafDoc.id}`]}`;
-                    label = `${spouseType}`
+                if (familyLeafDoc.data().children[leafDoc.id] !== null) {
+                    let parentType = `${familyLeafDoc.data().children[leafDoc.id]}`;
+                    label = `${parentType}`
+                    if (parentType.includes("Step")) {
+                        label = "Step-parent"
+                    } else {
+                        label = `${parentType}`
+                    }
                 } else {
-                    label = `Spouse`
+                    label = ``
                 }
-                spouseAction = `<button class="iconButton white u-mar-l_auto" data-dropdown-target="spouse_options_menu__${familyLeafDoc.id}">
+                parentAction = `<button class="iconButton white u-mar-l_auto" data-dropdown-target="parent_options_menu__${familyLeafDoc.id}">
+                                <i class="fa fa-ellipsis-h"></i>
+                            </button>
+                            <div id="parent_options_menu__${familyLeafDoc.id}" class="dropdown u-visibility_hidden u-p_fixed">
+                                <div class="dropdown__item" data-value="Biological">Biological</div>
+                                <div class="dropdown__item" data-value="Step">Step-parent</div>
+                                <div class="dropdown__item" data-value="Unrelated">Unrelated</div>
+
+                            </div>`
+            } else if (relativeType === "children") {
+                if (familyLeafDoc.data().parents[leafDoc.id] !== null) {
+                    let childType = familyLeafDoc.data().parents[leafDoc.id];
+                    if (childType.includes("Step")) {
+                        label = "Step-child"
+                    } else {
+                        label = `${childType}`
+                    }
+                } else {
+                    label = ``
+                }
+                childAction = `<button class="iconButton white u-mar-l_auto" data-dropdown-target="child_options_menu__${familyLeafDoc.id}">
+                                <i class="fa fa-ellipsis-h"></i>
+                            </button>
+                            <div id="child_options_menu__${familyLeafDoc.id}" class="dropdown u-visibility_hidden u-p_fixed">
+                                <div class="dropdown__item" data-value="Adopted">Adopted</div>
+                                <div class="dropdown__item" data-value="Biological">Biological</div>
+                                <div class="dropdown__item" data-value="Step">Step-child</div>
+                                <div class="dropdown__item" data-value="Unrelated">Unrelated</div>
+                            </div>`
+            } else if (relativeType === "siblings") {
+                label = ``
+            } else if (relativeType === "partners") {                
+                if (familyLeafDoc.data().partners[leafDoc.id] !== null) {
+                    let partnerType = familyLeafDoc.data().partners[leafDoc.id];
+                    label = `${partnerType}`
+                } else {
+                    label = ``
+                }
+                partnerAction = `<button class="iconButton white u-mar-l_auto" data-dropdown-target="partner_options_menu__${familyLeafDoc.id}">
                                     <i class="fa fa-ellipsis-h"></i>
                                 </button>
-                                <div id="spouse_options_menu__${familyLeafDoc.id}" class="dropdown u-d_none u-p_fixed">
+                                <div id="partner_options_menu__${familyLeafDoc.id}" class="dropdown u-visibility_hidden u-p_fixed">
                                     <div class="dropdown__item" data-value="Dating">Dating</div>
                                     <div class="dropdown__item" data-value="Engaged">Engaged</div>
                                     <div class="dropdown__item" data-value="Married">Married</div>
                                     <div class="dropdown__item" data-value="Divorced">Divorced</div>
                                     <div class="dropdown__item" data-value="Separated">Separated</div>
+                                    <div class="dropdown__item" data-value="Widowed">Widowed</div>
+                                    <div class="dropdown__item" data-value="Unrelated">Unrelated</div>
                                 </div>`
             }
 
-            let detailsPanelItem = createElementWithClass("div", "detailsPanel__item u-mar-b_3 u-d_flex u-align-items_center");
+            let detailsPanelItem = createElementWithClass("div", "detailsPanel__item u-mar-b_2 u-d_flex u-align-items_center");
             detailsPanelItem.setAttribute("data-leaf-id", familyLeafDoc.id);
             // let detailsPanelImage = createElementWithClass("img", "u-mar-r_2");
             // let detailsPanelText = createElementWithClass("div", "detailsPanel__text", "u-mar-r_2");
@@ -331,7 +392,7 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
                             <div class="detailsPanel__name u-mar-b_point5 u-bold">${firstName}${lastName}</div> 
                             <div class="detailsPanel__relativeType">${label}</div> 
                         </div>
-                        ${spouseAction}`
+                        ${partnerAction}${childAction}${parentAction}`
 
             detailsPanelItem.innerHTML += content;
 
@@ -347,23 +408,31 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
 
             detailsPanelImmediateFamily.appendChild(detailsPanelItem);
 
-            if (relativeType === "spouses") {
-                initiateSpouseOptions(familyLeafDoc.id);
+            if (relativeType === "partners") {
+                initiatePartnerOptions(familyLeafDoc.id);
+            }
+
+            if (relativeType === "children") {
+                initiateChildOptions(familyLeafDoc.id);
+            }
+
+            if (relativeType === "parents") {
+                initiateParentOptions(familyLeafDoc.id);
             }
         }
     }
 }
 
-function initiateSpouseOptions(leafId) {
-    let spouseDropdownTrigger = detailsPanelImmediateFamily.querySelector(`[data-leaf-id="${leafId}"] [data-dropdown-target="spouse_options_menu__${leafId}"]
+function initiatePartnerOptions(leafId) {
+    let partnerDropdownTrigger = detailsPanelImmediateFamily.querySelector(`[data-leaf-id="${leafId}"] [data-dropdown-target="partner_options_menu__${leafId}"]
     `);
-    let spouseOptionEl = detailsPanelImmediateFamily.querySelector(`[data-leaf-id="${leafId}"] #spouse_options_menu__${leafId}
+    let partnerOptionEl = detailsPanelImmediateFamily.querySelector(`[data-leaf-id="${leafId}"] #partner_options_menu__${leafId}
     `);
-    let spouseOptions = spouseOptionEl.querySelectorAll(".dropdown__item");
+    let partnerOptions = partnerOptionEl.querySelectorAll(".dropdown__item");
 
-    initiateDropdown(spouseDropdownTrigger);
+    initiateDropdown(partnerDropdownTrigger);
 
-    for (option of spouseOptions) {
+    for (option of partnerOptions) {
         option.addEventListener('click', (e) => {
             e.preventDefault();
 
@@ -374,23 +443,130 @@ function initiateSpouseOptions(leafId) {
             console.log(leafId);
             console.log(targetLeafId);
 
-            currentTreeLeafCollectionRef.doc(leafId).update({
-                [`spouses.${targetLeafId}`] : value
-            })
-            .then(() => {
-                console.log("First spouses updated succesfully");
-            })
+            if (value === "Unrelated") {
+                currentTreeLeafCollectionRef.doc(leafId).update({
+                    [`partners.${targetLeafId}`] : firebase.firestore.FieldValue.delete()
+                })
+                .then(() => {
+                    console.log("First partner updated succesfully");
+                })
+    
+                currentTreeLeafCollectionRef.doc(targetLeafId).update({
+                    [`partners.${leafId}`] : firebase.firestore.FieldValue.delete()
+                })
+                .then(() => {
+                    console.log("Second partner updated succesfully");
+                    location.reload();
+                })
+            } else {
+                currentTreeLeafCollectionRef.doc(leafId).update({
+                    [`partners.${targetLeafId}`] : value
+                })
+                .then(() => {
+                    console.log("First partner updated succesfully");
+                })
+    
+                currentTreeLeafCollectionRef.doc(targetLeafId).update({
+                    [`partners.${leafId}`] : value
+                })
+                .then(() => {
+                    console.log("Second partner updated succesfully");
+                    location.reload();
+                })
+            }
+        })
+    }
+}
 
-            currentTreeLeafCollectionRef.doc(targetLeafId).update({
-                [`spouses.${leafId}`] : value
+function initiateChildOptions(leafId) {
+    let childDropdownTrigger = detailsPanelImmediateFamily.querySelector(`[data-leaf-id="${leafId}"] [data-dropdown-target="child_options_menu__${leafId}"]
+    `);
+
+    let childOptionEl = detailsPanelImmediateFamily.querySelector(`[data-leaf-id="${leafId}"] #child_options_menu__${leafId}
+    `);
+    let childOptions = childOptionEl.querySelectorAll(".dropdown__item");
+
+    initiateDropdown(childDropdownTrigger);
+
+    for (option of childOptions) {
+        option.addEventListener('click', (e) => {
+            e.preventDefault();
+
+            let value = e.target.getAttribute("data-value");
+            let parentLeafId = DetailsPanel.getLeafDoc().id;
+
+            console.log(value);
+            console.log(leafId);
+            console.log(parentLeafId);
+
+            currentTreeLeafCollectionRef.doc(leafId).update({
+                [`parents.${parentLeafId}`] : value
             })
             .then(() => {
-                console.log("Second spouse updated succesfully");
-                location.reload();
+                console.log("Child updated succesfully");
+
+                currentTreeLeafCollectionRef.doc(parentLeafId).update({
+                    [`children.${leafId}`] : value
+                })
+                .then(() => {
+                    console.log("Parent updated succesfully");
+                    location.reload();
+                })
             })
         })
     }
 }
+function initiateParentOptions(leafId) {
+    let parentDropdownTrigger = detailsPanelImmediateFamily.querySelector(`[data-leaf-id="${leafId}"] [data-dropdown-target="parent_options_menu__${leafId}"]
+    `);
+
+    let parentOptionEl = detailsPanelImmediateFamily.querySelector(`[data-leaf-id="${leafId}"] #parent_options_menu__${leafId}
+    `);
+    let parentOptions = parentOptionEl.querySelectorAll(".dropdown__item");
+
+    initiateDropdown(parentDropdownTrigger);
+
+    for (option of parentOptions) {
+        option.addEventListener('click', (e) => {
+            e.preventDefault();
+
+            let value = e.target.getAttribute("data-value");
+            let childLeafId = DetailsPanel.getLeafDoc().id;
+
+            console.log(value);
+            console.log(leafId);
+            console.log(childLeafId);
+
+            if (value === "Unrelated") {
+                currentTreeLeafCollectionRef.doc(leafId).update({
+                    [`children.${childLeafId}`] : firebase.firestore.FieldValue.delete()
+                })
+                .then(() => {    
+                    currentTreeLeafCollectionRef.doc(childLeafId).update({
+                        [`parents.${leafId}`] : firebase.firestore.FieldValue.delete()
+                    })
+                    .then(() => {
+                        location.reload();
+                    })
+                })
+            } else {
+                currentTreeLeafCollectionRef.doc(leafId).update({
+                    [`children.${childLeafId}`] : value
+                })
+                .then(() => {    
+                    currentTreeLeafCollectionRef.doc(childLeafId).update({
+                        [`parents.${leafId}`] : value
+                    })
+                    .then(() => {
+                        location.reload();
+                    })
+                })
+            }
+
+        })
+    }
+}
+
 
 function createFullName(leafDoc) {
     let memberDoc = null;
@@ -425,6 +601,9 @@ function createFullName(leafDoc) {
     } else if (firstName && !middleName && !nickname && lastName) {
         // if firstname AND lastname
         fullName = `${lastName}`;
+    } else if (firstName && !middleName && nickname && lastName) {
+        // if firstname AND lastname
+        fullName = `${firstName} (${nickname}) ${lastName}`;
     } else if (!firstName && !middleName && !nickname && !lastName) {
         // if none
         fullName = ``;
@@ -489,9 +668,14 @@ DetailsPanel.editMember = function() {
             backgroundImageStyle = leafElement.style.backgroundImage ? `style='background-image: ${leafElement.style.backgroundImage}'` : null
         }
 
+        let isChecked;
+        if (value.dataPath === "deceased" && docData[value.dataPath] === true) {
+            isChecked = "checked";
+        }
+
         let inputGroup = `<div class="inputGroup inputGroup__horizontal">
                                 <label class="u-mar-r_2 u-w_33perc">${key}</label>
-                                <input class="u-mar-l_auto u-flex_1 detailsEditInput__${value.dataPath}" type="${inputType}" name="${value.dataPath}" value="${data}" ${backgroundImageStyle}">
+                                <input class="u-mar-l_auto u-flex_1 detailsEditInput__${value.dataPath}" type="${inputType}" name="${value.dataPath}" value="${data}" ${backgroundImageStyle}" ${isChecked}>
                             </div>`
     
         detailsPanelEdit.innerHTML += inputGroup;
@@ -563,8 +747,9 @@ DetailsPanel.editMember = function() {
                     "firstName" : detailsPanelEdit["firstName"].value,
                     "lastName" : detailsPanelEdit["lastName"].value,
                     "middleName" : detailsPanelEdit["middleName"].value,
-                    "surname" : detailsPanelEdit["surname"].value,
+                    "birthName" : detailsPanelEdit["birthName"].value,
                     "nickname" : detailsPanelEdit["nickname"].value,
+                    "phonetic" : detailsPanelEdit["phonetic"].value,
                 },
                 "address" : {
                     "address1" : detailsPanelEdit["address1"].value,
@@ -573,7 +758,14 @@ DetailsPanel.editMember = function() {
                     "zipcode" : detailsPanelEdit["zipcode"].value,
                     "country" : detailsPanelEdit["country"].value,
                 },
+                "phone" : {
+                    "homePhone" : detailsPanelEdit["homePhone"].value,
+                    "mobilePhone" : detailsPanelEdit["mobilePhone"].value,
+                    "workPhone" : detailsPanelEdit["workPhone"].value,
+                },
+                "website" : detailsPanelEdit["website"].value,
                 "birthday" : detailsPanelEdit["birthday"].value,
+                "deathdate" : detailsPanelEdit["deathdate"].value,
                 "profile_photo" : photoFile,
                 "occupation" : detailsPanelEdit["occupation"].value,
                 "email" : detailsPanelEdit["email"].value,
@@ -619,12 +811,22 @@ MemberBlueprint.object = {
                     "First Name" : { "dataPath" : "firstName", "defaultValue" : null, "icon" : "user" },
                     "Middle Name" : { "dataPath" : "middleName", "defaultValue" : null, "icon" : "user" },
                     "Last Name" : { "dataPath" : "lastName", "defaultValue" : null, "icon" : "user" },
-                    "Surname" : { "dataPath" : "surname", "defaultValue" : null, "icon" : "user" },
-                    "Nickname" : { "dataPath" : "nickname", "defaultValue" : null, "icon" : "user" }
+                    "Birth name" : { "dataPath" : "birthName", "defaultValue" : null, "icon" : "user" },
+                    "Nickname" : { "dataPath" : "nickname", "defaultValue" : null, "icon" : "user" },
+                    "Phonetic" : { "dataPath" : "phonetic", "defaultValue" : null, "icon" : "user" }
                 }
             },
     "Email" : { "dataPath" : "email", "defaultValue" : null, "icon" : "envelope" },
+    "Website" : { "dataPath" : "website", "defaultValue" : null, "icon" : "link", "data-type" : "url" },
+    "Phone" : { "dataPath" : "phone", "icon" : "phone", 
+                "defaultValue" : {
+                    "Home phone" : { "dataPath" : "homePhone", "defaultValue" : null, "icon" : "phone", "dataType": "tel" },
+                    "Mobile phone" : { "dataPath" : "mobilePhone", "defaultValue" : null, "icon" : "mobile-alt", "dataType": "tel" },
+                    "Work phone" : { "dataPath" : "workPhone", "defaultValue" : null, "icon" : "building", "dataType": "tel" },
+                }
+            },
     "Birthday" : { "dataPath" : "birthday", "defaultValue" : null, "icon" : "birthday-cake", "dataType": "date" },
+    "Death date" : { "dataPath" : "deathdate", "defaultValue" : null, "icon" : "hand-peace", "dataType": "date" },
     "Address" : { "dataPath" : "address", "icon" : "map-pin", 
                 "defaultValue" : {
                     "Address 1" : { "dataPath" : "address1", "defaultValue" : null, "icon" : "" },
@@ -635,25 +837,25 @@ MemberBlueprint.object = {
                 }
             },
     "Occupation" : { "dataPath" : "occupation", "defaultValue" : null, "icon" : "briefcase" },
-    "Children" : { "dataPath" : "children", "defaultValue" : [] },
-    "Parents" : { "dataPath" : "parents", "defaultValue" : [] },
-    "Siblings" : { "dataPath" : "siblings", "defaultValue" : [] },
-    "Spouses" : { "dataPath" : "spouses", "defaultValue" : {} },
+    "Children" : { "dataPath" : "children", "defaultValue" : {} },
+    "Parents" : { "dataPath" : "parents", "defaultValue" : {} },
+    "Siblings" : { "dataPath" : "siblings", "defaultValue" : {} },
+    "Partners" : { "dataPath" : "partners", "defaultValue" : {} },
     "Top Member" : { "dataPath" : "topMember", "defaultValue" : false },
     "Claimed by" : { "dataPath" : "claimed_by", "defaultValue" : null },
     "Created by" : { "dataPath" : "created_by", "defaultValue" : null },
     "Profile photo" : { "dataPath" : "profile_photo", "icon" : "picture", "defaultValue" : null , "dataType": "file"},
-    "Deceased" : { "dataPath" : "deceased", "defaultValue" : false, "icon" : "hand-peace", "dataType" : "checkbox" },
+    "Deceased" : { "dataPath" : "deceased", "defaultValue" : false, "icon" : "frown", "dataType" : "checkbox" },
 }
 
 MemberBlueprint.loop = function(args) {
     let exclude = args.exclude || [];
     let functionCall = args.functionCall;
-    let relationships = ["children", "parents", "siblings", "spouses"];
+    let relationships = ["children", "parents", "siblings", "partners"];
     let metaDetails = ["claimed_by", "topMember", "created_by", ];
     let basicDetails = ["email", "birthday", "occupation", "profile_photo", "facebook", "instagram"];
-    let groups = ["name", "address"];
-    let groupDetails = ["firstName", "middleName", "lastName", "nickname", "surname", "address1", "address2", "city", "zipcode", "country"];
+    let groups = ["name", "address", "phone"];
+    let groupDetails = ["firstName", "middleName", "lastName", "nickname", "birthName", "homePhone", "mobilePhone", "workPhone", "address1", "address2", "city", "zipcode", "country"];
 
     let excludeItems = new Array;
 
@@ -754,24 +956,28 @@ Relationship.addParent = function() {
     let addParentTo = DetailsPanel.getActiveDoc();
     console.log(`I'm finna add a parent to ${addParentTo.id}`);
 
-    let childrenArray = [addParentTo.id];
+    let childrenObject = {};
+    childrenObject[`${addParentTo.id}`] = null;
 
-    if (addParentTo.data().siblings) {
-        childrenArray.push(...addParentTo.data().siblings);
+    if (addParentTo.data().siblings && Object.keys(addParentTo.data().siblings).length > 0) {
+        for (siblingId of Object.keys( addParentTo.data().siblings)) {
+            childrenObject[`${siblingId}`] = null;
+        }
     };
 
     currentTreeLeafCollectionRef.add(      
         newLeafForFirebase({
-            "children": childrenArray,
-            "topMember": true
+            "children": childrenObject,
+            "topMember": true,
+            "created_by": LocalDocs.member.id
         })
     )
     .then((leafRef) => {
         console.log(`Parent ${leafRef.id} succesfully created!`);
-        if (addParentTo.data().siblings) {
-            for (siblingId of addParentTo.data().siblings) {
+        if (addParentTo.data().siblings && Object.keys(addParentTo.data().siblings).length > 0) {
+            for (siblingId of Object.keys(addParentTo.data().siblings)) {
                 currentTreeLeafCollectionRef.doc(siblingId).update({
-                    parents: firebase.firestore.FieldValue.arrayUnion(leafRef.id)
+                    [`parents.${leafRef.id}`] : null
                 })
                 .then(() => {
                     console.log(`${siblingId} successfully updated to have ${leafRef.id} as a parent`)
@@ -783,7 +989,7 @@ Relationship.addParent = function() {
         };
 
         currentTreeLeafCollectionRef.doc(addParentTo.id).update({
-            parents: firebase.firestore.FieldValue.arrayUnion(leafRef.id),
+            [`parents.${leafRef.id}`] : null,
             topMember: false
         }).then(() => {
             location.reload();
@@ -800,30 +1006,37 @@ Relationship.addChild = function() {
     let addChildTo = DetailsPanel.getActiveDoc();
     console.log(`I'm finna add a child to ${addChildTo.id}`);
 
-    let parentArray = [addChildTo.id];
-    let siblingsArray = [];
+    // let parentArray = [addChildTo.id];
+    let parentsObject = {};
+    parentsObject[`${addChildTo.id}`] = null;
 
-    if (addChildTo.data().spouses) {
-        for (spouseId of Object.keys(addChildTo.data().spouses)) {
-            console.log(`${spouseId} should be added as a parent to the new child`)
-            parentArray.push(spouseId);
+    // let siblingsArray = [];
+    let siblingsObject = {};
+
+    if (addChildTo.data().partners) {
+        for (partnerId of Object.keys(addChildTo.data().partners)) {
+            console.log(`${partnerId} should be added as a parent to the new child`)
+            parentsObject[`${partnerId}`] = null;
         }
     }
 
-    if (addChildTo.data().children) {
-        siblingsArray.push(...addChildTo.data().children);
+    if (Object.keys(addChildTo.data().children).length > 0) {
+        for (childId of Object.keys(addChildTo.data().children)) {
+            siblingsObject[`${childId}`] = null;
+        }
     }
 
     currentTreeLeafCollectionRef.add(
         newLeafForFirebase({
-            "siblings": siblingsArray,
-            "parents": parentArray
+            "siblings": siblingsObject,
+            "parents": parentsObject,
+            "created_by": LocalDocs.member.id
         })
     )
     .then((newChildRef) => {
-        for (parentId of parentArray) {
-            currentTreeLeafCollectionRef.doc(parentId).update({
-                "children": firebase.firestore.FieldValue.arrayUnion(newChildRef.id)
+        for (parentId of Object.keys(parentsObject)) {
+            currentTreeLeafCollectionRef.doc(parentId).update({ 
+                [`children.${newChildRef.id}`] : null
             })
             .then(() => {
                 console.log(`${parentId} has a new child: ${newChildRef.id}`)
@@ -832,10 +1045,10 @@ Relationship.addChild = function() {
                 console.log(err.message);
             })
         }
-        if (siblingsArray.length > 0) {
-            for (siblingId of siblingsArray) {
+        if (Object.keys(siblingsObject).length > 0) {
+            for (siblingId of Object.keys(siblingsObject)) {
                 currentTreeLeafCollectionRef.doc(siblingId).update({
-                    "siblings": firebase.firestore.FieldValue.arrayUnion(newChildRef.id)
+                    [`siblings.${newChildRef.id}`] : null
                 })
                 .then(() => {
                     console.log(`${siblingId} has a new sibling: ${newChildRef.id}`)
@@ -849,53 +1062,54 @@ Relationship.addChild = function() {
     })
 }
 
-Relationship.addSpouse = function() {
-    let addSpouseTo = DetailsPanel.getActiveDoc();
-    let spouseArray = [];
+Relationship.addPartner = function() {
+    let addPartnerTo = DetailsPanel.getActiveDoc();
+    // let partnerArray = [];
 
-    if (addSpouseTo.data().spouses) {
-        for (spouseId of Object.keys(addSpouseTo.data().spouses)) {
-            spouseArray.push(spouseId);
+    // if (addPartnerTo.data().partners) {
+    //     for (partnerId of Object.keys(addPartnerTo.data().partners)) {
+    //         partnerArray.push(partnerId);
+    //     }
+    // }
+
+    let partnerObject = {};
+    let childrenObject = {};
+
+    partnerObject[addPartnerTo.id] = null;
+
+    if ( addPartnerTo.data().children && Object.keys(addPartnerTo.data().children).length > 0 ) {
+        for (childId of Object.keys(addPartnerTo.data().children)) {
+            childrenObject[`${childId}`] = null;
         }
     }
 
-    let spouseObject = {};
-    let childrenArray = [];
-
-    spouseObject[addSpouseTo.id] = null;
-
-    if (addSpouseTo.data().children) {
-        for (childId of addSpouseTo.data().children) {
-            childrenArray.push(childId);
-        }
-    }
-
-    if (spouseArray && spouseArray.length > 0) {
-        for (spouseId of spouseArray) {
-            spouseObject[`${spouseId}`] = null;
+    if (partnerObject && Object.keys(partnerObject).length > 0) {
+        for (partnerId of Object.keys(partnerObject)) {
+            partnerObject[`${partnerId}`] = null;
         }
     }
 
     currentTreeLeafCollectionRef.add(
         newLeafForFirebase({
-            "spouses": spouseObject,
-            "children": childrenArray
+            "partners": partnerObject,
+            "children": childrenObject,
+            "created_by": LocalDocs.member.id
         })
-    ).then(newSpouseDoc => {
-        console.log(`${newSpouseDoc.id} was successfully created!`)
-        currentTreeLeafCollectionRef.doc(addSpouseTo.id).update({
-            [`spouses.${newSpouseDoc.id}`] : null
+    ).then(newPartnerDoc => {
+        console.log(`${newPartnerDoc.id} was successfully created!`)
+        currentTreeLeafCollectionRef.doc(addPartnerTo.id).update({
+            [`partners.${newPartnerDoc.id}`] : null
         })
         .then(() => {
-            console.log(`${newSpouseDoc.id} was added as a spouse to ${addSpouseTo.id}`)
+            console.log(`${newPartnerDoc.id} was added as a partner to ${addPartnerTo.id}`)
 
-            if (childrenArray.length > 0) {
-                for (childId of childrenArray) {
+            if (Object.keys(childrenObject).length > 0) {
+                for (childId of Object.keys(childrenObject)) {
                     currentTreeLeafCollectionRef.doc(childId).update({
-                        "parents" : firebase.firestore.FieldValue.arrayUnion(newSpouseDoc.id)
+                        [`parents.${newPartnerDoc.id}`] : null
                     })
                     .then(() => {
-                        console.log(`${childId} has a new parent: ${newSpouseDoc.id}`)
+                        console.log(`${childId} has a new parent: ${newPartnerDoc.id}`)
                     })
                     .catch(err => {
                         console.log(err.message)
@@ -903,17 +1117,17 @@ Relationship.addSpouse = function() {
                 }
             }
             
-            if (addSpouseTo.data().spouses) {
-                for (spouseId of spouseArray) {
-                    console.log(`Adding newSPouse to ${spouseId}`);
-                    currentTreeLeafCollectionRef.doc(spouseId).update({
-                        [`spouses.${newSpouseDoc.id}`]: null
+            if (addPartnerTo.data().partners) {
+                for (partnerId of Object.keys(addPartnerTo.data().partners)) {
+                    console.log(`Adding newPartner to ${partnerId}`);
+                    currentTreeLeafCollectionRef.doc(partnerId).update({
+                        [`partners.${newPartnerDoc.id}`]: null
                     })
                     .then(() => {
-                        console.log("Spouse successfully added")
+                        console.log("Partner successfully added")
                     })
                     .catch(err => {
-                        console.log(`Spouse not added`);
+                        console.log(`Partner not added`);
                         console.log(err.message);
                     })
                 }
@@ -930,39 +1144,44 @@ Relationship.addSibling = function() {
     let addSiblingTo = DetailsPanel.getActiveDoc();
     console.log(`I'm finna add a sibling to ${addSiblingTo.id}`);
 
-    let parentArray = new Array;
-    let siblingArray = [addSiblingTo.id];
+    // let parentArray = new Array;
+    // let siblingArray = [addSiblingTo.id];
 
-    if (addSiblingTo.data().siblings) {
-        for (siblingId of addSiblingTo.data().siblings) {
-            siblingArray.push(siblingId);
+    let parentObject = {};
+    let siblingObject = {};
+    siblingObject[addSiblingTo.id] = null;
+
+    if (addSiblingTo.data().siblings && Object.keys(addSiblingTo.data().siblings).length > 0) {
+        for (siblingId of Object.keys(addSiblingTo.data().siblings)) {
+            siblingObject[siblingId] = null;
         }
     }
 
-    if (addSiblingTo.data().parents) {
-        for (parentId of addSiblingTo.data().parents) {
-            parentArray.push(parentId);
+    if (addSiblingTo.data().parents && Object.keys(addSiblingTo.data().parents).length > 0) {
+        for (parentId of Object.keys(addSiblingTo.data().parents)) {
+            parentObject[parentId] = null;
         }
     }
 
     // get other siblings, make sure this new sibling is added to them
     // get parents, make sure new sibling is added as child to each
     
-    console.log(parentArray);
-    console.log(siblingArray);
+    console.log(parentObject);
+    console.log(siblingObject);
 
     // Left off trying to figure out why adding a sibling won't add other siblnigs's parents to the new sibling
 
     currentTreeLeafCollectionRef.add(
         newLeafForFirebase({
-            "siblings": siblingArray,
-            "parents": parentArray
+            "siblings": siblingObject,
+            "parents": parentObject,
+            "created_by": LocalDocs.member.id
         })
     )
     .then((newSiblingRef) => {
-        for (siblingId of siblingArray) {
+        for (siblingId of Object.keys(siblingObject)) {
             currentTreeLeafCollectionRef.doc(siblingId).update({
-                "siblings" : firebase.firestore.FieldValue.arrayUnion(newSiblingRef.id)
+                [`siblings.${newSiblingRef.id}`] : null
             })
             .then(() => {
                 console.log(`${siblingId} has added ${newSiblingRef.id} as a sibling.`)
@@ -972,10 +1191,10 @@ Relationship.addSibling = function() {
             })
         }
 
-        if (parentArray.length > 0) {
-            for (parentId of parentArray) {
+        if (Object.keys(parentObject).length > 0) {
+            for (parentId of Object.keys(parentObject)) {
                 currentTreeLeafCollectionRef.doc(parentId).update({
-                    "children" : firebase.firestore.FieldValue.arrayUnion(newSiblingRef.id)
+                    [`children.${newSiblingRef.id}`] : null
                 })
                 .then(() => {
                     console.log(`${parentId} has added ${newSiblingRef.id} as a sibling.`)
@@ -994,27 +1213,34 @@ Relationship.addSibling = function() {
 
 Relationship.removeLeaf = function() {
     let reqRemovalDoc = DetailsPanel.getLeafDoc();
+    console.log(reqRemovalDoc);
 
     if (reqRemovalDoc.data().claimed_by === LocalDocs.member.id) {
         alert("You cannot delete yourself!");
         return;
     } else {
-        if (reqRemovalDoc.data().children.length > 0 && Object.keys(reqRemovalDoc.data().spouses).length < 1) {
+        if (Object.keys(reqRemovalDoc.data().children).length > 0 && Object.keys(reqRemovalDoc.data().partners).length < 1 && Object.keys(reqRemovalDoc.data().parents).length > 0) {
             currentTreeLeafCollectionRef.doc(reqRemovalDoc.id).update({
                 "deleted" : true
-            });
-            location.reload();
+            }).then(() => {
+                location.reload();
+            })
         }
         else {
             if (reqRemovalDoc.data().topMember === true) {
-                console.log(`TopMember deleted. Top Member reassigned to ${reqRemovalDoc.data().children[0]}`);
-                currentTreeLeafCollectionRef.doc(reqRemovalDoc.data().children[0]).update({topMember: true});
+                if (Object.keys(reqRemovalDoc.data().partners).length > 0) {
+                    console.log(`TopMember deleted. Top Member reassigned to ${reqRemovalDoc.data().partners[0]}`);
+                    currentTreeLeafCollectionRef.doc(Object.keys(reqRemovalDoc.data().partners)[0]).update({topMember: true});
+                } else {
+                    console.log(`TopMember deleted. Top Member reassigned to ${reqRemovalDoc.data().children[0]}`);
+                    currentTreeLeafCollectionRef.doc(Object.keys(reqRemovalDoc.data().children)[0]).update({topMember: true});
+                }
             }
-            if (reqRemovalDoc.data().parents && reqRemovalDoc.data().parents.length > 0) {
-                for (parentId of reqRemovalDoc.data().parents) {
+            if (Object.keys(reqRemovalDoc.data().parents) && Object.keys(reqRemovalDoc.data().parents).length > 0) {
+                for (parentId of Object.keys(reqRemovalDoc.data().parents)) {
                     console.log(`Updating parent ${parentId}`);
                     currentTreeLeafCollectionRef.doc(parentId).update({
-                        children: firebase.firestore.FieldValue.arrayRemove(reqRemovalDoc.id)
+                        [`children.${reqRemovalDoc.id}`] : firebase.firestore.FieldValue.delete()
                     })
                     .then((ref) => {
                         console.log("Parent successfully updated")
@@ -1026,11 +1252,11 @@ Relationship.removeLeaf = function() {
                 }
             }
     
-            if (reqRemovalDoc.data().children && reqRemovalDoc.data().children.length > 0) {
-                for (childId of reqRemovalDoc.data().children) {
+            if (Object.keys(reqRemovalDoc.data().children) && Object.keys(reqRemovalDoc.data().children).length > 0) {
+                for (childId of Object.keys(reqRemovalDoc.data().children)) {
                     console.log(`Updating child ${childId}`);
                     currentTreeLeafCollectionRef.doc(childId).update({
-                        parents: firebase.firestore.FieldValue.arrayRemove(reqRemovalDoc.id)
+                        [`parents.${reqRemovalDoc.id}`] : firebase.firestore.FieldValue.delete()
                     })
                     .then((ref) => {
                         console.log("Child successfully updated")
@@ -1042,29 +1268,29 @@ Relationship.removeLeaf = function() {
                 }
             }
             
-            if (reqRemovalDoc.data().spouses) {
-                if ( Object.keys(reqRemovalDoc.data().spouses).length > 0 ) {
-                    for ( spouseId of Object.keys(reqRemovalDoc.data().spouses) ) {
-                        console.log(`Updating spouse ${spouseId}`);
-                        currentTreeLeafCollectionRef.doc(spouseId).update({
-                            [`spouses.${reqRemovalDoc.id}`] : firebase.firestore.FieldValue.delete()
+            if (Object.keys(reqRemovalDoc.data().partners).length > 0) {
+                if ( Object.keys(reqRemovalDoc.data().partners).length > 0 ) {
+                    for ( partnerId of Object.keys(reqRemovalDoc.data().partners) ) {
+                        console.log(`Updating partners ${partnerId}`);
+                        currentTreeLeafCollectionRef.doc(partnerId).update({
+                            [`partners.${reqRemovalDoc.id}`] : firebase.firestore.FieldValue.delete()
                         })
                         .then(() => {
-                            console.log("Spouse successfully updated")
+                            console.log("Partner successfully updated")
                         })
                         .catch(err => {
-                            console.log(`Spouse not updated`);
+                            console.log(`Partner not updated`);
                             console.log(err.message);
                         })
                     }
                 }
             }
     
-            if (reqRemovalDoc.data().siblings && reqRemovalDoc.data().siblings.length > 0) {
-                for (siblingId of reqRemovalDoc.data().siblings) {
+            if (reqRemovalDoc.data().siblings && Object.keys(reqRemovalDoc.data().siblings).length > 0) {
+                for (siblingId of Object.keys(reqRemovalDoc.data().siblings)) {
                     console.log(`Updating sibling ${siblingId}`);
                     currentTreeLeafCollectionRef.doc(siblingId).update({
-                        siblings: firebase.firestore.FieldValue.arrayRemove(reqRemovalDoc.id)
+                        [`siblings.${reqRemovalDoc.id}`] : firebase.firestore.FieldValue.delete()
                     })
                     .then((ref) => {
                         console.log("Sibling successfully updated")
@@ -1119,8 +1345,8 @@ let connectionArray = {};
 
 function connectLines() {
     for (let leafDoc of LocalDocs.leaves) {
-        let children = leafDoc.data().children ? leafDoc.data().children : null;
-        if (children && children.length > 0) {
+        let children = Object.keys(leafDoc.data().children).length > 0 ? Object.keys(leafDoc.data().children) : null;
+        if (children) {
             connectionArray[`${leafDoc.id}`] = children;
         }
     }
@@ -1130,7 +1356,6 @@ function connectLines() {
 
 function iterateOverConnections() {
     for (let [parentId, value] of Object.entries(connectionArray)) {
-        console.log(parentId);
 
         let parentEl = familyTreeEl.querySelector(`[data-id="${parentId}"]`);
         let parrentAttributes = parentEl.getBoundingClientRect();

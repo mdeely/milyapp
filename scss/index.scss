@@ -19,7 +19,7 @@ $brand: #002831;
     --iconButtonSize: 44px;
     --color_border: #D9DFE0;
     --leafSize: 72px;
-    --profileImageSize: 128px;
+    --profileImageSize: 160px;
     --leafCaptionOffset: 12px;
     --leafSpacing: 24px;
     --leafShadow: 0px 2px 16px rgba(0, 0, 0, 0.05), 0px 1px 2px rgba(0, 0, 0, 0.07), 0px 4px 24px rgba(0, 0, 0, 0.08);
@@ -111,6 +111,21 @@ img {
 
 a {
     color: var(--brand);
+
+    &:focus {
+        outline-offset: 2px;
+        outline: 3px solid var(--color_outline);
+    }
+}
+
+hr {
+    border-top: 1px solid var(--color_border);
+    border-bottom: 0px solid transparent;
+    border-left: 0px solid transparent;
+    border-right: 0px solid transparent;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    margin: 0;
 }
 
 polyline,
@@ -171,10 +186,6 @@ path {
             width: calc(100vw - var(--detailsWidth));
         }
 
-        // .spouseToSpouse__line {
-        //     transform: translateX( calc( var(--detailsWidth)/2 * -1 ));
-        // }
-
         #detailsPanel {
             right: 0;
         }
@@ -211,7 +222,9 @@ path {
         border-radius: 8px;
         text-decoration: none;
 
-        &:hover {
+        &:hover,
+        &:focus {
+            outline: none;
             background-color:var(--brand_lighter);
         }
 
@@ -273,7 +286,7 @@ path {
         }
         
         .branch,
-        .spouses,
+        .partners,
         .descendants {
             display: block;
         }
@@ -332,6 +345,10 @@ path {
     }
 }
 
+.error:empty {
+    display: none;
+}
+
 #accountMenu {
     width: var(--accountMenuSize);
     height: var(--accountMenuSize);
@@ -371,7 +388,7 @@ path {
         background-repeat: no-repeat;
         background-position: top;
         background-size: cover;
-        background-size: 100%;
+        background-size: 100% 200px;
         height: 400px;
         z-index: -1;
     }
@@ -401,6 +418,10 @@ path {
             z-index: -1;
         }
     }
+}
+
+.detailsPanel__text {
+    pointer-events: none;
 }
 
 .detailsPanel__icon {
@@ -440,6 +461,10 @@ path {
 .detailsPanel__relativeType {
     opacity: .5;
     color: var(--brand);
+
+    &:empty {
+        display: none;
+    }
 }
 
 .detailsPanel__profileImage {
@@ -494,31 +519,52 @@ input[name*="profile_photo"] {
 }
 
 .descendants,
-.spouses {
+.partners {
     display: flex;
     flex-direction: row;
     position: relative;
 }
 
-.spouses {
+.partners {
 
     .leaf {
-        margin-left: -4px;
-        margin-right: -4px;
+        // margin-left: -4px;
+        // margin-right: -4px;
 
-        &:only-child {
-            margin-left: var(--leafSpacing);
-            margin-right: var(--leafSpacing);
-        }
+        // &:only-child {
+        //     margin-left: var(--leafSpacing);
+        //     margin-right: var(--leafSpacing);
+        // }
 
-        &:first-child {
-            margin-left: 8px;
-        }
+        // &:first-child {
+        //     margin-left: 8px;
+        // }
 
-        &:last-child {
-            margin-right: 16px;
+        // &:last-child {
+        //     margin-right: -32px;
+        // }
+    }
+
+    .apart,
+    .together {
+        display: flex;
+
+        &:empty {
+            display: none;
         }
     }
+
+    .together {
+        margin-right: -56px;
+    }
+
+    // .apart {
+    //     .leaf {
+    //         margin-left: -16px;
+    //     }
+    // }
+
+
     // position: relative;
 
     // &:before {
@@ -533,7 +579,7 @@ input[name*="profile_photo"] {
     // }
 }
 
-.spouses .leaf {
+.partners .leaf {
     // &:after {
     //     content: "";
     //     position: absolute;
@@ -564,13 +610,13 @@ input[name*="profile_photo"] {
     transform: translateX(-50%);
 }
 
-.spouses .leaf svg {
+.partners .leaf svg {
     z-index: -2;
 }
 
 
-.spouses:hover,
-.spouses:hover + .descendants {
+.partners:hover,
+.partners:hover + .descendants {
     .leaf {
         svg {
             z-index: -1;
@@ -600,11 +646,11 @@ input[name*="profile_photo"] {
     &:before {
         content: "";
         position: absolute;
-        width: calc(var(--leafSize) + 20px);
-        height: calc(var(--leafSize) + 20px);
-        top: -4px;
+        width: calc(var(--leafSize) + 24px);
+        height: calc(var(--leafSize) + 24px);
+        top: -6px;
         border-radius: 100px;
-        box-shadow: 0 0 0 4px rgba(white, 0) inset, 0 0 0 4px var(--color_outline);
+        box-shadow: 0 0 0 6px rgba(white, 0) inset, 0 0 0 4px var(--color_outline);
         opacity: 0;
         transform: scale(.8);
         transition: transform $detailsRevealTiming cubic-bezier(.66,.23,.33,1.02);
@@ -619,7 +665,7 @@ input[name*="profile_photo"] {
         transition: transform $detailsRevealTiming cubic-bezier(.66,.23,.33,1.02);
         opacity: 1;
         transform: scale(1);
-        box-shadow: 0 0 0 4px rgba(white, 1) inset, 0 0 0 4px var(--color_outline);
+        box-shadow: 0 0 0 6px rgba(white, 1) inset, 0 0 0 4px var(--color_outline);
     }
 
     > * {
@@ -678,47 +724,6 @@ input[name*="profile_photo"] {
         }
     }
 
-}
-
-.parentToChild__middleBar,
-.childToParent__middleBar,
-.spouseToSpouse__line,
-.parentToChildren__downLine {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    margin: 0 auto;
-    z-index: -1;
-    background-color: var(--color_border);
-    transition: all .2s ease-in-out;
-    transform: scale(.95);
-    height: 1px;
-    pointer-events: none;
-}
-
-.spouseToSpouse__line {
-    top: calc( var(--leafSize) / 2 + var(--leafSpacing) );
-    bottom: 0;
-    width: calc( 100% - var(--leafSize));
-}
-
-.parentToChild__middleBar {
-    top: 0;
-    width:  calc( 100% - calc( var(--leafSpacing) + var(--leafSize) ));
-}
-
-.childToParent__middleBar {
-    width: 1px;
-    height: var(--leafSpacing);
-    top: calc( var(--leafSpacing) * -1);
-}
-
-.parentToChildren__downLine {
-    width: 1px;
-    height: calc( var(--leafSize) - calc( var(--leafSpacing) / 2 ));
-    // top: calc( var(--leafSize) / 2 + var(--leafSpacing) );
-    bottom: 0;
 }
 
 #view-preferences {
@@ -821,6 +826,7 @@ input[type=email],
 input[type=password],
 input[type=number],
 input[type=date],
+input[type=tel],
 select {
     -webkit-appearance: none;
     padding: 12px 16px;
@@ -829,6 +835,7 @@ select {
     font-size: 16px;
     border: 0px solid transparent;
     background-color: white;
+    color: var(--color_text);
 
     &:hover {
         box-shadow: 0 0 0 2px var(--color_border);
@@ -865,6 +872,34 @@ label {
 
     label {
         margin-bottom: 8px;
+    }
+
+    &.checkbox {
+        --inputGroupLayout: row;
+        align-items: center;
+
+        input[type=checkbox] {
+            -webkit-appearance: none;
+            box-shadow: 0 0 0 1px var(--color_border);
+            height: 24px;
+            width: 24px;
+            border-radius: 4px;
+
+            &:checked {
+                background-color: var(--color_outline);
+            }
+
+            &:focus,
+            &:hover {
+                outline: none;
+                box-shadow: 0 0 0 2px var(--color_outline);
+            }
+        }
+
+        label {
+            margin-left: 16px;
+            margin-bottom: 0;
+        }
     }
 }
 
@@ -1036,6 +1071,7 @@ button,
         align-items: center;
         text-decoration: none;
         color: var(--color_text);
+        font-size: 16px;
 
         &:hover {
             background-color: rgba($brand, .08);
@@ -1086,6 +1122,14 @@ button,
     color: rgba(black, .65);
 }
 
+.u-font-size_18 {
+    font-size: 18px;
+}
+
+.u-font-size_15 {
+    font-size: 15px;
+}
+
 .u-font-size_14 {
     font-size: 14px;
 }
@@ -1116,6 +1160,10 @@ button,
 
 .u-p_absolute {
     position: absolute;
+}
+
+.u-visibility_hidden {
+    visibility: hidden;
 }
 
 .u-d_none {
@@ -1241,6 +1289,21 @@ button,
 
 .u-mar-t_8 {
     margin-top: 64px;
+}
+.u-mar-t_8 {
+    margin-top: 8px * 8;
+}
+.u-mar-t_9 {
+    margin-top: 8px * 9;
+}
+.u-mar-t_10 {
+    margin-top: 8px * 10;
+}
+.u-mar-t_11 {
+    margin-top: 8px * 11;
+}
+.u-mar-t_12 {
+    margin-top: 8px * 12;
 }
 
 .u-mar-b_1 {

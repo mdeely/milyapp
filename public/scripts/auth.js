@@ -177,17 +177,17 @@ const authenticatedView = (isAuthenticated) => {
 
     if (isAuthenticated) {
         for (const element of ifAuthShow) {
-            element.classList.remove("u-d_none");
+            element.classList.remove("u-visibility_hidden");
         }
         for (const element of ifAuthHide) {
-            element.classList.add("u-d_none");
+            element.classList.add("u-visibility_hidden");
         }
     } else {
         for (const element of ifAuthShow) {
-            element.classList.add("u-d_none");
+            element.classList.add("u-visibility_hidden");
         }
         for (const element of ifAuthHide) {
-            element.classList.remove("u-d_none");
+            element.classList.remove("u-visibility_hidden");
         }
     }
 }
@@ -206,7 +206,7 @@ signUpForm.addEventListener('submit', (e) => {
             "name": {
                 firstName: null,
                 lastName: null,
-                surname: null
+                birthName: null
             },
             "email": email,
             "trees": [],

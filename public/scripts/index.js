@@ -83,8 +83,15 @@ for (let closeButton of document.querySelectorAll(".details__button--close")) {
 
 document.addEventListener('keydown', function(event) {
     const key = event.key; // Or const {key} = event; in ES6+
+
+    activeTrigger = document.querySelector(`.dropdown:not(.u-visibility_hidden)`);
+    
     if (key === "Escape") {
-       DetailsPanel.close();
+        if (activeTrigger) {
+            closeAllDropdowns();
+        } else {
+            DetailsPanel.close();
+        }
     }
 });
 
@@ -98,8 +105,8 @@ addChildButton.addEventListener('click', (e) => {
   closeAllDropdowns();
 })
 
-addSpouseButton.addEventListener('click', (e) => {
-  Relationship.addSpouse();
+addPartnerButton.addEventListener('click', (e) => {
+  Relationship.addPartner();
   closeAllDropdowns();
 })
 
@@ -118,10 +125,10 @@ addSiblingButton.addEventListener('click', (e) => {
 //////////
 const memberOptionsDropdown = document.querySelector('[data-dropdown-target="member-options-dropdown"]');
 const inviteMemberButton = document.querySelector("#invite-member-action");
-const deleteTreeButton = document.querySelector("#delete-tree");
+// const deleteTreeButton = document.querySelector("#delete-tree");
 
 const inviteMemberForm = document.querySelector("#invite-member_form");
-const editTreeForm = document.querySelector("#edit-tree_form");
+// const editTreeForm = document.querySelector("#edit-tree_form");
 const notificationIndicator = document.querySelector("#notification_indicator");
 const notificationMenu = document.querySelector("#notification_menu");
 const permissionsContainer = document.querySelector("#edit-tree_permissions");
@@ -176,39 +183,65 @@ const initiateDropdowns = () => {
     }
 }
 
-function initiateDropdown(trigger) {
-    trigger.addEventListener('click', (e) => {
+function initiateDropdown(triggerEl) {
+    triggerEl.addEventListener('click', (e) => {
         e.preventDefault();
-        showDropdown(e);
+        // e.stopPropagation();
+        showDropdown(triggerEl);
     })
 }
 
-const showDropdown = (e) => {
-    let triggerData = e.target.getBoundingClientRect();
+const showDropdown = (triggerEl) => {
+    let triggerData = triggerEl.getBoundingClientRect();
     let triggerX = triggerData.x;
     let triggerY = triggerData.y;
     let triggerWidth = triggerData.width;
     let triggerHeight = triggerData.height;
+    let browserHeight = window.innerHeight;
 
-    let targetClass = e.target.getAttribute("data-dropdown-target");
+    let targetClass = triggerEl.getAttribute("data-dropdown-target");
     let targetEl = document.querySelector(`#${targetClass}`);
 
-    if (targetEl.classList.contains(`u-d_none`)) {
+    let positionForDropdown = triggerY + triggerHeight + offset;
+
+    let targetElHeight = targetEl.getBoundingClientRect().height;;
+
+    // get height of browser. 
+    // Get height of targetEl
+    // Get top value of targetEl
+
+    // if the height of targetEl + top is greater than browser height
+
+    if (targetEl.classList.contains(`u-visibility_hidden`)) {
         closeAllDropdowns();
-        targetEl.classList.remove("u-d_none");
+        targetEl.classList.remove("u-visibility_hidden");
         targetEl.style.left = `${triggerX - triggerWidth + offset}px`;
-        targetEl.style.top = `${triggerY + triggerHeight + offset}px`;
+
+        if ( (targetElHeight + positionForDropdown) >= browserHeight ) {
+            targetEl.style.top = `${triggerY - targetElHeight - offset}px`;
+            // put above trigger El
+        } else {
+            targetEl.style.top = `${positionForDropdown}px`;
+        }
 
     } else {
-        targetEl.classList.add("u-d_none")
+        targetEl.classList.add("u-visibility_hidden")
     }
+
+    targetEl.addEventListener('onblur', (e) => {
+        console.log("blur?");
+        closeAllDropdowns();
+    })
 }
 
 const closeAllDropdowns = () => {
+    dropdownTriggers = document.querySelectorAll(`[data-dropdown-target]`);
+
     for (dropdownTrigger of dropdownTriggers) {
         let targetClass = dropdownTrigger.getAttribute("data-dropdown-target");
         let targetEl = document.querySelector(`#${targetClass}`);
-        targetEl.classList.add("u-d_none");
+
+        targetEl.classList.add("u-visibility_hidden");
     }
 }
 
@@ -364,9 +397,9 @@ const getLeafEl = (doc) => {
 const authLeafPermissionType = () => {
     let permissionType = null;
 
-    viewer = currentTreeDoc.data().viewers.includes(authMemberDoc.id) ? "viewer" : null; 
-    contributor = currentTreeDoc.data().contributors.includes(authMemberDoc.id) ? "contributor": null; 
-    admin = currentTreeDoc.data().admins.includes(authMemberDoc.id) ? "admin" : null; 
+    viewer = LocalDocs.tree.data().viewers.includes(LocalDocs.member.id) ? "viewer" : null; 
+    contributor = LocalDocs.tree.data().contributors.includes(LocalDocs.member.id) ? "contributor": null; 
+    admin = LocalDocs.tree.data().admins.includes(LocalDocs.member.id) ? "admin" : null; 
 
     if (viewer) {
         permissionType = "viewer";
@@ -543,17 +576,17 @@ const replaceLeafWithMemberData = async (claimedBy, leafId) => {
 
 const renderFamilyFromMember = (doc) => {
     let children = doc.data().children && doc.data().children.length > 0 ? doc.data().children : null;
-    let spouses = doc.data().spouses ? Object.entries(doc.data().spouses) : null;
+    let partners = doc.data().partners ? Object.entries(doc.data().partners) : null;
     let branchEl = createBranchEl("div", "branch");
     let leafEl = getLeafEl(doc);
-    let spousesContainer = createBranchEl("div", "spouses");
+    let partnersContainer = createBranchEl("div", "partners");
 
     if (doc.data().claimed_by) {
         leafEl.setAttribute("data-member-id", doc.data().claimed_by);
         replaceLeafWithMemberData(doc.data().claimed_by, doc.id);
     }
     
-    spousesContainer.appendChild(leafEl);
+    partnersContainer.appendChild(leafEl);
 
     if (children) {
         let descendantsContainer = createBranchEl("div", "descendants");
@@ -565,50 +598,50 @@ const renderFamilyFromMember = (doc) => {
         branchEl.appendChild(descendantsContainer);
     }
 
-    if (spouses) {
-        for (spouse of spouses) {
-            let spouseId = spouse[0];
-            let spouseStatus = spouse[1];
-            let spouseDoc = getLocalLeafDocFromId(spouseId);
-            // let spouseDoc = window.currentTreeLeaves.find(leafDoc => leafDoc.id === spouseId);
-            let spouseLeafEl = getLeafEl(spouseDoc);
+    if (partners) {
+        for (partner of partners) {
+            let partnerId = partner[0];
+            let partnerStatus = partner[1];
+            let partnerDoc = getLocalLeafDocFromId(partnerId);
+            // let partnerDoc = window.currentTreeLeaves.find(leafDoc => leafDoc.id === partnerId);
+            let partnerLeafEl = getLeafEl(partnerDoc);
 
-            renderedLeafMembers.push(spouseId);
-            spousesContainer.appendChild(spouseLeafEl);
+            renderedLeafMembers.push(partnerId);
+            partnersContainer.appendChild(partnerLeafEl);
         }
     }
 
 
-    branchEl.prepend(spousesContainer);
+    branchEl.prepend(partnersContainer);
 
     return branchEl;
 }
 
-editTreeForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    let reqTreeId = editTreeForm["edit-tree_id"].value;
-    let newTreeName = editTreeForm["edit-tree_name"].value;
+// editTreeForm.addEventListener('submit', (e) => {
+//     e.preventDefault();
+//     let reqTreeId = editTreeForm["edit-tree_id"].value;
+//     let newTreeName = editTreeForm["edit-tree_name"].value;
 
-    treesRef.doc(reqTreeId).update({
-        "name" : newTreeName
-    })
-    .then(() => {
-        console.log("Tree updated successfully!");
-        closeModals();
-        location.reload();
-    })
-    .catch(err => {
-        console.log(err.message);
-    })
-})
+//     treesRef.doc(reqTreeId).update({
+//         "name" : newTreeName
+//     })
+//     .then(() => {
+//         console.log("Tree updated successfully!");
+//         closeModals();
+//         location.reload();
+//     })
+//     .catch(err => {
+//         console.log(err.message);
+//     })
+// })
 
-deleteTreeButton.addEventListener('click', (e) => {
-    e.preventDefault;
-    let reqTreeId = editTreeForm["edit-tree_id"].value;
+// deleteTreeButton.addEventListener('click', (e) => {
+//     e.preventDefault;
+//     let reqTreeId = editTreeForm["edit-tree_id"].value;
 
-    treesRef.doc(reqTreeId).delete();
-    // update this on all member's tree lists!
-})
+//     treesRef.doc(reqTreeId).delete();
+//     // update this on all member's tree lists!
+// })
 
 inviteMemberForm.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -650,6 +683,20 @@ inviteMemberForm.addEventListener('submit', (e) => {
     }
 })
 
+renameTreeForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    let treeNameFromInput = renameTreeForm["rename-tree_name"].value;
+    let treeId = renameTreeForm["rename-tree_id"].value;
+
+    treesRef.doc(treeId).update({
+        "name": treeNameFromInput
+    })
+    .then(() => {
+        location.reload();
+    })
+})
+
+
 const createTreeFormModal = document.querySelector("#create-tree_form_modal");
 createTreeFormModal.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -668,7 +715,7 @@ createTreeFormModal.addEventListener('submit', (e) => {
                 "topMember" : true
             })
         )
-        if (!LocalDocs.member.primary_tree)
+        if (!LocalDocs.member.data().primary_tree)
             membersRef.doc(LocalDocs.member.id).update({
                 "trees" : firebase.firestore.FieldValue.arrayUnion(newTreeRef.id),
                 "primary_tree" : newTreeRef.id
@@ -974,7 +1021,7 @@ const getListViewInfo = (leafDoc) => {
     let viewListInfo = document.createElement("div");
     viewListInfo.setAttribute("class", "view-list_info");
     
-    let includeItems = ["name", "email", "phone_number", "address"];
+    let includeItems = ["name", "email", "phoneNumber", "address"];
     let groupItems = ["name", "address"];
 
     for (let [key, value] of Object.entries(memberBlueprint)) {
