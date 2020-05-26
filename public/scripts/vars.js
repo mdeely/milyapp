@@ -256,7 +256,7 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
                 data = new Intl.DateTimeFormat('en-US', options).format(date);
             }
     
-            let infoEl = `<div class="detailsPanel__item detailsPanel__${reqName} u-mar-b_3"><i class="fa fa-${reqIcon} detailsPanel__icon u-mar-r_2"></i>${data}</div>`
+            let infoEl = `<div class="detailsPanel__item detailsPanel__${reqName} u-mar-b_3" tooltip-reveal="fast" tooltip="${key}" tooltip-position="top left"><i class="fa fa-${reqIcon} detailsPanel__icon u-mar-r_2"></i>${data}</div>`
     
             if (reqParentName === "address") {
                 // add to address element
@@ -323,7 +323,7 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
                 } else {
                     label = ``
                 }
-                parentAction = `<button class="iconButton white u-mar-l_auto" data-dropdown-target="parent_options_menu__${familyLeafDoc.id}">
+                parentAction = `<button class="iconButton white u-mar-l_auto" tooltip="Options" data-dropdown-target="parent_options_menu__${familyLeafDoc.id}">
                                 <i class="fa fa-ellipsis-h"></i>
                             </button>
                             <div id="parent_options_menu__${familyLeafDoc.id}" class="dropdown u-visibility_hidden u-p_fixed">
@@ -343,7 +343,7 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
                 } else {
                     label = ``
                 }
-                childAction = `<button class="iconButton white u-mar-l_auto" data-dropdown-target="child_options_menu__${familyLeafDoc.id}">
+                childAction = `<button class="iconButton white u-mar-l_auto" tooltip="Options" data-dropdown-target="child_options_menu__${familyLeafDoc.id}">
                                 <i class="fa fa-ellipsis-h"></i>
                             </button>
                             <div id="child_options_menu__${familyLeafDoc.id}" class="dropdown u-visibility_hidden u-p_fixed">
@@ -361,7 +361,7 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
                 } else {
                     label = ``
                 }
-                partnerAction = `<button class="iconButton white u-mar-l_auto" data-dropdown-target="partner_options_menu__${familyLeafDoc.id}">
+                partnerAction = `<button class="iconButton white u-mar-l_auto" tooltip="Options" data-dropdown-target="partner_options_menu__${familyLeafDoc.id}">
                                     <i class="fa fa-ellipsis-h"></i>
                                 </button>
                                 <div id="partner_options_menu__${familyLeafDoc.id}" class="dropdown u-visibility_hidden u-p_fixed">
@@ -638,7 +638,6 @@ DetailsPanel.editMember = function() {
 
     if (reqEditDocData.claimed_by) {
         memberDoc = LocalDocs.getMemberDocByIdFromCurrentTree(reqEditDocData.claimed_by);
-        console.log(memberDoc);
     }
 
     let docData = memberDoc ? memberDoc.data() : reqEditDocData;
@@ -669,9 +668,9 @@ DetailsPanel.editMember = function() {
         }
 
         let isChecked;
-        if (value.dataPath === "deceased" && docData[value.dataPath] === true) {
-            isChecked = "checked";
-        }
+        // if (value.dataPath === "deceased" && docData[value.dataPath] === true) {
+        //     isChecked = "checked";
+        // }
 
         let inputGroup = `<div class="inputGroup inputGroup__horizontal">
                                 <label class="u-mar-r_2 u-w_33perc">${key}</label>
@@ -769,7 +768,6 @@ DetailsPanel.editMember = function() {
                 "profile_photo" : photoFile,
                 "occupation" : detailsPanelEdit["occupation"].value,
                 "email" : detailsPanelEdit["email"].value,
-                "deceased" : detailsPanelEdit["deceased"].checked ? true : false,
             })
             .then(() => {
                 console.log("Updated!");
@@ -845,7 +843,6 @@ MemberBlueprint.object = {
     "Claimed by" : { "dataPath" : "claimed_by", "defaultValue" : null },
     "Created by" : { "dataPath" : "created_by", "defaultValue" : null },
     "Profile photo" : { "dataPath" : "profile_photo", "icon" : "picture", "defaultValue" : null , "dataType": "file"},
-    "Deceased" : { "dataPath" : "deceased", "defaultValue" : false, "icon" : "frown", "dataType" : "checkbox" },
 }
 
 MemberBlueprint.loop = function(args) {

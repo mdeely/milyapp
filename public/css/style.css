@@ -709,6 +709,57 @@ button,
     .buttonGroup .iconButton:first-child {
       margin-left: 0px; }
 
+[tooltip] {
+  position: relative; }
+  [tooltip]:after {
+    content: attr(tooltip);
+    pointer-events: none;
+    position: absolute;
+    background-color: white;
+    right: calc(100% + 8px);
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 400;
+    opacity: 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    line-height: initial;
+    white-space: pre;
+    color: white;
+    background-color: var(--color_text);
+    transition-delay: unset;
+    transition: opacity .2s ease-in-out; }
+  [tooltip]:hover {
+    z-index: 99;
+    transition: opacity .2s ease-in-out; }
+    [tooltip]:hover:after {
+      opacity: 1;
+      transition-delay: .65s; }
+  [tooltip]:focus {
+    z-index: 99; }
+    [tooltip]:focus:after {
+      opacity: 1; }
+
+[tooltip-position="right"]:after {
+  left: calc(100% + 8px);
+  right: unset; }
+
+[tooltip-position="top middle"]:after {
+  left: 50%;
+  top: unset;
+  bottom: calc(100% + 16px);
+  right: unset;
+  transform: translateX(-50%); }
+
+[tooltip-position="top left"]:after {
+  left: 0;
+  top: unset;
+  bottom: calc(100% + 16px);
+  right: unset; }
+
+[tooltip-reveal="fast"]:hover:after {
+  transition-delay: unset; }
+
 .modal {
   position: fixed;
   top: 0;

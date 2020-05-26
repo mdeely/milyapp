@@ -48,6 +48,7 @@ const populateMyTreesList = async () => {
                     liEl.setAttribute("data-tree-id", reqTreeDoc.id);
                     aEl.setAttribute("href", `#/trees/${reqTreeDoc.id}`);
                     treeEditButton.setAttribute("data-dropdown-target", `edit_tree_options_${reqTreeDoc.id}`); 
+                    treeEditButton.setAttribute("tooltip", `Options`); 
                     dropdownEl.setAttribute("id", `edit_tree_options_${reqTreeDoc.id}`);
                     renameDropdown.setAttribute("data-value", `rename`);
                     renameDropdown.setAttribute("data-modal-trigger", `rename-tree_modal`);
