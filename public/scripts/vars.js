@@ -343,7 +343,7 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
                 } else {
                     label = ``
                 }
-                parentAction = `<button class="iconButton white u-mar-l_auto" tooltip="Options" data-dropdown-target="parent_options_menu__${familyLeafDoc.id}">
+                parentAction = `<button class="iconButton white u-mar-l_auto" tooltip="Options" tooltip-position="top middle" data-dropdown-target="parent_options_menu__${familyLeafDoc.id}">
                                 <i class="fa fa-ellipsis-h"></i>
                             </button>
                             <div id="parent_options_menu__${familyLeafDoc.id}" class="dropdown u-visibility_hidden u-p_fixed">

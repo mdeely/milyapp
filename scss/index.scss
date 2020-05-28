@@ -3,6 +3,7 @@ $brand: #002831;
 
 :root {
     --brand: #002831;
+    --brand_600: #5C737B;
     --color_outline: #2D9CDB;
     --color_gray: #BDBDBD;
     --color_dark_gray: #828282;
@@ -1045,18 +1046,17 @@ button,
         content: attr(tooltip);
         pointer-events: none;
         position: absolute;
-        background-color: white;
         right: calc(100% + 8px);
-        padding: 8px 12px;
+        padding: 6px 10px;
         border-radius: 24px;
-        font-size: 14px;
+        font-size: 12px;
         font-weight: 400;
         opacity: 0;
         box-shadow: 0 2px 8px rgba(0,0,0,.1);
         line-height: initial;
         white-space: pre;
         color: white;
-        background-color: var(--color_text);
+        background-color: var(--brand_600);
         transition-delay: unset;
         transition: opacity .2s ease-in-out;
     }

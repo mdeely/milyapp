@@ -61,6 +61,7 @@ window.router = function(user) {
                                             .then((reqTreeDoc) => {
                                                 LocalDocs.trees.push(reqTreeDoc);
                                                 reqRoute.onAuthController(user);
+                                                closeAllDropdowns();
                                             })
                                             .catch(() => {
                                                 console.log("error getting a tree");
