@@ -20,9 +20,7 @@ const editMemberButton = document.querySelector("#edit-member-action");
 const dataViews = document.querySelectorAll(`[data-view]`);
 
 const treeBlueprint = {
-    "Admins" : { "dataPath" : "admins", "defaultValue" : [] },
-    "Contributors" : { "dataPath" : "contributors", "defaultValue" : [] },
-    "Viewers" : { "dataPath" : "viewers", "defaultValue" : [] },
+    "Permissions" : { "dataPath" : "permissions", "defaultValue" : {} },
     "Created by" : { "dataPath" : "created_by", "defaultValue" : null },
     "Name" : { "dataPath" : "name", "defaultValue" : null }
 }
@@ -30,7 +28,6 @@ const treeBlueprint = {
 const familyTreeEl = document.querySelector("#familyTree");
 const mainContent = document.querySelector("#mainContent");
 const branchContainer = document.querySelector("#branchContainer");
-const leafConnections = document.querySelector("#leaf_connections");
 
 const detailsPanel = mainContent.querySelector("#detailsPanel");
 const detailsPanelInfo = detailsPanel.querySelector(".detailsPanel__information");
@@ -44,6 +41,7 @@ const detailsPanelFullName = detailsPanel.querySelector(".detailsPanel__fullName
 const detailsPanelProfileImage = detailsPanel.querySelector(".detailsPanel__profileImage");
 
 const renameTreeForm = document.querySelector("#rename-tree_form");
+const editTreeForm = document.querySelector("#edit-tree_form");
 
 const signUpButton = document.querySelector("#sign-up_button");
 const logInButton = document.querySelector("#log-in_button");
@@ -64,6 +62,11 @@ const excludedCategories = ["Name", "Address"];
 
 const placeholderImageUrl = "https://firebasestorage.googleapis.com/v0/b/mily-4c2a8.appspot.com/o/assets%2Fplaceholder%2Fprofile_placeholder.svg?alt=media&token=d3b939f1-d46b-4315-bcc6-3167d17a18ed";
 
+const availablePermissions = {
+    "Admin" : "admin",
+    "Contributor" : "contributor",
+    "Viewer" : "viewer"
+};
 // document.querySelector(".view-preferences_zoomIn").addEventListener('click', (e) => {
 //     console.log("zoom in");
 // });
@@ -273,8 +276,15 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
         if (relativeType === "partners") {
             if ( docDataPath && Object.keys(docDataPath).length > 0 ) {
                 let relationshipHeader = document.createElement('h6');
-                relationshipHeader.textContent = `${relativeType}`;
-                relationshipHeader.setAttribute("class", "u-mar-t_6 u-mar-b_3");
+
+                if (docDataPath && Object.keys(docDataPath).length === 1) {
+                    singular = relativeType.slice(0, -1); 
+                    console.log(`${relativeType} to ${singular}`)
+                    relationshipHeader.textContent = `${singular}`;
+                } else {
+                    relationshipHeader.textContent = `${relativeType}`;
+                }
+                relationshipHeader.setAttribute("class", "u-mar-t_6 u-mar-b_2");
                 detailsPanelImmediateFamily.appendChild(relationshipHeader);
                 for ( let reqId of Object.keys(docDataPath) ) {
                     renderRelationship(reqId);
@@ -283,8 +293,18 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
         } else {
             if (docDataPath && Object.keys(docDataPath).length > 0 ) {
                 let relationshipHeader = document.createElement('h6');
-                relationshipHeader.textContent = `${relativeType}`;
-                relationshipHeader.setAttribute("class", "u-mar-t_6 u-mar-b_3");
+                if (docDataPath && Object.keys(docDataPath).length === 1) {
+                    if (relativeType === "children") {
+                        singular = relativeType.replace("ren", "");
+                        relationshipHeader.textContent = `${singular}`;
+                    } else {
+                        singular = relativeType.slice(0, -1); 
+                        relationshipHeader.textContent = `${singular}`;
+                    }
+                } else {
+                    relationshipHeader.textContent = `${relativeType}`;
+                }
+                relationshipHeader.setAttribute("class", "u-mar-t_6 u-mar-b_2");
                 detailsPanelImmediateFamily.appendChild(relationshipHeader);
                 for ( let reqId of Object.keys(docDataPath) ) {
                     renderRelationship(reqId);
@@ -354,8 +374,9 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
                             </div>`
             } else if (relativeType === "siblings") {
                 label = ``
-            } else if (relativeType === "partners") {                
-                if (familyLeafDoc.data().partners[leafDoc.id] !== null) {
+            } else if (relativeType === "partners") { 
+                let partnerType = familyLeafDoc.data().partners[leafDoc.id] ? familyLeafDoc.data().partners[leafDoc.id] : null;
+                if (partnerType && partnerType !== "Unrelated") {
                     let partnerType = familyLeafDoc.data().partners[leafDoc.id];
                     label = `${partnerType}`
                 } else {
@@ -443,37 +464,59 @@ function initiatePartnerOptions(leafId) {
             console.log(leafId);
             console.log(targetLeafId);
 
-            if (value === "Unrelated") {
-                currentTreeLeafCollectionRef.doc(leafId).update({
-                    [`partners.${targetLeafId}`] : firebase.firestore.FieldValue.delete()
-                })
-                .then(() => {
-                    console.log("First partner updated succesfully");
-                })
+            currentTreeLeafCollectionRef.doc(leafId).update({
+                [`partners.${targetLeafId}`] : value
+            })
+            .then(() => {
+                console.log("First partner updated succesfully");
+            })
+
+            currentTreeLeafCollectionRef.doc(targetLeafId).update({
+                [`partners.${leafId}`] : value
+            })
+            .then(() => {
+                console.log("Second partner updated succesfully");
+                location.reload();
+            })
+
+
+            //////////////////
+            //////////////////
+            // MD NOTE: THE CODE BELOW IS COMMENTED OUT TO BE ABLE TO RECOVER RELATIONSHIPS THAT MAY BE MARKED AS UNRELATED
+            ////////////////
+            ////////////////
+
+            // if (value === "Unrelated") {
+            //     currentTreeLeafCollectionRef.doc(leafId).update({
+            //         [`partners.${targetLeafId}`] : firebase.firestore.FieldValue.delete()
+            //     })
+            //     .then(() => {
+            //         console.log("First partner updated succesfully");
+            //     })
     
-                currentTreeLeafCollectionRef.doc(targetLeafId).update({
-                    [`partners.${leafId}`] : firebase.firestore.FieldValue.delete()
-                })
-                .then(() => {
-                    console.log("Second partner updated succesfully");
-                    location.reload();
-                })
-            } else {
-                currentTreeLeafCollectionRef.doc(leafId).update({
-                    [`partners.${targetLeafId}`] : value
-                })
-                .then(() => {
-                    console.log("First partner updated succesfully");
-                })
+            //     currentTreeLeafCollectionRef.doc(targetLeafId).update({
+            //         [`partners.${leafId}`] : firebase.firestore.FieldValue.delete()
+            //     })
+            //     .then(() => {
+            //         console.log("Second partner updated succesfully");
+            //         location.reload();
+            //     })
+            // } else {
+            //     currentTreeLeafCollectionRef.doc(leafId).update({
+            //         [`partners.${targetLeafId}`] : value
+            //     })
+            //     .then(() => {
+            //         console.log("First partner updated succesfully");
+            //     })
     
-                currentTreeLeafCollectionRef.doc(targetLeafId).update({
-                    [`partners.${leafId}`] : value
-                })
-                .then(() => {
-                    console.log("Second partner updated succesfully");
-                    location.reload();
-                })
-            }
+            //     currentTreeLeafCollectionRef.doc(targetLeafId).update({
+            //         [`partners.${leafId}`] : value
+            //     })
+            //     .then(() => {
+            //         console.log("Second partner updated succesfully");
+            //         location.reload();
+            //     })
+            // }
         })
     }
 }
@@ -537,31 +580,49 @@ function initiateParentOptions(leafId) {
             console.log(leafId);
             console.log(childLeafId);
 
-            if (value === "Unrelated") {
-                currentTreeLeafCollectionRef.doc(leafId).update({
-                    [`children.${childLeafId}`] : firebase.firestore.FieldValue.delete()
+            currentTreeLeafCollectionRef.doc(leafId).update({
+                [`children.${childLeafId}`] : value
+            })
+            .then(() => {    
+                currentTreeLeafCollectionRef.doc(childLeafId).update({
+                    [`parents.${leafId}`] : value
                 })
-                .then(() => {    
-                    currentTreeLeafCollectionRef.doc(childLeafId).update({
-                        [`parents.${leafId}`] : firebase.firestore.FieldValue.delete()
-                    })
-                    .then(() => {
-                        location.reload();
-                    })
+                .then(() => {
+                    location.reload();
                 })
-            } else {
-                currentTreeLeafCollectionRef.doc(leafId).update({
-                    [`children.${childLeafId}`] : value
-                })
-                .then(() => {    
-                    currentTreeLeafCollectionRef.doc(childLeafId).update({
-                        [`parents.${leafId}`] : value
-                    })
-                    .then(() => {
-                        location.reload();
-                    })
-                })
-            }
+            })
+
+            //////////////////
+            //////////////////
+            // MD NOTE: THE CODE BELOW IS COMMENTED OUT TO BE ABLE TO RECOVER RELATIONSHIPS THAT MAY BE MARKED AS UNRELATED
+            ////////////////
+            ////////////////
+
+            // if (value === "Unrelated") {
+            //     currentTreeLeafCollectionRef.doc(leafId).update({
+            //         [`children.${childLeafId}`] : firebase.firestore.FieldValue.delete()
+            //     })
+            //     .then(() => {    
+            //         currentTreeLeafCollectionRef.doc(childLeafId).update({
+            //             [`parents.${leafId}`] : firebase.firestore.FieldValue.delete()
+            //         })
+            //         .then(() => {
+            //             location.reload();
+            //         })
+            //     })
+            // } else {
+            //     currentTreeLeafCollectionRef.doc(leafId).update({
+            //         [`children.${childLeafId}`] : value
+            //     })
+            //     .then(() => {    
+            //         currentTreeLeafCollectionRef.doc(childLeafId).update({
+            //             [`parents.${leafId}`] : value
+            //         })
+            //         .then(() => {
+            //             location.reload();
+            //         })
+            //     })
+            // }
 
         })
     }
@@ -1338,13 +1399,22 @@ function newLeafForFirebase(params) {
     return newLeafObject;
 }
 
-let connectionArray = {};
+let connectionObject = {};
 
 function connectLines() {
+    let connectionChildren = connectionObject["children"] = {};
+    let connectionPartners = connectionObject["partners"] = {};
+
     for (let leafDoc of LocalDocs.leaves) {
-        let children = Object.keys(leafDoc.data().children).length > 0 ? Object.keys(leafDoc.data().children) : null;
+        let children = Object.keys(leafDoc.data().children).length > 0 ? Object.entries(leafDoc.data().children) : null;
+        let partners = Object.keys(leafDoc.data().partners).length > 0 ? Object.entries(leafDoc.data().partners) : null;
+
         if (children) {
-            connectionArray[`${leafDoc.id}`] = children;
+            connectionChildren[`${leafDoc.id}`] = children;
+        }
+
+        if (partners) {
+            connectionPartners[`${leafDoc.id}`] = partners;
         }
     }
 
@@ -1352,21 +1422,41 @@ function connectLines() {
 }
 
 function iterateOverConnections() {
-    for (let [parentId, value] of Object.entries(connectionArray)) {
+    let apartArray = ["Separated", "Divorced", "Widowed"];
+    let unrelatedArray = ["Unrelated", "Step"];
 
+    for (let [parentId, parentValue] of Object.entries(connectionObject.children)) {
         let parentEl = familyTreeEl.querySelector(`[data-id="${parentId}"]`);
         let parrentAttributes = parentEl.getBoundingClientRect();
 
-        for (let childId of value) {
-            let childEl = familyTreeEl.querySelector(`[data-id="${childId}"]`);
-            let childAttributes = childEl.getBoundingClientRect();
+        for (let childId of parentValue) {
+            if ( !unrelatedArray.includes(childId[1]) ) {
+                let childEl = familyTreeEl.querySelector(`[data-id="${childId[0]}"]`);
+                let childAttributes = childEl.getBoundingClientRect();
+                
+                createSVG(parrentAttributes, childAttributes, parentEl, "child");
+            }
+        }
+    } 
 
-            createSVG(parrentAttributes, childAttributes, parentEl);
+    for (let [partnerId, partnerValue] of Object.entries(connectionObject.partners)) {
+        if (partnerId) {
+            let partnerEl = familyTreeEl.querySelector(`[data-id="${partnerId}"]`);
+            let partnerAttributes = partnerEl.getBoundingClientRect();
+
+            for (let partnerMatchId of partnerValue) {
+                if ( apartArray.includes(partnerMatchId[1]) ) {
+                    let partnerMatchEl = familyTreeEl.querySelector(`[data-id="${partnerMatchId[0]}"]`);
+                    let partnerMatchAttributes = partnerMatchEl.getBoundingClientRect();
+
+                    createSVG(partnerAttributes, partnerMatchAttributes, partnerEl, "partner");
+                }
+            }
         }
     } 
 }
 
-function createSVG(parentAttributes, childAttributes, parentEl) {
+function createSVG(fromAttributes, toAttributes, parentEl, relationshipType) {
     let style = getComputedStyle(parentEl);
     let width = parentEl.offsetWidth;
     let height = width;
@@ -1375,14 +1465,22 @@ function createSVG(parentAttributes, childAttributes, parentEl) {
     let singleMargin = parseInt(style.marginTop);
     let distanceDif;
 
+    let middleOfToX = toAttributes.x - toAttributes.width;
+    let middleOfToY = toAttributes.y - toAttributes.width;
 
-    if (parentAttributes.x > childAttributes.x) {
-        distanceDif = (-1 * (parentAttributes.x - childAttributes.x)) + halfWidth;
+    if (fromAttributes.x > toAttributes.x) {
+        distanceDif = (-1 * (fromAttributes.x - toAttributes.x)) + halfWidth;
     } else {
-        distanceDif = (childAttributes.x - parentAttributes.x) + halfWidth;
+        distanceDif = (toAttributes.x - fromAttributes.x) + halfWidth;
     }
 
-    let d = `M${halfWidth} ${height + captionOffset} L${halfWidth} ${height + (captionOffset/2) + singleMargin} L${distanceDif} ${height + (captionOffset/2) + singleMargin} L${distanceDif} ${height + captionOffset + (singleMargin*2)}`;
+    let d;
+
+    if (relationshipType === "child") {
+        d = `M${halfWidth} ${height + captionOffset} L${halfWidth} ${height + (captionOffset/2) + singleMargin} L${distanceDif} ${height + (captionOffset/2) + singleMargin} L${distanceDif} ${height + captionOffset + (singleMargin*2)}`;
+    } else if (relationshipType === "partner") {
+        d = `M${halfWidth} ${halfWidth} L${distanceDif} ${halfWidth}`;
+    }
 
 
     let xmlns = "http://www.w3.org/2000/svg";
@@ -1397,6 +1495,10 @@ function createSVG(parentAttributes, childAttributes, parentEl) {
     let svgNS = "http://www.w3.org/2000/svg";  
     path = document.createElementNS(svgNS, "path");
     path.setAttributeNS(null, "d", d);
+
+    if (relationshipType === "partner") {
+        path.setAttributeNS(null, "stroke-dasharray", "4 4");
+    }
 
     svgElem.appendChild(path);
     parentEl.appendChild(svgElem);

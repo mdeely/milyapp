@@ -52,10 +52,11 @@ const populateMyTreesList = async () => {
                     dropdownEl.setAttribute("id", `edit_tree_options_${reqTreeDoc.id}`);
                     renameDropdown.setAttribute("data-value", `rename`);
                     renameDropdown.setAttribute("data-modal-trigger", `rename-tree_modal`);
+                    editMembersDropdown.setAttribute("data-modal-trigger", `edit-tree_modal`);
                     
                     aEl.textContent = reqTreeDoc.data().name;
                     renameDropdown.textContent = "Rename";
-                    editMembersDropdown.textContent = "Edit member";
+                    editMembersDropdown.textContent = "Settings & permissions";
                     deleteDropdown.textContent = "Delete tree";
 
                     dropdownEl.appendChild(renameDropdown);
@@ -66,6 +67,46 @@ const populateMyTreesList = async () => {
                     aEl.appendChild(treeEditButton);
                     liEl.appendChild(dropdownEl);
                     liEl.appendChild(aEl);
+
+                    editMembersDropdown.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        let permissionsEl = editTreeForm.querySelector(".permissions");
+                        permissionsEl.innerHTML = '';
+
+                        editTreeForm[`edit-tree_id`].value = treeId;
+                        editTreeForm["make-public"].checked = reqTreeDoc.data().public ? reqTreeDoc.data().public : null ;
+
+                        if (reqTreeDoc.data().permissions) {
+                            for (let [memberId, memberPermission] of Object.entries(reqTreeDoc.data().permissions)) {
+                                let div = createElementWithClass("div", "u-mar-b_1 u-d_block");
+                                let select = document.createElement("select");
+                                let selectWrapper = createElementWithClass("div", "select-wrapper u-mar-l_auto");
+                                div.setAttribute("class", "u-d_flex u-mar-b_1 u-align-items_center");
+                                div.setAttribute("data-member-id", memberId);
+
+                                div.textContent = memberId;
+
+                                for (let [permName, permValue] of Object.entries(availablePermissions)) {
+                                    let option = document.createElement("option");
+                                    option.textContent = permName;
+                                    option.setAttribute("value", permValue);
+
+                                    if (memberPermission === permValue) {
+                                        option.setAttribute("selected", true);
+                                    }
+
+                                    select.appendChild(option);
+                                }
+
+                                selectWrapper.appendChild(select);
+                                div.appendChild(selectWrapper);
+                                permissionsEl.appendChild(div);
+
+                            }
+                        }
+
+                        closeAllDropdowns();
+                    })
 
                     deleteDropdown.addEventListener('click', (e) => {
                         e.preventDefault;
@@ -81,6 +122,7 @@ const populateMyTreesList = async () => {
                         e.preventDefault();
                         renameTreeForm["rename-tree_name"].value = reqTreeDoc.data().name;
                         renameTreeForm["rename-tree_id"].value = reqTreeDoc.id;
+                        closeAllDropdowns();
                     });
 
                     // let anchor = `<li class="u-w_full u-mar-r_2 u-mar-l_2" data-tree-id="${reqTreeDoc.id}">
@@ -109,6 +151,34 @@ const populateMyTreesList = async () => {
                 // ranThrough.push(treeId);
             }
         }
+
+        editTreeForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            let memberEls = editTreeForm.querySelectorAll(`[data-member-id]`);
+            let treeId = editTreeForm[`edit-tree_id`].value;
+
+            let obj = {};
+
+            for (updateMemberPermission of memberEls) {
+                let memberId = updateMemberPermission.getAttribute("data-member-id");
+                let select = updateMemberPermission.querySelector("select");
+                let value = select.options[select.selectedIndex].value;    
+                
+                obj[`${memberId}`] = value;
+            };
+
+            treesRef.doc(treeId).update({
+                "permissions": obj
+            })     
+            .then(() => {
+                console.log("updated!");
+            })   
+            .catch(() => {
+                console.log(err.message);
+            }) 
+
+            closeModals();
+        })
 
 
     } else {

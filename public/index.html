@@ -6,7 +6,8 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link href="https://fonts.googleapis.com/css?family=Lato:400,700,900" rel="stylesheet">
     <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"> -->
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous">
+    <script src="https://kit.fontawesome.com/254edd873a.js" crossorigin="anonymous"></script>
+    <!-- <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous"> -->
     <!-- <link rel="stylesheet" href="/style.css"> -->
     <link rel="stylesheet" href="css/style.css"> 
     <title>Mily</title>
@@ -65,7 +66,7 @@
                         <label for="sign-up_password">Password</label>
                         <input type="password" name="sign-up_password" placeholder="Password">
                     </div>
-                    <div class="inputGroup checkbox u-mar-t_2">
+                    <div class="inputGroup checkbox">
                         <input name="sign-up_age-verification" type="checkbox">
                         <label for="sign-up_age-verification.">I'm 13 years or older.</label>
                     </div>
@@ -167,9 +168,9 @@
                     <nav class="detailsPanel__actions u-mar-b_6 u-mar-t_1">
                         <button class="iconButton add-relationship_button" data-dropdown-target="add-relationship-dropdown" tooltip="Add relationship" tooltip-position="right"><i class="fa fa-plus"></i></button>
                         <div class="detailsPanel__actions-secondary u-mar-l_auto u-d_flex">
-                            <button class="iconButton secondary" id="invite-member-action" data-modal-trigger="invite-member_modal" tooltip="Invite member" ><i class="fa fa-envelope"></i></button>
-                            <button class="iconButton secondary u-mar-l_2" id="edit-member-action" tooltip="Edit" ><i class="fa fa-pencil-alt"></i></button>
-                            <button class="iconButton secondary details__button--close u-mar-l_2" tooltip="Hide panel" ><i class="fa fa-times"></i></button> 
+                            <button class="iconButton secondary" id="invite-member-action" data-modal-trigger="invite-member_modal" tooltip="Invite member" tooltip-position="bottom middle" ><i class="fa fa-envelope"></i></button>
+                            <button class="iconButton secondary u-mar-l_2" id="edit-member-action" tooltip="Edit" tooltip-position="bottom middle" ><i class="fa fa-pencil-alt"></i></button>
+                            <button class="iconButton secondary details__button--close u-mar-l_2" tooltip="Hide panel" tooltip-position="bottom middle" ><i class="fa fa-times"></i></button> 
                         </div>
                     </nav>
                     <!-- <ul id="member-options-dropdown" class="dropdown u-d_none u-p_fixed">
@@ -298,7 +299,7 @@
         </div>
 
         <div class="modal medium" data-modal="rename-tree_modal">
-            <form id="rename-tree_form" class="card modal-dialouge">
+            <form id="rename-tree_form" class="card modal-dialouge" role="dialog">
                 <div class="card__header">
                     <h2 class="u-mar-b_0">Rename family</h2>
                 </div>
@@ -313,6 +314,31 @@
                     <div class="buttonGroup u-jc_flex-end">
                         <a href="#" class="modal_button--close button secondary">Close</a>
                         <button class="rename-tree_save" type="submit">Rename</button>
+                    </div>
+                </div>
+                <a href="#" class="modal_button--close iconButton white"><i class="fa fa-times"></i></a>
+            </form>
+        </div>
+
+        <div class="modal medium" data-modal="edit-tree_modal">
+            <form id="edit-tree_form" class="card modal-dialouge" role="dialog">
+                <div class="card__header">
+                    <h2 class="u-mar-b_0">Settings & Permissions</h2>
+                </div>
+                <div class="card__content">
+                    <div class="inputGroup checkbox u-mar-t_2">
+                        <input name="make-public" type="checkbox">
+                        <label for="make-public">Make public</label>
+                    </div>
+                    <div class="inputGroup">
+                        <input type="text" name="edit-tree_id" class="u-d_none">
+                    </div>
+                    <div class="permissions"></div>
+                </div>
+                <div class="card__footer">
+                    <div class="buttonGroup u-jc_flex-end">
+                        <a href="#" class="modal_button--close button secondary">Cancel</a>
+                        <button class="edit-tree_save" type="submit">Save changes</button>
                     </div>
                 </div>
                 <a href="#" class="modal_button--close iconButton white"><i class="fa fa-times"></i></a>

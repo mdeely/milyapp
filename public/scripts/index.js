@@ -397,19 +397,21 @@ const getLeafEl = (doc) => {
 const authLeafPermissionType = () => {
     let permissionType = null;
 
-    viewer = LocalDocs.tree.data().viewers.includes(LocalDocs.member.id) ? "viewer" : null; 
-    contributor = LocalDocs.tree.data().contributors.includes(LocalDocs.member.id) ? "contributor": null; 
-    admin = LocalDocs.tree.data().admins.includes(LocalDocs.member.id) ? "admin" : null; 
+    // console.log(LocalDocs.tree.data().permissions[LocalDocs.member.id]);
 
-    if (viewer) {
-        permissionType = "viewer";
-    } else if (contributor) {
-        permissionType = "contributor";
-    } else if (admin) {
-        permissionType = "admin";
-    }
+    // viewer = LocalDocs.tree.data().permissions[LocalDocs.member.id] ? "viewer" : null; 
+    // contributor = LocalDocs.tree.data().contributors.includes(LocalDocs.member.id) ? "contributor": null; 
+    // admin = LocalDocs.tree.data().admins.includes(LocalDocs.member.id) ? "admin" : null; 
 
-    return permissionType;
+    // if (viewer) {
+    //     permissionType = "viewer";
+    // } else if (contributor) {
+    //     permissionType = "contributor";
+    // } else if (admin) {
+    //     permissionType = "admin";
+    // }
+
+    return permissionType = LocalDocs.tree.data().permissions[LocalDocs.member.id] ? LocalDocs.tree.data().permissions[LocalDocs.member.id] : null;
 
     //
     // TODO FIGURE OUT HOW TO SEND THE PERMISSION STATUS WHEN POPULATING DETAILS

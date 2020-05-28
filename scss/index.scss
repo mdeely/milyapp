@@ -192,27 +192,27 @@ path {
     }
 }
 
-.connection {
-    --halfLeafSize: calc(var(--leafSize) / 2);
+// .connection {
+//     --halfLeafSize: calc(var(--leafSize) / 2);
 
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: -1;
-    background-color: red;
+//     position: absolute;
+//     left: 50%;
+//     transform: translateX(-50%);
+//     z-index: -1;
+//     background-color: red;
 
-    &_parentToChild {
-        height: calc(var(--leafSize) + 12px);
-        width: 10px;
-        top: var(--leafSpacing);
-    }
+//     &_parentToChild {
+//         height: calc(var(--leafSize) + 12px);
+//         width: 10px;
+//         top: var(--leafSpacing);
+//     }
 
-    &_childToParent {
-        height: calc(var(--leafSize) + 12px);
-        width: 10px;
-        bottom: var(--leafSpacing);
-    }
-}
+//     &_childToParent {
+//         height: calc(var(--leafSize) + 12px);
+//         width: 10px;
+//         bottom: var(--leafSpacing);
+//     }
+// }
 
 #myTree__list {
     max-width: 800px;
@@ -556,6 +556,10 @@ input[name*="profile_photo"] {
 
     .together {
         margin-right: -56px;
+
+        .leaf {
+            margin-left: -32px;
+        }
     }
 
     // .apart {
@@ -847,6 +851,34 @@ select {
     }
 }
 
+.select-wrapper {
+    padding: 0;
+    position: relative;
+
+    &:after {
+        content: "\f0d7";
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900; 
+        position: absolute;
+        right: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        pointer-events: none;;
+    }
+
+    select {
+        -webkit-appearance: none;
+        padding: 12px 16px;
+        border: 0px solid transparent;
+        border-radius: 8px;
+        padding-right: 40px;
+
+        &:hover {
+            cursor: pointer;
+        }
+    }
+}
+
 label {
     font-weight: bold;
     font-size: 15px;
@@ -879,13 +911,16 @@ label {
         align-items: center;
 
         input[type=checkbox] {
-            -webkit-appearance: none;
+            // -webkit-appearance: none;
             box-shadow: 0 0 0 1px var(--color_border);
             height: 24px;
             width: 24px;
             border-radius: 4px;
 
             &:checked {
+                content: "\f0d7";
+                font-family: "Font Awesome 5 Free";
+                font-weight: 900; 
                 background-color: var(--color_outline);
             }
 
@@ -1013,7 +1048,7 @@ button,
         background-color: white;
         right: calc(100% + 8px);
         padding: 8px 12px;
-        border-radius: 8px;
+        border-radius: 24px;
         font-size: 14px;
         font-weight: 400;
         opacity: 0;
@@ -1052,7 +1087,7 @@ button,
 [tooltip-position="top middle"]:after {
     left: 50%;
     top: unset;
-    bottom: calc(100% + 16px);
+    bottom: calc(100% + 8px);
     right: unset;
     transform: translateX(-50%);
 }
@@ -1061,6 +1096,13 @@ button,
     top: unset;
     bottom: calc(100% + 16px);
     right: unset;
+}
+[tooltip-position="bottom middle"]:after {
+    left: 50%;
+    bottom: unset;
+    top: calc(100% + 8px);
+    right: unset;
+    transform: translateX(-50%);
 }
 [tooltip-reveal="fast"]:hover:after {
     transition-delay: unset;;
