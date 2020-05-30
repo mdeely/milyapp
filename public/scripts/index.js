@@ -313,20 +313,20 @@ const setupEmailVerificationView = (user) => {
 //     }
 // }
 
-const authMemberHasPermission = () => {
-    let viewer = currentTreeDoc.data().viewers.includes(authMemberDoc.id);
-    let contributor = currentTreeDoc.data().contributors.includes(authMemberDoc.id);
-    let admin = currentTreeDoc.data().admins.includes(authMemberDoc.id);
-    let hasPermisison;
+// const authMemberHasPermission = () => {
+//     let viewer = currentTreeDoc.data().viewers.includes(authMemberDoc.id);
+//     let contributor = currentTreeDoc.data().contributors.includes(authMemberDoc.id);
+//     let admin = currentTreeDoc.data().admins.includes(authMemberDoc.id);
+//     let hasPermisison;
 
-    if (viewer || contributor || admin) {
-        hasPermission = true;
-    } else {
-        hasPermission = false;
-    }
+//     if (viewer || contributor || admin) {
+//         hasPermission = true;
+//     } else {
+//         hasPermission = false;
+//     }
 
-    return hasPermission;
-}
+//     return hasPermission;
+// }
 
 const closeModals = () => {
     let openModals = document.querySelectorAll(".modal.open");
@@ -703,13 +703,14 @@ const createTreeFormModal = document.querySelector("#create-tree_form_modal");
 createTreeFormModal.addEventListener('submit', (e) => {
     e.preventDefault();
 
-    treesRef.add(
-        newTreeForFirebase({
-            "admins" : [LocalDocs.member.id],
-            "created_by" : LocalDocs.member.id,
-            "name" : createTreeFormModal["create-tree_name"].value
-        })
-    ).then(newTreeRef => {
+    let permissionObj = {};
+    permissionObj[LocalDocs.member.id] = "admin";
+
+    treesRef.add({
+        "permissions" : permissionObj,
+        "created_by" : LocalDocs.member.id,
+        "name" : createTreeFormModal["create-tree_name"].value
+    }).then(newTreeRef => {
         newTreeRef.collection('leaves').add(
             newLeafForFirebase({
                 "created_by" : LocalDocs.member.id,
@@ -750,13 +751,14 @@ const createTreeForm = document.querySelector("#create-tree_form");
 createTreeForm.addEventListener('submit', (e) => {
     e.preventDefault();
 
-    treesRef.add(
-        newTreeForFirebase({
-            "admins" : [LocalDocs.member.id],
-            "created_by" : LocalDocs.member.id,
-            "name" : createTreeForm["create-tree_name"].value
-        })
-    )
+    let permissionObj = {};
+    permissionObj[LocalDocs.member.id] = "admin";
+
+    treesRef.add({
+        "permissions" : permissionObj,
+        "created_by" : LocalDocs.member.id,
+        "name" : createTreeForm["create-tree_name"].value
+    })
     .then(newTreeRef => {
         membersRef.doc(LocalDocs.member.id).update({
             "primary_tree" : newTreeRef.id,
@@ -783,231 +785,6 @@ editMemberButton.addEventListener('click', (e) => {
     DetailsPanel.editMember();
     closeAllDropdowns();
 })
-
-// const editMember = () => {
-//     let reqEditDoc = getDocFromDetailsPanelId();
-//     let reqEditDocData = reqEditDoc.data();
-
-//     detailsPanelEdit.classList.remove("u-d_none");
-
-//     for (let [key, value] of Object.entries(memberBlueprint)) {
-//         let data = '';
-//         let name = '';
-
-//         if ( !excludedDetails.includes(value["dataPath"]) ) {
-//             if ( value["defaultValue"] && Object.values(value["defaultValue"]).length > 0 ) {
-//                 for (let [detailKey, detailValue] of Object.entries(value["defaultValue"])) {
-//                     name = detailValue["dataPath"];
-//                     data = reqEditDocData[value["dataPath"]][detailValue["dataPath"]];
-//                     createMemberInput(detailKey, data, name);
-//                 }
-//             } else {
-//                 name = value["dataPath"];
-//                 data = reqEditDocData[value["dataPath"]];
-//             }
-
-//             if ( !excludedCategories.includes(key) ) {
-//                 if (name === "birthday" && data) {  
-
-//                     data = new Date(data).toISOString().substring(0, 10);
-//                 }
-//                 createMemberInput(key, data, name);
-//             }
-//         }
-//     }
-
-
-//     let buttonGroup = document.createElement('div');
-//     let saveButton = document.createElement("button");
-//     let cancelButton = document.createElement("button");
-
-//     saveButton.textContent = "Save";
-//     saveButton.setAttribute("class", "u-w_full")
-//     saveButton.setAttribute("type", "submit");
-
-//     cancelButton.textContent = "Cancel";
-//     cancelButton.setAttribute("class", "u-w_full button secondary")
-//     cancelButton.setAttribute("href", "#");
-
-//     let ref;
-//     if (reqEditDoc.ref.parent.path === "members") {
-//         ref = membersRef;
-//     } else {
-//         ref = currentTreeLeafCollectionRef;
-//     }
-
-//     // saveButton.addEventListener("click", (e) => {
-//     //     e.preventDefault();
-//     //     let reqEditDoc = getDocFromDetailsPanelId();
-
-//     //     ref.doc(reqEditDoc.id).update({
-//     //         "name" : {
-//     //             "firstName" : detailsPanelEdit["firstName"].value,
-//     //             "lastName" : detailsPanelEdit["lastName"].value,
-//     //             "middleName" : detailsPanelEdit["middleName"].value,
-//     //             "surname" : detailsPanelEdit["surname"].value,
-//     //             "nickname" : detailsPanelEdit["nickname"].value,
-//     //         },
-//     //         "address" : {
-//     //             "address1" : detailsPanelEdit["address1"].value,
-//     //             "address2" : detailsPanelEdit["address2"].value,
-//     //             "city" : detailsPanelEdit["city"].value,
-//     //             "zipcode" : detailsPanelEdit["zipcode"].value,
-//     //             "country" : detailsPanelEdit["country"].value,
-//     //         },
-//     //         "birthday" : detailsPanelEdit["birthday"].value,
-
-//     //         "occupation" : detailsPanelEdit["occupation"].value,
-//     //         "email" : detailsPanelEdit["email"].value,
-//     //     })
-//     //     .then(() => {
-//     //         console.log("Updated!");
-//     //         detailsPanelAction.classList.remove("u-d_none");
-//     //         detailsPanelEdit.classList.add("u-d_none");
-//     //         detailsPanelInfo.classList.remove("u-d_none");
-//     //         location.reload();
-//     //     })
-//     //     .catch(err => {
-//     //         console.log(err.message)
-//     //     })
-//     // });
-
-//     cancelButton.addEventListener("click", (e) => {
-//         e.preventDefault();
-//         detailsPanelEdit.classList.add("u-d_none");
-//         detailsPanelInfo.classList.remove("u-d_none");
-//         detailsPanelAction.classList.remove("u-d_none");
-//     });
-
-//     buttonGroup.setAttribute("class", "formActions u-pad_4");
-//     buttonGroup.appendChild(saveButton);
-//     buttonGroup.appendChild(cancelButton);
-    
-//     detailsPanelInfo.classList.add("u-d_none");
-//     detailsPanelAction.classList.add("u-d_none");
-//     detailsPanelEdit.appendChild(buttonGroup);
-
-//     // add save/cancel action
-//     // turn all information into inputs
-// }
-
-// const createMemberInput = (detailName, data, name, type = "text") => {
-//     data = data ? data : '';
-
-//     if (detailName === "Birthday") {
-//         type = "date"
-//     }
-
-//     let inputGroup = `<div class="inputGroup inputGroup__horizontal">
-//                             <label class="u-mar-r_2 u-w_33perc">${detailName}</label>
-//                             <input class="u-mar-l_auto u-flex_1'" type="${type}" name="${name}" value="${data}">
-//                         </div>`
-
-//     detailsPanelEdit.innerHTML += inputGroup;
-// }
-
-// const removeLeaf = async () => {
-//     let reqRemovalDoc = getDocFromDetailsPanelId();
-
-//     if (reqRemovalDoc.data().claimed_by === authMemberDoc.id) {
-//         alert("You cannot delete yourself!");
-//         return
-//     } else {
-//         if (0 > 0) {
-//             console.log("do nothing?")
-//             // Dont remove completely, but mark as "empty connection"?
-//         }
-//         else {
-    
-//             if (reqRemovalDoc.data().topMember === true) {
-//                 console.log(`TopMember deleted. Top Member reassigned to ${reqRemovalDoc.data().children[0]}`);
-//                 currentTreeLeafCollectionRef.doc(reqRemovalDoc.data().children[0]).update({topMember: true});
-//             }
-    
-//             if (reqRemovalDoc.data().parents.length > 0) {
-//                 for (parentId of reqRemovalDoc.data().parents) {
-//                     console.log(`Updating parent ${parentId}`);
-//                     currentTreeLeafCollectionRef.doc(parentId).update({
-//                         children: firebase.firestore.FieldValue.arrayRemove(reqRemovalDoc.id)
-//                     })
-//                     .then((ref) => {
-//                         console.log("Parent successfully updated")
-//                     })
-//                     .catch(err => {
-//                         console.log(`Parent not updated`);
-//                         console.log(err.message);
-//                     })
-//                 }
-//             }
-    
-//             if (reqRemovalDoc.data().children.length > 0) {
-//                 for (childId of reqRemovalDoc.data().children) {
-//                     console.log(`Updating child ${childId}`);
-//                     currentTreeLeafCollectionRef.doc(childId).update({
-//                         parents: firebase.firestore.FieldValue.arrayRemove(reqRemovalDoc.id)
-//                     })
-//                     .then((ref) => {
-//                         console.log("Child successfully updated")
-//                     })
-//                     .catch(err => {
-//                         console.log(`Child not updated`);
-//                         console.log(err.message);
-//                     })
-//                 }
-//             }
-            
-//             if (reqRemovalDoc.data().spouses) {
-//                 if ( Object.keys(reqRemovalDoc.data().spouses).length > 0 ) {
-//                     for ( spouseId of Object.keys(reqRemovalDoc.data().spouses) ) {
-//                         console.log(`Updating spouse ${spouseId}`);
-//                         currentTreeLeafCollectionRef.doc(spouseId).update({
-//                             [`spouses.${reqRemovalDoc.id}`] : firebase.firestore.FieldValue.delete()
-//                         })
-//                         .then(() => {
-//                             console.log("Spouse successfully updated")
-//                         })
-//                         .catch(err => {
-//                             console.log(`Spouse not updated`);
-//                             console.log(err.message);
-//                         })
-//                     }
-//                 }
-//             }
-    
-//             if (reqRemovalDoc.data().siblings.length > 0) {
-//                 for (siblingId of reqRemovalDoc.data().siblings) {
-//                     console.log(`Updating sibling ${siblingId}`);
-//                     currentTreeLeafCollectionRef.doc(siblingId).update({
-//                         siblings: firebase.firestore.FieldValue.arrayRemove(reqRemovalDoc.id)
-//                     })
-//                     .then((ref) => {
-//                         console.log("Sibling successfully updated")
-//                     })
-//                     .catch(err => {
-//                         console.log(`Sibling not updated`);
-//                         console.log(err.message);
-//                     })
-//                 }
-//             }
-
-//             treesRef.doc(currentTreeDoc.id).update({
-//                 "admins" : firebase.firestore.FieldValue.arrayRemove(reqRemovalDoc.data().claimed_by),
-//                 "contributors" : firebase.firestore.FieldValue.arrayRemove(reqRemovalDoc.data().claimed_by),
-//                 "viewers" : firebase.firestore.FieldValue.arrayRemove(reqRemovalDoc.data().claimed_by)
-//             });
-    
-//             currentTreeLeafCollectionRef.doc(reqRemovalDoc.id).delete()
-//             .then(() => {
-//                 console.log("user was deleted");
-//                 location.reload();
-//             })
-//             .catch(err => {
-//                 console.log(err.message);
-//             })
-//             // document.querySelector(`[data-id="${reqRemovalDoc.id}"]`).remove();
-//         }
-//     }
-// }
 
 viewPermissionsTree.addEventListener('click', (e) => {
     e.preventDefault();
@@ -1059,9 +836,61 @@ const getListViewInfo = (leafDoc) => {
 const showListView = (show = true) => {
     if (show) {
         familyTreeEl.classList.add("view_list");
+        let leaves = familyTreeEl.querySelectorAll(".leaf");
+        for (leafEl of leaves) {
+            if (leafEl.querySelector(".list__information")) {
+                leafEl.querySelector(".list__information").style.display = "block";
+            } else {
+                let leafId = leafEl.getAttribute("data-id");
+                let leafDoc = LocalDocs.getLeafById(leafId);
+                let leafImageEl = leafEl.querySelector(".leaf__image");
+                let data = leafDoc ? leafDoc.data() : null;
+                if (data.claimed_by) {
+                    data = LocalDocs.getMemberById(data.claimed_by).data();
+                }
+                let firstName = data.name.firstName ? data.name.firstName : '';
+                let lastName = data.name.lastName ? data.name.lastName : '';
+                let email = data.email ? data.email : '';
+                let birthday = data.birthday ? convertBirthday(data.birthday) : '';
+                let homePhone = data.phone.homePhone ? data.phone.homePhone : '';
+                let workPhone = data.phone.workPhone ? data.phone.workPhone : '';
+                let mobilePhone = data.phone.mobilePhone ? data.phone.mobilePhone : '';
+                let address1 = data.address.address1 ? data.address.address1 : '';
+                let address2 = data.address.address2 ? data.address.address2 : '';
+                let city = data.address.city ? data.address.city : '';
+                let zipcode = data.address.zipcode ? data.address.zipcode : '';
+
+                if (address1 || address2) {
+                    address = `${address1} ${address2}, </br>${city} ${zipcode}`
+                } else {
+                    address = `${city} ${zipcode}`
+                }
+
+                let content = `
+                    <p class="list__information u-w_full">
+                        <span class="u-bold">${firstName} ${lastName}</span>
+                        <span tooltip-position="top middle" tooltip="Email">${email}</span>
+                        <span tooltip-position="top middle" tooltip="Mobile phone">${mobilePhone}</span>
+                        <span tooltip-position="top middle" tooltip="Birthday">${birthday}</span>
+                        <span tooltip-position="top middle" tooltip="Address">${address}</span>
+                    </p>`;
+    
+                // First + Lastname
+                // Email
+                // Birthdate
+                // Phone
+                // Address
+    
+                leafImageEl.insertAdjacentHTML("afterend", content);
+            }
+        }
         // Generate date for tree view
     } else {
         familyTreeEl.classList.remove("view_list");
+        let infos = familyTreeEl.querySelectorAll(".list__information");
+        for (infoEl of infos ) {
+            infoEl.style.display = "none";
+        }
     }
 }
 
@@ -1083,302 +912,6 @@ const newTreeForFirebase = (params) => {
 
     return newTreeObject;
 }
-
-// const addChild = (e) => {
-//     let addChildTo = getDocFromDetailsPanelId(true);
-//     console.log(`I'm finna add a child to ${addChildTo.id}`);
-
-//     let parentArray = [addChildTo.id];
-//     let siblingsArray = [];
-
-//     if (addChildTo.data().spouses) {
-//         for (spouseId of Object.keys(addChildTo.data().spouses)) {
-//             parentArray.push(spouseId);
-//         }
-//     }
-
-//     if (addChildTo.data().children) {
-//         for (childId of addChildTo.data().children) {
-//             siblingsArray.push(childId);
-//         }
-//     }
-
-//     currentTreeLeafCollectionRef.add(
-//         newLeafForFirebase({
-//             "siblings": siblingsArray,
-//             "parents": parentArray
-//         })
-//     )
-//     .then((newChildRef) => {
-//         for (parentId of parentArray) {
-//             currentTreeLeafCollectionRef.doc(parentId).update({
-//                 "children": firebase.firestore.FieldValue.arrayUnion(newChildRef.id)
-//             })
-//             .then(() => {
-//                 console.log(`${parentId} has a new child: ${newChildRef.id}`)
-//             })
-//             .catch(err => {
-//                 console.log(err.message);
-//             })
-//         }
-//         if (siblingsArray.length > 0) {
-//             for (siblingId of siblingsArray) {
-//                 currentTreeLeafCollectionRef.doc(siblingId).update({
-//                     "siblings": firebase.firestore.FieldValue.arrayUnion(newChildRef.id)
-//                 })
-//                 .then(() => {
-//                     console.log(`${siblingId} has a new sibling: ${newChildRef.id}`)
-//                 })
-//                 .catch(err => {
-//                     console.log(err.message);
-//                 })
-//             }
-//         }
-//         location.reload();
-//     })
-// }
-
-// const addSpouse = (e) => {
-//     let addSpouseTo = getDocFromDetailsPanelId(true);
-//     let spouseArray = [];
-
-//     if (addSpouseTo.data().spouses) {
-//         for (spouseId of Object.keys(addSpouseTo.data().spouses)) {
-//             spouseArray.push(spouseId);
-//         }
-//     }
-
-//     let spouseObject = {};
-//     let childrenArray = [];
-
-//     spouseObject[addSpouseTo.id] = null;
-
-//     if (addSpouseTo.data().children) {
-//         for (childId of addSpouseTo.data().children) {
-//             childrenArray.push(childId);
-//         }
-//     }
-
-//     if (spouseArray && spouseArray.length > 0) {
-//         for (spouseId of spouseArray) {
-//             spouseObject[`${spouseId}`] = null;
-//         }
-//     }
-
-//     currentTreeLeafCollectionRef.add(
-//         newLeafForFirebase({
-//             "spouses": spouseObject,
-//             "children": childrenArray
-//         })
-//     ).then(newSpouseDoc => {
-//         console.log(`${newSpouseDoc.id} was successfully created!`)
-//         currentTreeLeafCollectionRef.doc(addSpouseTo.id).update({
-//             [`spouses.${newSpouseDoc.id}`] : null
-//         })
-//         .then(() => {
-//             console.log(`${newSpouseDoc.id} was added as a spouse to ${addSpouseTo.id}`)
-
-//             if (childrenArray.length > 0) {
-//                 for (childId of childrenArray) {
-//                     currentTreeLeafCollectionRef.doc(childId).update({
-//                         "parents" : firebase.firestore.FieldValue.arrayUnion(childId)
-//                     })
-//                     .then(() => {
-//                         console.log(`${childId} has a new parent: ${newSpouseDoc.id}`)
-//                     })
-//                     .catch(err => {
-//                         console.log(err.message)
-//                     })
-//                 }
-//             }
-            
-//             if (addSpouseTo.data().spouses) {
-//                 for (spouseId of spouseArray) {
-//                     console.log(`Adding newSPouse to ${spouseId}`);
-//                     currentTreeLeafCollectionRef.doc(spouseId).update({
-//                         [`spouses.${newSpouseDoc.id}`]: null
-//                     })
-//                     .then(() => {
-//                         console.log("Spouse successfully added")
-//                     })
-//                     .catch(err => {
-//                         console.log(`Spouse not added`);
-//                         console.log(err.message);
-//                     })
-//                 }
-//             }
-//             location.reload();
-//         })
-//         .catch(err => {
-//             console.log(err.message)
-//         })
-//     })
-// }
-
-// const addSibling = (e) => {
-//     let addSiblingTo = getDocFromDetailsPanelId(true);
-//     console.log(`I'm finna add a sibling to ${addSiblingTo.id}`);
-
-//     let parentArray = [];
-//     let siblingArray = [addSiblingTo.id];
-
-//     if (addSiblingTo.data().siblings) {
-//         for (siblingId of addSiblingTo.data().siblings) {
-//             siblingArray.push(siblingId);
-//         }
-//     }
-
-//     if (addSiblingTo.data().parents) {
-//         for (parentId of addSiblingTo.data().parents) {
-//             parentArray.push(parentId);
-//         }
-//     }
-
-//     currentTreeLeafCollectionRef.add(
-//         newLeafForFirebase({
-//             "siblings": siblingArray,
-//             "parents": parentArray
-//         })
-//     )
-//     .then((newSiblingRef) => {
-//         for (siblingId of siblingArray) {
-//             currentTreeLeafCollectionRef.doc(siblingId).update({
-//                 "siblings" : firebase.firestore.FieldValue.arrayUnion(newSiblingRef.id)
-//             })
-//             .then(() => {
-//                 console.log(`${siblingId} has added ${newSiblingRef.id} as a sibling.`)
-//             })
-//             .catch(err => {
-//                 console.log(err.message);
-//             })
-//         }
-
-//         if (parentArray.length > 0) {
-//             for (parentId of parentArray) {
-//                 currentTreeLeafCollectionRef.doc(parentId).update({
-//                     "children" : firebase.firestore.FieldValue.arrayUnion(newSiblingRef.id)
-//                 })
-//                 .then(() => {
-//                     console.log(`${parentId} has added ${newSiblingRef.id} as a sibling.`)
-//                 })
-//                 .catch(err => {
-//                     console.log(err.message);
-//                 })
-//             }
-//         }
-//         location.reload();
-//     })
-//     .catch(err => {
-//         console.log(err.message);
-//     })
-
-//     // Get your siblings and add them as siblings to the newSibling
-//     // add newSibilng to your siblings
-//     // If you have parent(s), add newSibling as a child
-// }
-
-// const removeActiveLeafClass = () => {
-//     let activeLeaf = document.querySelector(".leaf.active");
-
-//     if (activeLeaf) {
-//         activeLeaf.classList.remove("active");
-//     };
-// }
-
-// const showDetailPanels = (show) => {
-//     closeAllDropdowns();
-//     detailsPanelInfo.classList.remove("u-d_none");
-//     detailsPanelEdit.classList.add("u-d_none");
-//     detailsPanelEdit.innerHTML = '';
-//     detailsPanelAction.classList.remove("u-d_none");
-
-//     if (show) {
-//         mainContent.classList.add("showDetails");
-//     } else {
-//         mainContent.classList.remove("showDetails");
-//         removeActiveLeafClass();
-//     }
-// }
-// const generateLines = () => {
-//     let spousesElArray = document.querySelectorAll(".spouses");
-
-//     for (spouseContainer of spousesElArray) {
-//         if (spouseContainer.childNodes.length > 1) {
-//             createLine(spouseContainer, spouseContainer.childNodes[0], spouseContainer.childNodes[1]);
-//         }
-//     }
-// }
-
-// const createLine = (branch, element1, element2)  => {
-//     return;
-//     // let e1_box = element1.getBoundingClientRect();
-//     // let e2_box = element2.getBoundingClientRect();
-
-//     // console.log(e1_box);
-//     // console.log(e2_box);
-
-//     // let e1_x = (e1_box.width / 2) + e1_box.x;
-//     // let e1_y = (e1_box.height / 2) + e1_box.y;
-
-//     // let e2_x = (e2_box.width / 2) + e2_box.x;
-//     // let e2_y = (e2_box.height / 2) + e2_box.y;
-
-//     // let midpoint = (e2_box.y + e2_box.x) / 2;
-
-//     if ( branch.nextSibling.classList.contains("descendants") ) {
-//         let parentToChildMiddleBar = document.createElement("div");
-//         parentToChildMiddleBar.setAttribute("class", 'parentToChild__middleBar connectorLine');
-//         branch.nextSibling.insertAdjacentElement('afterbegin', parentToChildMiddleBar);
-
-//         let childLeaves = branch.nextSibling.querySelectorAll(".leaf");
-
-//         if (childLeaves.length > 1) {
-//             for (childLeaf of childLeaves) {
-//                 let childToParentMiddleBar = document.createElement("div");
-//                 childToParentMiddleBar.setAttribute("class", 'childToParent__middleBar connectorLine');
-//                 childLeaf.insertAdjacentElement('afterbegin', childToParentMiddleBar);
-//             }
-//         } else {
-//             console.log("no child leaves");
-//         }
-//     }
-
-
-//     let spouseLine = document.createElement("div");
-//     spouseLine.setAttribute("class", 'spouseToSpouse__line connectorLine');
-
-//     let spouseToChildren = document.createElement("div");
-//     spouseToChildren.setAttribute("class", 'parentToChildren__downLine connectorLine');
-//     // let spouseLine = document.createElement("div");
-//     // spouseLine.setAttribute("class", 'spouseLine');
-
-// //     let svg = `
-// //     <svg height="210" width="500" class="spouseLine">
-// //         <polyline points="
-// //             ${0},${0}
-// //             ${e2_x},${e2_y}
-// //         "
-// //         fill="none" stroke="black" />
-// //     </svg>
-// //   `
-
-//     // let svg = document.createElement("svg");
-//     // let polyline = document.createElement("polyline");
-
-//     // polyline.setAttribute("points", `${e1_x},${e1_y} ${e2_x},${e2_y}`);
-//     // polyline.setAttribute("fill", `none`);
-//     // polyline.setAttribute("stroke", `black`);
-
-//     // svg.setAttribute("class", `spouseLine`);
-//     // svg.setAttribute("width", `100`);
-//     // svg.setAttribute("height", `100`);
-
-//     // svg.appendChild(polyline);
-
-//     // familyTree.appendChild(svg);
-//     branch.appendChild(spouseLine);
-//     branch.appendChild(spouseToChildren);
-// }
 
 initiateModals();
 initiateDropdowns();

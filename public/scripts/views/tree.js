@@ -11,7 +11,6 @@ Tree.setup = function(treeId) {
             pageTitle.innerHTML = LocalDocs.tree ? LocalDocs.tree.data().name : "Tree not found!";
             treesRef.doc(LocalDocs.tree.id).collection('leaves').get()
             .then((response) => {
-
                 LocalDocs.leaves = response.docs;
                 window.currentTreeLeafCollectionRef = treesRef.doc(LocalDocs.tree.id).collection('leaves');
 
@@ -68,14 +67,14 @@ TreeBranch.initiate =  function() {
 
     branchContainer.appendChild(topMemberBranchEl);
     connectLines();
-    panzoom(branchContainer, {
-        minZoom: .25, // prevent zooming out
-        maxZoom: 2, // prevent zooming beyond acceptable levels
-        // bounds: true, // prevent panning outside of container
-        // boundsPadding: .5, // prevent panning outside of container
-        // zoomDoubleClickSpeed: 1
-        zoomSpeed: 0.085 // 6.5% per mouse wheel event
-    });
+    // panzoom(branchContainer, {
+    //     minZoom: .25, // prevent zooming out
+    //     maxZoom: 2, // prevent zooming beyond acceptable levels
+    //     // bounds: true, // prevent panning outside of container
+    //     // boundsPadding: .5, // prevent panning outside of container
+    //     // zoomDoubleClickSpeed: 1
+    //     zoomSpeed: 0.085 // 6.5% per mouse wheel event
+    // });
 }
 
 TreeBranch.clear = function() {

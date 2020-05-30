@@ -192,16 +192,24 @@ path {
     #familyTree.view_list .partners,
     #familyTree.view_list .descendants {
       display: block; }
+    #familyTree.view_list .apart,
+    #familyTree.view_list .together {
+      max-width: 100%; }
     #familyTree.view_list .leaf {
-      --leafSpacing: 8px;
+      --leafSpacing: 0;
       width: 100%;
       border-radius: 8px;
       margin-left: 0;
       height: unset;
-      padding: 16px;
+      padding: 8px;
       justify-content: unset;
       box-shadow: none;
-      align-items: center; }
+      align-items: center;
+      border-bottom: 1px solid var(--color_border);
+      border-radius: 0;
+      display: grid;
+      grid-template-columns: var(--leafSize) 1fr;
+      gap: 0; }
       #familyTree.view_list .leaf:hover {
         transform: none; }
       #familyTree.view_list .leaf:hover:before {
@@ -222,6 +230,18 @@ path {
         top: 0; }
       #familyTree.view_list .leaf path {
         display: none; }
+      #familyTree.view_list .leaf .list__information {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 6%; }
+    #familyTree.view_list #branchContainer {
+      transform-origin: unset !important;
+      transform: unset !important;
+      max-width: 1024px;
+      width: 100%;
+      display: block;
+      margin-left: auto;
+      margin-right: auto; }
   #familyTree > .branch {
     will-change: transform; }
 
@@ -266,6 +286,9 @@ path {
     background-size: 100% 200px;
     height: 400px;
     z-index: -1; }
+  #detailsPanel h6 {
+    border-bottom: 1px solid var(--color_border);
+    padding-bottom: 8px; }
 
 .detailsPanel__actions {
   display: flex; }
@@ -433,8 +456,6 @@ input[name*="profile_photo"] {
     opacity: 1;
     transform: scale(1);
     box-shadow: 0 0 0 6px white inset, 0 0 0 4px var(--color_outline); }
-  .leaf > * {
-    pointer-events: none; }
   .leaf .leaf_caption {
     position: absolute;
     padding: 8px 12px;
@@ -473,9 +494,6 @@ input[name*="profile_photo"] {
   .leaf.highlight .leaf_caption {
     transform: scale3d(1.2, 1.2, 1.2);
     transition: transform 0.2s ease-in-out; }
-
-#view-preferences {
-  right: 0; }
 
 [data-view] {
   padding-top: 64px; }
@@ -902,6 +920,9 @@ button,
 .u-jc_flex-end {
   justify-content: flex-end; }
 
+.u-jc_center {
+  justify-content: center; }
+
 .u-pad_0 {
   padding: 0px; }
 
@@ -947,6 +968,9 @@ button,
 
 .u-mar-l_2 {
   margin-left: 16px; }
+
+.u-mar-l_3 {
+  margin-left: 24px; }
 
 .u-mar-r_auto {
   margin-right: auto; }

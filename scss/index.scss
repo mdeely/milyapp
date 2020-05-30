@@ -292,16 +292,26 @@ path {
             display: block;
         }
 
+        .apart,
+        .together {
+            max-width: 100%;
+        }
+
         .leaf {
-            --leafSpacing: 8px;
+            --leafSpacing: 0;
             width: 100%;
             border-radius: 8px;
             margin-left: 0;
             height: unset;
-            padding: 16px;
+            padding: 8px;
             justify-content: unset;
             box-shadow: none;
             align-items: center;
+            border-bottom: 1px solid var(--color_border);
+            border-radius: 0;
+            display: grid;
+            grid-template-columns: var(--leafSize) 1fr;
+            gap: 0;
 
             &:hover {
                 transform: none;
@@ -338,6 +348,22 @@ path {
             path {
                 display: none;
             }
+
+            .list__information {
+                display: grid;
+                grid-template-columns: repeat(5, 1fr);
+                gap: 6%;
+            }
+        }
+
+        #branchContainer {
+            transform-origin: unset !important;
+            transform: unset !important;
+            max-width: 1024px;
+            width: 100%;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
         }
     }
 
@@ -392,6 +418,11 @@ path {
         background-size: 100% 200px;
         height: 400px;
         z-index: -1;
+    }
+
+    h6 {
+        border-bottom: 1px solid var(--color_border);
+        padding-bottom: 8px;
     }
 }
 
@@ -674,7 +705,7 @@ input[name*="profile_photo"] {
     }
 
     > * {
-        pointer-events: none;
+        // pointer-events: none;
     }
 
     .leaf_caption {
@@ -731,9 +762,9 @@ input[name*="profile_photo"] {
 
 }
 
-#view-preferences {
-    right: 0;
-}
+// #view-preferences {
+//     right: 0;
+// }
 
 [data-view] {
     padding-top: 64px;
@@ -1287,6 +1318,10 @@ button,
     justify-content: flex-end;
 }
 
+.u-jc_center {
+    justify-content: center;
+}
+
 .u-pad_0 {
     padding: 0px;
 }
@@ -1346,6 +1381,9 @@ button,
 
 .u-mar-l_2 {
     margin-left: 16px;
+}
+.u-mar-l_3 {
+    margin-left: 24px;
 }
 
 .u-mar-r_auto {

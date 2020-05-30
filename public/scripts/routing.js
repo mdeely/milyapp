@@ -42,7 +42,6 @@ window.router = function(user) {
 
     auth.onAuthStateChanged(function(user) {
         if (user) {
-            Nav.update(user);
             if (user.emailVerified) {
                 let uid = firebase.auth().currentUser.uid;
                 membersRef.where('claimed_by', '==', uid).limit(1).get()
@@ -89,6 +88,8 @@ window.router = function(user) {
                 accountVerificationViewOnAuthChange(user);
                 console.log("Go verify yourself");
             }
+            Nav.update(user);
+
         } else {
             Nav.update();
             reqRoute.onAuthController();

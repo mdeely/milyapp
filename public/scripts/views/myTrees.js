@@ -152,12 +152,17 @@ const populateMyTreesList = async () => {
             }
         }
 
+        editTreeForm.removeEventListener("submit", console.log("removed!"));
+
         editTreeForm.addEventListener('submit', (e) => {
             e.preventDefault();
             let memberEls = editTreeForm.querySelectorAll(`[data-member-id]`);
             let treeId = editTreeForm[`edit-tree_id`].value;
 
             let obj = {};
+            let makePublicCheckboxState = editTreeForm[`make-public`].checked;
+
+            console.log(makePublicCheckboxState);
 
             for (updateMemberPermission of memberEls) {
                 let memberId = updateMemberPermission.getAttribute("data-member-id");
@@ -168,16 +173,17 @@ const populateMyTreesList = async () => {
             };
 
             treesRef.doc(treeId).update({
-                "permissions": obj
+                "permissions": obj,
+                "public" : makePublicCheckboxState
             })     
             .then(() => {
                 console.log("updated!");
+                location.reload();
             })   
             .catch(() => {
                 console.log(err.message);
             }) 
-
-            closeModals();
+            // closeModals();
         })
 
 

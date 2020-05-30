@@ -40,6 +40,7 @@ const getNotificationsByAuthMember = () => {
 
         if (docs.length > 0) {
             for (doc of docs) {
+                console.log("There is a notification");
                 let notificationEl = document.createElement("div");
                 let dismissNotificationButton = document.createElement('button');
                 let icon = `<i class="fa fa-times"></i>`
@@ -90,9 +91,10 @@ const getNotificationsByEmail = async (email) => {
         notificationQuery.get().then(queryResult  => {
             let docs = queryResult.docs;
             if (docs.length > 0) {
-                notificationIndicator.classList.remove("u-visibilty_hidden");
+                notificationIndicator.classList.remove("u-visibility_hidden");
     
                 for (doc of docs) {
+                    console.log(doc);
                     let notificationEl = document.createElement("div");
                     let acceptNotification = document.createElement("button");
                     let declinetNotification = document.createElement("button");
@@ -157,11 +159,10 @@ const handleNotification = (method, doc) => {
     if (method === "accept") {
         membersRef.doc(LocalDocs.member.id).get()
         .then(reqMemberDoc => {
-            let permissionType = doc.data().permission_type + "s";
 
             reqTreeRef.update({
                 // Place member into the correct permission.
-                [permissionType] : firebase.firestore.FieldValue.arrayUnion(LocalDocs.member.id)
+                [`permissions.${LocalDocs.member.id}`] : doc.data().permission_type
             })
             .then(() => console.log("permission added to tree successfully!"))
             .catch(() => console.log("error while adding permission to tree"));

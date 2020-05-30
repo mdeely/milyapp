@@ -111,6 +111,7 @@ DetailsPanel.show = function(docId = null) {
 DetailsPanel.close = function() {
     mainContent.classList.remove("showDetails");
     Leaf.removeActive();
+    closeAllDropdowns();
 }
 
 DetailsPanel.getLeafDoc = function() {
@@ -138,10 +139,11 @@ DetailsPanel.getActiveDoc = function() {
 DetailsPanel.populate = function(leafDoc, leafEl) {
     let dataSource = leafDoc.data();
     let detailsPhoto = leafEl.querySelector(".leaf__image").getAttribute("style");
-    
+    let memberPermissionType = authLeafPermissionType();
+
     if (leafDoc.data().claimed_by) {
         reqMemberDoc = LocalDocs.members.find(memberDoc => memberDoc.id === leafDoc.data().claimed_by);
-        dataSource = reqMemberDoc.data();
+        dataSource = reqMemberDoc ? reqMemberDoc.data() : dataSource ;
     }
 
     detailsPanelMetaData.textContent = '';
@@ -149,79 +151,56 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
     detailsPanelFirstName.textContent = dataSource.name.firstName ? dataSource.name.firstName : "No name";
     detailsPanelFullName.textContent = createFullName(leafDoc);
     detailsPanel.setAttribute("data-details-id", leafDoc.id);
+    detailsPanelProfileImage.setAttribute("style", detailsPhoto);
 
-    if (leafDoc.data().topMember === true) {
-        addParentButton.classList.remove("u-d_none");
-    } else {
-        addParentButton.classList.add("u-d_none");
+    // claimed leafs can always edit themselves
+    // members can add if they are an admin or contributor
+    // members can remove if they are an admin or a contributor+creator of a leaf
+    
+    if (memberPermissionType === "admin" || memberPermissionType === "contributor") {
+        inviteMemberButton.classList.remove("u-d_none");
+        editMemberButton.classList.remove("u-d_none");
+        addRelationshipButton.classList.remove("u-d_none");
+        removeLeafButton.classList.remove("u-d_none");
+
+        if (leafDoc.data().topMember === true) {
+            addParentButton.classList.remove("u-d_none");
+        } else {
+            addParentButton.classList.add("u-d_none");
+        }
+
+        if (memberPermissionType === "contributor") {
+            if (leafDoc.data().created_by === LocalDocs.member.id) {
+                removeLeafButton.classList.remove("u-d_none");
+            } else {
+                removeLeafButton.classList.add("u-d_none");
+            }
+        }
+    } else if (memberPermissionType === "viewer" || !memberPermissionType)  {
+        console.log("I'm a viewers")
+        addParentButton.classList.add("u-d_none")
+        inviteMemberButton.classList.add("u-d_none");
+        removeLeafButton.classList.add("u-d_none");
+        editMemberButton.classList.add("u-d_none");
+        addRelationshipButton.classList.add("u-d_none");
     }
 
     if (leafDoc.data().claimed_by) {
-        inviteMemberButton.classList.add("u-d_none");
         editMemberButton.classList.add("u-d_none");
+        inviteMemberButton.classList.add("u-d_none");
         detailsPanel.setAttribute("data-details-member-id", leafDoc.data().claimed_by);
+        if (leafDoc.data().claimed_by === LocalDocs.member.id) {
+            editMemberButton.classList.remove("u-d_none");
+        }
     } else {
-        inviteMemberButton.classList.remove("u-d_none");
-        editMemberButton.classList.remove("u-d_none");
         detailsPanel.removeAttribute("data-details-member-id");
     }
 
-    if (leafDoc.data().claimed_by === LocalDocs.member.id) {
-        editMemberButton.classList.remove("u-d_none");
-    }
-
-    // Determine if leafDoc has a memberDoc.
-    if (detailsPanel.hasAttribute("data-details-member-id")) {
-        // do something if is claimed member
-    }
-
-    detailsPanelProfileImage.setAttribute("style", detailsPhoto);
-    memberPermissionType = authLeafPermissionType();
-    
-    if (memberPermissionType && memberPermissionType === "admin" || memberPermissionType && memberPermissionType === "contributor") {
-        addParentButton.classList.remove("u-d_none")
-        inviteMemberButton.classList.remove("u-d_none");
-        removeLeafButton.classList.remove("u-d_none");
-        editMemberButton.classList.remove("u-d_none");
-        addRelationshipButton.classList.remove("u-d_none");
-
-        if (leafDoc.data().topMember !== true) {
-            addParentButton.classList.add("u-d_none")
-        }
-
-        if (memberPermissionType === "contributor" && leafDoc.data().created_by !== LocalDocs.member.id) {
-            console.log("should not have removed button");
-        }
-
-        if (leafDoc.data().invitation) {
-            inviteMemberButton.classList.add("u-d_none");
-        }
-
-        if (leafDoc.data().claimed_by) {
-            if (leafDoc.data().claimed_by === LocalDocs.member.id) {
-                removeLeafButton.classList.add("u-d_none");
-                editMemberButton.classList.remove("u-d_none");
-                inviteMemberButton.classList.add("u-d_none");
-            } else {
-                inviteMemberButton.classList.add("u-d_none");
-            }
-        }
-
-    } else if (memberPermissionType || memberPermissionType === "viewer") {
-        addParentButton.classList.add("u-d_none")
+    if (leafDoc.data().invitation) {
         inviteMemberButton.classList.add("u-d_none");
-        removeLeafButton.classList.add("u-d_none");
-        editMemberButton.classList.add("u-d_none");
-        addRelationshipButton.classList.add("u-d_none");
-    } else {
-        addParentButton.classList.add("u-d_none")
-        inviteMemberButton.classList.add("u-d_none");
-        removeLeafButton.classList.add("u-d_none");
-        editMemberButton.classList.add("u-d_none");
-        addRelationshipButton.classList.add("u-d_none");
     }
 
-    const detailsHeader =`<h6 class="u-mar-b_3 u-mar-t_8">Details</h6>`;
+    const detailsHeader =`<h6 class="u-mar-b_2 u-mar-t_8">Details</h6>`;
 
     let hasDetails = false;
 
@@ -230,9 +209,11 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
         "functionCall": generateDetailElement
     });
 
-    if (hasDetails) {
-        detailsPanelMetaData.insertAdjacentHTML("afterBegin", detailsHeader);
-        // const detailsNoInfo =`<div class="u-italic u-text_low u-font-size_13">No details</div>`;
+    detailsPanelMetaData.insertAdjacentHTML("afterBegin", detailsHeader);
+
+    if (!hasDetails) {
+        const detailsNoInfo =`<p class="u-italic u-text_lowest u-font-size_13">No details provided</p>`;
+        detailsPanelMetaData.insertAdjacentHTML("beforeEnd", detailsNoInfo);
         // detailsPanelMetaData.innerHTML += detailsNoInfo;
     }
 
@@ -245,7 +226,13 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
         let reqName = value["dataPath"];
         let reqParentName = parentValue ? parentValue["dataPath"] : null;
         let reqIcon = value["icon"];
-        let data = reqParentName ? dataSource[reqParentName][reqName] : dataSource[reqName];
+        let data;
+
+        if (reqParentName) {
+            data = dataSource[reqParentName][reqName] ? dataSource[reqParentName][reqName] : null;
+        } else {
+            data = dataSource[reqName] ? dataSource[reqName] : null;
+        }
 
         if (data) {
             hasDetails = true;
@@ -253,10 +240,7 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
 
         if (data) {
             if (data && reqName === "birthday" || reqName === "deathdate") {
-                var options = { year: 'numeric', month: 'long', day: 'numeric' };
-        
-                let date = new Date(data.replace(/-/g, '\/'));
-                data = new Intl.DateTimeFormat('en-US', options).format(date);
+                data = convertBirthday(data);
             }
     
             let infoEl = `<div class="detailsPanel__item detailsPanel__${reqName} u-mar-b_3" tooltip-reveal="fast" tooltip="${key}" tooltip-position="top left"><i class="fa fa-${reqIcon} detailsPanel__icon u-mar-r_2"></i>${data}</div>`
@@ -315,6 +299,7 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
         function renderRelationship(reqId) {
             let familyLeafDoc = LocalDocs.getLeafById(reqId);
             let familyMemberDoc = null;
+            let memberPermissionType = authLeafPermissionType();
             
             if (familyLeafDoc.data().claimed_by) {
                 familyMemberDoc = LocalDocs.getMemberDocByIdFromCurrentTree(familyLeafDoc.data().claimed_by);
@@ -330,7 +315,7 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
             let parentAction = '';
             let leafEl = document.querySelector(`[data-id="${reqId}"]`);
             let profileImage = leafEl ? leafEl.querySelector(".leaf__image").getAttribute("style") : null;
-    
+
             if (relativeType === "parents") {
                 if (familyLeafDoc.data().children[leafDoc.id] !== null) {
                     let parentType = `${familyLeafDoc.data().children[leafDoc.id]}`;
@@ -343,15 +328,18 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
                 } else {
                     label = ``
                 }
-                parentAction = `<button class="iconButton white u-mar-l_auto" tooltip="Options" tooltip-position="top middle" data-dropdown-target="parent_options_menu__${familyLeafDoc.id}">
-                                <i class="fa fa-ellipsis-h"></i>
-                            </button>
-                            <div id="parent_options_menu__${familyLeafDoc.id}" class="dropdown u-visibility_hidden u-p_fixed">
-                                <div class="dropdown__item" data-value="Biological">Biological</div>
-                                <div class="dropdown__item" data-value="Step">Step-parent</div>
-                                <div class="dropdown__item" data-value="Unrelated">Unrelated</div>
 
-                            </div>`
+                if (memberPermissionType === "admin" || memberPermissionType === "contributor") {
+                        parentAction = `<button class="iconButton white u-mar-l_auto" tooltip="Options" tooltip-position="top middle" data-dropdown-target="parent_options_menu__${familyLeafDoc.id}">
+                        <i class="fa fa-ellipsis-h"></i>
+                    </button>
+                    <div id="parent_options_menu__${familyLeafDoc.id}" class="dropdown u-visibility_hidden u-p_fixed">
+                        <div class="dropdown__item" data-value="Biological">Biological</div>
+                        <div class="dropdown__item" data-value="Step">Step-parent</div>
+                        <div class="dropdown__item" data-value="Unrelated">Unrelated</div>
+
+                    </div>`
+                }
             } else if (relativeType === "children") {
                 if (familyLeafDoc.data().parents[leafDoc.id] !== null) {
                     let childType = familyLeafDoc.data().parents[leafDoc.id];
@@ -363,15 +351,20 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
                 } else {
                     label = ``
                 }
-                childAction = `<button class="iconButton white u-mar-l_auto" tooltip="Options" data-dropdown-target="child_options_menu__${familyLeafDoc.id}">
-                                <i class="fa fa-ellipsis-h"></i>
-                            </button>
-                            <div id="child_options_menu__${familyLeafDoc.id}" class="dropdown u-visibility_hidden u-p_fixed">
-                                <div class="dropdown__item" data-value="Adopted">Adopted</div>
-                                <div class="dropdown__item" data-value="Biological">Biological</div>
-                                <div class="dropdown__item" data-value="Step">Step-child</div>
-                                <div class="dropdown__item" data-value="Unrelated">Unrelated</div>
-                            </div>`
+                if (memberPermissionType === "admin" || memberPermissionType === "contributor") {
+                    if (memberPermissionType !== "contributor" && familyLeafDoc.data().created_by === LocalDocs.member.id) {
+                        
+                    }
+                        childAction = `<button class="iconButton white u-mar-l_auto" tooltip="Options" tooltip-position="top middle" data-dropdown-target="child_options_menu__${familyLeafDoc.id}">
+                        <i class="fa fa-ellipsis-h"></i>
+                    </button>
+                    <div id="child_options_menu__${familyLeafDoc.id}" class="dropdown u-visibility_hidden u-p_fixed">
+                        <div class="dropdown__item" data-value="Adopted">Adopted</div>
+                        <div class="dropdown__item" data-value="Biological">Biological</div>
+                        <div class="dropdown__item" data-value="Step">Step-child</div>
+                        <div class="dropdown__item" data-value="Unrelated">Unrelated</div>
+                    </div>`
+                }
             } else if (relativeType === "siblings") {
                 label = ``
             } else if (relativeType === "partners") { 
@@ -382,18 +375,20 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
                 } else {
                     label = ``
                 }
-                partnerAction = `<button class="iconButton white u-mar-l_auto" tooltip="Options" data-dropdown-target="partner_options_menu__${familyLeafDoc.id}">
-                                    <i class="fa fa-ellipsis-h"></i>
-                                </button>
-                                <div id="partner_options_menu__${familyLeafDoc.id}" class="dropdown u-visibility_hidden u-p_fixed">
-                                    <div class="dropdown__item" data-value="Dating">Dating</div>
-                                    <div class="dropdown__item" data-value="Engaged">Engaged</div>
-                                    <div class="dropdown__item" data-value="Married">Married</div>
-                                    <div class="dropdown__item" data-value="Divorced">Divorced</div>
-                                    <div class="dropdown__item" data-value="Separated">Separated</div>
-                                    <div class="dropdown__item" data-value="Widowed">Widowed</div>
-                                    <div class="dropdown__item" data-value="Unrelated">Unrelated</div>
-                                </div>`
+                if (memberPermissionType === "admin" || memberPermissionType === "contributor") {
+                    partnerAction = `<button class="iconButton white u-mar-l_auto" tooltip="Options" tooltip-position="top middle" data-dropdown-target="partner_options_menu__${familyLeafDoc.id}">
+                                        <i class="fa fa-ellipsis-h"></i>
+                                    </button>
+                                    <div id="partner_options_menu__${familyLeafDoc.id}" class="dropdown u-visibility_hidden u-p_fixed">
+                                        <div class="dropdown__item" data-value="Dating">Dating</div>
+                                        <div class="dropdown__item" data-value="Engaged">Engaged</div>
+                                        <div class="dropdown__item" data-value="Married">Married</div>
+                                        <div class="dropdown__item" data-value="Divorced">Divorced</div>
+                                        <div class="dropdown__item" data-value="Separated">Separated</div>
+                                        <div class="dropdown__item" data-value="Widowed">Widowed</div>
+                                        <div class="dropdown__item" data-value="Unrelated">Unrelated</div>
+                                    </div>`
+                }
             }
 
             let detailsPanelItem = createElementWithClass("div", "detailsPanel__item u-mar-b_2 u-d_flex u-align-items_center");
@@ -429,19 +424,28 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
 
             detailsPanelImmediateFamily.appendChild(detailsPanelItem);
 
-            if (relativeType === "partners") {
-                initiatePartnerOptions(familyLeafDoc.id);
-            }
-
-            if (relativeType === "children") {
-                initiateChildOptions(familyLeafDoc.id);
-            }
-
-            if (relativeType === "parents") {
-                initiateParentOptions(familyLeafDoc.id);
+            if (memberPermissionType === "admin" || memberPermissionType === "contributor") {
+                if (relativeType === "partners") {
+                    initiatePartnerOptions(familyLeafDoc.id);
+                }
+    
+                if (relativeType === "children") {
+                    initiateChildOptions(familyLeafDoc.id);
+                }
+    
+                if (relativeType === "parents") {
+                    initiateParentOptions(familyLeafDoc.id);
+                }
             }
         }
     }
+}
+
+function convertBirthday(data) {
+    let options = { year: 'numeric', month: 'long', day: 'numeric' };
+
+    let date = new Date(data.replace(/-/g, '\/'));
+    return new Intl.DateTimeFormat('en-US', options).format(date);
 }
 
 function initiatePartnerOptions(leafId) {
@@ -696,6 +700,7 @@ DetailsPanel.editMember = function() {
     let reqEditDoc = DetailsPanel.getLeafDoc();
     let reqEditDocData = reqEditDoc.data();
     let memberDoc = null;
+    let header = `<h4 class="u-mar-t_2 u-mar-b_3">Edit details</h4>`
 
     if (reqEditDocData.claimed_by) {
         memberDoc = LocalDocs.getMemberDocByIdFromCurrentTree(reqEditDocData.claimed_by);
@@ -857,6 +862,8 @@ DetailsPanel.editMember = function() {
     detailsPanelInfo.classList.add("u-d_none");
     detailsPanelAction.classList.add("u-d_none");
     detailsPanelEdit.appendChild(buttonGroup);
+    detailsPanelEdit.insertAdjacentHTML("afterBegin", header);
+
 
     // add save/cancel action
     // turn all information into inputs
@@ -867,9 +874,9 @@ let MemberBlueprint = {};
 MemberBlueprint.object = {
     "Name" : { "dataPath" : "name", "icon" : "user", 
                 "defaultValue" : {
-                    "First Name" : { "dataPath" : "firstName", "defaultValue" : null, "icon" : "user" },
-                    "Middle Name" : { "dataPath" : "middleName", "defaultValue" : null, "icon" : "user" },
-                    "Last Name" : { "dataPath" : "lastName", "defaultValue" : null, "icon" : "user" },
+                    "First name" : { "dataPath" : "firstName", "defaultValue" : null, "icon" : "user" },
+                    "Middle name" : { "dataPath" : "middleName", "defaultValue" : null, "icon" : "user" },
+                    "Last name" : { "dataPath" : "lastName", "defaultValue" : null, "icon" : "user" },
                     "Birth name" : { "dataPath" : "birthName", "defaultValue" : null, "icon" : "user" },
                     "Nickname" : { "dataPath" : "nickname", "defaultValue" : null, "icon" : "user" },
                     "Phonetic" : { "dataPath" : "phonetic", "defaultValue" : null, "icon" : "user" }
@@ -998,7 +1005,7 @@ LocalDocs.getMemberDocByIdFromCurrentTree = function(reqId) {
 }
 
 LocalDocs.getMemberById = function(reqId) {
-    return LocalDocs.trees.find(doc => doc.id === reqId);
+    return LocalDocs.members.find(doc => doc.id === reqId);
 }
 
 LocalDocs.getLeafById = function(reqId) {

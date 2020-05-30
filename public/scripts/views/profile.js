@@ -215,6 +215,11 @@ const newMember = (button, form) => {
                 "zipcode" : form["zipcode"].value,
                 "country" : form["country"].value,
             },
+            "phone" : {
+                "homePhone" : form["homePhone"].value,
+                "mobilePhone" : form["mobilePhone"].value,
+                "workPhone" : form["workPhone"].value,
+            },
             "birthday" : form["birthday"].value,
 
             "occupation" : form["occupation"].value,
