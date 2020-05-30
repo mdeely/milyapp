@@ -311,7 +311,7 @@ path {
             border-radius: 0;
             display: grid;
             grid-template-columns: var(--leafSize) 1fr;
-            gap: 0;
+            gap: 8px;
 
             &:hover {
                 transform: none;
@@ -330,7 +330,8 @@ path {
             }
 
             &__image {
-                --leafSize: 56px;
+                --leafSize: 40px;
+                pointer-events: none;
             }
 
             &__detail-item {
@@ -353,6 +354,8 @@ path {
                 display: grid;
                 grid-template-columns: repeat(5, 1fr);
                 gap: 6%;
+                margin: 0;
+                pointer-events: unset;
             }
         }
 
@@ -705,7 +708,7 @@ input[name*="profile_photo"] {
     }
 
     > * {
-        // pointer-events: none;
+        pointer-events: none;
     }
 
     .leaf_caption {

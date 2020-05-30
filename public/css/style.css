@@ -209,7 +209,7 @@ path {
       border-radius: 0;
       display: grid;
       grid-template-columns: var(--leafSize) 1fr;
-      gap: 0; }
+      gap: 8px; }
       #familyTree.view_list .leaf:hover {
         transform: none; }
       #familyTree.view_list .leaf:hover:before {
@@ -219,7 +219,8 @@ path {
       #familyTree.view_list .leaf_caption {
         display: none; }
       #familyTree.view_list .leaf__image {
-        --leafSize: 56px; }
+        --leafSize: 40px;
+        pointer-events: none; }
       #familyTree.view_list .leaf__detail-item {
         flex: 1; }
       #familyTree.view_list .leaf:before {
@@ -233,7 +234,9 @@ path {
       #familyTree.view_list .leaf .list__information {
         display: grid;
         grid-template-columns: repeat(5, 1fr);
-        gap: 6%; }
+        gap: 6%;
+        margin: 0;
+        pointer-events: unset; }
     #familyTree.view_list #branchContainer {
       transform-origin: unset !important;
       transform: unset !important;
@@ -456,6 +459,8 @@ input[name*="profile_photo"] {
     opacity: 1;
     transform: scale(1);
     box-shadow: 0 0 0 6px white inset, 0 0 0 4px var(--color_outline); }
+  .leaf > * {
+    pointer-events: none; }
   .leaf .leaf_caption {
     position: absolute;
     padding: 8px 12px;

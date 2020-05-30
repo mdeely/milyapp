@@ -234,7 +234,7 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
             data = dataSource[reqName] ? dataSource[reqName] : null;
         }
 
-        if (data) {
+        if (data && !key.includes("name")) {
             hasDetails = true;
         }
 
@@ -313,6 +313,7 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
             let partnerAction = '';
             let childAction = '';
             let parentAction = '';
+            let siblingAction = '';
             let leafEl = document.querySelector(`[data-id="${reqId}"]`);
             let profileImage = leafEl ? leafEl.querySelector(".leaf__image").getAttribute("style") : null;
 
@@ -337,7 +338,7 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
                         <div class="dropdown__item" data-value="Biological">Biological</div>
                         <div class="dropdown__item" data-value="Step">Step-parent</div>
                         <div class="dropdown__item" data-value="Unrelated">Unrelated</div>
-
+                        <div class="dropdown__item u-o_50" data-value="reset">Reset</div>
                     </div>`
                 }
             } else if (relativeType === "children") {
@@ -363,10 +364,32 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
                         <div class="dropdown__item" data-value="Biological">Biological</div>
                         <div class="dropdown__item" data-value="Step">Step-child</div>
                         <div class="dropdown__item" data-value="Unrelated">Unrelated</div>
+                        <div class="dropdown__item u-o_50" data-value="reset">Reset</div>
                     </div>`
                 }
             } else if (relativeType === "siblings") {
-                label = ``
+                if (familyLeafDoc.data().siblings[leafDoc.id] !== null) {
+                    let siblingType = `${familyLeafDoc.data().siblings[leafDoc.id]}`;
+                    label = `${siblingType}`
+                    if (siblingType.includes("Step")) {
+                        label = "Step-sibilng"
+                    } else {
+                        label = `${siblingType}`
+                    }
+                } else {
+                    label = ``
+                }
+                if (memberPermissionType === "admin" || memberPermissionType === "contributor") {
+                        siblingAction = `<button class="iconButton white u-mar-l_auto" tooltip="Options" tooltip-position="top middle" data-dropdown-target="sibling_options_menu__${familyLeafDoc.id}">
+                        <i class="fa fa-ellipsis-h"></i>
+                    </button>
+                    <div id="sibling_options_menu__${familyLeafDoc.id}" class="dropdown u-visibility_hidden u-p_fixed">
+                        <div class="dropdown__item" data-value="Biological">Biological</div>
+                        <div class="dropdown__item" data-value="Step">Step</div>
+                        <div class="dropdown__item" data-value="Unrelated">Unrelated</div>
+                        <div class="dropdown__item u-o_50" data-value="reset">Reset</div>
+                    </div>`
+                }
             } else if (relativeType === "partners") { 
                 let partnerType = familyLeafDoc.data().partners[leafDoc.id] ? familyLeafDoc.data().partners[leafDoc.id] : null;
                 if (partnerType && partnerType !== "Unrelated") {
@@ -387,6 +410,7 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
                                         <div class="dropdown__item" data-value="Separated">Separated</div>
                                         <div class="dropdown__item" data-value="Widowed">Widowed</div>
                                         <div class="dropdown__item" data-value="Unrelated">Unrelated</div>
+                                        <div class="dropdown__item u-o_50" data-value="reset">Reset</div>
                                     </div>`
                 }
             }
@@ -408,7 +432,7 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
                             <div class="detailsPanel__name u-mar-b_point5 u-bold">${firstName}${lastName}</div> 
                             <div class="detailsPanel__relativeType">${label}</div> 
                         </div>
-                        ${partnerAction}${childAction}${parentAction}`
+                        ${partnerAction}${childAction}${parentAction}${siblingAction}`
 
             detailsPanelItem.innerHTML += content;
 
@@ -436,6 +460,10 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
                 if (relativeType === "parents") {
                     initiateParentOptions(familyLeafDoc.id);
                 }
+
+                if (relativeType === "siblings") {
+                    initiateSiblingOptions(familyLeafDoc.id);
+                }
             }
         }
     }
@@ -462,6 +490,10 @@ function initiatePartnerOptions(leafId) {
             e.preventDefault();
 
             let value = e.target.getAttribute("data-value");
+
+            if (value === "reset") {
+                value = null;
+            }
             let targetLeafId = DetailsPanel.getLeafDoc().id;
 
             console.log(value);
@@ -540,6 +572,10 @@ function initiateChildOptions(leafId) {
             e.preventDefault();
 
             let value = e.target.getAttribute("data-value");
+
+            if (value === "reset") {
+                value = null;
+            }
             let parentLeafId = DetailsPanel.getLeafDoc().id;
 
             console.log(value);
@@ -578,6 +614,10 @@ function initiateParentOptions(leafId) {
             e.preventDefault();
 
             let value = e.target.getAttribute("data-value");
+
+            if (value === "reset") {
+                value = null;
+            }
             let childLeafId = DetailsPanel.getLeafDoc().id;
 
             console.log(value);
@@ -628,6 +668,45 @@ function initiateParentOptions(leafId) {
             //     })
             // }
 
+        })
+    }
+}
+
+function initiateSiblingOptions(leafId) {
+    let siblingDropdownTrigger = detailsPanelImmediateFamily.querySelector(`[data-leaf-id="${leafId}"] [data-dropdown-target="sibling_options_menu__${leafId}"]
+    `);
+
+    let siblingOptionEl = detailsPanelImmediateFamily.querySelector(`[data-leaf-id="${leafId}"] #sibling_options_menu__${leafId}
+    `);
+    let siblingOptions = siblingOptionEl.querySelectorAll(".dropdown__item");
+
+    initiateDropdown(siblingDropdownTrigger);
+
+    for (option of siblingOptions) {
+        option.addEventListener('click', (e) => {
+            e.preventDefault();
+
+            let value = e.target.getAttribute("data-value");
+
+            if (value === "reset") {
+                value = null;
+            }
+            let siblingLeafId = DetailsPanel.getLeafDoc().id;
+
+            currentTreeLeafCollectionRef.doc(leafId).update({
+                [`siblings.${siblingLeafId}`] : value
+            })
+            .then(() => {
+                console.log("Sibling #1 updated succesfully");
+
+                currentTreeLeafCollectionRef.doc(siblingLeafId).update({
+                    [`siblings.${leafId}`] : value
+                })
+                .then(() => {
+                    console.log("Sibling #2 updated succesfully");
+                    location.reload();
+                })
+            })
         })
     }
 }

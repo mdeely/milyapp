@@ -839,7 +839,7 @@ const showListView = (show = true) => {
         let leaves = familyTreeEl.querySelectorAll(".leaf");
         for (leafEl of leaves) {
             if (leafEl.querySelector(".list__information")) {
-                leafEl.querySelector(".list__information").style.display = "block";
+                leafEl.querySelector(".list__information").style.display = "grid";
             } else {
                 let leafId = leafEl.getAttribute("data-id");
                 let leafDoc = LocalDocs.getLeafById(leafId);
@@ -858,21 +858,22 @@ const showListView = (show = true) => {
                 let address1 = data.address.address1 ? data.address.address1 : '';
                 let address2 = data.address.address2 ? data.address.address2 : '';
                 let city = data.address.city ? data.address.city : '';
+                let state = data.address.state ? data.address.state : '';
                 let zipcode = data.address.zipcode ? data.address.zipcode : '';
 
                 if (address1 || address2) {
-                    address = `${address1} ${address2}, </br>${city} ${zipcode}`
+                    address = `${address1} ${address2}, </br>${city}, ${state} ${zipcode}`
                 } else {
-                    address = `${city} ${zipcode}`
+                    address = `${city} ${state} ${zipcode}`
                 }
 
                 let content = `
-                    <p class="list__information u-w_full">
+                    <p class="list__information u-w_full u-pad-l_1">
                         <span class="u-bold">${firstName} ${lastName}</span>
-                        <span tooltip-position="top middle" tooltip="Email">${email}</span>
-                        <span tooltip-position="top middle" tooltip="Mobile phone">${mobilePhone}</span>
-                        <span tooltip-position="top middle" tooltip="Birthday">${birthday}</span>
-                        <span tooltip-position="top middle" tooltip="Address">${address}</span>
+                        <span class="u-font-size_14 u-ta_center" tooltip-position="top middle" tooltip-reveal="fast" tooltip="Email">${email}</span>
+                        <span class="u-font-size_14 u-ta_center" tooltip-position="top middle" tooltip-reveal="fast" tooltip="Mobile phone">${mobilePhone}</span>
+                        <span class="u-font-size_14 u-ta_center" tooltip-position="top middle" tooltip-reveal="fast" tooltip="Birthday">${birthday}</span>
+                        <span class="u-font-size_14 u-ta_center" tooltip-position="top middle" tooltip-reveal="fast" tooltip="Address" style="white-space: nowrap">${address}</span>
                     </p>`;
     
                 // First + Lastname
