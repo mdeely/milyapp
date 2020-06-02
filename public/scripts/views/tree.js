@@ -5,6 +5,7 @@ let Tree = {};
 
 Tree.setup = function(treeId) {
     clear();
+    Nav.showViewPreferencesButton(true);
     variablizeCurrentTreeDoc(treeId)
     .then((response) => {
         if (response) {

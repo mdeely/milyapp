@@ -870,10 +870,10 @@ const showListView = (show = true) => {
                 let content = `
                     <p class="list__information u-w_full u-pad-l_1">
                         <span class="u-bold">${firstName} ${lastName}</span>
-                        <span class="u-font-size_14 u-ta_center" tooltip-position="top middle" tooltip-reveal="fast" tooltip="Email">${email}</span>
-                        <span class="u-font-size_14 u-ta_center" tooltip-position="top middle" tooltip-reveal="fast" tooltip="Mobile phone">${mobilePhone}</span>
-                        <span class="u-font-size_14 u-ta_center" tooltip-position="top middle" tooltip-reveal="fast" tooltip="Birthday">${birthday}</span>
-                        <span class="u-font-size_14 u-ta_center" tooltip-position="top middle" tooltip-reveal="fast" tooltip="Address" style="white-space: nowrap">${address}</span>
+                        <span class="u-font-size_14" tooltip-position="top middle" tooltip-reveal="fast" tooltip="Email">${email}</span>
+                        <span class="u-font-size_14" tooltip-position="top middle" tooltip-reveal="fast" tooltip="Mobile phone">${mobilePhone}</span>
+                        <span class="u-font-size_14" tooltip-position="top middle" tooltip-reveal="fast" tooltip="Birthday">${birthday}</span>
+                        <span class="u-font-size_14" tooltip-position="top middle" tooltip-reveal="fast" tooltip="Address" style="white-space: nowrap">${address}</span>
                     </p>`;
     
                 // First + Lastname
@@ -893,6 +893,7 @@ const showListView = (show = true) => {
             infoEl.style.display = "none";
         }
     }
+    closeAllDropdowns();
 }
 
 const newTreeForFirebase = (params) => {

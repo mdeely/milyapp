@@ -18,6 +18,7 @@ const removeLeafButton = document.querySelector("#remove-leaf-action");
 const editMemberButton = document.querySelector("#edit-member-action");
 
 const dataViews = document.querySelectorAll(`[data-view]`);
+const listTable = document.querySelector("#listTable");
 
 const treeBlueprint = {
     "Permissions" : { "dataPath" : "permissions", "defaultValue" : {} },
@@ -106,6 +107,7 @@ let DetailsPanel = {};
 
 DetailsPanel.show = function(docId = null) {
     mainContent.classList.add("showDetails");
+    detailsPanel.scrollTop = 0;
 }
 
 DetailsPanel.close = function() {
@@ -140,6 +142,7 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
     let dataSource = leafDoc.data();
     let detailsPhoto = leafEl.querySelector(".leaf__image").getAttribute("style");
     let memberPermissionType = authLeafPermissionType();
+    let table = document.createElement("table");
 
     if (leafDoc.data().claimed_by) {
         reqMemberDoc = LocalDocs.members.find(memberDoc => memberDoc.id === leafDoc.data().claimed_by);
@@ -338,7 +341,7 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
                         <div class="dropdown__item" data-value="Biological">Biological</div>
                         <div class="dropdown__item" data-value="Step">Step-parent</div>
                         <div class="dropdown__item" data-value="Unrelated">Unrelated</div>
-                        <div class="dropdown__item u-o_50" data-value="reset">Reset</div>
+                        <div class="dropdown__item u-o_50" data-value="reset">Unset</div>
                     </div>`
                 }
             } else if (relativeType === "children") {
@@ -364,7 +367,7 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
                         <div class="dropdown__item" data-value="Biological">Biological</div>
                         <div class="dropdown__item" data-value="Step">Step-child</div>
                         <div class="dropdown__item" data-value="Unrelated">Unrelated</div>
-                        <div class="dropdown__item u-o_50" data-value="reset">Reset</div>
+                        <div class="dropdown__item u-o_50" data-value="reset">Unset</div>
                     </div>`
                 }
             } else if (relativeType === "siblings") {
@@ -387,7 +390,7 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
                         <div class="dropdown__item" data-value="Biological">Biological</div>
                         <div class="dropdown__item" data-value="Step">Step</div>
                         <div class="dropdown__item" data-value="Unrelated">Unrelated</div>
-                        <div class="dropdown__item u-o_50" data-value="reset">Reset</div>
+                        <div class="dropdown__item u-o_50" data-value="reset">Unset</div>
                     </div>`
                 }
             } else if (relativeType === "partners") { 
@@ -410,7 +413,7 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
                                         <div class="dropdown__item" data-value="Separated">Separated</div>
                                         <div class="dropdown__item" data-value="Widowed">Widowed</div>
                                         <div class="dropdown__item" data-value="Unrelated">Unrelated</div>
-                                        <div class="dropdown__item u-o_50" data-value="reset">Reset</div>
+                                        <div class="dropdown__item u-o_50" data-value="reset">Unset</div>
                                     </div>`
                 }
             }
@@ -779,7 +782,7 @@ DetailsPanel.editMember = function() {
     let reqEditDoc = DetailsPanel.getLeafDoc();
     let reqEditDocData = reqEditDoc.data();
     let memberDoc = null;
-    let header = `<h4 class="u-mar-t_2 u-mar-b_3">Edit details</h4>`
+    let header = `<h3 class="u-mar-t_4 u-mar-b_4">Edit details</h3>`
 
     if (reqEditDocData.claimed_by) {
         memberDoc = LocalDocs.getMemberDocByIdFromCurrentTree(reqEditDocData.claimed_by);

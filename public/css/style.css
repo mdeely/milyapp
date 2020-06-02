@@ -46,14 +46,6 @@ ol {
   padding: 0;
   list-style-type: none; }
 
-h1:first-child,
-h2:first-child,
-h3:first-child,
-h4:first-child,
-h5:first-child,
-h6:first-child {
-  margin-top: 0; }
-
 h6 {
   font-weight: bold;
   text-transform: uppercase;
@@ -145,7 +137,8 @@ path {
   margin: 0 auto; }
   #myTree__list .myTree__item {
     border-radius: 8px;
-    text-decoration: none; }
+    text-decoration: none;
+    min-height: 72px; }
     #myTree__list .myTree__item:hover, #myTree__list .myTree__item:focus {
       outline: none;
       background-color: var(--brand_lighter); }
@@ -208,7 +201,7 @@ path {
       border-bottom: 1px solid var(--color_border);
       border-radius: 0;
       display: grid;
-      grid-template-columns: var(--leafSize) 1fr;
+      grid-template-columns: calc(var(--leafSize) - 12px) 1fr;
       gap: 8px; }
       #familyTree.view_list .leaf:hover {
         transform: none; }
@@ -275,7 +268,8 @@ path {
   bottom: 0;
   z-index: 99;
   background-color: white;
-  box-shadow: 0 0 0 1px var(--color_border) inset; }
+  box-shadow: 0 0 0 1px var(--color_border) inset;
+  scroll-behavior: smooth; }
   #detailsPanel:before {
     content: '';
     position: absolute;
@@ -312,6 +306,10 @@ path {
     background-color: var(--brand_lighter);
     transform: translate(-8px, -8px);
     z-index: -1; }
+  .detailsPanel__item:hover button {
+    opacity: 1; }
+  .detailsPanel__item button {
+    opacity: 0; }
 
 .detailsPanel__text {
   pointer-events: none; }
@@ -635,7 +633,8 @@ label {
     --inputGroupLayout: row;
     align-items: center; }
     .inputGroup.checkbox input[type=checkbox] {
-      box-shadow: 0 0 0 1px var(--color_border);
+      -webkit-appearance: inherit;
+      box-shadow: 0 0 0 1px var(--color_dark_gray);
       height: 24px;
       width: 24px;
       border-radius: 4px; }
@@ -988,6 +987,9 @@ button,
 
 .u-mar-b_point5 {
   margin-bottom: 4px; }
+
+.u-mar-t_0 {
+  margin-top: 0px; }
 
 .u-mar-t_1 {
   margin-top: 8px; }

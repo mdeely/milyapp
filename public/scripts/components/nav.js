@@ -32,6 +32,14 @@ Nav.update = function(user) {
     }
 }
 
+Nav.showViewPreferencesButton = function(show) {
+    if (show) {
+        viewPreferencesButton.classList.remove("u-visibility_hidden");
+    } else {
+        viewPreferencesButton.classList.add("u-visibility_hidden");
+    }
+}
+
 const getNotificationsByAuthMember = () => {
     let notificationUpdateQuery = notificationsRef.where("from_member", "==", LocalDocs.member.id).where("status", "in", ["declined", "accepted"]);
     notificationUpdateQuery.get()
@@ -173,44 +181,48 @@ const handleNotification = (method, doc) => {
                 "claimed_by" : LocalDocs.member.id,
                 "invitation" : null
             })
-            .then(() => console.log("leaf updated  successfully!"))
-            .catch(() => console.log("error while updating leaf"));
-
-            if (!reqMemberDoc.data().primary_tree) {
-                // Make this the member's primary tree
+            .then(() => {
+                if (!reqMemberDoc.data().primary_tree) {
+                    // Make this the member's primary tree
+                    membersRef.doc(LocalDocs.member.id).update({
+                        "primary_tree" : treeToJoin
+                    })
+                    .then(() => console.log("member primary tree updated  successfully!"))
+                    .catch(() => console.log("error while updating member primary tree"));
+                }
+    
                 membersRef.doc(LocalDocs.member.id).update({
-                    "primary_tree" : treeToJoin
+                    // Add new tree to the member's Trees
+                    "trees" : firebase.firestore.FieldValue.arrayUnion(treeToJoin)
                 })
-                .then(() => console.log("member primary tree updated  successfully!"))
-                .catch(() => console.log("error while updating member primary tree"));
-            }
-
-            membersRef.doc(LocalDocs.member.id).update({
-                // Add new tree to the member's Trees
-                "trees" : firebase.firestore.FieldValue.arrayUnion(treeToJoin)
+                .then(() => {
+                    notificationsRef.doc(doc.id).update({
+                        "status" : "accepted"
+                    })
+                    .then(() => {
+                        console.log("notification updated  successfully!");
+                        location.reload();
+                    })
+                    .catch(() => console.log("error while updating notification"));
+                })
+                .catch(() => console.log("error while updating member trees"));
             })
-            .then(() => console.log("member trees updated successfully!"))
-            .catch(() => console.log("error while updating member trees"));
-
-            notificationsRef.doc(doc.id).update({
-                "status" : "accepted"
-            })
-            .then(() => console.log("notification updated  successfully!"))
-            .catch(() => console.log("error while updating notification"));
+            .catch(() => console.log("error while updating leaf"));
         })
     } else if (method === "decline") {
         // set notification status to "declined"
         notificationsRef.doc(doc.id).update({
             "status" : "declined"
         })
-        .then(() => console.log("notification declined successfully!"))
-        .catch(() => console.log("error while declining notification"));
+        .then(() => {
+            // remove invitation from leaf
+            reqTreeAndLeafRef.update({
+                "invitation" : null
+            })
+            .then(() => console.log("leaf updated  successfully!"))
+            .catch(() => console.log("error while updating leaf"));
 
-        // remove invitation from leaf
-        reqTreeAndLeafRef.update({
-            "invitation" : null
-        })
-        .then(() => console.log("leaf updated  successfully!"))
-        .catch(() => console.log("error while updating leaf"));
+        });
+
     }
 }

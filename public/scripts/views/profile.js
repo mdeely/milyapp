@@ -4,6 +4,7 @@ var storageRef = firebase.storage().ref()
 
 function profileSetup() {
     pageTitle.innerHTML = "Profile";
+    Nav.showViewPreferencesButton(false);
 }
 
 const profileViewOnAuthChange = (user) => {
