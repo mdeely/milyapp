@@ -145,6 +145,20 @@ path {
     width: 100%;
     height: 100%;
     overflow: visible;
+
+    &.highlight {
+        z-index: 1;
+        
+        path {
+            transition: all .1s ease-in-out;
+            stroke: var(--color_outline);
+            stroke-width: 4;
+        }
+
+        & ~ .leaf_connections {
+            z-index: -5;
+        }
+    }
 }
 
 // .connectionLine {
@@ -449,7 +463,7 @@ path {
             top: 0;
             bottom: 0;
             border-radius: 8px;
-            background-color: rgba(0,0,0,.08);
+            // background-color: rgba(0,0,0,.08);
             background-color: var(--brand_lighter);
             transform: translate(-8px, -8px);
             z-index: -1;
@@ -1353,6 +1367,10 @@ button,
 
 .u-pad_4 {
     padding: 32px;
+}
+
+.u-pad-b_0 {
+    padding-bottom: 0px;
 }
 
 .u-pad-b_10 {

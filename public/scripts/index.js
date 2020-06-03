@@ -781,11 +781,6 @@ removeLeafButton.addEventListener('click', (e) => {
     closeAllDropdowns();
 })
 
-editMemberButton.addEventListener('click', (e) => {
-    DetailsPanel.editMember();
-    closeAllDropdowns();
-})
-
 viewPermissionsTree.addEventListener('click', (e) => {
     e.preventDefault();
     showListView(false);
@@ -852,9 +847,9 @@ const showListView = (show = true) => {
                 let lastName = data.name.lastName ? data.name.lastName : '';
                 let email = data.email ? data.email : '';
                 let birthday = data.birthday ? convertBirthday(data.birthday) : '';
-                let homePhone = data.phone.homePhone ? data.phone.homePhone : '';
-                let workPhone = data.phone.workPhone ? data.phone.workPhone : '';
-                let mobilePhone = data.phone.mobilePhone ? data.phone.mobilePhone : '';
+                let homePhone = data.phone.homePhone ? formatPhoneNumber(data.phone.homePhone) : '';
+                let workPhone = data.phone.workPhone ? formatPhoneNumber(data.phone.workPhone) : '';
+                let mobilePhone = data.phone.mobilePhone ? formatPhoneNumber(data.phone.mobilePhone) : '';
                 let address1 = data.address.address1 ? data.address.address1 : '';
                 let address2 = data.address.address2 ? data.address.address2 : '';
                 let city = data.address.city ? data.address.city : '';

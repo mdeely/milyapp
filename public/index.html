@@ -26,7 +26,7 @@
             <div id="notification_menu" class="dropdown u-p_absolute">
             </div>
             <!-- <button id="search_button" class="u-mar-l_2 u-mar-r_1 iconButton"><i class="fa fa-search"></i></button> -->
-            <button id="view-preferences_button" class="u-mar-l_2 u-mar-r_2 iconButton" data-dropdown-target="view-preferences"><i class="fa fa-eye"></i></button>
+            <button id="view-preferences_button" class="u-mar-l_2 u-mar-r_2 iconButton" data-dropdown-target="view-preferences" tooltip="View preferences"><i class="fa fa-sliders-h"></i></button>
             <div id="view-preferences" class="dropdown u-visibility_hidden u-p_absolute">
                 <div id="view-preferences_tree" class="dropdown__item">Tree</div>
                 <div id="view-preferences_list" class="dropdown__item">List</div>
@@ -168,7 +168,7 @@
                         <button class="iconButton add-relationship_button" data-dropdown-target="add-relationship-dropdown" tooltip="Add relationship" tooltip-position="right"><i class="fa fa-plus"></i></button>
                         <div class="detailsPanel__actions-secondary u-mar-l_auto u-d_flex">
                             <button class="iconButton secondary" id="invite-member-action" data-modal-trigger="invite-member_modal" tooltip="Invite member" tooltip-position="bottom middle" ><i class="fa fa-envelope"></i></button>
-                            <button class="iconButton secondary u-mar-l_2" id="edit-member-action" tooltip="Edit" tooltip-position="bottom middle" ><i class="fa fa-pencil-alt"></i></button>
+                            <!-- <button class="iconButton secondary u-mar-l_2" id="edit-member-action" tooltip="Edit" tooltip-position="bottom middle" ><i class="fa fa-pencil-alt"></i></button> -->
                             <button class="iconButton secondary details__button--close u-mar-l_2" tooltip="Hide panel" tooltip-position="bottom middle" ><i class="fa fa-times"></i></button> 
                         </div>
                     </nav>
@@ -322,8 +322,8 @@
 
         <div class="modal medium" data-modal="edit-tree_modal">
             <form id="edit-tree_form" class="card modal-dialouge" role="dialog">
-                <div class="card__header">
-                    <h2 class="u-mar-b_0">Settings & Permissions</h2>
+                <div class="card__header u-pad-b_0">
+                    <h2 class="u-mar-b_0 u-mar-t_0">Settings & Permissions</h2>
                 </div>
                 <div class="card__content">
                     <div class="inputGroup checkbox u-mar-t_2">

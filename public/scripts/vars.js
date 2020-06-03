@@ -15,7 +15,7 @@ const addPartnerButton = document.querySelector("#add-partner-action");
 const addSiblingButton = document.querySelector("#add-sibling-action");
 
 const removeLeafButton = document.querySelector("#remove-leaf-action");
-const editMemberButton = document.querySelector("#edit-member-action");
+// const editMemberButton = document.querySelector("#edit-member-action");
 
 const dataViews = document.querySelectorAll(`[data-view]`);
 const listTable = document.querySelector("#listTable");
@@ -143,6 +143,19 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
     let detailsPhoto = leafEl.querySelector(".leaf__image").getAttribute("style");
     let memberPermissionType = authLeafPermissionType();
     let table = document.createElement("table");
+    
+    let detailsHeaderEl = createElementWithClass("h6", "u-mar-b_2 u-mar-t_8 u-d_flex u-ai_center");
+    let editDetailsAnchor = createElementWithClass("button", "u-mar-l_auto iconButton white");
+    let pencilIcon = createElementWithClass("i", "fa fa-pencil-alt");
+
+    detailsHeaderEl.textContent = "Details"
+    editDetailsAnchor.setAttribute("tooltip", "Edit");
+
+    editDetailsAnchor.appendChild(pencilIcon);
+    editDetailsAnchor.addEventListener('click', (e) => {
+        DetailsPanel.editMember();
+        closeAllDropdowns();
+    })
 
     if (leafDoc.data().claimed_by) {
         reqMemberDoc = LocalDocs.members.find(memberDoc => memberDoc.id === leafDoc.data().claimed_by);
@@ -162,9 +175,10 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
     
     if (memberPermissionType === "admin" || memberPermissionType === "contributor") {
         inviteMemberButton.classList.remove("u-d_none");
-        editMemberButton.classList.remove("u-d_none");
+        // editMemberButton.classList.remove("u-d_none");
         addRelationshipButton.classList.remove("u-d_none");
         removeLeafButton.classList.remove("u-d_none");
+        detailsHeaderEl.classList.remove("u-d_none");
 
         if (leafDoc.data().topMember === true) {
             addParentButton.classList.remove("u-d_none");
@@ -179,21 +193,28 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
                 removeLeafButton.classList.add("u-d_none");
             }
         }
+        if (!leafDoc.data().claimed_by) {
+            detailsHeaderEl.appendChild(editDetailsAnchor);
+        }
+
     } else if (memberPermissionType === "viewer" || !memberPermissionType)  {
         console.log("I'm a viewers")
         addParentButton.classList.add("u-d_none")
         inviteMemberButton.classList.add("u-d_none");
         removeLeafButton.classList.add("u-d_none");
-        editMemberButton.classList.add("u-d_none");
+        // editMemberButton.classList.add("u-d_none");
         addRelationshipButton.classList.add("u-d_none");
     }
 
     if (leafDoc.data().claimed_by) {
-        editMemberButton.classList.add("u-d_none");
+        // editMemberButton.classList.add("u-d_none");
         inviteMemberButton.classList.add("u-d_none");
         detailsPanel.setAttribute("data-details-member-id", leafDoc.data().claimed_by);
+
         if (leafDoc.data().claimed_by === LocalDocs.member.id) {
-            editMemberButton.classList.remove("u-d_none");
+            // editMemberButton.classList.remove("u-d_none");
+            detailsHeaderEl.classList.remove("u-d_none");
+            detailsHeaderEl.appendChild(editDetailsAnchor);
         }
     } else {
         detailsPanel.removeAttribute("data-details-member-id");
@@ -203,7 +224,7 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
         inviteMemberButton.classList.add("u-d_none");
     }
 
-    const detailsHeader =`<h6 class="u-mar-b_2 u-mar-t_8">Details</h6>`;
+    // const detailsHeader =`<h6 class="u-mar-b_2 u-mar-t_8 u-d_flex u-ai_center">Details<a href="#" class="u-mar-l_auto iconButton white"><i class="fa fa-pencil-alt"></i></a></h6>`;
 
     let hasDetails = false;
 
@@ -212,7 +233,8 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
         "functionCall": generateDetailElement
     });
 
-    detailsPanelMetaData.insertAdjacentHTML("afterBegin", detailsHeader);
+    // detailsPanelMetaData.insertAdjacentHTML("afterBegin", detailsHeader);
+    detailsPanelMetaData.prepend(detailsHeaderEl);
 
     if (!hasDetails) {
         const detailsNoInfo =`<p class="u-italic u-text_lowest u-font-size_13">No details provided</p>`;
@@ -239,6 +261,10 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
 
         if (data && !key.includes("name")) {
             hasDetails = true;
+        }
+
+        if (key.includes("phone")) {
+            data = formatPhoneNumber(data);
         }
 
         if (data) {
@@ -440,13 +466,25 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
             detailsPanelItem.innerHTML += content;
 
             detailsPanelItem.addEventListener("mouseover", (e) => {
+                let leafId = detailsPanel.getAttribute("data-details-id");
+                let targetSvg = document.querySelector(`svg[data-from-leaf="${leafId}"][data-to-leaf="${familyLeafDoc.id}"]`);
+
                 leafEl.classList.add("highlight");
-                // highlight the person on the family tree
+
+                if (targetSvg) {
+                    targetSvg.classList.add("highlight");
+                }
             })
 
             detailsPanelItem.addEventListener("mouseout", (e) => {
+                let leafId = detailsPanel.getAttribute("data-details-id");
+                let targetSvg = document.querySelector(`svg[data-from-leaf="${leafId}"][data-to-leaf="${familyLeafDoc.id}"]`);
+
                 leafEl.classList.remove("highlight");
-                // highlight the person on the family tree
+
+                if (targetSvg) {
+                    targetSvg.classList.remove("highlight");
+                }
             })
 
             detailsPanelImmediateFamily.appendChild(detailsPanelItem);
@@ -602,6 +640,17 @@ function initiateChildOptions(leafId) {
         })
     }
 }
+
+function formatPhoneNumber(phoneNumberString) {
+    var cleaned = ('' + phoneNumberString).replace(/\D/g, '')
+    var match = cleaned.match(/^(1|)?(\d{3})(\d{3})(\d{4})$/)
+    if (match) {
+      var intlCode = (match[1] ? '+1 ' : '')
+      return [intlCode, '(', match[2], ') ', match[3], '-', match[4]].join('')
+    }
+    return null
+  }
+
 function initiateParentOptions(leafId) {
     let parentDropdownTrigger = detailsPanelImmediateFamily.querySelector(`[data-leaf-id="${leafId}"] [data-dropdown-target="parent_options_menu__${leafId}"]
     `);
@@ -935,6 +984,7 @@ DetailsPanel.editMember = function() {
         detailsPanelEdit.classList.add("u-d_none");
         detailsPanelInfo.classList.remove("u-d_none");
         detailsPanelAction.classList.remove("u-d_none");
+        detailsPanel.scrollTop = 0;
     });
 
     buttonGroup.setAttribute("class", "formActions u-pad_4");
@@ -1516,14 +1566,12 @@ function iterateOverConnections() {
 
     for (let [parentId, parentValue] of Object.entries(connectionObject.children)) {
         let parentEl = familyTreeEl.querySelector(`[data-id="${parentId}"]`);
-        let parrentAttributes = parentEl.getBoundingClientRect();
 
         for (let childId of parentValue) {
             if ( !unrelatedArray.includes(childId[1]) ) {
                 let childEl = familyTreeEl.querySelector(`[data-id="${childId[0]}"]`);
-                let childAttributes = childEl.getBoundingClientRect();
                 
-                createSVG(parrentAttributes, childAttributes, parentEl, "child");
+                createSVG(parentEl, childEl, "child");
             }
         }
     } 
@@ -1531,28 +1579,31 @@ function iterateOverConnections() {
     for (let [partnerId, partnerValue] of Object.entries(connectionObject.partners)) {
         if (partnerId) {
             let partnerEl = familyTreeEl.querySelector(`[data-id="${partnerId}"]`);
-            let partnerAttributes = partnerEl.getBoundingClientRect();
 
             for (let partnerMatchId of partnerValue) {
                 if ( apartArray.includes(partnerMatchId[1]) ) {
                     let partnerMatchEl = familyTreeEl.querySelector(`[data-id="${partnerMatchId[0]}"]`);
-                    let partnerMatchAttributes = partnerMatchEl.getBoundingClientRect();
 
-                    createSVG(partnerAttributes, partnerMatchAttributes, partnerEl, "partner");
+                    createSVG(partnerEl, partnerMatchEl, "partner");
                 }
             }
         }
     } 
 }
 
-function createSVG(fromAttributes, toAttributes, parentEl, relationshipType) {
-    let style = getComputedStyle(parentEl);
-    let width = parentEl.offsetWidth;
+function createSVG(fromEl, toEl, relationshipType) {
+    let toAttributes = toEl.getBoundingClientRect();
+    let fromAttributes = fromEl.getBoundingClientRect();
+    let style = getComputedStyle(fromEl);
+    let width = fromEl.offsetWidth;
     let height = width;
     let halfWidth = width / 2;
     let captionOffset = 12;
     let singleMargin = parseInt(style.marginTop);
     let distanceDif;
+
+    let fromleafId = fromEl.getAttribute("data-id");
+    let toLeafId = toEl.getAttribute("data-id");
 
     let middleOfToX = toAttributes.x - toAttributes.width;
     let middleOfToY = toAttributes.y - toAttributes.width;
@@ -1571,7 +1622,6 @@ function createSVG(fromAttributes, toAttributes, parentEl, relationshipType) {
         d = `M${halfWidth} ${halfWidth} L${distanceDif} ${halfWidth}`;
     }
 
-
     let xmlns = "http://www.w3.org/2000/svg";
 
     let svgElem = document.createElementNS(xmlns, "svg");
@@ -1579,6 +1629,9 @@ function createSVG(fromAttributes, toAttributes, parentEl, relationshipType) {
     svgElem.setAttributeNS(null, "width", width);
     svgElem.setAttributeNS(null, "height", width);
     svgElem.setAttributeNS(null, "class", "leaf_connections");
+    svgElem.setAttributeNS(null, "data-from-leaf", fromleafId);
+    svgElem.setAttributeNS(null, "data-to-leaf", toLeafId);
+
     // svgElem.setAttributeNS(null, "preserveAspectRatio", "none");
 
     let svgNS = "http://www.w3.org/2000/svg";  
@@ -1590,7 +1643,7 @@ function createSVG(fromAttributes, toAttributes, parentEl, relationshipType) {
     }
 
     svgElem.appendChild(path);
-    parentEl.appendChild(svgElem);
+    fromEl.appendChild(svgElem);
 
     // return polylineConnector;
 }
