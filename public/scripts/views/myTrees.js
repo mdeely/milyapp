@@ -41,7 +41,7 @@ const populateMyTreesList = async () => {
                         let liEl = createElementWithClass('li', 'u-w_full u-mar-r_2 u-mar-l_2' );
                         let aEl = createElementWithClass('a', 'myTree__item u-pad_1 u-w_full u-font-size_18 u-d_flex u-ai_center' );
                         let treeEditButton = createElementWithClass('button', 'iconButton white u-mar-l_auto edit_tree_button' );
-                        let ellipsisIcon = createElementWithClass('i', 'fa fa-ellipsis-h' );
+                        let ellipsisIcon = createElementWithClass('i', 'far fa-ellipsis-h' );
                         let dropdownEl = createElementWithClass('div', 'dropdown u-visibility_hidden u-p_fixed' );
                         let renameDropdown = createElementWithClass('div', 'dropdown__item' );
                         let inviteDropdown = createElementWithClass('div', 'dropdown__item' );
@@ -170,14 +170,19 @@ const populateMyTreesList = async () => {
                                     treesRef.doc(reqTreeDoc.id).collection('leaves').where("claimed_by", "==", LocalDocs.member.id).get()
                                     .then((result) => {
                                         let leafDocId = result.docs[0].id;
-                                        treesRef.doc(reqTreeDoc.id).collection('leaves').doc(leafDocId).update({
-                                            "claimed_by" : null
-                                        })
-                                        .then(() => {
-                                            console.log(`${leafDocId} updated to remove claimed by ${LocalDocs.member.id}`)
+
+                                        if (leafDocId) {
+                                            treesRef.doc(reqTreeDoc.id).collection('leaves').doc(leafDocId).update({
+                                                "claimed_by" : null
+                                            })
+                                            .then(() => {
+                                                console.log(`${leafDocId} updated to remove claimed by ${LocalDocs.member.id}`)
+                                                location.reload();
+                                            })
+                                            .catch(() => console.log("error"));
+                                        } else {
                                             location.reload();
-                                        })
-                                        .catch(() => console.log("error"));
+                                        }
                                     })
                                 })
                             })

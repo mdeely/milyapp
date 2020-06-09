@@ -490,7 +490,7 @@ path {
     color: var(--color_gray);
     color: var(--brand);
     vertical-align: middle;
-    opacity: .3;
+    opacity: .6;
 }
 
 .detailsPanel__fullName {
@@ -916,6 +916,7 @@ select {
     // border: solid 1px var(--color_border);
     border-radius: 8px;
     width: 100%;
+    box-shadow: 0 0 0 1px var(--color_border);
 
     input[type=radio] {
         position: absolute;
@@ -956,7 +957,7 @@ select {
 
     &:after {
         content: "\f0d7";
-        font-family: "Font Awesome 5 Free";
+        font-family: "Font Awesome 5 Pro";
         font-weight: 900; 
         position: absolute;
         right: 16px;
@@ -1018,7 +1019,7 @@ label {
 
             &:checked {
                 content: "\f0d7";
-                font-family: "Font Awesome 5 Free";
+                font-family: "Font Awesome 5 Pro";
                 font-weight: 900; 
                 background-color: var(--color_outline);
             }
@@ -1102,7 +1103,7 @@ button,
     width: var(--iconButtonSize);
     height: var(--iconButtonSize);
     line-height: var(--iconButtonSize);
-    font-size: 20px;
+    font-size: 22px;
     border-radius: 50%;
     align-items: center;
 

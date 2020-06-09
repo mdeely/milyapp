@@ -6,8 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link href="https://fonts.googleapis.com/css?family=Lato:400,700,900" rel="stylesheet">
     <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"> -->
-    <script src="https://kit.fontawesome.com/254edd873a.js" crossorigin="anonymous"></script>
-    <!-- <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous"> -->
+    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.13.0/css/all.css" integrity="sha384-IIED/eyOkM6ihtOiQsX2zizxFBphgnv1zbe1bKA+njdFzkr6cDNy16jfIKWu4FNH" crossorigin="anonymous">
     <!-- <link rel="stylesheet" href="/style.css"> -->
     <link rel="stylesheet" href="css/style.css"> 
     <title>Mily</title>
@@ -22,16 +21,16 @@
                 <a class="button" id="log-in_button" href="/#/log-in">Log in</a>
                 <a class="button" id="sign-up_button" href="/#/sign-up">Sign up</a>
             </div>
-            <button id="notification_indicator" data-dropdown-target="notification_menu" class="iconButton u-visibility_hidden"><i class="fa fa-bell"></i></button>
+            <button id="notification_indicator" data-dropdown-target="notification_menu" class="iconButton u-visibility_hidden"><i class="fal fa-bell"></i></button>
             <div id="notification_menu" class="dropdown u-p_absolute">
             </div>
             <!-- <button id="search_button" class="u-mar-l_2 u-mar-r_1 iconButton"><i class="fa fa-search"></i></button> -->
-            <button id="view-preferences_button" class="u-mar-l_2 u-mar-r_2 iconButton" data-dropdown-target="view-preferences" tooltip="View preferences"><i class="fa fa-sliders-h"></i></button>
+            <button id="view-preferences_button" class="u-mar-l_2 u-mar-r_2 iconButton" data-dropdown-target="view-preferences" tooltip="View preferences"><i class="fal fa-sliders-h"></i></button>
             <div id="view-preferences" class="dropdown u-visibility_hidden u-p_absolute">
                 <div id="view-preferences_tree" class="dropdown__item">Tree</div>
                 <div id="view-preferences_list" class="dropdown__item">List</div>
                 <!-- <div id="view-preferences_list" class="dropdown__item">
-                    <button class="iconButton view-preferences_zoomIn"><i class="fa fa-plus"></i></button>
+                    <button class="iconButton view-preferences_zoomIn"><i fa-plus"></i></button>
                     <button class="iconButton u-mar-l_auto view-preferences_zoomOut"><i class="fa fa-minus"></i></button>
                 </div> -->
             </div>
@@ -112,11 +111,11 @@
             <div class="modal medium" data-modal="create-tree_modal">
                 <form id="create-tree_form_modal" class="card modal-dialouge">
                     <div class="card__header">
-                        <h1 class="u-mar-b_0 u-mar-t_0">Create family</h1>
+                        <h2 class="u-mar-b_0 u-mar-t_0">Create tree</h2>
                     </div>
                     <div class="card__content">
                         <div class="inputGroup">
-                            <label for="create-tree_name">Family name</label>
+                            <label for="create-tree_name">Tree name</label>
                             <input type="text" name="create-tree_name">
                         </div>
                     </div>
@@ -126,7 +125,7 @@
                             <button type="submit">Create tree</button>
                         </div>
                     </div>
-                    <a href="#" class="modal_button--close iconButton white"><i class="fa fa-times"></i></a>
+                    <a href="#" class="modal_button--close iconButton white"><i class="fal fa-times"></i></a>
                 </form>
             </div>
 
@@ -147,7 +146,7 @@
                             <button type="submit">Rename tree</button>
                         </div>
                     </div>
-                    <a href="#" class="modal_button--close iconButton white"><i class="fa fa-times"></i></a>
+                    <a href="#" class="modal_button--close iconButton white"><i class="fal fa-times"></i></a>
                 </form>
             </div> -->
 
@@ -167,11 +166,11 @@
             <!-- <svg id="leaf_connections" width="160" height="280" xmlns="http://www.w3.org/2000/svg" version="1.1"></svg> -->
                 <aside id="detailsPanel">
                     <nav class="detailsPanel__actions u-mar-b_6 u-mar-t_1">
-                        <button class="iconButton add-relationship_button" data-dropdown-target="add-relationship-dropdown" tooltip="Add relationship" tooltip-position="right"><i class="fa fa-plus"></i></button>
+                        <button class="iconButton add-relationship_button" data-dropdown-target="add-relationship-dropdown" tooltip="Add relationship" tooltip-position="right"><i class="fal fa-plus"></i></button>
                         <div class="detailsPanel__actions-secondary u-mar-l_auto u-d_flex">
-                            <button class="iconButton secondary" id="invite-member-action" data-modal-trigger="invite-member_modal" tooltip="Invite member" tooltip-position="bottom middle" ><i class="fa fa-envelope"></i></button>
-                            <!-- <button class="iconButton secondary u-mar-l_2" id="edit-member-action" tooltip="Edit" tooltip-position="bottom middle" ><i class="fa fa-pencil-alt"></i></button> -->
-                            <button class="iconButton secondary details__button--close u-mar-l_2" tooltip="Hide panel" tooltip-position="bottom middle" ><i class="fa fa-times"></i></button> 
+                            <button class="iconButton secondary" id="invite-member-action" data-modal-trigger="invite-member_modal" tooltip="Invite member" tooltip-position="bottom middle" ><i class="fal fa-envelope"></i></button>
+                            <!-- <button class="iconButton secondary u-mar-l_2" id="edit-member-action" tooltip="Edit" tooltip-position="bottom middle" ><i class="fal fa-pencil-alt"></i></button> -->
+                            <button class="iconButton secondary details__button--close u-mar-l_2" tooltip="Hide panel" tooltip-position="bottom middle" ><i class="fal fa-times"></i></button> 
                         </div>
                     </nav>
                     <!-- <ul id="member-options-dropdown" class="dropdown u-d_none u-p_fixed">
@@ -236,7 +235,7 @@
                     <div class="detailsPanel__actions-secondary u-mar-l_auto u-d_flex">
                         <button class="iconButton secondary" id="invite-member-action" data-modal-trigger="invite-member_modal"><i class="fa fa-envelope"></i></button>
                         <button class="iconButton secondary u-mar-l_2" data-dropdown-target="member-options-dropdown"><i class="fa fa-ellipsis-h"></i></button>
-                        <button class="iconButton secondary details__button--close u-mar-l_2"><i class="fa fa-times"></i></button> 
+                        <button class="iconButton secondary details__button--close u-mar-l_2"><i class="fal fa-times"></i></button> 
                     </div>
                 </nav>
                 <ul id="member-options-dropdown" class="dropdown u-d_none u-p_fixed">
@@ -295,14 +294,14 @@
                         <button type="submit">Send invitation</button>
                     </div>
                 </div>
-                <a href="#" class="modal_button--close iconButton white"><i class="fa fa-times"></i></a>
+                <a href="#" class="modal_button--close iconButton white"><i class="fal fa-times"></i></a>
             </form>
         </div>
 
         <div class="modal medium" data-modal="rename-tree_modal">
             <form id="rename-tree_form" class="card modal-dialouge" role="dialog">
                 <div class="card__header">
-                    <h2 class="u-mar-b_0">Rename family</h2>
+                    <h2 class="u-mar-b_0 u-mar-t_0">Rename family</h2>
                 </div>
                 <div class="card__content">
                     <div class="inputGroup">
@@ -317,7 +316,7 @@
                         <button class="rename-tree_save" type="submit">Rename</button>
                     </div>
                 </div>
-                <a href="#" class="modal_button--close iconButton white" tooltip="Close"><i class="fa fa-times"></i></a>
+                <a href="#" class="modal_button--close iconButton white" tooltip="Close"><i class="fal fa-times"></i></a>
             </form>
         </div>
 
@@ -336,7 +335,7 @@
                     <div class="radioGroup">
                         <input type="radio" class="u-mar-r_2" id="permission-tree_viewer" name="invite-member-to-tree_permission" value="viewer" checked>
                         <label for="permission-tree_viewer">Viewer</label>
-                        
+
                         <input type="radio" class="u-mar-r_2" id="permission-tree_admin" name="invite-member-to-tree_permission" value="admin">
                         <label for="permission-tree_admin">Admin</label>
 
@@ -350,7 +349,7 @@
                         <button class="invite-member-tree_save" type="submit">Invite</button>
                     </div>
                 </div>
-                <a href="#" class="modal_button--close iconButton white" tooltip="Close"><i class="fa fa-times"></i></a>
+                <a href="#" class="modal_button--close iconButton white" tooltip="Close"><i class="fal fa-times"></i></a>
             </form>
         </div>
 
@@ -375,7 +374,7 @@
                         <button class="edit-tree_save" type="submit">Save changes</button>
                     </div>
                 </div>
-                <a href="#" class="modal_button--close iconButton white"><i class="fa fa-times"></i></a>
+                <a href="#" class="modal_button--close iconButton white"><i class="fal fa-times"></i></a>
             </form>
         </div>
 

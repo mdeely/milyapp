@@ -149,7 +149,7 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
     
     let detailsHeaderEl = createElementWithClass("h6", "u-mar-b_2 u-mar-t_8 u-d_flex u-ai_center");
     let editDetailsAnchor = createElementWithClass("button", "u-mar-l_auto iconButton white");
-    let pencilIcon = createElementWithClass("i", "fa fa-pencil-alt");
+    let pencilIcon = createElementWithClass("i", "fal fa-pencil-alt");
 
     detailsHeaderEl.textContent = "Details"
     editDetailsAnchor.setAttribute("tooltip", "Edit");
@@ -227,7 +227,7 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
         inviteMemberButton.classList.add("u-d_none");
     }
 
-    // const detailsHeader =`<h6 class="u-mar-b_2 u-mar-t_8 u-d_flex u-ai_center">Details<a href="#" class="u-mar-l_auto iconButton white"><i class="fa fa-pencil-alt"></i></a></h6>`;
+    // const detailsHeader =`<h6 class="u-mar-b_2 u-mar-t_8 u-d_flex u-ai_center">Details<a href="#" class="u-mar-l_auto iconButton white"><i class="fal fa-pencil-alt"></i></a></h6>`;
 
     let hasDetails = false;
 
@@ -275,7 +275,7 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
                 data = convertBirthday(data);
             }
     
-            let infoEl = `<div class="detailsPanel__item detailsPanel__${reqName} u-mar-b_3" tooltip-reveal="fast" tooltip="${key}" tooltip-position="top left"><i class="fa fa-${reqIcon} detailsPanel__icon u-mar-r_2"></i>${data}</div>`
+            let infoEl = `<div class="detailsPanel__item detailsPanel__${reqName} u-mar-b_3" tooltip-reveal="fast" tooltip="${key}" tooltip-position="top left"><i class="fal fa-${reqIcon} detailsPanel__icon u-mar-r_2"></i>${data}</div>`
     
             if (reqParentName === "address") {
                 // add to address element
@@ -364,7 +364,7 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
 
                 if (memberPermissionType === "admin" || memberPermissionType === "contributor") {
                         parentAction = `<button class="iconButton white u-mar-l_auto" tooltip="Options" tooltip-position="top middle" data-dropdown-target="parent_options_menu__${familyLeafDoc.id}">
-                        <i class="fa fa-ellipsis-h"></i>
+                        <i class="fal fa-ellipsis-h"></i>
                     </button>
                     <div id="parent_options_menu__${familyLeafDoc.id}" class="dropdown u-visibility_hidden u-p_fixed">
                         <div class="dropdown__item" data-value="Biological">Biological</div>
@@ -389,7 +389,7 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
                         
                     }
                         childAction = `<button class="iconButton white u-mar-l_auto" tooltip="Options" tooltip-position="top middle" data-dropdown-target="child_options_menu__${familyLeafDoc.id}">
-                        <i class="fa fa-ellipsis-h"></i>
+                        <i class="fal fa-ellipsis-h"></i>
                     </button>
                     <div id="child_options_menu__${familyLeafDoc.id}" class="dropdown u-visibility_hidden u-p_fixed">
                         <div class="dropdown__item" data-value="Adopted">Adopted</div>
@@ -413,7 +413,7 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
                 }
                 if (memberPermissionType === "admin" || memberPermissionType === "contributor") {
                         siblingAction = `<button class="iconButton white u-mar-l_auto" tooltip="Options" tooltip-position="top middle" data-dropdown-target="sibling_options_menu__${familyLeafDoc.id}">
-                        <i class="fa fa-ellipsis-h"></i>
+                        <i class="fal fa-ellipsis-h"></i>
                     </button>
                     <div id="sibling_options_menu__${familyLeafDoc.id}" class="dropdown u-visibility_hidden u-p_fixed">
                         <div class="dropdown__item" data-value="Biological">Biological</div>
@@ -432,7 +432,7 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
                 }
                 if (memberPermissionType === "admin" || memberPermissionType === "contributor") {
                     partnerAction = `<button class="iconButton white u-mar-l_auto" tooltip="Options" tooltip-position="top middle" data-dropdown-target="partner_options_menu__${familyLeafDoc.id}">
-                                        <i class="fa fa-ellipsis-h"></i>
+                                        <i class="fal fa-ellipsis-h"></i>
                                     </button>
                                     <div id="partner_options_menu__${familyLeafDoc.id}" class="dropdown u-visibility_hidden u-p_fixed">
                                         <div class="dropdown__item" data-value="Dating">Dating</div>

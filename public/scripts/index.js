@@ -517,7 +517,7 @@ const authLeafPermissionType = () => {
 //         label = "Sibling"
 //     } else if (relativeType === "spouses") {
 //         label = "Spouse"
-//         spouseAction = `<button class="iconButton white u-mar-l_auto"><i class="fa fa-pencil-alt"></i></button>`
+//         spouseAction = `<button class="iconButton white u-mar-l_auto"><i class="fal fa-pencil-alt"></i></button>`
 //     }
 
 //     let el = `<div class="detailsPanel__item u-mar-b_4 u-d_flex u-align-items_center">
