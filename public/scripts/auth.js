@@ -12,6 +12,7 @@
 
 
 
+
 // window.currentTreeMemberDocs = new Array;
 
 
@@ -205,8 +206,8 @@ signUpForm.addEventListener('submit', (e) => {
             "created_by": cred.user.uid,
             "name": {
                 firstName: null,
-                lastName: null,
-                birthName: null
+                surnameCurrent: null,
+                surnameBirth: null
             },
             "email": email,
             "trees": [],

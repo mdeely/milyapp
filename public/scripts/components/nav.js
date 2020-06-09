@@ -102,7 +102,6 @@ const getNotificationsByEmail = async (email) => {
                 notificationIndicator.classList.remove("u-visibility_hidden");
     
                 for (doc of docs) {
-                    console.log(doc);
                     let notificationEl = document.createElement("div");
                     let acceptNotification = document.createElement("button");
                     let declinetNotification = document.createElement("button");
@@ -132,18 +131,29 @@ const getNotificationsByEmail = async (email) => {
                         if (memberDoc.exists) {
                             treesRef.doc(doc.data().for_tree).get()
                             .then((treeDoc) => {
-                                treesRef.doc(doc.data().for_tree).collection("leaves").doc(doc.data().for_leaf).get()
-                                .then((leafDoc) => {
-                                    let memberName = memberDoc.data().name && memberDoc.data().name.firstName ? memberDoc.data().name.firstName : "a Mily member";
-                                    let leafName = leafDoc.data().name && leafDoc.data().name.firstName ? leafDoc.data().name.firstName : "a leaf";
-                                    let treeName = treeDoc.data().name ? treeDoc.data().name : "a tree";
-            
-                                    notificationEl.textContent = `You have an invitation from ${memberName} to take over "${leafName}" in family "${treeName}" as a ${doc.data().permission_type}.`;
-            
-                                    notificationEl.appendChild(acceptNotification);
-                                    notificationEl.appendChild(declinetNotification);
+                                let memberName = memberDoc.data().name && memberDoc.data().name.firstName ? memberDoc.data().name.firstName : "a Mily member";
+                                let treeName = treeDoc.data().name ? treeDoc.data().name : "a tree";
+                                let leafName;
+                                let notificationMessage;
+
+                                if (doc.data().type === "leaf") {
+                                    treesRef.doc(doc.data().for_tree).collection("leaves").doc(doc.data().for_leaf).get()
+                                    .then((leafDoc) => {
+                                        leafName = leafDoc.data().name && leafDoc.data().name.firstName ? leafDoc.data().name.firstName : "a leaf";
+                                        notificationMessage =`You have an invitation from ${memberName} to take over "${leafName}" in family "${treeName}" as a ${doc.data().permission_type}.`;
+                                        appendToNotifications(acceptNotification, declinetNotification, notificationMessage);
+                                    })
+                                } else if (doc.data().type === "tree") {
+                                    notificationMessage =`You have an invitation from ${memberName} join the "${treeName}" family as a ${doc.data().permission_type}.`;
+                                    appendToNotifications(acceptNotification, declinetNotification, notificationMessage);
+                                }   
+                                
+                                function appendToNotifications(acceptBtn, declineButton, message) {
+                                    notificationEl.insertAdjacentText('afterBegin', message);
+                                    notificationEl.appendChild(acceptBtn);
+                                    notificationEl.appendChild(declineButton);
                                     notificationMenu.appendChild(notificationEl);
-                                })
+                                } 
                             });
                         } else {
                             console.log("An invitation exists, but that member is no longer a part of Mily.");
@@ -162,7 +172,11 @@ const handleNotification = (method, doc) => {
     let treeToJoin = doc.data().for_tree;
 
     let reqTreeRef = treesRef.doc(treeToJoin);
-    let reqTreeAndLeafRef = reqTreeRef.collection('leaves').doc(leafToTakeOver);
+    let reqTreeAndLeafRef;
+
+    if (doc.data().type === "leaf") {
+        reqTreeAndLeafRef = reqTreeRef.collection('leaves').doc(leafToTakeOver);
+    }
 
     if (method === "accept") {
         membersRef.doc(LocalDocs.member.id).get()
@@ -175,39 +189,40 @@ const handleNotification = (method, doc) => {
             .then(() => console.log("permission added to tree successfully!"))
             .catch(() => console.log("error while adding permission to tree"));
 
-            reqTreeAndLeafRef.update({
-                // Update leaf to be claimed_by authmemeberdoc.id
-                // Remove "invitation"
-                "claimed_by" : LocalDocs.member.id,
-                "invitation" : null
+            if (!reqMemberDoc.data().primary_tree) {
+                membersRef.doc(LocalDocs.member.id).update({
+                    "primary_tree" : treeToJoin
+                })
+                .then(() => console.log("member primary tree updated  successfully!"))
+                .catch(() => console.log("error while updating member primary tree"));
+            }
+
+            membersRef.doc(LocalDocs.member.id).update({
+                // Add new tree to the member's Trees
+                "trees" : firebase.firestore.FieldValue.arrayUnion(treeToJoin)
             })
             .then(() => {
-                if (!reqMemberDoc.data().primary_tree) {
-                    // Make this the member's primary tree
-                    membersRef.doc(LocalDocs.member.id).update({
-                        "primary_tree" : treeToJoin
-                    })
-                    .then(() => console.log("member primary tree updated  successfully!"))
-                    .catch(() => console.log("error while updating member primary tree"));
-                }
-    
-                membersRef.doc(LocalDocs.member.id).update({
-                    // Add new tree to the member's Trees
-                    "trees" : firebase.firestore.FieldValue.arrayUnion(treeToJoin)
+                notificationsRef.doc(doc.id).update({
+                    "status" : "accepted"
                 })
                 .then(() => {
-                    notificationsRef.doc(doc.id).update({
-                        "status" : "accepted"
-                    })
-                    .then(() => {
-                        console.log("notification updated  successfully!");
-                        location.reload();
-                    })
-                    .catch(() => console.log("error while updating notification"));
+                    console.log("notification updated  successfully!");
+                    location.reload();
                 })
-                .catch(() => console.log("error while updating member trees"));
+                .catch(() => console.log("error while updating notification"));
             })
-            .catch(() => console.log("error while updating leaf"));
+            .catch(() => console.log("error while updating member trees"));
+
+            if (doc.data().for_leaf) {
+                reqTreeAndLeafRef.update({
+                    "claimed_by" : LocalDocs.member.id,
+                    "invitation" : null
+                })
+                .then(() => {
+                    console.log("leaf updated");
+                })
+                .catch(() => console.log("error while updating leaf"));
+            }
         })
     } else if (method === "decline") {
         // set notification status to "declined"
@@ -216,12 +231,13 @@ const handleNotification = (method, doc) => {
         })
         .then(() => {
             // remove invitation from leaf
-            reqTreeAndLeafRef.update({
-                "invitation" : null
-            })
-            .then(() => console.log("leaf updated  successfully!"))
-            .catch(() => console.log("error while updating leaf"));
-
+            if (doc.data().type === "leaf") {
+                reqTreeAndLeafRef.update({
+                    "invitation" : null
+                })
+                .then(() => console.log("leaf updated  successfully!"))
+                .catch(() => console.log("error while updating leaf"));
+            }
         });
 
     }

@@ -15,7 +15,7 @@ $brand: #002831;
     --brand_lighter: #E3F2F5;
     --navHeight: 88px;
     --navDecorationHeight: 24px;
-    --detailsWidth: 352px;
+    --detailsWidth: 332px;
     --bounceEasing: cubic-bezier(0.51, 0.92, 0.24, 1.15);
     --iconButtonSize: 44px;
     --color_border: #D9DFE0;
@@ -910,6 +910,46 @@ select {
     }
 }
 
+.radioGroup {
+    display: flex;
+    position: relative;
+    // border: solid 1px var(--color_border);
+    border-radius: 8px;
+    width: 100%;
+
+    input[type=radio] {
+        position: absolute;
+        visibility: hidden;
+        display: none;
+
+        &:checked + label {
+            background-color: var(--brand_lighter);
+        }
+
+        &:hover,
+        &:focus {
+            & + label {
+                transform: scale(1.02);
+                transition: all 0s ease-in-out;
+                cursor: pointer;
+                outline: none;
+                background-color: rgba(black, .05);
+            }
+            &:checked + label {
+                background-color: var(--brand_lighter);
+            }
+        }
+    }
+
+    label {
+        padding: 12px 16px;
+        border-radius: 8px;
+        flex: 1;
+        text-align: center;
+        transition: all .1s ease-in-out;
+    }
+}
+
 .select-wrapper {
     padding: 0;
     position: relative;
@@ -1272,6 +1312,13 @@ button,
 }
 
 /// Utility classes
+.u-fw_900 {
+    font-weight: 900;
+}
+.u-fw_600 {
+    font-weight: 600;
+}
+
 .u_disabled {
     pointer-events: none;
     opacity: .5;

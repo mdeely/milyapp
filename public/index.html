@@ -98,6 +98,8 @@
                     </div>
                 </div>
                 <div class="card__footer">
+                    <!-- <a id="microsoft-sign-up_button" class="button u-mar-b_1 u-w_full" href="#">Sign in with Microsoft</a> -->
+                    <a id="google-sign-up_button" class="button u-mar-b_1 u-w_full" href="#">Sign in with Google</a>
                     <button type="submit" class="u-w_full">Log in</button>
                     <p class="u-ta_center u-mar-lr_auto">Don't have an account? <a href="#/sign-up">Sign up</a></p>
                 </div>
@@ -274,17 +276,16 @@
                         <label for="invite-member_email">Email address</label>
                         <input type="text" name="invite-member_email">
                         <p class="error"></p>
-                        <div class="inputGroup inputGroup__horizontal u-mar-t_2">
-                            <input type="radio" class="u-mar-r_2" name="invite-member_permission" value="admin">
-                            <label for="permission">Admin</label>
-                        </div>
-                        <div class="inputGroup inputGroup__horizontal u-mar-r_2">
-                            <input type="radio" class="u-mar-r_2" name="invite-member_permission" value="contributor">
-                            <label for="permission">Contributor</label>
-                        </div>
-                        <div class="inputGroup inputGroup__horizontal u-mar-r_2">
-                            <input type="radio" class="u-mar-r_2" name="invite-member_permission" value="viewer" checked>
-                            <label for="permission">Viewer</label>
+                        <p class="u-mar-t_2 u-mar-b_1 u-fw_600 u-font-size_15">Permission type:</p>
+                        <div class="radioGroup">
+                            <input type="radio" class="u-mar-r_2" id="permission_viewer" name="invite-member_permission" value="viewer" checked>
+                            <label for="permission_viewer">Viewer</label>
+
+                            <input type="radio" class="u-mar-r_2" id="permission_admin" name="invite-member_permission" value="admin">
+                            <label for="permission_admin">Admin</label>
+    
+                            <input type="radio" class="u-mar-r_2" id="permission_contributor" name="invite-member_permission" value="contributor">
+                            <label for="permission_contributor">Contributor</label>
                         </div>
                     </div>
                 </div>
@@ -314,6 +315,39 @@
                     <div class="buttonGroup u-jc_flex-end">
                         <a href="#" class="modal_button--close button secondary">Close</a>
                         <button class="rename-tree_save" type="submit">Rename</button>
+                    </div>
+                </div>
+                <a href="#" class="modal_button--close iconButton white" tooltip="Close"><i class="fa fa-times"></i></a>
+            </form>
+        </div>
+
+        <div class="modal medium" data-modal="invite-members-to-tree_modal">
+            <form id="invite-members-to-tree_form" class="card modal-dialouge" role="dialog">
+                <div class="card__header">
+                    <h2 class="u-mar-b_0 u-mar-t_0">Invite member</h2>
+                </div>
+                <div class="card__content">
+                    <div class="inputGroup">
+                        <label for="invite-member-to-tree_email">Send email invite to</label>
+                        <input type="email" name="invite-member-to-tree_email">
+                    </div>
+                    <input type="text" name="invite-member-to-tree_id" hidden>
+                    <p class="u-mar-t_2 u-mar-b_1 u-fw_600 u-font-size_15">Permission type:</p>
+                    <div class="radioGroup">
+                        <input type="radio" class="u-mar-r_2" id="permission-tree_viewer" name="invite-member-to-tree_permission" value="viewer" checked>
+                        <label for="permission-tree_viewer">Viewer</label>
+                        
+                        <input type="radio" class="u-mar-r_2" id="permission-tree_admin" name="invite-member-to-tree_permission" value="admin">
+                        <label for="permission-tree_admin">Admin</label>
+
+                        <input type="radio" class="u-mar-r_2" id="permission-tree_contributor" name="invite-member-to-tree_permission" value="contributor">
+                        <label for="permission-tree_contributor">Contributor</label>
+                    </div>
+                </div>
+                <div class="card__footer">
+                    <div class="buttonGroup u-jc_flex-end">
+                        <a href="#" class="modal_button--close button secondary">Cancel</a>
+                        <button class="invite-member-tree_save" type="submit">Invite</button>
                     </div>
                 </div>
                 <a href="#" class="modal_button--close iconButton white" tooltip="Close"><i class="fa fa-times"></i></a>

@@ -23,7 +23,7 @@ const editProfileEl = () => {
     let cardHeader = createElementWithClass("div", "card__header");
     let cardFooter = createElementWithClass("div", "card__footer");
     let button = createElementWithClass("button", "u-w_full", "Save");
-    let header = createElementWithClass("h2", "u-mar-b_0", "Your profile");
+    let header = createElementWithClass("h2", "u-mar-b_0 u-mar-t_0", "Your profile");
 
     form.setAttribute("id", "set-profile_form");
     cardContent.setAttribute("class", "card__content");
@@ -166,9 +166,9 @@ const updateMember = (button, form) => {
             membersRef.doc(LocalDocs.member.id).update({
                 "name" : {
                     "firstName" : form["firstName"].value,
-                    "lastName" : form["lastName"].value,
+                    "surnameCurrent" : form["surnameCurrent"].value,
                     "middleName" : form["middleName"].value,
-                    "birthName" : form["birthName"].value,
+                    "surnameBirth" : form["surnameBirth"].value,
                     "nickname" : form["nickname"].value,
                 },
                 "address" : {
@@ -204,9 +204,9 @@ const newMember = (button, form) => {
             "created_by" : auth.currentUser.uid,
             "name" : {
                 "firstName" : form["firstName"].value,
-                "lastName" : form["lastName"].value,
+                "surnameCurrent" : form["surnameCurrent"].value,
                 "middleName" : form["middleName"].value,
-                "birthName" : form["birthName"].value,
+                "surnameBirth" : form["surnameBirth"].value,
                 "nickname" : form["nickname"].value,
             },
             "address" : {

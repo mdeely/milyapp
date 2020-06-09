@@ -55,17 +55,19 @@ window.router = function(user) {
                                 if (LocalDocs.member.data().trees) {
                                     LocalDocs.trees = [];
                                     if ( LocalDocs.member.data().trees && LocalDocs.member.data().trees.length > 0) {
-                                        for (let treeId of LocalDocs.member.data().trees) {
-                                            treesRef.doc(treeId).get()
-                                            .then((reqTreeDoc) => {
-                                                LocalDocs.trees.push(reqTreeDoc);
-                                                reqRoute.onAuthController(user);
-                                                closeAllDropdowns();
-                                            })
-                                            .catch(() => {
-                                                console.log("error getting a tree");
-                                            })
-                                        }
+                                        // for (let treeId of LocalDocs.member.data().trees) {
+                                        //     treesRef.doc(treeId).get()
+                                        //     .then((reqTreeDoc) => {
+                                        //         LocalDocs.trees.push(reqTreeDoc);
+                                        //         // reqRoute.onAuthController(user);
+                                        //         // closeAllDropdowns();
+                                        //     })
+                                        //     .catch(() => {
+                                        //         console.log("error getting a tree");
+                                        //     })
+                                        // }
+                                        reqRoute.onAuthController(user);
+                                        closeAllDropdowns();
                                     } else {
                                         console.log("Member has no trees");
                                     }

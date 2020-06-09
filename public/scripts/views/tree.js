@@ -181,6 +181,7 @@ TreeLeaf.create = function (doc) {
         if (auth.currentUser) {
             DetailsPanel.show(doc.id);
             Leaf.setActive(leafTarget);
+            console.log(doc);
             DetailsPanel.populate(doc, e.target);
         }
     });

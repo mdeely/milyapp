@@ -43,9 +43,12 @@ const detailsPanelProfileImage = detailsPanel.querySelector(".detailsPanel__prof
 
 const renameTreeForm = document.querySelector("#rename-tree_form");
 const editTreeForm = document.querySelector("#edit-tree_form");
+const inviteMembersToTreeForm = document.querySelector("#invite-members-to-tree_form");
 
 const signUpButton = document.querySelector("#sign-up_button");
 const logInButton = document.querySelector("#log-in_button");
+const googleLogInButton = document.querySelector("#google-sign-up_button");
+// const microsoftLogInButton = document.querySelector("#microsoft-sign-up_button");
 const accountMenuButton = document.querySelector("#accountMenu");
 // const searchButton = document.querySelector("#search_button");
 const viewPreferencesButton = document.querySelector("#view-preferences_button");
@@ -157,7 +160,7 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
         closeAllDropdowns();
     })
 
-    if (leafDoc.data().claimed_by) {
+    if (leafDoc && leafDoc.data().claimed_by) {
         reqMemberDoc = LocalDocs.members.find(memberDoc => memberDoc.id === leafDoc.data().claimed_by);
         dataSource = reqMemberDoc ? reqMemberDoc.data() : dataSource ;
     }
@@ -330,14 +333,14 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
             let familyMemberDoc = null;
             let memberPermissionType = authLeafPermissionType();
             
-            if (familyLeafDoc.data().claimed_by) {
-                familyMemberDoc = LocalDocs.getMemberDocByIdFromCurrentTree(familyLeafDoc.data().claimed_by);
-            }
+            // if (familyLeafDoc.data().claimed_by) {
+            //     familyMemberDoc = LocalDocs.getMemberDocByIdFromCurrentTree(familyLeafDoc.data().claimed_by);
+            // }
 
             let docData = familyMemberDoc ? familyMemberDoc : familyLeafDoc;
 
             let firstName = docData.data().name.firstName || "No name";
-            let lastName = docData.data().name.lastName ? ` ${docData.data().name.lastName}` : '';
+            let surnameCurrent = docData.data().name.surnameCurrent ? ` ${docData.data().name.surnameCurrent}` : '';
             let label;
             let partnerAction = '';
             let childAction = '';
@@ -458,7 +461,7 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
             let content = `
                         <div class="detailsPanel__img u-mar-r_2" style='${profileImage || placeholderImageUrl}'></div>
                         <div class="detailsPanel__text u-mar-r_2">
-                            <div class="detailsPanel__name u-mar-b_point5 u-bold">${firstName}${lastName}</div> 
+                            <div class="detailsPanel__name u-mar-b_point5 u-bold">${firstName}${surnameCurrent}</div> 
                             <div class="detailsPanel__relativeType">${label}</div> 
                         </div>
                         ${partnerAction}${childAction}${parentAction}${siblingAction}`
@@ -597,6 +600,47 @@ function initiatePartnerOptions(leafId) {
         })
     }
 }
+// var microsoftProvider = new firebase.auth.OAuthProvider('microsoft.com');
+//   microsoftLogInButton.addEventListener('click', (e) => {
+//     e.preventDefault();
+//     firebase.auth().signInWithPopup(microsoftProvider)
+//     .then(function(result) {
+//         console.log(result);
+//       // User is signed in.
+//       // IdP data available in result.additionalUserInfo.profile.
+//       // OAuth access token can also be retrieved:
+//       // result.credential.accessToken
+//       // OAuth ID token can also be retrieved:
+//       // result.credential.idToken
+//     })
+//     .catch(function(error) {
+//         console.log(error);
+
+//       // Handle error.
+//     });
+//  })
+
+let googleProvider = new firebase.auth.GoogleAuthProvider();
+
+googleLogInButton.addEventListener('click', (e) => {
+    e.preventDefault();
+    firebase.auth().signInWithPopup(googleProvider).then(function(result) {
+        // This gives you a Google Access Token. You can use it to access the Google API.
+        let token = result.credential.accessToken;
+        // The signed-in user info.
+        let user = result.user;
+        // ...
+      }).catch(function(error) {
+        // Handle Errors here.
+        let errorCode = error.code;
+        let errorMessage = error.message;
+        // The email of the user's account used.
+        let email = error.email;
+        // The firebase.auth.AuthCredential type that was used.
+        let credential = error.credential;
+        // ...
+    });
+ })
 
 function initiateChildOptions(leafId) {
     let childDropdownTrigger = detailsPanelImmediateFamily.querySelector(`[data-leaf-id="${leafId}"] [data-dropdown-target="child_options_menu__${leafId}"]
@@ -777,35 +821,35 @@ function createFullName(leafDoc) {
     let firstName = docData.data().name.firstName ? docData.data().name.firstName : null;
     let middleName = docData.data().name.middleName ? docData.data().name.middleName : null;
     let nickname = docData.data().name.nickname ? docData.data().name.nickname : null;
-    let lastName = docData.data().name.lastName ? docData.data().name.lastName : null;
+    let surnameCurrent = docData.data().name.surnameCurrent ? docData.data().name.surnameCurrent : null;
 
-    if (firstName && !middleName && !nickname && !lastName) {
+    if (firstName && !middleName && !nickname && !surnameCurrent) {
         // if only firstName
         fullName = ``;
-    } else if (firstName && middleName && !nickname && !lastName) {
+    } else if (firstName && middleName && !nickname && !surnameCurrent) {
         // if only middle name
         fullName = `Middle name: ${middleName}`;
-    } else if (!firstName && !middleName && !nickname && lastName) {
+    } else if (!firstName && !middleName && !nickname && surnameCurrent) {
         // if only last name
         fullName = ``;
-    } else if (firstName && middleName && !nickname && lastName) {
-        // if only firstname, lastname, and middlename
-        fullName = `${firstName} ${middleName} ${lastName}`;
-    } else if (firstName && !middleName && nickname && !lastName) {
+    } else if (firstName && middleName && !nickname && surnameCurrent) {
+        // if only firstname, surnameCurrent, and middlename
+        fullName = `${firstName} ${middleName} ${surnameCurrent}`;
+    } else if (firstName && !middleName && nickname && !surnameCurrent) {
         // if only last name
         fullName = `Nickname: ${nickname}`;
-    } else if (firstName && !middleName && !nickname && lastName) {
-        // if firstname AND lastname
-        fullName = `${lastName}`;
-    } else if (firstName && !middleName && nickname && lastName) {
-        // if firstname AND lastname
-        fullName = `${firstName} (${nickname}) ${lastName}`;
-    } else if (!firstName && !middleName && !nickname && !lastName) {
+    } else if (firstName && !middleName && !nickname && surnameCurrent) {
+        // if firstname AND surnameCurrent
+        fullName = `${surnameCurrent}`;
+    } else if (firstName && !middleName && nickname && surnameCurrent) {
+        // if firstname AND surnameCurrent
+        fullName = `${firstName} (${nickname}) ${surnameCurrent}`;
+    } else if (!firstName && !middleName && !nickname && !surnameCurrent) {
         // if none
         fullName = ``;
     } else {
         // anything else
-        fullName = `${firstName} (${nickname}) ${middleName} ${lastName}`;
+        fullName = `${firstName} (${nickname}) ${middleName} ${surnameCurrent}`;
     }
 
     return fullName;
@@ -827,11 +871,12 @@ function createElementWithClass(elementType, classname = null, content = null) {
 
 DetailsPanel.editMember = function() {
     detailsPanelEdit.innerHTML = '';
+    detailsPanel.scrollTop = 0;
 
     let reqEditDoc = DetailsPanel.getLeafDoc();
     let reqEditDocData = reqEditDoc.data();
     let memberDoc = null;
-    let header = `<h3 class="u-mar-t_4 u-mar-b_4">Edit details</h3>`
+    let header = `<h2 class="u-mar-t_4 u-mar-b_4">Edit details</h2>`
 
     if (reqEditDocData.claimed_by) {
         memberDoc = LocalDocs.getMemberDocByIdFromCurrentTree(reqEditDocData.claimed_by);
@@ -869,9 +914,9 @@ DetailsPanel.editMember = function() {
         //     isChecked = "checked";
         // }
 
-        let inputGroup = `<div class="inputGroup inputGroup__horizontal">
-                                <label class="u-mar-r_2 u-w_33perc">${key}</label>
-                                <input class="u-mar-l_auto u-flex_1 detailsEditInput__${value.dataPath}" type="${inputType}" name="${value.dataPath}" value="${data}" ${backgroundImageStyle}" ${isChecked}>
+        let inputGroup = `<div class="inputGroup">
+                                <label>${key}</label>
+                                <input class="detailsEditInput__${value.dataPath}" type="${inputType}" name="${value.dataPath}" value="${data}" ${backgroundImageStyle}" ${isChecked}>
                             </div>`
     
         detailsPanelEdit.innerHTML += inputGroup;
@@ -882,7 +927,7 @@ DetailsPanel.editMember = function() {
     let cancelButton = document.createElement("button");
 
     saveButton.textContent = "Save";
-    saveButton.setAttribute("class", "u-w_full")
+    saveButton.setAttribute("class", "u-w_full u-mar-b_1")
     saveButton.setAttribute("type", "submit");
 
     cancelButton.textContent = "Cancel";
@@ -941,9 +986,9 @@ DetailsPanel.editMember = function() {
             ref.doc(docId).update({
                 "name" : {
                     "firstName" : detailsPanelEdit["firstName"].value,
-                    "lastName" : detailsPanelEdit["lastName"].value,
+                    "surnameCurrent" : detailsPanelEdit["surnameCurrent"].value,
                     "middleName" : detailsPanelEdit["middleName"].value,
-                    "birthName" : detailsPanelEdit["birthName"].value,
+                    "surnameBirth" : detailsPanelEdit["surnameBirth"].value,
                     "nickname" : detailsPanelEdit["nickname"].value,
                     "phonetic" : detailsPanelEdit["phonetic"].value,
                 },
@@ -981,10 +1026,10 @@ DetailsPanel.editMember = function() {
 
     cancelButton.addEventListener("click", (e) => {
         e.preventDefault();
+        detailsPanel.scrollTop = 0;
         detailsPanelEdit.classList.add("u-d_none");
         detailsPanelInfo.classList.remove("u-d_none");
         detailsPanelAction.classList.remove("u-d_none");
-        detailsPanel.scrollTop = 0;
     });
 
     buttonGroup.setAttribute("class", "formActions u-pad_4");
@@ -1008,14 +1053,14 @@ MemberBlueprint.object = {
                 "defaultValue" : {
                     "First name" : { "dataPath" : "firstName", "defaultValue" : null, "icon" : "user" },
                     "Middle name" : { "dataPath" : "middleName", "defaultValue" : null, "icon" : "user" },
-                    "Last name" : { "dataPath" : "lastName", "defaultValue" : null, "icon" : "user" },
-                    "Birth name" : { "dataPath" : "birthName", "defaultValue" : null, "icon" : "user" },
+                    "Surname (current)" : { "dataPath" : "surnameCurrent", "defaultValue" : null, "icon" : "user" },
+                    "Surname (at birth)" : { "dataPath" : "surnameBirth", "defaultValue" : null, "icon" : "user" },
                     "Nickname" : { "dataPath" : "nickname", "defaultValue" : null, "icon" : "user" },
                     "Phonetic" : { "dataPath" : "phonetic", "defaultValue" : null, "icon" : "user" }
                 }
             },
     "Email" : { "dataPath" : "email", "defaultValue" : null, "icon" : "envelope" },
-    "Website" : { "dataPath" : "website", "defaultValue" : null, "icon" : "link", "data-type" : "url" },
+    "Website" : { "dataPath" : "website", "defaultValue" : null, "icon" : "link"},
     "Phone" : { "dataPath" : "phone", "icon" : "phone", 
                 "defaultValue" : {
                     "Home phone" : { "dataPath" : "homePhone", "defaultValue" : null, "icon" : "phone", "dataType": "tel" },
@@ -1050,9 +1095,9 @@ MemberBlueprint.loop = function(args) {
     let functionCall = args.functionCall;
     let relationships = ["children", "parents", "siblings", "partners"];
     let metaDetails = ["claimed_by", "topMember", "created_by", ];
-    let basicDetails = ["email", "birthday", "occupation", "profile_photo", "facebook", "instagram"];
+    let basicDetails = ["email", "birthday", "occupation", "profile_photo", "facebook", "instagram", "website"];
     let groups = ["name", "address", "phone"];
-    let groupDetails = ["firstName", "middleName", "lastName", "nickname", "birthName", "homePhone", "mobilePhone", "workPhone", "address1", "address2", "city", "zipcode", "country"];
+    let groupDetails = ["firstName", "middleName", "surnameCurrent", "nickname", "surnameBirth", "homePhone", "mobilePhone", "workPhone", "address1", "address2", "city", "zipcode", "country"];
 
     let excludeItems = new Array;
 

@@ -44,6 +44,7 @@ const populateMyTreesList = async () => {
                         let ellipsisIcon = createElementWithClass('i', 'fa fa-ellipsis-h' );
                         let dropdownEl = createElementWithClass('div', 'dropdown u-visibility_hidden u-p_fixed' );
                         let renameDropdown = createElementWithClass('div', 'dropdown__item' );
+                        let inviteDropdown = createElementWithClass('div', 'dropdown__item' );
                         let editMembersDropdown = createElementWithClass('div', 'dropdown__item' );
                         let deleteDropdown = createElementWithClass('div', 'dropdown__item u-c_danger' );
                         let leaveTree = createElementWithClass('div', 'dropdown__item u-c_danger' );
@@ -55,10 +56,13 @@ const populateMyTreesList = async () => {
                         dropdownEl.setAttribute("id", `edit_tree_options_${reqTreeDoc.id}`);
                         renameDropdown.setAttribute("data-value", `rename`);
                         renameDropdown.setAttribute("data-modal-trigger", `rename-tree_modal`);
+                        inviteDropdown.setAttribute("data-value", `invite`);
+                        inviteDropdown.setAttribute("data-modal-trigger", `invite-members-to-tree_modal`);
                         editMembersDropdown.setAttribute("data-modal-trigger", `edit-tree_modal`);
                         
                         aEl.textContent = reqTreeDoc.data().name;
                         renameDropdown.textContent = "Rename";
+                        inviteDropdown.textContent = "Invite members";
                         editMembersDropdown.textContent = "Settings & permissions";
                         deleteDropdown.textContent = "Delete tree";
                         leaveTree.textContent = "Leave tree";
@@ -68,6 +72,7 @@ const populateMyTreesList = async () => {
                         if ( reqTreeDoc.data().permissions[LocalDocs.member.id] ) {
                             if (reqTreeDoc.data().permissions[LocalDocs.member.id] === "admin") {
                                 dropdownEl.appendChild(renameDropdown);
+                                dropdownEl.appendChild(inviteDropdown);
                                 dropdownEl.appendChild(editMembersDropdown);
                                 dropdownEl.appendChild(deleteDropdown);
                             } else {
@@ -98,7 +103,7 @@ const populateMyTreesList = async () => {
                                     membersRef.doc(memberId).get()
                                     .then((reqMemberDoc) => {
                                         if (reqMemberDoc.exists) {
-                                            div.textContent = `${reqMemberDoc.data().name.firstName} ${reqMemberDoc.data().name.lastName}`;
+                                            div.textContent = `${reqMemberDoc.data().name.firstName} ${reqMemberDoc.data().name.surnameCurrent}`;
                                         } else {
                                             div.textContent = memberId;
                                         }
@@ -139,6 +144,12 @@ const populateMyTreesList = async () => {
                             e.preventDefault();
                             renameTreeForm["rename-tree_name"].value = reqTreeDoc.data().name;
                             renameTreeForm["rename-tree_id"].value = reqTreeDoc.id;
+                            closeAllDropdowns();
+                        });
+
+                        inviteDropdown.addEventListener('click' , (e) => {
+                            e.preventDefault();
+                            inviteMembersToTreeForm[`invite-member-to-tree_id`].value = reqTreeDoc.id;
                             closeAllDropdowns();
                         });
 
@@ -232,6 +243,30 @@ const populateMyTreesList = async () => {
                 console.log(err.message);
             }) 
             // closeModals();
+        })
+        
+        inviteMembersToTreeForm.addEventListener("submit", (e) => {
+            e.preventDefault();
+
+            let treeId = inviteMembersToTreeForm[`invite-member-to-tree_id`].value;
+            let emailForTree = inviteMembersToTreeForm[`invite-member-to-tree_email`].value;
+            let permissionType = inviteMembersToTreeForm.querySelector(`input[name="invite-member-to-tree_permission"]:checked`).value;
+
+            notificationsRef.add({
+                "for_email": emailForTree,
+                "for_leaf": null,
+                "for_tree": treeId,
+                "from_member": LocalDocs.member.id,
+                "permission_type": permissionType,
+                "status": "pending",
+                "type": "tree"
+            })
+            .then(()=> {
+                console.log("tree notification created");
+                inviteMembersToTreeForm[`invite-member-to-tree_id`].value = "";
+                inviteMembersToTreeForm[`invite-member-to-tree_email`].value = "";
+                closeModals();
+            })
         })
 
 

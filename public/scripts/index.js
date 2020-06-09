@@ -657,7 +657,7 @@ inviteMemberForm.addEventListener('submit', (e) => {
         inviteMemberForm.querySelector(".error").textContent = `${emaillAddress} already belongs to a leaf on this tree.`;
     } else {
         notificationsRef.add({
-            "type" : "invitation",
+            "type" : "leaf",
             "from_member" : LocalDocs.member.id,
             "for_email" : emaillAddress,
             "for_leaf" : leafId,
@@ -804,7 +804,7 @@ const getListViewInfo = (leafDoc) => {
                 let group = document.createElement("span");
                 group.setAttribute("class", "group");
                 for (let [detailKey, detailValue] of Object.entries(value["defaultValue"])) {
-                    if ( ["firstName", "lastName", "address1", "address2", "city", "zipcode", "country"].includes(detailValue["dataPath"]) ) {
+                    if ( ["firstName", "surnameCurrent", "address1", "address2", "city", "zipcode", "country"].includes(detailValue["dataPath"]) ) {
                         let name = leafDoc.data()[value["dataPath"]][detailValue["dataPath"]] ? leafDoc.data()[value["dataPath"]][detailValue["dataPath"]] : "No data" ;
                         let detail = `<span class="leaf__detail-item">${name}</span>`;
                         group.innerHTML += detail;
@@ -844,7 +844,7 @@ const showListView = (show = true) => {
                     data = LocalDocs.getMemberById(data.claimed_by).data();
                 }
                 let firstName = data.name.firstName ? data.name.firstName : '';
-                let lastName = data.name.lastName ? data.name.lastName : '';
+                let surnameCurrent = data.name.surnameCurrent ? data.name.surnameCurrent : '';
                 let email = data.email ? data.email : '';
                 let birthday = data.birthday ? convertBirthday(data.birthday) : '';
                 let homePhone = data.phone.homePhone ? formatPhoneNumber(data.phone.homePhone) : '';
@@ -864,14 +864,14 @@ const showListView = (show = true) => {
 
                 let content = `
                     <p class="list__information u-w_full u-pad-l_1">
-                        <span class="u-bold">${firstName} ${lastName}</span>
+                        <span class="u-bold">${firstName} ${surnameCurrent}</span>
                         <span class="u-font-size_14" tooltip-position="top middle" tooltip-reveal="fast" tooltip="Email">${email}</span>
                         <span class="u-font-size_14" tooltip-position="top middle" tooltip-reveal="fast" tooltip="Mobile phone">${mobilePhone}</span>
                         <span class="u-font-size_14" tooltip-position="top middle" tooltip-reveal="fast" tooltip="Birthday">${birthday}</span>
                         <span class="u-font-size_14" tooltip-position="top middle" tooltip-reveal="fast" tooltip="Address" style="white-space: nowrap">${address}</span>
                     </p>`;
     
-                // First + Lastname
+                // First + surnameCurrent
                 // Email
                 // Birthdate
                 // Phone
