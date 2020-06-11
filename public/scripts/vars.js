@@ -14,7 +14,9 @@ const addChildButton = document.querySelector("#add-child-action");
 const addPartnerButton = document.querySelector("#add-partner-action");
 const addSiblingButton = document.querySelector("#add-sibling-action");
 
-const removeLeafButton = document.querySelector("#remove-leaf-action");
+const deleteLeafButton = document.querySelector("#delete-leaf-action");
+// const removeMemberFromTreeButton = document.querySelector("#remove-member-from-tree-action");
+
 // const editMemberButton = document.querySelector("#edit-member-action");
 
 const dataViews = document.querySelectorAll(`[data-view]`);
@@ -48,7 +50,7 @@ const inviteMembersToTreeForm = document.querySelector("#invite-members-to-tree_
 const signUpButton = document.querySelector("#sign-up_button");
 const logInButton = document.querySelector("#log-in_button");
 const googleLogInButton = document.querySelector("#google-sign-up_button");
-// const microsoftLogInButton = document.querySelector("#microsoft-sign-up_button");
+const microsoftLogInButton = document.querySelector("#microsoft-sign-up_button");
 const accountMenuButton = document.querySelector("#accountMenu");
 // const searchButton = document.querySelector("#search_button");
 const viewPreferencesButton = document.querySelector("#view-preferences_button");
@@ -180,7 +182,7 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
         inviteMemberButton.classList.remove("u-d_none");
         // editMemberButton.classList.remove("u-d_none");
         addRelationshipButton.classList.remove("u-d_none");
-        removeLeafButton.classList.remove("u-d_none");
+        deleteLeafButton.classList.remove("u-d_none");
         detailsHeaderEl.classList.remove("u-d_none");
 
         if (leafDoc.data().topMember === true) {
@@ -191,20 +193,22 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
 
         if (memberPermissionType === "contributor") {
             if (leafDoc.data().created_by === LocalDocs.member.id) {
-                removeLeafButton.classList.remove("u-d_none");
+                deleteLeafButton.classList.remove("u-d_none");
             } else {
-                removeLeafButton.classList.add("u-d_none");
+                deleteLeafButton.classList.add("u-d_none");
             }
         }
         if (!leafDoc.data().claimed_by) {
             detailsHeaderEl.appendChild(editDetailsAnchor);
+        } else {
+            deleteLeafButton.classList.add("u-d_none");
         }
 
     } else if (memberPermissionType === "viewer" || !memberPermissionType)  {
         console.log("I'm a viewers")
         addParentButton.classList.add("u-d_none")
         inviteMemberButton.classList.add("u-d_none");
-        removeLeafButton.classList.add("u-d_none");
+        deleteLeafButton.classList.add("u-d_none");
         // editMemberButton.classList.add("u-d_none");
         addRelationshipButton.classList.add("u-d_none");
     }
@@ -295,7 +299,6 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
 
                 if (docDataPath && Object.keys(docDataPath).length === 1) {
                     singular = relativeType.slice(0, -1); 
-                    console.log(`${relativeType} to ${singular}`)
                     relationshipHeader.textContent = `${singular}`;
                 } else {
                     relationshipHeader.textContent = `${relativeType}`;
@@ -600,7 +603,7 @@ function initiatePartnerOptions(leafId) {
         })
     }
 }
-// var microsoftProvider = new firebase.auth.OAuthProvider('microsoft.com');
+// let microsoftProvider = new firebase.auth.OAuthProvider('microsoft.com');
 //   microsoftLogInButton.addEventListener('click', (e) => {
 //     e.preventDefault();
 //     firebase.auth().signInWithPopup(microsoftProvider)
@@ -1453,7 +1456,7 @@ Relationship.addSibling = function() {
     })
 }
 
-Relationship.removeLeaf = function() {
+Relationship.deleteLeaf = function() {
     let reqRemovalDoc = DetailsPanel.getLeafDoc();
     console.log(reqRemovalDoc);
 

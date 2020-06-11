@@ -21,7 +21,7 @@
                 <a class="button" id="log-in_button" href="/#/log-in">Log in</a>
                 <a class="button" id="sign-up_button" href="/#/sign-up">Sign up</a>
             </div>
-            <button id="notification_indicator" data-dropdown-target="notification_menu" class="iconButton u-visibility_hidden"><i class="fal fa-bell"></i></button>
+            <button id="notification_indicator" data-dropdown-target="notification_menu" class="iconButton u-visibility_hidden" tooltip="Notifications"><i class="fal fa-bell"></i></button>
             <div id="notification_menu" class="dropdown u-p_absolute">
             </div>
             <!-- <button id="search_button" class="u-mar-l_2 u-mar-r_1 iconButton"><i class="fa fa-search"></i></button> -->
@@ -39,7 +39,7 @@
                 <a href="#/my-trees" class="dropdown__item">My trees</a>
                 <a href="#/profile" class="dropdown__item">Profile</a>
                 <!-- <a href="#/settings" class="dropdown__item">Settings</a> -->
-                <div id="sign-out_button" class=" dropdown__item">Sign out</div>
+                <div tabindex="0" id="sign-out_button" class=" dropdown__item">Sign out</div>
             </div>
 
             <div id="pageTitle" class="u-mar-lr_auto u-c_white u-p_absolute"></div>
@@ -98,8 +98,9 @@
                 </div>
                 <div class="card__footer">
                     <!-- <a id="microsoft-sign-up_button" class="button u-mar-b_1 u-w_full" href="#">Sign in with Microsoft</a> -->
-                    <a id="google-sign-up_button" class="button u-mar-b_1 u-w_full" href="#">Sign in with Google</a>
                     <button type="submit" class="u-w_full">Log in</button>
+                    <p class="u-ta_center">or</p>
+                    <a id="google-sign-up_button" class="button u-mar-b_1 u-w_full secondary" href="#"><i class="u-mar-r_1 fab fa-google"></i>Sign in with Google</a>
                     <p class="u-ta_center u-mar-lr_auto">Don't have an account? <a href="#/sign-up">Sign up</a></p>
                 </div>
             </form>
@@ -168,7 +169,7 @@
                     <nav class="detailsPanel__actions u-mar-b_6 u-mar-t_1">
                         <button class="iconButton add-relationship_button" data-dropdown-target="add-relationship-dropdown" tooltip="Add relationship" tooltip-position="right"><i class="fal fa-plus"></i></button>
                         <div class="detailsPanel__actions-secondary u-mar-l_auto u-d_flex">
-                            <button class="iconButton secondary" id="invite-member-action" data-modal-trigger="invite-member_modal" tooltip="Invite member" tooltip-position="bottom middle" ><i class="fal fa-envelope"></i></button>
+                            <button class="iconButton secondary" id="invite-member-action" data-modal-trigger="invite-member_modal" tooltip="Invite member" tooltip-reveal="fast" tooltip-position="bottom middle" ><i class="fal fa-envelope"></i></button>
                             <!-- <button class="iconButton secondary u-mar-l_2" id="edit-member-action" tooltip="Edit" tooltip-position="bottom middle" ><i class="fal fa-pencil-alt"></i></button> -->
                             <button class="iconButton secondary details__button--close u-mar-l_2" tooltip="Hide panel" tooltip-position="bottom middle" ><i class="fal fa-times"></i></button> 
                         </div>
@@ -177,7 +178,7 @@
                         <li id="edit-member-action" class="dropdown__item">Edit member details</li>
                     </ul> -->
                     <ul id="add-relationship-dropdown" class="dropdown u-visibility_hidden u-p_fixed">
-                        <li class="dropdown__item dropdown__label">Add relationship</li>
+                        <!-- <li class="dropdown__item dropdown__label">Add relationship</li> -->
                         <li id="add-parent-action" class="dropdown__item">Parent</li>
                         <li id="add-child-action" class="dropdown__item">Child</li>
                         <li id="add-sibling-action" class="dropdown__item">Sibling</li>
@@ -192,7 +193,7 @@
                         <div class="detailsPanel__metaData u-mar-b_7 u-mar-t_10"></div>
                         <!-- <h6 class="u-mar-b_4">Immediate family</h6> -->
                         <div class="detailsPanel__immediateFamily"></div>
-                        <li id="remove-leaf-action" class="button danger secondary u-w_full u-mar-t_12">Remove from tree</li>
+                        <li id="delete-leaf-action" class="button danger secondary u-w_full u-mar-t_12">Delete leaf from tree</li>
                     </div>
                     <form id="detailsPanel__edit">
                     </form>
@@ -227,48 +228,12 @@
                 <button class="u-w_full">Create tree</button>
             </div>
         </form>
-        <!-- <section id="mainContent"> -->
-            <!-- <section id="familyTree" class="ifAuth--show"></section> -->
-            <!-- <aside id="detailsPanel">
-                <nav class="detailsPanel__actions u-mar-b_4">
-                    <button class="iconButton add-relationship_button" data-dropdown-target="add-relationship-dropdown"><i class="fa fa-plus"></i></button>
-                    <div class="detailsPanel__actions-secondary u-mar-l_auto u-d_flex">
-                        <button class="iconButton secondary" id="invite-member-action" data-modal-trigger="invite-member_modal"><i class="fa fa-envelope"></i></button>
-                        <button class="iconButton secondary u-mar-l_2" data-dropdown-target="member-options-dropdown"><i class="fa fa-ellipsis-h"></i></button>
-                        <button class="iconButton secondary details__button--close u-mar-l_2"><i class="fal fa-times"></i></button> 
-                    </div>
-                </nav>
-                <ul id="member-options-dropdown" class="dropdown u-d_none u-p_fixed">
-                    <li id="edit-member-action" class="dropdown__item">Edit member details</li>
-                    <li id="remove-leaf-action" class="dropdown__item u-c_danger">Remove from tree</li>
-                </ul>
-                <ul id="add-relationship-dropdown" class="dropdown u-d_none u-p_fixed">
-                    <li class="dropdown__item dropdown__label">Add relationship</li>
-                    <li id="add-parent-action" class="dropdown__item">Parent</li>
-                    <li id="add-child-action" class="dropdown__item">Child</li>
-                    <li id="add-partner-action" class="dropdown__item">Partner</li>
-                    <li id="add-sibling-action" class="dropdown__item">Sibling</li>
-                </ul>
-                <div class="detailsPanel__information">
-                    <div class="detailsPanel__profileImage u-mar-lr_auto u-mar-b_3">
-                        <img src="" alt="">
-                    </div>
-                    <div class="detailsPanel__firstName u-mar-lr_auto header_m u-ta_center u-mar-b_5"></div>
-                    <h6 class="u-mar-b_4">Details</h6>
-                    <div class="detailsPanel__metaData u-mar-b_7"></div>
-                    <h6 class="u-mar-b_4">Immediate family</h6>
-                    <div class="detailsPanel__immediateFamily"></div>
-                </div>
-                <form id="detailsPanel__edit" class="u-pad-b_10">
-                </form>
-            </aside> -->
-        <!-- </section> -->
 
         <div class="modal medium" data-modal="invite-member_modal">
             <form id="invite-member_form" class="card modal-dialouge">
                 <div class="card__header">
-                    <h2 class="u-mar-b_0">Invite member</h2>
-                    <p>Invite someone to claim this leaf on the family tree. Their profile photo and information will be used.</p>
+                    <h2 class="u-mar-b_0 u-mar-t_0">Invite member</h2>
+                    <p class="u-mar-b_0 u-text_low">Invite someone to claim this leaf on the family tree.</p>
                 </div>
                 <div class="card__content">
                     <div class="inputGroup">
@@ -278,13 +243,13 @@
                         <p class="u-mar-t_2 u-mar-b_1 u-fw_600 u-font-size_15">Permission type:</p>
                         <div class="radioGroup">
                             <input type="radio" class="u-mar-r_2" id="permission_viewer" name="invite-member_permission" value="viewer" checked>
-                            <label for="permission_viewer">Viewer</label>
-
-                            <input type="radio" class="u-mar-r_2" id="permission_admin" name="invite-member_permission" value="admin">
-                            <label for="permission_admin">Admin</label>
+                            <label tabindex="0" for="permission_viewer">Viewer</label>
     
                             <input type="radio" class="u-mar-r_2" id="permission_contributor" name="invite-member_permission" value="contributor">
-                            <label for="permission_contributor">Contributor</label>
+                            <label tabindex="0" for="permission_contributor">Contributor</label>
+
+                            <input type="radio" class="u-mar-r_2" id="permission_admin" name="invite-member_permission" value="admin">
+                            <label tabindex="0" for="permission_admin">Admin</label>
                         </div>
                     </div>
                 </div>
@@ -336,11 +301,11 @@
                         <input type="radio" class="u-mar-r_2" id="permission-tree_viewer" name="invite-member-to-tree_permission" value="viewer" checked>
                         <label for="permission-tree_viewer">Viewer</label>
 
-                        <input type="radio" class="u-mar-r_2" id="permission-tree_admin" name="invite-member-to-tree_permission" value="admin">
-                        <label for="permission-tree_admin">Admin</label>
-
                         <input type="radio" class="u-mar-r_2" id="permission-tree_contributor" name="invite-member-to-tree_permission" value="contributor">
                         <label for="permission-tree_contributor">Contributor</label>
+
+                        <input type="radio" class="u-mar-r_2" id="permission-tree_admin" name="invite-member-to-tree_permission" value="admin">
+                        <label for="permission-tree_admin">Admin</label>
                     </div>
                 </div>
                 <div class="card__footer">

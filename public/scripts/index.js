@@ -417,95 +417,6 @@ const authLeafPermissionType = () => {
     // TODO FIGURE OUT HOW TO SEND THE PERMISSION STATUS WHEN POPULATING DETAILS
 }
 
-// const populateDetailsPanel = (doc, leafDoc) => {
-//     detailsPanelMetaData.textContent = '';
-//     detailsPanelImmediateFamily.textContent = '';
-//     detailsPanelFirstName.textContent = doc.data().name.firstName ? doc.data().name.firstName : "No name";
-//     detailsPanel.setAttribute("data-member-details-id", '');
-//     detailsPanel.setAttribute("data-details-id", leafDoc.id);
-
-//     if (doc.ref.parent.path === "members") {
-//         detailsPanel.setAttribute("data-member-details-id", doc.id);
-//     }
-
-//     let profileImage = detailsPanel.querySelector(".detailsPanel__profileImage img");
-//     profileImage.setAttribute('src', placeholderImageUrl);
-    
-//     if (authLeafPermissionType() && authLeafPermissionType() === "admin" || authLeafPermissionType() && authLeafPermissionType() === "contributor") {
-//         addParentButton.classList.remove("u-d_none")
-//         inviteMemberButton.classList.remove("u-d_none");
-//         removeLeafButton.classList.remove("u-d_none");
-//         editMemberButton.classList.remove("u-d_none");
-//         addRelationshipButton.classList.remove("u-d_none");
-
-//         if (doc.data().topMember !== true) {
-//             addParentButton.classList.add("u-d_none")
-//         }
-
-//         if (doc.data().invitation) {
-//             inviteMemberButton.classList.add("u-d_none");
-//         }
-
-//         if (leafDoc.data().claimed_by) {
-//             if (leafDoc.data().claimed_by === authMemberDoc.id) {
-//                 removeLeafButton.classList.add("u-d_none");
-//                 editMemberButton.classList.remove("u-d_none");
-//                 inviteMemberButton.classList.add("u-d_none");
-//             } else {
-//                 inviteMemberButton.classList.add("u-d_none");
-//             }
-//         }
-
-//     } else if (authLeafPermissionType() || authLeafPermissionType() === "viewer") {
-//         addParentButton.classList.add("u-d_none")
-//         inviteMemberButton.classList.add("u-d_none");
-//         removeLeafButton.classList.add("u-d_none");
-//         editMemberButton.classList.add("u-d_none");
-//         addRelationshipButton.classList.add("u-d_none");
-//     } else {
-//         addParentButton.classList.add("u-d_none")
-//         inviteMemberButton.classList.add("u-d_none");
-//         removeLeafButton.classList.add("u-d_none");
-//         editMemberButton.classList.add("u-d_none");
-//         addRelationshipButton.classList.add("u-d_none");
-//     }
-
-//     for (let [key, value] of Object.entries(memberBlueprint)) {
-//         if ( !excludedDetails.includes(value["dataPath"]) ) {
-//             if ( value["defaultValue"] && Object.values(value["defaultValue"]).length > 0 ) {
-//                 for (let [detailKey, detailValue] of Object.entries(value["defaultValue"])) {
-//                     if ( !["firstName"].includes(detailValue["dataPath"]) ) {
-//                         generateDetailElement({data: doc.data()[value["dataPath"]][detailValue["dataPath"]], name: detailValue["dataPath"], icon: value["icon"]});
-//                     }
-//                 }
-//             } else {
-//                 if ( !excludedCategories.includes(key) ) {
-//                     generateDetailElement({data: doc.data()[value["dataPath"]], name: value["dataPath"], icon: value["icon"]});
-//                 }
-//             }
-//         }
-//     }
-
-//     let relativeTypeArray = ["spouses", "children", "siblings", "parents"];
-
-//     for (relativeType of relativeTypeArray) {
-//         let relativeData = leafDoc.data()[`${relativeType}`];
-//         if (relativeData) {
-//             if (relativeType === "spouses") {
-//                 for ( relativeId in relativeData ) {
-//                     let relativeDoc = getLocalLeafDocFromId(relativeId);
-//                     generateImmediateFamilyElement(relativeDoc, relativeType); 
-//                 }
-//             } else {
-//                 for ( relativeId of relativeData ) {
-//                     let relativeDoc = getLocalLeafDocFromId(relativeId);
-//                     generateImmediateFamilyElement(relativeDoc, relativeType);  
-//                 }
-//             }
-//         }
-//     }
-// }
-
 // const generateImmediateFamilyElement = (parentDoc, relativeType) => {
 //     let label;
 //     let spouseAction = '';
@@ -776,8 +687,8 @@ createTreeForm.addEventListener('submit', (e) => {
     })
 })
 
-removeLeafButton.addEventListener('click', (e) => {
-  Relationship.removeLeaf(e);
+deleteLeafButton.addEventListener('click', (e) => {
+  Relationship.deleteLeaf(e);
     closeAllDropdowns();
 })
 
@@ -792,6 +703,7 @@ viewPermissionsList.addEventListener('click', (e) => {
 })
 
 const getListViewInfo = (leafDoc) => {
+    return;
     let viewListInfo = document.createElement("div");
     viewListInfo.setAttribute("class", "view-list_info");
     

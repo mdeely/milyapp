@@ -924,20 +924,23 @@ select {
         display: none;
 
         &:checked + label {
-            background-color: var(--brand_lighter);
+            color: white;
+            background-color: var(--brand);
         }
 
         &:hover,
         &:focus {
+
             & + label {
-                transform: scale(1.02);
-                transition: all 0s ease-in-out;
                 cursor: pointer;
-                outline: none;
-                background-color: rgba(black, .05);
-            }
-            &:checked + label {
+                outline: 0px solid transparent;
+                color: var(--color_text);
                 background-color: var(--brand_lighter);
+            }
+
+            &:checked + label {
+                color: white;
+                background-color: var(--brand);
             }
         }
     }
@@ -947,7 +950,7 @@ select {
         border-radius: 8px;
         flex: 1;
         text-align: center;
-        transition: all .1s ease-in-out;
+        margin-bottom: 0;
     }
 }
 
@@ -1002,7 +1005,7 @@ label {
         margin-top: 16px;
     }
 
-    label {
+    > label {
         margin-bottom: 8px;
     }
 
@@ -1467,6 +1470,10 @@ button,
 
 .u-mar-r_auto {
     margin-right: auto;
+}
+
+.u-mar-r_1 {
+    margin-right: 8px;
 }
 
 .u-mar-r_2 {

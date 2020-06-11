@@ -97,6 +97,11 @@ const populateMyTreesList = async () => {
                                     let div = createElementWithClass("div", "u-mar-b_1 u-d_block");
                                     let select = document.createElement("select");
                                     let selectWrapper = createElementWithClass("div", "select-wrapper u-mar-l_auto");
+                                    let removeMemberFromTreeButton = createElementWithClass("button", "iconButton white u-mar-l_1");
+                                    let trashIcon = createElementWithClass("i", "u-c_danger fal fa-trash-alt");
+
+                                    removeMemberFromTreeButton.setAttribute("tooltip", "Remove member");
+                                    removeMemberFromTreeButton.setAttribute("tooltip-reveal", "fast");
                                     div.setAttribute("class", "u-d_flex u-mar-b_1 u-align-items_center");
                                     div.setAttribute("data-member-id", memberId);
 
@@ -119,10 +124,49 @@ const populateMyTreesList = async () => {
         
                                             select.appendChild(option);
                                         }
-        
+                                        
+                                        removeMemberFromTreeButton.appendChild(trashIcon);
                                         selectWrapper.appendChild(select);
                                         div.appendChild(selectWrapper);
+                                        div.appendChild(removeMemberFromTreeButton);
                                         permissionsEl.appendChild(div);
+                                    })
+
+                                    removeMemberFromTreeButton.addEventListener('click', (e) => {
+                                        e.preventDefault();
+
+                                        if (confirm("Remove this member?")) {
+                                          let memberId = e.target.closest("[data-member-id]").getAttribute("data-member-id");
+                                          let treeId = editTreeForm[`edit-tree_id`].value;
+
+
+                                          treesRef.doc(treeId).get()
+                                          .then((treeDoc) => {
+                                              if (treeDoc.data().created_by === memberId) {
+                                                  alert("You created this tree. You cannot remove yourself from it.")
+                                              } else {
+                                                membersRef.doc(memberId).update({
+                                                    trees: firebase.firestore.FieldValue.arrayRemove(treeId)
+                                                  })
+                                                  .then(() => {
+                                                      console.log("member had the tree removed");
+                                                      treesRef.doc(treeId).update({
+                                                        [`permissions.${memberId}`] : firebase.firestore.FieldValue.delete()
+                                                      })
+                                                      .then(() => {
+                                                            console.log("permission removed from tree");
+                                                        //   location.reload();
+                                                      })
+                                                      .catch(err => {
+                                                        console.log(err.message);
+                                                    })
+                                                  })
+                                                  .catch(err => {
+                                                      console.log(err.message);
+                                                  })
+                                              }
+                                          })
+                                        }
                                     })
                                 }
                             }
@@ -216,8 +260,6 @@ const populateMyTreesList = async () => {
             }
         }
 
-        editTreeForm.removeEventListener("submit", console.log("removed!"));
-
         editTreeForm.addEventListener('submit', (e) => {
             e.preventDefault();
             let memberEls = editTreeForm.querySelectorAll(`[data-member-id]`);
@@ -231,7 +273,7 @@ const populateMyTreesList = async () => {
             for (updateMemberPermission of memberEls) {
                 let memberId = updateMemberPermission.getAttribute("data-member-id");
                 let select = updateMemberPermission.querySelector("select");
-                let value = select.options[select.selectedIndex].value;    
+                let value = select.options[select.selectedIndex].value;  
                 
                 obj[`${memberId}`] = value;
             };
