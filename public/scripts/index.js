@@ -856,18 +856,50 @@ async function renderTableRow(doc) {
     return tr;
 }
 
+const renderTableHeaders = () => {
+    let tr = createElementWithClass("tr", "")
+    let thProfileImage = createElementWithClass("th", "");
+    let thName = createElementWithClass("th", "u-pad_1", "Name");
+    let thEmail = createElementWithClass("th", "u-pad_1", "Email");
+    let thMobilePhone = createElementWithClass("th", "u-pad_1", "Mobile Phone");
+    let thBirthday = createElementWithClass("th", "u-pad_1", "Birthday");
+    let thAddress = createElementWithClass("th", "u-pad_1", "Adderss");
+
+    tr.appendChild(thProfileImage);
+    tr.appendChild(thName);
+    tr.appendChild(thEmail);
+    tr.appendChild(thMobilePhone);
+    tr.appendChild(thBirthday);
+    tr.appendChild(thAddress);
+
+    return tr;
+}
+
 const showListView = (show = true) => {
-    // DetailsPanel.close();
     if (show) {
+        
         mainContent.classList.add("view_list");
         let topLeafDoc = LocalDocs.leaves.find(leafDoc => leafDoc.data().topMember === true);
-        let tableEl = familyTreeListEl.querySelector("table");
+        let tableEl = createElementWithClass("table", "u-w_full");
 
-        if (!tableEl.querySelector("tr td")) {
-            if (topLeafDoc) {
-                renderRowAndRelations(topLeafDoc, tableEl);
-            }
-        }
+        tableEl.appendChild(renderTableHeaders());
+
+        familyTreeListEl.innerHTML = '';
+        familyTreeListEl.appendChild(tableEl);
+
+        // if (tdEls.length > 0) {
+        //     for (tdEl of tdEls) {
+        //         tdEl.remove();
+        //     }
+        // }
+
+        renderRowAndRelations(topLeafDoc, tableEl);
+
+        // if (!tableEl.querySelector("tr td")) {
+        //     if (topLeafDoc) {
+        //         renderRowAndRelations(topLeafDoc, tableEl);
+        //     }
+        // }
     } else {
         mainContent.classList.remove("view_list");
     }

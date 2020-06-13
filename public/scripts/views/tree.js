@@ -17,6 +17,10 @@ Tree.setup = function(treeId) {
 
 
                 TreeBranch.initiate();
+
+                let tableEl = familyTreeListEl.querySelector("table");
+                let tdEls = tableEl.querySelectorAll("tr td");
+                    
                 showListView(false);
                 console.log("TODO: change the treeBranch abilities based on authentication and permission status");
             })
@@ -26,7 +30,7 @@ Tree.setup = function(treeId) {
 
 Tree.treeViewOnAuthChange = function(user) {
     if (user) {
-        // huh?
+        // ??
     } else {
         treeDebugMsg.innerHTML += `<h1 class="u-mar-lr_auto u-ta_center">Sign up/in to join this tree</h2>`;
         console.log("tree auth change!");
