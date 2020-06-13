@@ -185,9 +185,7 @@ path {
     margin: 0 auto;
     border-collapse: collapse; }
   #familyTree__list tr {
-    border-radius: 16px;
-    z-index: 1;
-    position: relative; }
+    border-radius: 16px; }
     #familyTree__list tr:hover td {
       background-color: var(--brand_lighter); }
       #familyTree__list tr:hover td:after {
@@ -195,17 +193,20 @@ path {
     #familyTree__list tr.highlight .leaf__image {
       transform: scale3d(1.3, 1.3, 1.3);
       transition: transform 0.2s ease-in-out; }
-    #familyTree__list tr.active {
-      box-shadow: 0 0 0 4px inset var(--color_outline);
-      z-index: 2; }
-      #familyTree__list tr.active td:after {
-        content: none; }
-      #familyTree__list tr.active .iconButton:focus {
-        box-shadow: none; }
-      #familyTree__list tr.active .iconButton:after {
-        opacity: 0; }
-      #familyTree__list tr.active:hover td {
-        background-color: unset; }
+    #familyTree__list tr.active td {
+      box-shadow: 0px -4px 0 0px var(--color_outline) inset, 0px 4px 0 0px var(--color_outline) inset; }
+      #familyTree__list tr.active td:first-child {
+        box-shadow: 0px -4px 0 0px var(--color_outline) inset, 0px 4px 0 0px var(--color_outline) inset, 4px 0 0 0px var(--color_outline) inset; }
+      #familyTree__list tr.active td:last-child {
+        box-shadow: 0px -4px 0 0px var(--color_outline) inset, 0px 4px 0 0px var(--color_outline) inset, -4px 0 0 0px var(--color_outline) inset; }
+    #familyTree__list tr.active td:after {
+      content: none; }
+    #familyTree__list tr.active .iconButton:focus {
+      box-shadow: none; }
+    #familyTree__list tr.active .iconButton:after {
+      opacity: 0; }
+    #familyTree__list tr.active:hover td {
+      background-color: unset; }
   #familyTree__list th {
     text-align: left; }
   #familyTree__list td {
@@ -883,7 +884,6 @@ button,
   .iconButton:focus {
     box-shadow: 0 0 0 4px var(--color_outline); }
   .iconButton i {
-    line-height: var(--iconButtonSize);
     pointer-events: none;
     text-decoration: none; }
 

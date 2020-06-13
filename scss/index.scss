@@ -307,8 +307,6 @@ path {
 
     tr {
         border-radius: 16px;
-        z-index: 1;
-        position: relative;
 
         &:hover {
             td {
@@ -328,8 +326,26 @@ path {
         }
 
         &.active {
-            box-shadow: 0 0 0 4px inset var(--color_outline);
-            z-index: 2;
+            // box-shadow: 0 0 0 4px var(--color_outline) inset;
+
+            td {
+                box-shadow: 
+                            0px -4px 0 0px var(--color_outline) inset,
+                            0px 4px 0 0px var(--color_outline) inset;
+
+                &:first-child {
+                    box-shadow: 
+                            0px -4px 0 0px var(--color_outline) inset,
+                            0px 4px 0 0px var(--color_outline) inset,
+                            4px 0 0 0px var(--color_outline) inset
+                }
+                &:last-child {
+                    box-shadow: 
+                            0px -4px 0 0px var(--color_outline) inset,
+                            0px 4px 0 0px var(--color_outline) inset,
+                            -4px 0 0 0px var(--color_outline) inset
+                }
+            }
 
             td:after {
                 content: none;
@@ -1324,7 +1340,7 @@ button,
     }
 
     i {
-        line-height: var(--iconButtonSize);
+        // line-height: var(--iconButtonSize);
         pointer-events: none;
         text-decoration: none;
     }
