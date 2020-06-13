@@ -689,7 +689,7 @@ select {
     display: none; }
     .checkboxGroup input[type=checkbox]:checked + label:before {
       content: "\f00c";
-      box-shadow: 0 0 0 2px inset var(--brand);
+      box-shadow: 0 0 0 2px var(--brand) inset;
       font-size: 18px;
       transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
   .checkboxGroup label {
@@ -704,7 +704,7 @@ select {
       width: 32px;
       height: 32px;
       border-radius: 8px;
-      box-shadow: 0 0 0 2px inset var(--color_border);
+      box-shadow: 0 0 0 2px var(--color_border) inset;
       margin-right: 8px;
       position: absolute;
       left: 0;

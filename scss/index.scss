@@ -1081,7 +1081,7 @@ select {
 
         &:checked + label:before {
             content: "\f00c";
-            box-shadow: 0 0 0 2px inset var(--brand);
+            box-shadow: 0 0 0 2px var(--brand) inset;
             font-size: 18px;
             transition: $transition;
         }
@@ -1100,7 +1100,7 @@ select {
             width: $checkboxSize;
             height: $checkboxSize;
             border-radius: 8px;
-            box-shadow: 0 0 0 2px inset var(--color_border);
+            box-shadow: 0 0 0 2px var(--color_border) inset;
             margin-right: 8px;
             position: absolute;
             left: 0;
