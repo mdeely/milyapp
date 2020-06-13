@@ -29,6 +29,8 @@ const treeBlueprint = {
 }
 
 const familyTreeEl = document.querySelector("#familyTree");
+const familyTreeListEl = document.querySelector("#familyTree__list");
+
 const mainContent = document.querySelector("#mainContent");
 const branchContainer = document.querySelector("#branchContainer");
 
@@ -86,22 +88,59 @@ const availablePermissions = {
 
 let Leaf = {};
 
-Leaf.removeActive = function() {
-  let activeLeaf = document.querySelector(".leaf.active");
+//// LEFT OFF FIGURING OUT HOW TO SHOW/HIDE the tablea nd leaf things.  
 
-  if (activeLeaf) {
-      activeLeaf.classList.remove("active");
-  };
+Leaf.removeActive = function() {
+    activeEls = mainContent.querySelectorAll("[data-id].active");
+
+    for (activeEl of activeEls) {
+        activeEl.classList.remove('active');
+    }
 }
 
-Leaf.setActive = function(el) {
+
+Leaf.toggleActive = function(el) {
+    let id = el.getAttribute("data-id");
+
     if (el.classList.contains("active")) {
-        el.classList.remove("active");
+        Leaf.removeActive();
         DetailsPanel.close();
     } else {
+        treeEl = familyTreeEl.querySelector(`[data-id="${id}"]`);
+        listEl = familyTreeListEl.querySelector(`[data-id="${id}"]`);
+        
         Leaf.removeActive();
-        el.classList.add("active");
+
+        treeEl.classList.add("active");
+
+        if (listEl) {
+            listEl.classList.add("active");
+        }
+        DetailsPanel.show();
     }
+
+
+    // if (treeActiveEl) {
+    //     if (treeActiveEl.classList.contains("active")) {
+    //         treeActiveEl.classList.remove('active');
+
+    //         DetailsPanel.close();
+    //     } else {
+    //         treeActiveEl.classList.add('active');
+    //         DetailsPanel.show();
+    //     }
+    // }
+
+    // if (listActiveEl) {
+    //     if (listActiveEl.classList.contains("active")) {
+    //         listActiveEl.classList.remove('active');
+
+    //         DetailsPanel.close();
+    //     } else {
+    //         listActiveEl.classList.add('active');
+    //         DetailsPanel.show();
+    //     }
+    // }
 }
 
 
@@ -147,7 +186,6 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
     let dataSource = leafDoc.data();
     let detailsPhoto = leafEl.querySelector(".leaf__image").getAttribute("style");
     let memberPermissionType = authLeafPermissionType();
-    let table = document.createElement("table");
     
     let detailsHeaderEl = createElementWithClass("h6", "u-mar-b_2 u-mar-t_8 u-d_flex u-ai_center");
     let editDetailsAnchor = createElementWithClass("button", "u-mar-l_auto iconButton white");
@@ -173,10 +211,6 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
     detailsPanelFullName.textContent = createFullName(leafDoc);
     detailsPanel.setAttribute("data-details-id", leafDoc.id);
     detailsPanelProfileImage.setAttribute("style", detailsPhoto);
-
-    // claimed leafs can always edit themselves
-    // members can add if they are an admin or contributor
-    // members can remove if they are an admin or a contributor+creator of a leaf
     
     if (memberPermissionType === "admin" || memberPermissionType === "contributor") {
         inviteMemberButton.classList.remove("u-d_none");
@@ -474,22 +508,32 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
             detailsPanelItem.addEventListener("mouseover", (e) => {
                 let leafId = detailsPanel.getAttribute("data-details-id");
                 let targetSvg = document.querySelector(`svg[data-from-leaf="${leafId}"][data-to-leaf="${familyLeafDoc.id}"]`);
+                let targetTableEl = familyTreeListEl.querySelector(`[data-id="${familyLeafDoc.id}"]`);
 
                 leafEl.classList.add("highlight");
 
                 if (targetSvg) {
                     targetSvg.classList.add("highlight");
                 }
+
+                if (targetTableEl) {
+                    targetTableEl.classList.add("highlight");
+                }
             })
 
             detailsPanelItem.addEventListener("mouseout", (e) => {
                 let leafId = detailsPanel.getAttribute("data-details-id");
                 let targetSvg = document.querySelector(`svg[data-from-leaf="${leafId}"][data-to-leaf="${familyLeafDoc.id}"]`);
+                let targetTableEl = familyTreeListEl.querySelector(`[data-id="${familyLeafDoc.id}"]`);
 
                 leafEl.classList.remove("highlight");
 
                 if (targetSvg) {
                     targetSvg.classList.remove("highlight");
+                }
+
+                if (targetTableEl) {
+                    targetTableEl.classList.remove("highlight");
                 }
             })
 

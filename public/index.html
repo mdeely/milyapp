@@ -13,7 +13,6 @@
 </head>
     <body>
         <nav class="mainNav">
-            
             <h1 class="u-mar-b_0 u-c_white logo">
                 <a id="mainNav_logo" href="/" class="u-remove-link-style">MILY</a>
             </h1>
@@ -112,12 +111,12 @@
             <div class="modal medium" data-modal="create-tree_modal">
                 <form id="create-tree_form_modal" class="card modal-dialouge">
                     <div class="card__header">
-                        <h2 class="u-mar-b_0 u-mar-t_0">Create tree</h2>
+                        <h2 class="u-mar-b_0 u-mar-t_0">Create a tree</h2>
                     </div>
                     <div class="card__content">
                         <div class="inputGroup">
                             <label for="create-tree_name">Tree name</label>
-                            <input type="text" name="create-tree_name">
+                            <input type="text" name="create-tree_name" required>
                         </div>
                     </div>
                     <div class="card__footer">
@@ -163,6 +162,18 @@
             <section id="mainContent">
             <section id="familyTree">
                 <div id="branchContainer"></div>
+            </section>
+            <section id="familyTree__list">
+                <table class="u-w_full">
+                    <tr>
+                        <th></th>
+                        <th class="u-pad-l_1">Name</th>
+                        <th class="u-pad_1">Email</th>
+                        <th class="u-pad_1">Mobile phone</th>
+                        <th class="u-pad_1">Birthday</th>
+                        <th class="u-pad_1">Address</th>
+                    </tr>
+                </table>
             </section>
             <!-- <svg id="leaf_connections" width="160" height="280" xmlns="http://www.w3.org/2000/svg" version="1.1"></svg> -->
                 <aside id="detailsPanel">
@@ -238,7 +249,7 @@
                 <div class="card__content">
                     <div class="inputGroup">
                         <label for="invite-member_email">Email address</label>
-                        <input type="text" name="invite-member_email">
+                        <input type="text" name="invite-member_email" required>
                         <p class="error"></p>
                         <p class="u-mar-t_2 u-mar-b_1 u-fw_600 u-font-size_15">Permission type:</p>
                         <div class="radioGroup">
@@ -266,7 +277,7 @@
         <div class="modal medium" data-modal="rename-tree_modal">
             <form id="rename-tree_form" class="card modal-dialouge" role="dialog">
                 <div class="card__header">
-                    <h2 class="u-mar-b_0 u-mar-t_0">Rename family</h2>
+                    <h2 class="u-mar-b_0 u-mar-t_0">Rename tree</h2>
                 </div>
                 <div class="card__content">
                     <div class="inputGroup">
@@ -293,7 +304,7 @@
                 <div class="card__content">
                     <div class="inputGroup">
                         <label for="invite-member-to-tree_email">Send email invite to</label>
-                        <input type="email" name="invite-member-to-tree_email">
+                        <input type="email" name="invite-member-to-tree_email" required>
                     </div>
                     <input type="text" name="invite-member-to-tree_id" hidden>
                     <p class="u-mar-t_2 u-mar-b_1 u-fw_600 u-font-size_15">Permission type:</p>
@@ -324,14 +335,14 @@
                     <h2 class="u-mar-b_0 u-mar-t_0">Settings & Permissions</h2>
                 </div>
                 <div class="card__content">
-                    <div class="inputGroup checkbox u-mar-t_2">
-                        <input name="make-public" type="checkbox">
-                        <label for="make-public">Make public</label>
-                    </div>
                     <div class="inputGroup">
                         <input type="text" name="edit-tree_id" class="u-d_none">
                     </div>
-                    <div class="permissions"></div>
+                    <div class="permissions u-mar-t_2"></div>
+                    <div class="checkboxGroup right u-mar-t_4 u-mar-b_1">
+                        <input id="make-public" name="make-public" type="checkbox">
+                        <label for="make-public">Make public</label>
+                    </div>
                 </div>
                 <div class="card__footer">
                     <div class="buttonGroup u-jc_flex-end">

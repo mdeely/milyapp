@@ -88,7 +88,6 @@ window.router = function(user) {
                 })
             } else {
                 accountVerificationViewOnAuthChange(user);
-                console.log("Go verify yourself");
             }
             Nav.update(user);
 

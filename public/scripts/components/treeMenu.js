@@ -26,7 +26,7 @@ const TreeDropdownItem = (treeDoc) => {
     anchor.setAttribute("class", `dropdown__item ${className}`);
     anchor.textContent += treeDoc.data().name;
 
-    editButton.innerHTML = `<i class="fa fa-pencil-alt"></i>`;
+    editButton.innerHTML = `<i class="fas fa-pencil-alt"></i>`;
     editButton.setAttribute("class", "iconButton white u-mar-l_auto");
     editButton.setAttribute('data-modal-trigger', 'edit-tree_modal');
 

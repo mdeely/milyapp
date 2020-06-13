@@ -17,8 +17,6 @@ const listenForSignUpForm = () => {
         if (ageVerification) {
             auth.createUserWithEmailAndPassword(email, password)
             .then((user) => {
-                console.log(user);
-                console.log("successfully created user");
                 signUpForm.reset();
                 signUpForm.querySelector(".message").innerHTML = '';
                 sendVerificationEmail(auth.currentUser);
@@ -740,66 +738,141 @@ const getListViewInfo = (leafDoc) => {
     return viewListInfo;
 }
 
-const showListView = (show = true) => {
-    if (show) {
-        familyTreeEl.classList.add("view_list");
-        let leaves = familyTreeEl.querySelectorAll(".leaf");
-        for (leafEl of leaves) {
-            if (leafEl.querySelector(".list__information")) {
-                leafEl.querySelector(".list__information").style.display = "grid";
-            } else {
-                let leafId = leafEl.getAttribute("data-id");
-                let leafDoc = LocalDocs.getLeafById(leafId);
-                let leafImageEl = leafEl.querySelector(".leaf__image");
-                let data = leafDoc ? leafDoc.data() : null;
-                if (data.claimed_by) {
-                    data = LocalDocs.getMemberById(data.claimed_by).data();
-                }
-                let firstName = data.name.firstName ? data.name.firstName : '';
-                let surnameCurrent = data.name.surnameCurrent ? data.name.surnameCurrent : '';
-                let email = data.email ? data.email : '';
-                let birthday = data.birthday ? convertBirthday(data.birthday) : '';
-                let homePhone = data.phone.homePhone ? formatPhoneNumber(data.phone.homePhone) : '';
-                let workPhone = data.phone.workPhone ? formatPhoneNumber(data.phone.workPhone) : '';
-                let mobilePhone = data.phone.mobilePhone ? formatPhoneNumber(data.phone.mobilePhone) : '';
-                let address1 = data.address.address1 ? data.address.address1 : '';
-                let address2 = data.address.address2 ? data.address.address2 : '';
-                let city = data.address.city ? data.address.city : '';
-                let state = data.address.state ? data.address.state : '';
-                let zipcode = data.address.zipcode ? data.address.zipcode : '';
-
-                if (address1 || address2) {
-                    address = `${address1} ${address2}, </br>${city}, ${state} ${zipcode}`
-                } else {
-                    address = `${city} ${state} ${zipcode}`
-                }
-
-                let content = `
-                    <p class="list__information u-w_full u-pad-l_1">
-                        <span class="u-bold">${firstName} ${surnameCurrent}</span>
-                        <span class="u-font-size_14" tooltip-position="top middle" tooltip-reveal="fast" tooltip="Email">${email}</span>
-                        <span class="u-font-size_14" tooltip-position="top middle" tooltip-reveal="fast" tooltip="Mobile phone">${mobilePhone}</span>
-                        <span class="u-font-size_14" tooltip-position="top middle" tooltip-reveal="fast" tooltip="Birthday">${birthday}</span>
-                        <span class="u-font-size_14" tooltip-position="top middle" tooltip-reveal="fast" tooltip="Address" style="white-space: nowrap">${address}</span>
-                    </p>`;
+async function renderRowAndRelations(doc, tableEl) {
+    let children = doc.data().children;
+    let partners = doc.data().partners;
     
-                // First + surnameCurrent
-                // Email
-                // Birthdate
-                // Phone
-                // Address
-    
-                leafImageEl.insertAdjacentHTML("afterend", content);
-            }
-        }
-        // Generate date for tree view
-    } else {
-        familyTreeEl.classList.remove("view_list");
-        let infos = familyTreeEl.querySelectorAll(".list__information");
-        for (infoEl of infos ) {
-            infoEl.style.display = "none";
+    let memberRow = await renderTableRow(doc);
+    tableEl.appendChild(memberRow);
+
+    if (Object.entries(partners).length > 0) {
+        for (partnerId of Object.keys(partners)) {
+            let partnerDoc = LocalDocs.leaves.find(leafDoc => leafDoc.id === partnerId);
+            let partnerRow = await renderTableRow(partnerDoc);
+            tableEl.appendChild(partnerRow);
         }
     }
+
+    if (Object.entries(children).length > 0) {
+        for (childId of Object.keys(children)) {
+            let childDoc = LocalDocs.leaves.find(leafDoc => leafDoc.id === childId);
+            renderRowAndRelations(childDoc, tableEl);
+        }
+    }
+
+    // let activeLeafEl = familyTreeEl.querySelector(".active");
+    // if (activeLeafEl) {
+    //     let id = activeLeafEl.getAttribute(`data-id`);
+    //     let makeTrActive = familyTreeListEl.querySelector(`[data-id="${id}"]`);
+
+    //     makeTrActive.classList.add("active");
+    // }
+}
+
+async function renderTableRow(doc) {
+    let tr = createElementWithClass("tr", "");
+    let tdName = createElementWithClass("td", "u-pad_1 u-bold");
+    let tdProfileImage = createElementWithClass("td", "u-pad_1 profile__image");
+    let tdEmail = createElementWithClass("td", "u-pad_1 u-font-size_14");
+    let tdMobilePhone = createElementWithClass("td", "u-pad_1 u-font-size_14");
+    let tdBirthday = createElementWithClass("td", "u-pad_1 u-font-size_14");
+    let tdAddress = createElementWithClass("td", "u-pad_1 u-font-size_14");
+    let tdViewInfo = createElementWithClass("td", "u-pad_1");
+    let tdInfoButton = createElementWithClass("button", "u-pad_1 u-mar-l_auto u-mar-r_1 iconButton white");
+    let tdInfoIcon = createElementWithClass("i", "fal fa-info-circle");
+
+    let profileImage = createElementWithClass("div", "leaf__image");
+    let leafImageEl = familyTreeEl.querySelector(`[data-id="${doc.id}"]`);
+    let leafImageStyle = leafImageEl.querySelector(`.leaf__image`).getAttribute("style");
+
+    profileImage.setAttribute("style", leafImageStyle);
+    let nameString = `${ doc.data().name.firstName}  ${doc.data().name.surnameCurrent}`
+
+    let firstName = doc.data().name.firstName || "No name";
+    if (doc.data().name.firstNam || !doc.data().name.firstName) {
+        nameString = `${firstName}`
+    } else if (doc.data().name.firstName && doc.data().name.surnameCurrent) {
+        nameString = `${firstName} ${doc.data().name.surnameCurrent}`
+    }
+
+    let email = doc.data().email || '';
+    let mobilePhone = doc.data().phone.mobilePhone || '';
+    let birthday = doc.data().birthday ? convertBirthday(doc.data().birthday) : '';
+    let address;
+    let address1 = doc.data().address.address1 ? doc.data().address.address1 : '';
+    let address2 = doc.data().address.address2 ? doc.data().address.address2 : '';
+    let city = doc.data().address.city ? doc.data().address.city : '';
+    let state = doc.data().address.state ? doc.data().address.state : '';
+    let zipcode = doc.data().address.zipcode ? doc.data().address.zipcode : '';
+
+    if (address1 || address2) {
+        address = `${address1} ${address2} ${city}, ${state} ${zipcode}`
+    } else {
+        address = `${city} ${state} ${zipcode}`
+    }
+
+    tdName.textContent = nameString;
+    tdEmail.textContent = email;
+    tdMobilePhone.textContent = mobilePhone;
+    tdBirthday.textContent = birthday;
+    tdAddress.textContent = address;
+
+    tdInfoButton.setAttribute("tooltip", "More details");
+
+    tr.setAttribute("data-id", doc.id);
+
+    tdInfoButton.appendChild(tdInfoIcon);
+    tdViewInfo.appendChild(tdInfoButton);
+
+    tdProfileImage.appendChild(profileImage);
+
+    tr.appendChild(tdProfileImage);
+    tr.appendChild(tdName);
+    tr.appendChild(tdEmail);
+    tr.appendChild(tdMobilePhone);
+    tr.appendChild(tdBirthday);
+    tr.appendChild(tdAddress);
+    tr.appendChild(tdViewInfo);
+
+    tdInfoButton.addEventListener('click', (e) => {
+        e.preventDefault();
+
+        let tr = e.target.closest("tr");
+
+        Leaf.toggleActive(tr);
+        DetailsPanel.populate(doc, tr);
+    });
+
+    let activeTreeEl = familyTreeEl.querySelector(".active");
+    if (activeTreeEl) {
+        let id = activeTreeEl.getAttribute(`data-id`);
+        console.log(id);
+        let makeTrActive = familyTreeListEl.querySelector(`[data-id="${id}"]`);
+
+        if (makeTrActive) {
+            makeTrActive.classList.add("active");
+        }
+    }
+
+    return tr;
+}
+
+const showListView = (show = true) => {
+    // DetailsPanel.close();
+    if (show) {
+        mainContent.classList.add("view_list");
+        let topLeafDoc = LocalDocs.leaves.find(leafDoc => leafDoc.data().topMember === true);
+        let tableEl = familyTreeListEl.querySelector("table");
+
+        if (!tableEl.querySelector("tr td")) {
+            if (topLeafDoc) {
+                renderRowAndRelations(topLeafDoc, tableEl);
+            }
+        }
+    } else {
+        mainContent.classList.remove("view_list");
+    }
+
     closeAllDropdowns();
 }
 

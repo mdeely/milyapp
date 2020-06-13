@@ -15,7 +15,9 @@ Tree.setup = function(treeId) {
                 LocalDocs.leaves = response.docs;
                 window.currentTreeLeafCollectionRef = treesRef.doc(LocalDocs.tree.id).collection('leaves');
 
+
                 TreeBranch.initiate();
+                showListView(false);
                 console.log("TODO: change the treeBranch abilities based on authentication and permission status");
             })
         }
@@ -179,8 +181,7 @@ TreeLeaf.create = function (doc) {
         let leafTarget = e.target;
 
         if (auth.currentUser) {
-            DetailsPanel.show(doc.id);
-            Leaf.setActive(leafTarget);
+            Leaf.toggleActive(leafTarget);
             DetailsPanel.populate(doc, e.target);
         }
     });

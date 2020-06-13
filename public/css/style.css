@@ -135,10 +135,17 @@ path {
     margin-right: 0; }
   #mainContent:not(.showDetails) #detailsPanel {
     right: calc( (var(--detailsWidth) * -1 )); }
-  #mainContent.showDetails #familyTree {
+  #mainContent.showDetails #familyTree,
+  #mainContent.showDetails #familyTree__list {
     width: calc(100vw - var(--detailsWidth)); }
   #mainContent.showDetails #detailsPanel {
     right: 0; }
+  #mainContent.view_list {
+    --leafSize: 32px; }
+    #mainContent.view_list #familyTree {
+      display: none; }
+    #mainContent.view_list #familyTree__list {
+      display: block; }
 
 #myTree__list {
   max-width: 800px;
@@ -156,6 +163,77 @@ path {
 #branchContainer {
   display: flex;
   max-width: 100vw; }
+
+#familyTree__list {
+  width: 100vw;
+  display: none;
+  transition: width 0.2s ease-in-out; }
+  #familyTree__list img {
+    width: 64px;
+    height: 64px;
+    max-width: 64px;
+    max-height: 64px;
+    object-fit: cover;
+    border-radius: 64px; }
+  #familyTree__list .profile__image {
+    width: 64px; }
+  #familyTree__list table {
+    max-width: 1024px;
+    width: 100%;
+    margin: 0 auto;
+    border-collapse: collapse; }
+  #familyTree__list tr {
+    border-radius: 16px;
+    z-index: 1;
+    position: relative; }
+    #familyTree__list tr:hover td {
+      background-color: var(--brand_lighter); }
+      #familyTree__list tr:hover td:after {
+        background-color: rgba(0, 0, 0, 0); }
+    #familyTree__list tr.highlight .leaf__image {
+      transform: scale3d(1.3, 1.3, 1.3);
+      transition: transform 0.2s ease-in-out; }
+    #familyTree__list tr.active {
+      box-shadow: 0 0 0 4px inset var(--color_outline);
+      z-index: 2; }
+      #familyTree__list tr.active td:after {
+        content: none; }
+      #familyTree__list tr.active .iconButton:focus {
+        box-shadow: none; }
+      #familyTree__list tr.active .iconButton:after {
+        opacity: 0; }
+      #familyTree__list tr.active:hover td {
+        background-color: unset; }
+  #familyTree__list th {
+    text-align: left; }
+  #familyTree__list td {
+    vertical-align: middle;
+    width: 20%;
+    position: relative; }
+    #familyTree__list td:first-child {
+      border-top-left-radius: 16px;
+      border-bottom-left-radius: 16px; }
+      #familyTree__list td:first-child:after {
+        width: calc(100% - 16px);
+        right: 0;
+        left: unset; }
+    #familyTree__list td:last-child {
+      border-top-right-radius: 16px;
+      border-bottom-right-radius: 16px;
+      width: var(--iconButtonSize); }
+      #familyTree__list td:last-child:after {
+        width: calc(100% - 16px);
+        left: 0;
+        right: unset; }
+    #familyTree__list td:after {
+      content: "";
+      position: absolute;
+      width: 100%;
+      height: 1px;
+      background-color: var(--color_border);
+      bottom: 0;
+      left: 0;
+      right: 0; }
 
 #familyTree {
   transition: width 0.2s ease-in-out;
@@ -598,6 +676,54 @@ select {
     outline: 0px solid transparent;
     box-shadow: 0 0 0 2px var(--color_outline); }
 
+.checkboxGroup {
+  display: flex;
+  position: relative; }
+  .checkboxGroup input[type=checkbox] {
+    position: absolute;
+    visibility: hidden;
+    display: none; }
+    .checkboxGroup input[type=checkbox]:checked + label:before {
+      content: "\f00c";
+      box-shadow: 0 0 0 2px inset var(--brand);
+      font-size: 18px;
+      transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+  .checkboxGroup label {
+    padding-left: 48px;
+    position: relative;
+    min-height: 32px;
+    padding-top: 8px; }
+    .checkboxGroup label:before {
+      content: "";
+      font-weight: 400;
+      font-family: "Font Awesome 5 Pro";
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      box-shadow: 0 0 0 2px inset var(--color_border);
+      margin-right: 8px;
+      position: absolute;
+      left: 0;
+      top: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0px;
+      transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    .checkboxGroup label:hover {
+      cursor: pointer; }
+  .checkboxGroup.right {
+    justify-content: flex-end; }
+    .checkboxGroup.right label {
+      padding-left: unset;
+      padding-right: 48px;
+      text-align: right; }
+      .checkboxGroup.right label:before {
+        left: unset;
+        right: 0;
+        margin-right: unset;
+        margin-left: 8px; }
+
 .radioGroup {
   display: flex;
   position: relative;
@@ -923,6 +1049,9 @@ button,
 .u-font-size_18 {
   font-size: 18px; }
 
+.u-font-size_17 {
+  font-size: 17px; }
+
 .u-font-size_15 {
   font-size: 15px; }
 
@@ -959,6 +1088,15 @@ button,
 .u-d_flex {
   display: flex; }
 
+.u-d_table {
+  display: table; }
+
+.u-d_table-cell {
+  display: table-cell; }
+
+.u-d_table-row {
+  display: table-row; }
+
 .u-d_block {
   display: block; }
 
@@ -972,7 +1110,7 @@ button,
   padding: 0px; }
 
 .u-pad_1 {
-  padding: 16px; }
+  padding: 8px; }
 
 .u-pad_2 {
   padding: 16px; }
@@ -982,6 +1120,24 @@ button,
 
 .u-pad_4 {
   padding: 32px; }
+
+.u-pad-r_0 {
+  padding-right: 0px; }
+
+.u-pad-r_1 {
+  padding-right: 8px; }
+
+.u-pad-r_2 {
+  padding-right: 16px; }
+
+.u-pad-l_0 {
+  padding-left: 0px; }
+
+.u-pad-l_1 {
+  padding-left: 8px; }
+
+.u-pad-l_2 {
+  padding-left: 16px; }
 
 .u-pad-b_0 {
   padding-bottom: 0px; }

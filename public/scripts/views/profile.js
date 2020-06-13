@@ -227,7 +227,6 @@ const newMember = (button, form) => {
             "email" : form["email"].value,
         })
         .then(() => {
-            console.log("new member created!");
             window.location.href = "#/my-trees";
             // location.reload();
         })
