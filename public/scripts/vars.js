@@ -508,12 +508,15 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
             detailsPanelItem.addEventListener("mouseover", (e) => {
                 let leafId = detailsPanel.getAttribute("data-details-id");
                 let targetSvg = document.querySelector(`svg[data-from-leaf="${leafId}"][data-to-leaf="${familyLeafDoc.id}"]`);
+                let targetSvgReverse = document.querySelector(`svg[data-to-leaf="${leafId}"][data-from-leaf="${familyLeafDoc.id}"]`);
                 let targetTableEl = familyTreeListEl.querySelector(`[data-id="${familyLeafDoc.id}"]`);
 
                 leafEl.classList.add("highlight");
 
                 if (targetSvg) {
                     targetSvg.classList.add("highlight");
+                } else if (targetSvgReverse) {
+                    targetSvgReverse.classList.add("highlight");
                 }
 
                 if (targetTableEl) {
@@ -524,12 +527,16 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
             detailsPanelItem.addEventListener("mouseout", (e) => {
                 let leafId = detailsPanel.getAttribute("data-details-id");
                 let targetSvg = document.querySelector(`svg[data-from-leaf="${leafId}"][data-to-leaf="${familyLeafDoc.id}"]`);
+                let targetSvgReverse = document.querySelector(`svg[data-to-leaf="${leafId}"][data-from-leaf="${familyLeafDoc.id}"]`);
+
                 let targetTableEl = familyTreeListEl.querySelector(`[data-id="${familyLeafDoc.id}"]`);
 
                 leafEl.classList.remove("highlight");
 
                 if (targetSvg) {
                     targetSvg.classList.remove("highlight");
+                } else if (targetSvgReverse) {
+                    targetSvgReverse.classList.remove("highlight");
                 }
 
                 if (targetTableEl) {

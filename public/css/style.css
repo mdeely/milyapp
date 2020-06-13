@@ -247,7 +247,8 @@ path {
   position: relative;
   top: 56px;
   padding-bottom: 80px;
-  width: 100vw; }
+  width: 100vw;
+  overflow: scroll; }
   #familyTree:focus {
     outline: 0 solid transparent; }
   #familyTree .view-list_info {
