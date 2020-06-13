@@ -105,8 +105,10 @@ const getNotificationsByEmail = async (email) => {
                     let notificationEl = document.createElement("div");
                     let acceptNotification = document.createElement("button");
                     let declinetNotification = document.createElement("button");
+                    let buttonGroup = createElementWithClass("div", "u-d_flex u-mar-t_1")
     
                     acceptNotification.setAttribute("id", "accept-notification");
+                    acceptNotification.setAttribute("class", "u-mar-r_1");
                     declinetNotification.setAttribute("id", "decline-notification");
                     declinetNotification.setAttribute("class", "danger");
     
@@ -124,7 +126,7 @@ const getNotificationsByEmail = async (email) => {
                     });
     
                     notificationEl.setAttribute("data-notification-id", doc.id);
-                    notificationEl.setAttribute("class","dropdown__item");
+                    notificationEl.setAttribute("class","dropdown__item u-fd_column u-ai_flex-start");
     
                     membersRef.doc(doc.data().from_member).get()
                     .then(memberDoc => {
@@ -150,8 +152,10 @@ const getNotificationsByEmail = async (email) => {
                                 
                                 function appendToNotifications(acceptBtn, declineButton, message) {
                                     notificationEl.insertAdjacentText('afterBegin', message);
-                                    notificationEl.appendChild(acceptBtn);
-                                    notificationEl.appendChild(declineButton);
+
+                                    buttonGroup.appendChild(acceptBtn);
+                                    buttonGroup.appendChild(declineButton);
+                                    notificationEl.appendChild(buttonGroup);
                                     notificationMenu.appendChild(notificationEl);
                                 } 
                             });

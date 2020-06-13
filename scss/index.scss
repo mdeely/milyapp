@@ -1353,6 +1353,7 @@ button,
 
     &:after {
         content: attr(tooltip);
+        font-family: 'Lato', sans-serif;
         pointer-events: none;
         position: absolute;
         right: calc(100% + 8px);
@@ -1842,6 +1843,14 @@ button,
     align-items: center;
 }
 
+.u-ai_flex-end {
+    align-items: flex-end;
+}
+
+.u-ai_flex-start {
+    align-items: flex-start;
+}
+
 .u-o_75 {
     opacity: .75;
 }
@@ -1876,4 +1885,9 @@ button,
 .header_m {
     font-weight: 900;
     font-size: 24px;
+}
+
+/// Other
+.u-cursor_pointer {
+    cursor: pointer;
 }

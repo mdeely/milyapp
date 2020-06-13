@@ -561,7 +561,7 @@ inviteMemberForm.addEventListener('submit', (e) => {
     let permissionType = inviteMemberForm.querySelector(`input[name="invite-member_permission"]:checked`).value;
     let emailAlreadyInUse = LocalDocs.members.find(memberDoc => memberDoc.data().email === emaillAddress);
     console.log(`${emaillAddress} should take over ${leafId} as a ${permissionType}. Sent by ${LocalDocs.member.id}`);
-;
+
     if (emailAlreadyInUse) {
         inviteMemberForm.querySelector(".error").textContent = `${emaillAddress} already belongs to a leaf on this tree.`;
     } else {
@@ -846,7 +846,6 @@ async function renderTableRow(doc) {
     let activeTreeEl = familyTreeEl.querySelector(".active");
     if (activeTreeEl) {
         let id = activeTreeEl.getAttribute(`data-id`);
-        console.log(id);
         let makeTrActive = familyTreeListEl.querySelector(`[data-id="${id}"]`);
 
         if (makeTrActive) {

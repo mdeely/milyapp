@@ -251,7 +251,9 @@
                         <label for="invite-member_email">Email address</label>
                         <input type="text" name="invite-member_email" required>
                         <p class="error"></p>
-                        <p class="u-mar-t_2 u-mar-b_1 u-fw_600 u-font-size_15">Permission type:</p>
+                        <p class="u-mar-t_2 u-mar-b_1 u-fw_600 u-font-size_15">Permission type
+                            <i class="far fa-question-circle u-mar-l_1 u-cursor_pointer" data-modal-trigger="permissions-info"></i>
+                        </p>
                         <div class="radioGroup">
                             <input type="radio" class="u-mar-r_2" id="permission_viewer" name="invite-member_permission" value="viewer" checked>
                             <label tabindex="0" for="permission_viewer">Viewer</label>
@@ -272,6 +274,26 @@
                 </div>
                 <a href="#" class="modal_button--close iconButton white"><i class="fal fa-times"></i></a>
             </form>
+        </div>
+
+        <div id="permissions-info" class="modal medium" data-modal="permissions-info">
+            <div class="card modal-dialouge">
+                <div class="card__header">
+                    <h2 class="u-mar-t_0 u-mar-b_0">Permissions</h2>
+                </div>
+                <div class="card__content">
+                    <h3 class="u-mar-t_0 u-mar-b_1">Viewer:</h3>
+                    <p class="u-mar-t_0 u-text_low u-mar-b_0">Can view everything on the tree, but cannot edit any details besides their own.</p>
+                    <h3 class="u-mar-b_1 u-mar-t_3">Contributor:</h3>
+                    <p class="u-mar-t_0 u-text_low u-mar-b_0">Can create leaves and edit their data. Contributors can only remove leaves they have created.</p>
+                    <h3 class="u-mar-b_1 u-mar-t_3">Admin:</h3>
+                    <p class="u-mar-t_0 u-text_low u-mar-b_0">WIll be granted unlimited power.</p>
+                </div>
+                <div class="card__footer">
+                    <button class="modal_button--close u-w_full">Dismiss</button>
+                </div>
+                <a href="#" class="modal_button--close iconButton white"><i class="fal fa-times"></i></a>
+            </div>
         </div>
 
         <div class="modal medium" data-modal="rename-tree_modal">
