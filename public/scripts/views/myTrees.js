@@ -39,7 +39,7 @@ const populateMyTreesList = async () => {
                 .then((reqTreeDoc) => {
                     if (reqTreeDoc.data().deleted !== true) {
                         let liEl = createElementWithClass('li', 'u-w_full u-mar-r_2 u-mar-l_2' );
-                        let aEl = createElementWithClass('a', 'myTree__item u-pad_1 u-w_full u-font-size_18 u-d_flex u-ai_center' );
+                        let aEl = createElementWithClass('a', 'myTree__item u-pad_2 u-w_full u-font-size_18 u-d_flex u-ai_center' );
                         let treeEditButton = createElementWithClass('button', 'iconButton white u-mar-l_auto edit_tree_button' );
                         let ellipsisIcon = createElementWithClass('i', 'far fa-ellipsis-h' );
                         let dropdownEl = createElementWithClass('div', 'dropdown u-visibility_hidden u-p_fixed' );

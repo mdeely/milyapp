@@ -255,14 +255,16 @@ path {
     margin: 0 auto;
 
     .myTree__item {
-        border-radius: 8px;
         text-decoration: none;
         min-height: 72px;
+        box-shadow: 0 1px 0 var(--color_border);
 
         &:hover,
         &:focus {
+            border-radius: 8px;
             outline: none;
             background-color:var(--brand_lighter);
+            box-shadow: 0 1px 0 transparent;
         }
 
         &:active {
