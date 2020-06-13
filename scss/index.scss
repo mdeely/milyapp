@@ -283,6 +283,7 @@ path {
     
     width: 100vw;
     display: none;
+    padding: 0 16px;
     transition: width $detailsRevealTiming ease-in-out;
 
     img {

@@ -169,6 +169,7 @@ path {
 #familyTree__list {
   width: 100vw;
   display: none;
+  padding: 0 16px;
   transition: width 0.2s ease-in-out; }
   #familyTree__list img {
     width: 64px;
