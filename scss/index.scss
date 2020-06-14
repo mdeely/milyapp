@@ -76,6 +76,11 @@ img {
     max-width: 100%;
 }
 
+fieldset {
+    border: 0px solid transparent;
+    padding: 0;
+}
+
 .mainNav {
     display: flex;
     background-color: var(--brand);
@@ -200,6 +205,8 @@ path {
         #familyTree__list {
             // margin: var(--detailsWidth);
             width: calc(100vw - var(--detailsWidth));
+            transition: width $detailsRevealTiming ease-in-out;
+
         }
 
         // #familyTree__list {
@@ -276,6 +283,7 @@ path {
 #branchContainer {
     display: flex;
     max-width: 100vw;
+    transition: width $detailsRevealTiming ease-in-out;
 }
 
 #familyTree__list {
@@ -372,13 +380,14 @@ path {
     }
 
     td {
+        $borderRadius: 72px;
         vertical-align: middle;
         width: 20%;
         position: relative;
 
         &:first-child {
-            border-top-left-radius: 16px;
-            border-bottom-left-radius: 16px;
+            border-top-left-radius: $borderRadius;
+            border-bottom-left-radius: $borderRadius;
 
             &:after {
                 width: calc(100% - 16px);
@@ -388,8 +397,8 @@ path {
         }
 
         &:last-child {
-            border-top-right-radius: 16px;
-            border-bottom-right-radius: 16px;
+            border-top-right-radius: $borderRadius;
+            border-bottom-right-radius: $borderRadius;
             width: var(--iconButtonSize);
 
             &:after {
@@ -424,6 +433,7 @@ path {
     // overflow: scroll;
     width: 100vw;
     overflow: scroll;
+    scrollbar-width: none;
 
     &:focus {
         outline: 0 solid transparent;
@@ -546,6 +556,10 @@ path {
     > .branch {
         will-change: transform
     }
+}
+
+#familyTree::-webkit-scrollbar {
+    display: none;
 }
 
 .error:empty {
@@ -975,6 +989,9 @@ input[name*="profile_photo"] {
         top: unset;
         transition: bottom $detailsRevealTiming ease-in-out;
         max-height: calc(100vh - (var(--navHeight) + 12vh));
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+        box-shadow: 0 0 24px rgba($brand, .25);
     }
 
     .mainNav {
@@ -998,6 +1015,7 @@ input[name*="profile_photo"] {
         &.showDetails {
             #familyTree {
                 margin-right: 0;
+                width: 100vw;
             }
     
             #detailsPanel {
@@ -1038,6 +1056,22 @@ input[name*="profile_photo"] {
 
     &__footer {
         padding: var(--cardFooterPadding, var(--cardPadding));
+    }
+
+    &.full_width {
+        --cardMaxWidth: 100%;
+    }
+
+    &.large {
+        --cardMaxWidth: 800px;
+    }
+
+    &.medium {
+        --cardMaxWidth: 560px;
+    }
+
+    &.small {
+        --cardMaxWidth: 320px;
     }
 }
 
@@ -1325,6 +1359,11 @@ button,
 
     &.danger {
         background-color: var(--color_danger);
+    }
+
+    &.disabled {
+        opacity: .35;
+        pointer-events: none;
     }
 }
 
@@ -1647,21 +1686,23 @@ button,
 .u-pad_0 {
     padding: 0px;
 }
-
 .u-pad_1 {
     padding: 8px;
 }
-
 .u-pad_2 {
     padding: 16px;
 }
-
 .u-pad_3 {
     padding: 24px;
 }
-
 .u-pad_4 {
     padding: 32px;
+}
+.u-pad_5 {
+    padding: 40px;
+}
+.u-pad_6 {
+    padding: 48px;
 }
 
 .u-pad-r_0 {
@@ -1694,6 +1735,34 @@ button,
 
 .u-pad-b_10 {
     padding-bottom: 80px;
+}
+
+.u-pad-t_0 {
+    padding-top: 8px * 0;
+}
+.u-pad-t_1 {
+    padding-top: 8px * 1;
+}
+.u-pad-t_2 {
+    padding-top: 8px * 2;
+}
+.u-pad-t_3 {
+    padding-top: 8px * 3;
+}
+.u-pad-t_4 {
+    padding-top: 8px * 4;
+}
+.u-pad-t_5 {
+    padding-top: 8px * 5;
+}
+.u-pad-t_6 {
+    padding-top: 8px * 6;
+}
+.u-pad-t_7 {
+    padding-top: 8px * 7;
+}
+.u-pad-t_8 {
+    padding-top: 8px * 8;
 }
 
 .u-mar_0 {
@@ -1853,6 +1922,10 @@ button,
 
 .u-flex_1 {
     flex: 1;
+}
+
+.u-flex-wrap_wrap {
+    flex-wrap: wrap;
 }
 
 .u-fd_column {

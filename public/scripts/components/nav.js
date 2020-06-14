@@ -34,9 +34,9 @@ Nav.update = function(user) {
 
 Nav.showViewPreferencesButton = function(show) {
     if (show) {
-        viewPreferencesButton.classList.remove("u-visibility_hidden");
+        viewPreferencesButton.classList.remove("u-d_none");
     } else {
-        viewPreferencesButton.classList.add("u-visibility_hidden");
+        viewPreferencesButton.classList.add("u-d_none");
     }
 }
 

@@ -685,6 +685,29 @@ createTreeForm.addEventListener('submit', (e) => {
     })
 })
 
+claimLeafAction.addEventListener('click', (e) => {
+    e.preventDefault();
+    let leafId = detailsPanel.getAttribute(`data-details-id`);
+    currentTreeLeafCollectionRef.doc(leafId).update({
+        "claimed_by" : LocalDocs.member.id,
+        "invitation" : null
+    }).then(() => {
+        notificationsRef.where("for_leaf", "==", leafId).get()
+        .then((data) => {
+            if (data.docs.length > 0) {
+                data.docs.forEach(doc => {
+                    notificationsRef.doc(doc.id).delete()
+                    .then(() => {
+                        location.reload();
+                    })
+                })
+            } else {
+                location.reload();
+            }
+        })
+    })
+})
+
 deleteLeafButton.addEventListener('click', (e) => {
   Relationship.deleteLeaf(e);
     closeAllDropdowns();
@@ -770,6 +793,7 @@ async function renderRowAndRelations(doc, tableEl) {
 }
 
 async function renderTableRow(doc) {
+    let data = doc.data();
     let tr = createElementWithClass("tr", "");
     let tdName = createElementWithClass("td", "u-pad_1 u-bold");
     let tdProfileImage = createElementWithClass("td", "u-pad_1 profile__image");
@@ -778,32 +802,37 @@ async function renderTableRow(doc) {
     let tdBirthday = createElementWithClass("td", "u-pad_1 u-font-size_14");
     let tdAddress = createElementWithClass("td", "u-pad_1 u-font-size_14");
     let tdViewInfo = createElementWithClass("td", "u-pad_1");
-    let tdInfoButton = createElementWithClass("button", "u-pad_1 u-mar-l_auto u-mar-r_1 iconButton white");
+    let tdInfoButton = createElementWithClass("button", "u-pad_1 u-mar-l_auto iconButton white");
     let tdInfoIcon = createElementWithClass("i", "fal fa-info-circle");
 
     let profileImage = createElementWithClass("div", "leaf__image");
     let leafImageEl = familyTreeEl.querySelector(`[data-id="${doc.id}"]`);
     let leafImageStyle = leafImageEl.querySelector(`.leaf__image`).getAttribute("style");
 
-    profileImage.setAttribute("style", leafImageStyle);
-    let nameString = `${ doc.data().name.firstName}  ${doc.data().name.surnameCurrent}`
-
-    let firstName = doc.data().name.firstName || "No name";
-    if (doc.data().name.firstNam || !doc.data().name.firstName) {
-        nameString = `${firstName}`
-    } else if (doc.data().name.firstName && doc.data().name.surnameCurrent) {
-        nameString = `${firstName} ${doc.data().name.surnameCurrent}`
+    if (doc.data().claimed_by) {
+        let memberDoc = LocalDocs.getMemberDocByIdFromCurrentTree(doc.data().claimed_by);
+        data = memberDoc.data();
     }
 
-    let email = doc.data().email || '';
-    let mobilePhone = doc.data().phone.mobilePhone || '';
-    let birthday = doc.data().birthday ? convertBirthday(doc.data().birthday) : '';
+    profileImage.setAttribute("style", leafImageStyle);
+    let nameString = `${ data.name.firstName}  ${data.name.surnameCurrent}`
+
+    let firstName = data.name.firstName || "No name";
+    if (data.name.firstNam || !data.name.firstName) {
+        nameString = `${firstName}`
+    } else if (data.name.firstName && data.name.surnameCurrent) {
+        nameString = `${firstName} ${data.name.surnameCurrent}`
+    }
+
+    let email = data.email || '';
+    let mobilePhone = data.phone.mobilePhone ? formatPhoneNumber(data.phone.mobilePhone) : '';
+    let birthday = data.birthday ? convertBirthday(data.birthday) : '';
     let address;
-    let address1 = doc.data().address.address1 ? doc.data().address.address1 : '';
-    let address2 = doc.data().address.address2 ? doc.data().address.address2 : '';
-    let city = doc.data().address.city ? doc.data().address.city : '';
-    let state = doc.data().address.state ? doc.data().address.state : '';
-    let zipcode = doc.data().address.zipcode ? doc.data().address.zipcode : '';
+    let address1 = data.address.address1 ? data.address.address1 : '';
+    let address2 = data.address.address2 ? data.address.address2 : '';
+    let city = data.address.city ? data.address.city : '';
+    let state = data.address.state ? data.address.state : '';
+    let zipcode = data.address.zipcode ? data.address.zipcode : '';
 
     if (address1 || address2) {
         address = `${address1} ${address2} ${city}, ${state} ${zipcode}`
@@ -863,7 +892,7 @@ const renderTableHeaders = () => {
     let thEmail = createElementWithClass("th", "u-pad_1", "Email");
     let thMobilePhone = createElementWithClass("th", "u-pad_1", "Mobile Phone");
     let thBirthday = createElementWithClass("th", "u-pad_1", "Birthday");
-    let thAddress = createElementWithClass("th", "u-pad_1", "Adderss");
+    let thAddress = createElementWithClass("th", "u-pad_1", "Address");
 
     tr.appendChild(thProfileImage);
     tr.appendChild(thName);

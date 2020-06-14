@@ -33,7 +33,7 @@
                     <button class="iconButton u-mar-l_auto view-preferences_zoomOut"><i class="fa fa-minus"></i></button>
                 </div> -->
             </div>
-            <button id="accountMenu" class="u-mar-l_1" data-dropdown-target="accountMenu__dropdown"></button>
+            <button id="accountMenu" class="u-mar-l_3" data-dropdown-target="accountMenu__dropdown"></button>
             <div id="accountMenu__dropdown" class="dropdown u-p_absolute u-visibility_hidden">
                 <a href="#/my-trees" class="dropdown__item">My trees</a>
                 <a href="#/profile" class="dropdown__item">Profile</a>
@@ -47,6 +47,41 @@
 
         <div style="display:none" data-view="account-verification">
             <div class="debugMessage"></div>
+        </div>
+
+        <div class="modal medium" data-modal="invite-members-to-tree_modal">
+            <form id="invite-members-to-tree_form" class="card modal-dialouge" role="dialog">
+                <div class="card__header">
+                    <h2 class="u-mar-b_0 u-mar-t_0">Invite member</h2>
+                </div>
+                <div class="card__content">
+                    <div class="inputGroup">
+                        <label for="invite-member-to-tree_email">Send email invite to</label>
+                        <input type="email" name="invite-member-to-tree_email" required>
+                    </div>
+                    <input type="text" name="invite-member-to-tree_id" hidden>
+                    <p class="u-mar-t_2 u-mar-b_1 u-fw_600 u-font-size_15">Permission type
+                        <i class="far fa-question-circle u-mar-l_1 u-cursor_pointer" data-modal-trigger="permissions-info"></i>
+                    </p>
+                    <div class="radioGroup">
+                        <input type="radio" class="u-mar-r_2" id="permission-tree_viewer" name="invite-member-to-tree_permission" value="viewer" checked>
+                        <label for="permission-tree_viewer">Viewer</label>
+
+                        <input type="radio" class="u-mar-r_2" id="permission-tree_contributor" name="invite-member-to-tree_permission" value="contributor">
+                        <label for="permission-tree_contributor">Contributor</label>
+
+                        <input type="radio" class="u-mar-r_2" id="permission-tree_admin" name="invite-member-to-tree_permission" value="admin">
+                        <label for="permission-tree_admin">Admin</label>
+                    </div>
+                </div>
+                <div class="card__footer">
+                    <div class="buttonGroup u-jc_flex-end">
+                        <a href="#" class="modal_button--close button secondary">Cancel</a>
+                        <button class="invite-member-tree_save" type="submit">Invite</button>
+                    </div>
+                </div>
+                <a href="#" class="modal_button--close iconButton white" tooltip="Close"><i class="fal fa-times"></i></a>
+            </form>
         </div>
 
         <div style="display:none" data-view="sign-up">
@@ -180,14 +215,19 @@
                     <nav class="detailsPanel__actions u-mar-b_6 u-mar-t_1">
                         <button class="iconButton add-relationship_button" data-dropdown-target="add-relationship-dropdown" tooltip="Add relationship" tooltip-position="right"><i class="fal fa-plus"></i></button>
                         <div class="detailsPanel__actions-secondary u-mar-l_auto u-d_flex">
-                            <button class="iconButton secondary" id="invite-member-action" data-modal-trigger="invite-member_modal" tooltip="Invite member" tooltip-reveal="fast" tooltip-position="bottom middle" ><i class="fal fa-envelope"></i></button>
+                            <button class="iconButton secondary" id="member-more-options" data-dropdown-target="member-options-dropdown" tooltip="More options" tooltip-reveal="fast" tooltip-position="bottom middle" ><i class="far fa-ellipsis-v"></i></button>
+                            <!-- <button class="iconButton secondary" id="invite-member-action" data-modal-trigger="invite-member_modal" tooltip="Invite member" tooltip-reveal="fast" tooltip-position="bottom middle" ><i class="fal fa-envelope"></i></button> -->
                             <!-- <button class="iconButton secondary u-mar-l_2" id="edit-member-action" tooltip="Edit" tooltip-position="bottom middle" ><i class="fal fa-pencil-alt"></i></button> -->
                             <button class="iconButton secondary details__button--close u-mar-l_2" tooltip="Hide panel" tooltip-position="bottom middle" ><i class="fal fa-times"></i></button> 
                         </div>
                     </nav>
-                    <!-- <ul id="member-options-dropdown" class="dropdown u-d_none u-p_fixed">
-                        <li id="edit-member-action" class="dropdown__item">Edit member details</li>
-                    </ul> -->
+
+                    <ul id="member-options-dropdown" class="dropdown u-visibility_hidden u-p_fixed">
+                        <li id="claim-leaf-action" class="dropdown__item u-d_none">Claim this leaf</li>
+                        <li data-modal-trigger="invite-member_modal" id="invite-member-action" class="dropdown__item u-d_none">Invite someone to claim</li>
+                        <li id="delete-leaf-action" class="dropdown__item u-c_danger">Remove leaf from tree</li>
+                    </ul>
+
                     <ul id="add-relationship-dropdown" class="dropdown u-visibility_hidden u-p_fixed">
                         <!-- <li class="dropdown__item dropdown__label">Add relationship</li> -->
                         <li id="add-parent-action" class="dropdown__item">Parent</li>
@@ -204,7 +244,7 @@
                         <div class="detailsPanel__metaData u-mar-b_7 u-mar-t_10"></div>
                         <!-- <h6 class="u-mar-b_4">Immediate family</h6> -->
                         <div class="detailsPanel__immediateFamily"></div>
-                        <li id="delete-leaf-action" class="button danger secondary u-w_full u-mar-t_12">Delete leaf from tree</li>
+                        <!-- <li id="delete-leaf-action" class="button danger secondary u-w_full u-mar-t_12">Delete leaf from tree</li> -->
                     </div>
                     <form id="detailsPanel__edit">
                     </form>
@@ -212,7 +252,7 @@
             </section>
         </div>
 
-        <div style="display:none" data-view="profile">
+        <div style="display:none" class="u-pad_4 u-pad-t_8" data-view="profile">
             <div class="debugMessage"></div>
         </div>
 
@@ -318,43 +358,12 @@
             </form>
         </div>
 
-        <div class="modal medium" data-modal="invite-members-to-tree_modal">
-            <form id="invite-members-to-tree_form" class="card modal-dialouge" role="dialog">
-                <div class="card__header">
-                    <h2 class="u-mar-b_0 u-mar-t_0">Invite member</h2>
-                </div>
-                <div class="card__content">
-                    <div class="inputGroup">
-                        <label for="invite-member-to-tree_email">Send email invite to</label>
-                        <input type="email" name="invite-member-to-tree_email" required>
-                    </div>
-                    <input type="text" name="invite-member-to-tree_id" hidden>
-                    <p class="u-mar-t_2 u-mar-b_1 u-fw_600 u-font-size_15">Permission type:</p>
-                    <div class="radioGroup">
-                        <input type="radio" class="u-mar-r_2" id="permission-tree_viewer" name="invite-member-to-tree_permission" value="viewer" checked>
-                        <label for="permission-tree_viewer">Viewer</label>
-
-                        <input type="radio" class="u-mar-r_2" id="permission-tree_contributor" name="invite-member-to-tree_permission" value="contributor">
-                        <label for="permission-tree_contributor">Contributor</label>
-
-                        <input type="radio" class="u-mar-r_2" id="permission-tree_admin" name="invite-member-to-tree_permission" value="admin">
-                        <label for="permission-tree_admin">Admin</label>
-                    </div>
-                </div>
-                <div class="card__footer">
-                    <div class="buttonGroup u-jc_flex-end">
-                        <a href="#" class="modal_button--close button secondary">Cancel</a>
-                        <button class="invite-member-tree_save" type="submit">Invite</button>
-                    </div>
-                </div>
-                <a href="#" class="modal_button--close iconButton white" tooltip="Close"><i class="fal fa-times"></i></a>
-            </form>
-        </div>
-
         <div class="modal medium" data-modal="edit-tree_modal">
             <form id="edit-tree_form" class="card modal-dialouge" role="dialog">
                 <div class="card__header u-pad-b_0">
-                    <h2 class="u-mar-b_0 u-mar-t_0">Settings & Permissions</h2>
+                    <h2 class="u-mar-b_0 u-mar-t_0">Settings & Permissions
+                        <i class="far fa-question-circle u-mar-l_1 u-cursor_pointer u-font-size_14" data-modal-trigger="permissions-info"></i>
+                    </h2>
                 </div>
                 <div class="card__content">
                     <div class="inputGroup">

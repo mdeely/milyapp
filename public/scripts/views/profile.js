@@ -18,16 +18,18 @@ const profileViewOnAuthChange = (user) => {
 }
 
 const editProfileEl = () => {
-    let form = createElementWithClass("form", "card u-mar-lr_auto");
-    let cardContent = document.createElement("div");
+    let form = createElementWithClass("form", "card full_width u-mar-lr_auto");
+    let cardContent = createElementWithClass("div", "card__content u-d_flex u-flex-wrap_wrap");
     let cardHeader = createElementWithClass("div", "card__header");
     let cardFooter = createElementWithClass("div", "card__footer");
     let button = createElementWithClass("button", "u-w_full", "Save");
     let header = createElementWithClass("h2", "u-mar-b_0 u-mar-t_0", "Your profile");
+    let fieldsetName = createElementWithClass("fieldset", "u-pad_1 u-flex_1");
+    let fieldsetAddress = createElementWithClass("fieldset", "u-pad_1 u-flex_1");
+    let fieldsetContact = createElementWithClass("fieldset", "u-pad_1 u-flex_1");
+    let fieldsetOther = createElementWithClass("fieldset", "u-pad_1 u-flex_1");
 
-    form.setAttribute("id", "set-profile_form");
-    cardContent.setAttribute("class", "card__content");
-    
+    form.setAttribute("id", "set-profile_form");    
 
     let imageUrl = accountMenuButton.style.backgroundImage;
     let profilePhotoInputEl = generateInputItem({
@@ -49,7 +51,7 @@ const editProfileEl = () => {
         let inputValue = "";
 
         if (LocalDocs.member) {
-            inputValue = LocalDocs.member.data()[value["dataPath"]];
+            inputValue = LocalDocs.member.data()[value["dataPath"]] ? LocalDocs.member.data()[value["dataPath"]] : null;
             if (parentValue) {
                 inputValue = LocalDocs.member.data()[parentValue["dataPath"]][value["dataPath"]];
             }
@@ -72,7 +74,20 @@ const editProfileEl = () => {
             "required" : isRequired
         });
 
-        cardContent.appendChild(el);
+        let regexName = /(name|Name|phonetic)/g;
+        let regexAddress = /(address|zipcode|city|country)/g;
+        let regexContact = /(phone|Phone|email)/g;
+
+        if (value["dataPath"].match(regexName)) {
+            fieldsetName.appendChild(el);
+        } else if (value["dataPath"].match(regexAddress)) {
+            fieldsetAddress.appendChild(el);
+        } else if (value["dataPath"].match(regexContact)) {
+            fieldsetContact.appendChild(el);
+        } else {
+            fieldsetOther.appendChild(el);
+        }
+        // cardContent.appendChild(el);
     }
 
     if (LocalDocs.member) {
@@ -81,9 +96,12 @@ const editProfileEl = () => {
         newMember(button, form);
         header.textContent = "Create your profile";
     }
-
+    
     cardFooter.appendChild(button);
-
+    cardContent.appendChild(fieldsetName);
+    cardContent.appendChild(fieldsetContact);
+    cardContent.appendChild(fieldsetAddress);
+    cardContent.appendChild(fieldsetOther);
     cardHeader.appendChild(header)
 
     form.appendChild(cardHeader);
@@ -121,7 +139,9 @@ const generateInputItem = (args) => {
     labelEl.setAttribute("for", args.name);
 
     inputEl.setAttribute("name", args.name);
-    inputEl.setAttribute("value", args.value);
+    if (args.value) {
+        inputEl.setAttribute("value", args.value);
+    }
     inputEl.setAttribute("type", args.type);
 
     if (args.backgroundImage !== null) {
@@ -147,7 +167,8 @@ const updateMember = (button, form) => {
         } else {
             let profilePhotoFile = form["profile_photo"].files[0];
             let fileName = profilePhotoFile.name;
-            let memberProfilePhotoRef = storageRef.child(`members/${LocalDocs.member.id}/${fileName}`);
+            let extension = fileName.split('.').pop();
+            let memberProfilePhotoRef = storageRef.child(`members/${LocalDocs.member.id}/profile.${extension}`);
 
             memberProfilePhotoRef.put(profilePhotoFile).then(function(snapshot) {
                 membersRef.doc(LocalDocs.member.id).update({

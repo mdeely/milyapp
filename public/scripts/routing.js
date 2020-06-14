@@ -50,6 +50,7 @@ window.router = function(user) {
                         LocalDocs.member = queryResult.docs[0] ? queryResult.docs[0] : null;
                         if (LocalDocs.member) {
                             Nav.update(user);
+                            showListView(false);
                             DetailsPanel.close();
                             if (LocalDocs.member.data().trees && LocalDocs.member.data().trees.length > 0) {
                                 if (LocalDocs.member.data().trees) {

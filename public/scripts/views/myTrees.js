@@ -62,7 +62,7 @@ const populateMyTreesList = async () => {
                         
                         aEl.textContent = reqTreeDoc.data().name;
                         renameDropdown.textContent = "Rename";
-                        inviteDropdown.textContent = "Invite members";
+                        inviteDropdown.textContent = "Add members";
                         editMembersDropdown.textContent = "Settings & permissions";
                         deleteDropdown.textContent = "Delete tree";
                         leaveTree.textContent = "Leave tree";

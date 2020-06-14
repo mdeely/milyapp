@@ -15,6 +15,9 @@ const addPartnerButton = document.querySelector("#add-partner-action");
 const addSiblingButton = document.querySelector("#add-sibling-action");
 
 const deleteLeafButton = document.querySelector("#delete-leaf-action");
+const claimLeafAction = document.querySelector("#claim-leaf-action");
+const memberMoreOptionsButton = document.querySelector("#member-more-options");
+
 // const removeMemberFromTreeButton = document.querySelector("#remove-member-from-tree-action");
 
 // const editMemberButton = document.querySelector("#edit-member-action");
@@ -183,6 +186,7 @@ DetailsPanel.getActiveDoc = function() {
 }
 
 DetailsPanel.populate = function(leafDoc, leafEl) {
+    closeAllDropdowns();
     let dataSource = leafDoc.data();
     let detailsPhoto = leafEl.querySelector(".leaf__image").getAttribute("style");
     let memberPermissionType = authLeafPermissionType();
@@ -194,6 +198,8 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
     detailsHeaderEl.textContent = "Details"
     editDetailsAnchor.setAttribute("tooltip", "Edit");
 
+    let memberHasClaimedLeafOnTree = LocalDocs.leaves.find(leafDoc => leafDoc.data().claimed_by === LocalDocs.member.id) ? true : false;
+    
     editDetailsAnchor.appendChild(pencilIcon);
     editDetailsAnchor.addEventListener('click', (e) => {
         DetailsPanel.editMember();
@@ -211,35 +217,62 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
     detailsPanelFullName.textContent = createFullName(leafDoc);
     detailsPanel.setAttribute("data-details-id", leafDoc.id);
     detailsPanelProfileImage.setAttribute("style", detailsPhoto);
-    
-    if (memberPermissionType === "admin" || memberPermissionType === "contributor") {
-        inviteMemberButton.classList.remove("u-d_none");
-        // editMemberButton.classList.remove("u-d_none");
-        addRelationshipButton.classList.remove("u-d_none");
-        deleteLeafButton.classList.remove("u-d_none");
-        detailsHeaderEl.classList.remove("u-d_none");
 
+    function addParentIfTopMember() {
         if (leafDoc.data().topMember === true) {
             addParentButton.classList.remove("u-d_none");
         } else {
             addParentButton.classList.add("u-d_none");
         }
+    }
 
-        if (memberPermissionType === "contributor") {
-            if (leafDoc.data().created_by === LocalDocs.member.id) {
-                deleteLeafButton.classList.remove("u-d_none");
-            } else {
-                deleteLeafButton.classList.add("u-d_none");
-            }
+    console.log(`member is a ${memberPermissionType}`);
+    
+    if (memberPermissionType === "admin") {
+        addParentIfTopMember();
+
+        addRelationshipButton.classList.remove("u-d_none");
+        deleteLeafButton.classList.remove("u-d_none");
+        detailsHeaderEl.classList.remove("u-d_none");
+
+        if (!memberHasClaimedLeafOnTree && !leafDoc.data().claimed_by) {
+            claimLeafAction.classList.remove("u-d_none");
+        } else {
+            claimLeafAction.classList.add("u-d_none");
         }
+        
         if (!leafDoc.data().claimed_by) {
+            inviteMemberButton.classList.remove("u-d_none");
             detailsHeaderEl.appendChild(editDetailsAnchor);
+        } else {
+            inviteMemberButton.classList.add("u-d_none");
+            // deleteLeafButton.classList.add("u-d_none");
+        }
+    } else if (memberPermissionType === "contributor") {
+        addParentIfTopMember();
+
+        if (leafDoc.data().claimed_by) {
+            console.log("claimed")
+            inviteMemberButton.classList.add("u-d_none");
+        } else {
+            inviteMemberButton.classList.remove("u-d_none");
+        }
+
+        console.log(leafDoc.data().claimed_by);
+        if (!memberHasClaimedLeafOnTree && !leafDoc.data().claimed_by) {
+            claimLeafAction.classList.remove("u-d_none");
+        } else {
+            claimLeafAction.classList.add("u-d_none");
+        }
+
+        if (leafDoc.data().created_by === LocalDocs.member.id) {
+            deleteLeafButton.classList.remove("u-d_none");
         } else {
             deleteLeafButton.classList.add("u-d_none");
         }
-
     } else if (memberPermissionType === "viewer" || !memberPermissionType)  {
         console.log("I'm a viewers")
+        memberMoreOptionsButton.classList.add("u-d_none");
         addParentButton.classList.add("u-d_none")
         inviteMemberButton.classList.add("u-d_none");
         deleteLeafButton.classList.add("u-d_none");
@@ -249,7 +282,8 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
 
     if (leafDoc.data().claimed_by) {
         // editMemberButton.classList.add("u-d_none");
-        inviteMemberButton.classList.add("u-d_none");
+        // inviteMemberButton.classList.remove("u-d_none");
+        // inviteMemberButton.classList.add("disabled");
         detailsPanel.setAttribute("data-details-member-id", leafDoc.data().claimed_by);
 
         if (leafDoc.data().claimed_by === LocalDocs.member.id) {
@@ -262,7 +296,7 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
     }
 
     if (leafDoc.data().invitation) {
-        inviteMemberButton.classList.add("u-d_none");
+        // inviteMemberButton.classList.add("disabled");
     }
 
     // const detailsHeader =`<h6 class="u-mar-b_2 u-mar-t_8 u-d_flex u-ai_center">Details<a href="#" class="u-mar-l_auto iconButton white"><i class="fal fa-pencil-alt"></i></a></h6>`;
@@ -399,7 +433,7 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
                     label = ``
                 }
 
-                if (memberPermissionType === "admin" || memberPermissionType === "contributor") {
+                if (memberPermissionType === "admin" || memberPermissionType === "contributor" && familyLeafDoc.data().created_by === LocalDocs.member.id) {
                         parentAction = `<button class="iconButton white u-mar-l_auto" tooltip="Options" tooltip-position="top middle" data-dropdown-target="parent_options_menu__${familyLeafDoc.id}">
                         <i class="fal fa-ellipsis-h"></i>
                     </button>
@@ -421,20 +455,17 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
                 } else {
                     label = ``
                 }
-                if (memberPermissionType === "admin" || memberPermissionType === "contributor") {
-                    if (memberPermissionType !== "contributor" && familyLeafDoc.data().created_by === LocalDocs.member.id) {
-                        
-                    }
-                        childAction = `<button class="iconButton white u-mar-l_auto" tooltip="Options" tooltip-position="top middle" data-dropdown-target="child_options_menu__${familyLeafDoc.id}">
-                        <i class="fal fa-ellipsis-h"></i>
-                    </button>
-                    <div id="child_options_menu__${familyLeafDoc.id}" class="dropdown u-visibility_hidden u-p_fixed">
-                        <div class="dropdown__item" data-value="Adopted">Adopted</div>
-                        <div class="dropdown__item" data-value="Biological">Biological</div>
-                        <div class="dropdown__item" data-value="Step">Step-child</div>
-                        <div class="dropdown__item" data-value="Unrelated">Unrelated</div>
-                        <div class="dropdown__item u-o_50" data-value="reset">Unset</div>
-                    </div>`
+                if (memberPermissionType === "admin" || memberPermissionType === "contributor" && familyLeafDoc.data().created_by === LocalDocs.member.id) {
+                            childAction = `<button class="iconButton white u-mar-l_auto" tooltip="Options" tooltip-position="top middle" data-dropdown-target="child_options_menu__${familyLeafDoc.id}">
+                            <i class="fal fa-ellipsis-h"></i>
+                        </button>
+                        <div id="child_options_menu__${familyLeafDoc.id}" class="dropdown u-visibility_hidden u-p_fixed">
+                            <div class="dropdown__item" data-value="Adopted">Adopted</div>
+                            <div class="dropdown__item" data-value="Biological">Biological</div>
+                            <div class="dropdown__item" data-value="Step">Step-child</div>
+                            <div class="dropdown__item" data-value="Unrelated">Unrelated</div>
+                            <div class="dropdown__item u-o_50" data-value="reset">Unset</div>
+                        </div>`
                 }
             } else if (relativeType === "siblings") {
                 if (familyLeafDoc.data().siblings[leafDoc.id] !== null) {
@@ -448,7 +479,7 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
                 } else {
                     label = ``
                 }
-                if (memberPermissionType === "admin" || memberPermissionType === "contributor") {
+                if (memberPermissionType === "admin" || memberPermissionType === "contributor" && familyLeafDoc.data().created_by === LocalDocs.member.id) {
                         siblingAction = `<button class="iconButton white u-mar-l_auto" tooltip="Options" tooltip-position="top middle" data-dropdown-target="sibling_options_menu__${familyLeafDoc.id}">
                         <i class="fal fa-ellipsis-h"></i>
                     </button>
@@ -467,20 +498,20 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
                 } else {
                     label = ``
                 }
-                if (memberPermissionType === "admin" || memberPermissionType === "contributor") {
-                    partnerAction = `<button class="iconButton white u-mar-l_auto" tooltip="Options" tooltip-position="top middle" data-dropdown-target="partner_options_menu__${familyLeafDoc.id}">
-                                        <i class="fal fa-ellipsis-h"></i>
-                                    </button>
-                                    <div id="partner_options_menu__${familyLeafDoc.id}" class="dropdown u-visibility_hidden u-p_fixed">
-                                        <div class="dropdown__item" data-value="Dating">Dating</div>
-                                        <div class="dropdown__item" data-value="Engaged">Engaged</div>
-                                        <div class="dropdown__item" data-value="Married">Married</div>
-                                        <div class="dropdown__item" data-value="Divorced">Divorced</div>
-                                        <div class="dropdown__item" data-value="Separated">Separated</div>
-                                        <div class="dropdown__item" data-value="Widowed">Widowed</div>
-                                        <div class="dropdown__item" data-value="Unrelated">Unrelated</div>
-                                        <div class="dropdown__item u-o_50" data-value="reset">Unset</div>
-                                    </div>`
+                if (memberPermissionType === "admin" || memberPermissionType === "contributor" && familyLeafDoc.data().created_by === LocalDocs.member.id) {
+                        partnerAction = `<button class="iconButton white u-mar-l_auto" tooltip="Options" tooltip-position="top middle" data-dropdown-target="partner_options_menu__${familyLeafDoc.id}">
+                        <i class="fal fa-ellipsis-h"></i>
+                    </button>
+                    <div id="partner_options_menu__${familyLeafDoc.id}" class="dropdown u-visibility_hidden u-p_fixed">
+                        <div class="dropdown__item" data-value="Dating">Dating</div>
+                        <div class="dropdown__item" data-value="Engaged">Engaged</div>
+                        <div class="dropdown__item" data-value="Married">Married</div>
+                        <div class="dropdown__item" data-value="Divorced">Divorced</div>
+                        <div class="dropdown__item" data-value="Separated">Separated</div>
+                        <div class="dropdown__item" data-value="Widowed">Widowed</div>
+                        <div class="dropdown__item" data-value="Unrelated">Unrelated</div>
+                        <div class="dropdown__item u-o_50" data-value="reset">Unset</div>
+                    </div>`
                 }
             }
 
@@ -579,79 +610,82 @@ function initiatePartnerOptions(leafId) {
     `);
     let partnerOptionEl = detailsPanelImmediateFamily.querySelector(`[data-leaf-id="${leafId}"] #partner_options_menu__${leafId}
     `);
-    let partnerOptions = partnerOptionEl.querySelectorAll(".dropdown__item");
+    let partnerOptions;
+    if (partnerOptionEl) {
+        partnerOptions = partnerOptionEl.querySelectorAll(".dropdown__item");
 
-    initiateDropdown(partnerDropdownTrigger);
-
-    for (option of partnerOptions) {
-        option.addEventListener('click', (e) => {
-            e.preventDefault();
-
-            let value = e.target.getAttribute("data-value");
-
-            if (value === "reset") {
-                value = null;
-            }
-            let targetLeafId = DetailsPanel.getLeafDoc().id;
-
-            console.log(value);
-            console.log(leafId);
-            console.log(targetLeafId);
-
-            currentTreeLeafCollectionRef.doc(leafId).update({
-                [`partners.${targetLeafId}`] : value
-            })
-            .then(() => {
-                console.log("First partner updated succesfully");
-            })
-
-            currentTreeLeafCollectionRef.doc(targetLeafId).update({
-                [`partners.${leafId}`] : value
-            })
-            .then(() => {
-                console.log("Second partner updated succesfully");
-                location.reload();
-            })
-
-
-            //////////////////
-            //////////////////
-            // MD NOTE: THE CODE BELOW IS COMMENTED OUT TO BE ABLE TO RECOVER RELATIONSHIPS THAT MAY BE MARKED AS UNRELATED
-            ////////////////
-            ////////////////
-
-            // if (value === "Unrelated") {
-            //     currentTreeLeafCollectionRef.doc(leafId).update({
-            //         [`partners.${targetLeafId}`] : firebase.firestore.FieldValue.delete()
-            //     })
-            //     .then(() => {
-            //         console.log("First partner updated succesfully");
-            //     })
+        initiateDropdown(partnerDropdownTrigger);
     
-            //     currentTreeLeafCollectionRef.doc(targetLeafId).update({
-            //         [`partners.${leafId}`] : firebase.firestore.FieldValue.delete()
-            //     })
-            //     .then(() => {
-            //         console.log("Second partner updated succesfully");
-            //         location.reload();
-            //     })
-            // } else {
-            //     currentTreeLeafCollectionRef.doc(leafId).update({
-            //         [`partners.${targetLeafId}`] : value
-            //     })
-            //     .then(() => {
-            //         console.log("First partner updated succesfully");
-            //     })
+        for (option of partnerOptions) {
+            option.addEventListener('click', (e) => {
+                e.preventDefault();
     
-            //     currentTreeLeafCollectionRef.doc(targetLeafId).update({
-            //         [`partners.${leafId}`] : value
-            //     })
-            //     .then(() => {
-            //         console.log("Second partner updated succesfully");
-            //         location.reload();
-            //     })
-            // }
-        })
+                let value = e.target.getAttribute("data-value");
+    
+                if (value === "reset") {
+                    value = null;
+                }
+                let targetLeafId = DetailsPanel.getLeafDoc().id;
+    
+                console.log(value);
+                console.log(leafId);
+                console.log(targetLeafId);
+    
+                currentTreeLeafCollectionRef.doc(leafId).update({
+                    [`partners.${targetLeafId}`] : value
+                })
+                .then(() => {
+                    console.log("First partner updated succesfully");
+                })
+    
+                currentTreeLeafCollectionRef.doc(targetLeafId).update({
+                    [`partners.${leafId}`] : value
+                })
+                .then(() => {
+                    console.log("Second partner updated succesfully");
+                    location.reload();
+                })
+    
+    
+                //////////////////
+                //////////////////
+                // MD NOTE: THE CODE BELOW IS COMMENTED OUT TO BE ABLE TO RECOVER RELATIONSHIPS THAT MAY BE MARKED AS UNRELATED
+                ////////////////
+                ////////////////
+    
+                // if (value === "Unrelated") {
+                //     currentTreeLeafCollectionRef.doc(leafId).update({
+                //         [`partners.${targetLeafId}`] : firebase.firestore.FieldValue.delete()
+                //     })
+                //     .then(() => {
+                //         console.log("First partner updated succesfully");
+                //     })
+        
+                //     currentTreeLeafCollectionRef.doc(targetLeafId).update({
+                //         [`partners.${leafId}`] : firebase.firestore.FieldValue.delete()
+                //     })
+                //     .then(() => {
+                //         console.log("Second partner updated succesfully");
+                //         location.reload();
+                //     })
+                // } else {
+                //     currentTreeLeafCollectionRef.doc(leafId).update({
+                //         [`partners.${targetLeafId}`] : value
+                //     })
+                //     .then(() => {
+                //         console.log("First partner updated succesfully");
+                //     })
+        
+                //     currentTreeLeafCollectionRef.doc(targetLeafId).update({
+                //         [`partners.${leafId}`] : value
+                //     })
+                //     .then(() => {
+                //         console.log("Second partner updated succesfully");
+                //         location.reload();
+                //     })
+                // }
+            })
+        }
     }
 }
 // let microsoftProvider = new firebase.auth.OAuthProvider('microsoft.com');
@@ -702,40 +736,44 @@ function initiateChildOptions(leafId) {
 
     let childOptionEl = detailsPanelImmediateFamily.querySelector(`[data-leaf-id="${leafId}"] #child_options_menu__${leafId}
     `);
-    let childOptions = childOptionEl.querySelectorAll(".dropdown__item");
 
-    initiateDropdown(childDropdownTrigger);
+    let childOptions;
+    if (childOptionEl) {
+        childOptions = childOptionEl.querySelectorAll(".dropdown__item");
 
-    for (option of childOptions) {
-        option.addEventListener('click', (e) => {
-            e.preventDefault();
+        initiateDropdown(childDropdownTrigger);
 
-            let value = e.target.getAttribute("data-value");
-
-            if (value === "reset") {
-                value = null;
-            }
-            let parentLeafId = DetailsPanel.getLeafDoc().id;
-
-            console.log(value);
-            console.log(leafId);
-            console.log(parentLeafId);
-
-            currentTreeLeafCollectionRef.doc(leafId).update({
-                [`parents.${parentLeafId}`] : value
-            })
-            .then(() => {
-                console.log("Child updated succesfully");
-
-                currentTreeLeafCollectionRef.doc(parentLeafId).update({
-                    [`children.${leafId}`] : value
+        for (option of childOptions) {
+            option.addEventListener('click', (e) => {
+                e.preventDefault();
+    
+                let value = e.target.getAttribute("data-value");
+    
+                if (value === "reset") {
+                    value = null;
+                }
+                let parentLeafId = DetailsPanel.getLeafDoc().id;
+    
+                console.log(value);
+                console.log(leafId);
+                console.log(parentLeafId);
+    
+                currentTreeLeafCollectionRef.doc(leafId).update({
+                    [`parents.${parentLeafId}`] : value
                 })
                 .then(() => {
-                    console.log("Parent updated succesfully");
-                    location.reload();
+                    console.log("Child updated succesfully");
+    
+                    currentTreeLeafCollectionRef.doc(parentLeafId).update({
+                        [`children.${leafId}`] : value
+                    })
+                    .then(() => {
+                        console.log("Parent updated succesfully");
+                        location.reload();
+                    })
                 })
             })
-        })
+        }
     }
 }
 
@@ -755,71 +793,75 @@ function initiateParentOptions(leafId) {
 
     let parentOptionEl = detailsPanelImmediateFamily.querySelector(`[data-leaf-id="${leafId}"] #parent_options_menu__${leafId}
     `);
-    let parentOptions = parentOptionEl.querySelectorAll(".dropdown__item");
 
-    initiateDropdown(parentDropdownTrigger);
+    let parentOptions;
+    if (parentOptionEl) {
+        parentOptions = parentOptionEl.querySelectorAll(".dropdown__item");
+        initiateDropdown(parentDropdownTrigger);
 
-    for (option of parentOptions) {
-        option.addEventListener('click', (e) => {
-            e.preventDefault();
-
-            let value = e.target.getAttribute("data-value");
-
-            if (value === "reset") {
-                value = null;
-            }
-            let childLeafId = DetailsPanel.getLeafDoc().id;
-
-            console.log(value);
-            console.log(leafId);
-            console.log(childLeafId);
-
-            currentTreeLeafCollectionRef.doc(leafId).update({
-                [`children.${childLeafId}`] : value
-            })
-            .then(() => {    
-                currentTreeLeafCollectionRef.doc(childLeafId).update({
-                    [`parents.${leafId}`] : value
+        for (option of parentOptions) {
+            option.addEventListener('click', (e) => {
+                e.preventDefault();
+    
+                let value = e.target.getAttribute("data-value");
+    
+                if (value === "reset") {
+                    value = null;
+                }
+                let childLeafId = DetailsPanel.getLeafDoc().id;
+    
+                console.log(value);
+                console.log(leafId);
+                console.log(childLeafId);
+    
+                currentTreeLeafCollectionRef.doc(leafId).update({
+                    [`children.${childLeafId}`] : value
                 })
-                .then(() => {
-                    location.reload();
+                .then(() => {    
+                    currentTreeLeafCollectionRef.doc(childLeafId).update({
+                        [`parents.${leafId}`] : value
+                    })
+                    .then(() => {
+                        location.reload();
+                    })
                 })
+    
+                //////////////////
+                //////////////////
+                // MD NOTE: THE CODE BELOW IS COMMENTED OUT TO BE ABLE TO RECOVER RELATIONSHIPS THAT MAY BE MARKED AS UNRELATED
+                ////////////////
+                ////////////////
+    
+                // if (value === "Unrelated") {
+                //     currentTreeLeafCollectionRef.doc(leafId).update({
+                //         [`children.${childLeafId}`] : firebase.firestore.FieldValue.delete()
+                //     })
+                //     .then(() => {    
+                //         currentTreeLeafCollectionRef.doc(childLeafId).update({
+                //             [`parents.${leafId}`] : firebase.firestore.FieldValue.delete()
+                //         })
+                //         .then(() => {
+                //             location.reload();
+                //         })
+                //     })
+                // } else {
+                //     currentTreeLeafCollectionRef.doc(leafId).update({
+                //         [`children.${childLeafId}`] : value
+                //     })
+                //     .then(() => {    
+                //         currentTreeLeafCollectionRef.doc(childLeafId).update({
+                //             [`parents.${leafId}`] : value
+                //         })
+                //         .then(() => {
+                //             location.reload();
+                //         })
+                //     })
+                // }
+    
             })
-
-            //////////////////
-            //////////////////
-            // MD NOTE: THE CODE BELOW IS COMMENTED OUT TO BE ABLE TO RECOVER RELATIONSHIPS THAT MAY BE MARKED AS UNRELATED
-            ////////////////
-            ////////////////
-
-            // if (value === "Unrelated") {
-            //     currentTreeLeafCollectionRef.doc(leafId).update({
-            //         [`children.${childLeafId}`] : firebase.firestore.FieldValue.delete()
-            //     })
-            //     .then(() => {    
-            //         currentTreeLeafCollectionRef.doc(childLeafId).update({
-            //             [`parents.${leafId}`] : firebase.firestore.FieldValue.delete()
-            //         })
-            //         .then(() => {
-            //             location.reload();
-            //         })
-            //     })
-            // } else {
-            //     currentTreeLeafCollectionRef.doc(leafId).update({
-            //         [`children.${childLeafId}`] : value
-            //     })
-            //     .then(() => {    
-            //         currentTreeLeafCollectionRef.doc(childLeafId).update({
-            //             [`parents.${leafId}`] : value
-            //         })
-            //         .then(() => {
-            //             location.reload();
-            //         })
-            //     })
-            // }
-
-        })
+        }
     }
+
 }
 
 function initiateSiblingOptions(leafId) {
@@ -828,36 +870,40 @@ function initiateSiblingOptions(leafId) {
 
     let siblingOptionEl = detailsPanelImmediateFamily.querySelector(`[data-leaf-id="${leafId}"] #sibling_options_menu__${leafId}
     `);
-    let siblingOptions = siblingOptionEl.querySelectorAll(".dropdown__item");
 
-    initiateDropdown(siblingDropdownTrigger);
+    let siblingOptions;
+    if (siblingOptionEl) {
+        siblingOptions = siblingOptionEl.querySelectorAll(".dropdown__item");
 
-    for (option of siblingOptions) {
-        option.addEventListener('click', (e) => {
-            e.preventDefault();
-
-            let value = e.target.getAttribute("data-value");
-
-            if (value === "reset") {
-                value = null;
-            }
-            let siblingLeafId = DetailsPanel.getLeafDoc().id;
-
-            currentTreeLeafCollectionRef.doc(leafId).update({
-                [`siblings.${siblingLeafId}`] : value
-            })
-            .then(() => {
-                console.log("Sibling #1 updated succesfully");
-
-                currentTreeLeafCollectionRef.doc(siblingLeafId).update({
-                    [`siblings.${leafId}`] : value
+        initiateDropdown(siblingDropdownTrigger);
+    
+        for (option of siblingOptions) {
+            option.addEventListener('click', (e) => {
+                e.preventDefault();
+    
+                let value = e.target.getAttribute("data-value");
+    
+                if (value === "reset") {
+                    value = null;
+                }
+                let siblingLeafId = DetailsPanel.getLeafDoc().id;
+    
+                currentTreeLeafCollectionRef.doc(leafId).update({
+                    [`siblings.${siblingLeafId}`] : value
                 })
                 .then(() => {
-                    console.log("Sibling #2 updated succesfully");
-                    location.reload();
+                    console.log("Sibling #1 updated succesfully");
+    
+                    currentTreeLeafCollectionRef.doc(siblingLeafId).update({
+                        [`siblings.${leafId}`] : value
+                    })
+                    .then(() => {
+                        console.log("Sibling #2 updated succesfully");
+                        location.reload();
+                    })
                 })
             })
-        })
+        }
     }
 }
 
@@ -1015,12 +1061,13 @@ DetailsPanel.editMember = function() {
             // Photo to upload
             let uploadedPhotoFile = detailsPanelEdit["profile_photo"].files[0];
             let fileName = uploadedPhotoFile.name;
+            let extension = filename.split('.').pop();
             let profilePhotoRef;
 
             if (memberDoc) {
-                profilePhotoRef = storageRef.child(`members/${memberDoc.id}/${fileName}`);
+                profilePhotoRef = storageRef.child(`members/${memberDoc.id}/profile.${extension}`);
             } else {
-                profilePhotoRef = storageRef.child(`trees/${LocalDocs.tree.id}/${reqEditDoc.id}/${fileName}`);
+                profilePhotoRef = storageRef.child(`trees/${LocalDocs.tree.id}/${reqEditDoc.id}/profile.${extension}`);
             }
 
             profilePhotoRef.put(uploadedPhotoFile).then(function(snapshot) {
@@ -1511,7 +1558,8 @@ Relationship.deleteLeaf = function() {
     let reqRemovalDoc = DetailsPanel.getLeafDoc();
     console.log(reqRemovalDoc);
 
-    if (reqRemovalDoc.data().claimed_by === LocalDocs.member.id) {
+    if (false) {
+    // if (reqRemovalDoc.data().claimed_by === LocalDocs.member.id) {
         alert("You cannot delete yourself!");
         return;
     } else {
@@ -1598,11 +1646,11 @@ Relationship.deleteLeaf = function() {
                 }
             }
 
-            treesRef.doc(LocalDocs.tree.id).update({
-                "admins" : firebase.firestore.FieldValue.arrayRemove(reqRemovalDoc.data().claimed_by),
-                "contributors" : firebase.firestore.FieldValue.arrayRemove(reqRemovalDoc.data().claimed_by),
-                "viewers" : firebase.firestore.FieldValue.arrayRemove(reqRemovalDoc.data().claimed_by)
-            });
+            // treesRef.doc(LocalDocs.tree.id).update({
+            //     "admins" : firebase.firestore.FieldValue.arrayRemove(reqRemovalDoc.data().claimed_by),
+            //     "contributors" : firebase.firestore.FieldValue.arrayRemove(reqRemovalDoc.data().claimed_by),
+            //     "viewers" : firebase.firestore.FieldValue.arrayRemove(reqRemovalDoc.data().claimed_by)
+            // });
     
             currentTreeLeafCollectionRef.doc(reqRemovalDoc.id).delete()
             .then(() => {

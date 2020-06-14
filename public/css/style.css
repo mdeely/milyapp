@@ -56,6 +56,10 @@ h6 {
 img {
   max-width: 100%; }
 
+fieldset {
+  border: 0px solid transparent;
+  padding: 0; }
+
 .mainNav {
   display: flex;
   background-color: var(--brand);
@@ -137,7 +141,8 @@ path {
     right: calc( (var(--detailsWidth) * -1 )); }
   #mainContent.showDetails #familyTree,
   #mainContent.showDetails #familyTree__list {
-    width: calc(100vw - var(--detailsWidth)); }
+    width: calc(100vw - var(--detailsWidth));
+    transition: width 0.2s ease-in-out; }
   #mainContent.showDetails #detailsPanel {
     right: 0; }
   #mainContent.view_list {
@@ -164,7 +169,8 @@ path {
 
 #branchContainer {
   display: flex;
-  max-width: 100vw; }
+  max-width: 100vw;
+  transition: width 0.2s ease-in-out; }
 
 #familyTree__list {
   width: 100vw;
@@ -215,15 +221,15 @@ path {
     width: 20%;
     position: relative; }
     #familyTree__list td:first-child {
-      border-top-left-radius: 16px;
-      border-bottom-left-radius: 16px; }
+      border-top-left-radius: 72px;
+      border-bottom-left-radius: 72px; }
       #familyTree__list td:first-child:after {
         width: calc(100% - 16px);
         right: 0;
         left: unset; }
     #familyTree__list td:last-child {
-      border-top-right-radius: 16px;
-      border-bottom-right-radius: 16px;
+      border-top-right-radius: 72px;
+      border-bottom-right-radius: 72px;
       width: var(--iconButtonSize); }
       #familyTree__list td:last-child:after {
         width: calc(100% - 16px);
@@ -248,7 +254,8 @@ path {
   top: 56px;
   padding-bottom: 80px;
   width: 100vw;
-  overflow: scroll; }
+  overflow: scroll;
+  scrollbar-width: none; }
   #familyTree:focus {
     outline: 0 solid transparent; }
   #familyTree .view-list_info {
@@ -331,6 +338,9 @@ path {
       margin-right: auto; }
   #familyTree > .branch {
     will-change: transform; }
+
+#familyTree::-webkit-scrollbar {
+  display: none; }
 
 .error:empty {
   display: none; }
@@ -606,7 +616,10 @@ input[name*="profile_photo"] {
     bottom: calc(-100vh - var(--navHeight));
     top: unset;
     transition: bottom 0.2s ease-in-out;
-    max-height: calc(100vh - (var(--navHeight) + 12vh)); }
+    max-height: calc(100vh - (var(--navHeight) + 12vh));
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    box-shadow: 0 0 24px rgba(0, 40, 49, 0.25); }
 
   .mainNav {
     align-items: baseline;
@@ -620,7 +633,8 @@ input[name*="profile_photo"] {
   #mainContent:not(.showDetails) #detailsPanel {
     right: unset; }
   #mainContent.showDetails #familyTree {
-    margin-right: 0; }
+    margin-right: 0;
+    width: 100vw; }
   #mainContent.showDetails #detailsPanel {
     right: unset;
     bottom: 0; }
@@ -647,6 +661,14 @@ input[name*="profile_photo"] {
     padding: var(--cardContentPadding, var(--cardPadding)); }
   .card__footer {
     padding: var(--cardFooterPadding, var(--cardPadding)); }
+  .card.full_width {
+    --cardMaxWidth: 100%; }
+  .card.large {
+    --cardMaxWidth: 800px; }
+  .card.medium {
+    --cardMaxWidth: 560px; }
+  .card.small {
+    --cardMaxWidth: 320px; }
 
 input[type=text],
 input[type=email],
@@ -874,6 +896,11 @@ button,
   button.danger,
   .iconButton.danger {
     background-color: var(--color_danger); }
+  .button.disabled,
+  button.disabled,
+  .iconButton.disabled {
+    opacity: .35;
+    pointer-events: none; }
 
 .iconButton {
   padding: 0;
@@ -1126,6 +1153,12 @@ button,
 .u-pad_4 {
   padding: 32px; }
 
+.u-pad_5 {
+  padding: 40px; }
+
+.u-pad_6 {
+  padding: 48px; }
+
 .u-pad-r_0 {
   padding-right: 0px; }
 
@@ -1149,6 +1182,33 @@ button,
 
 .u-pad-b_10 {
   padding-bottom: 80px; }
+
+.u-pad-t_0 {
+  padding-top: 0px; }
+
+.u-pad-t_1 {
+  padding-top: 8px; }
+
+.u-pad-t_2 {
+  padding-top: 16px; }
+
+.u-pad-t_3 {
+  padding-top: 24px; }
+
+.u-pad-t_4 {
+  padding-top: 32px; }
+
+.u-pad-t_5 {
+  padding-top: 40px; }
+
+.u-pad-t_6 {
+  padding-top: 48px; }
+
+.u-pad-t_7 {
+  padding-top: 56px; }
+
+.u-pad-t_8 {
+  padding-top: 64px; }
 
 .u-mar_0 {
   margin: 0px; }
@@ -1273,6 +1333,9 @@ button,
 
 .u-flex_1 {
   flex: 1; }
+
+.u-flex-wrap_wrap {
+  flex-wrap: wrap; }
 
 .u-fd_column {
   flex-direction: column; }
