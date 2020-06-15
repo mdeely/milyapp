@@ -761,17 +761,17 @@ const getListViewInfo = (leafDoc) => {
     return viewListInfo;
 }
 
-async function renderRowAndRelations(doc, tableEl) {
+function renderRowAndRelations(doc, tableEl) {
     let children = doc.data().children;
     let partners = doc.data().partners;
     
-    let memberRow = await renderTableRow(doc);
+    let memberRow = renderTableRow(doc);
     tableEl.appendChild(memberRow);
 
     if (Object.entries(partners).length > 0) {
         for (partnerId of Object.keys(partners)) {
             let partnerDoc = LocalDocs.leaves.find(leafDoc => leafDoc.id === partnerId);
-            let partnerRow = await renderTableRow(partnerDoc);
+            let partnerRow = renderTableRow(partnerDoc);
             tableEl.appendChild(partnerRow);
         }
     }
@@ -792,7 +792,7 @@ async function renderRowAndRelations(doc, tableEl) {
     // }
 }
 
-async function renderTableRow(doc) {
+function renderTableRow(doc) {
     let data = doc.data();
     let tr = createElementWithClass("tr", "");
     let tdName = createElementWithClass("td", "u-pad_1 u-bold");

@@ -75,7 +75,7 @@ const editProfileEl = () => {
         });
 
         let regexName = /(name|Name|phonetic)/g;
-        let regexAddress = /(address|zipcode|city|country)/g;
+        let regexAddress = /(address|zipcode|city|state|country)/g;
         let regexContact = /(phone|Phone|email)/g;
 
         if (value["dataPath"].match(regexName)) {
@@ -196,6 +196,7 @@ const updateMember = (button, form) => {
                     "address1" : form["address1"].value,
                     "address2" : form["address2"].value,
                     "city" : form["city"].value,
+                    "state" : form["state"].value,
                     "zipcode" : form["zipcode"].value,
                     "country" : form["country"].value,
                 },
@@ -234,6 +235,7 @@ const newMember = (button, form) => {
                 "address1" : form["address1"].value,
                 "address2" : form["address2"].value,
                 "city" : form["city"].value,
+                "state" : form["state"].value,
                 "zipcode" : form["zipcode"].value,
                 "country" : form["country"].value,
             },

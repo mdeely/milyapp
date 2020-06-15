@@ -497,10 +497,13 @@ input[name*="profile_photo"] {
   .partners .apart:empty,
   .partners .together:empty {
     display: none; }
-.partners .together {
-  margin-right: -56px; }
-  .partners .together .leaf {
-    margin-left: -32px; }
+.partners .together .leaf {
+  margin-left: 0;
+  margin-right: 0; }
+.partners .together + .leaf {
+  margin-left: -8px; }
+.partners .together:empty + .leaf {
+  margin-left: 0; }
 
 .message:empty {
   display: none; }
@@ -570,7 +573,7 @@ input[name*="profile_photo"] {
     font-size: 14px;
     text-overflow: ellipsis;
     white-space: nowrap;
-    max-width: calc(var(--spacer) * 17);
+    max-width: calc(var(--spacer) * 11);
     overflow: hidden;
     backface-visibility: hidden;
     z-index: 5; }
@@ -579,7 +582,7 @@ input[name*="profile_photo"] {
       font-style: italic;
       opacity: .75; }
   .leaf__image {
-    background-color: var(--color_yellow);
+    background-color: white;
     width: calc(var(--leafSize) + 12px);
     height: calc(var(--leafSize) + 12px);
     max-width: calc(var(--leafSize) + 12px);
@@ -851,7 +854,7 @@ button,
   cursor: pointer;
   font-weight: bold;
   font-size: 15px;
-  transition: all .1s ease-in-out;
+  transition: transform .1s ease-in-out;
   text-decoration: none; }
   .button:hover, .button:focus,
   button:hover,
@@ -863,7 +866,7 @@ button,
   button:active,
   .iconButton:active {
     transform: scale(1.02);
-    transition: all 0s ease-in-out; }
+    transition: transform 0s ease-in-out; }
   .button:focus,
   button:focus,
   .iconButton:focus {
@@ -1003,7 +1006,11 @@ button,
   background-color: rgba(0, 0, 0, 0.35);
   display: flex;
   justify-content: center;
-  overflow: scroll; }
+  overflow: scroll;
+  visibility: hidden;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.75); }
   .modal.medium .modal-dialouge {
     max-width: 480px; }
   .modal.small .modal-dialouge {
@@ -1015,12 +1022,18 @@ button,
     width: 100%;
     border-radius: 16px;
     box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
-    background-color: white; }
-  .modal:not(.open) {
-    display: none;
-    pointer-events: none; }
+    background-color: white;
+    transform: scale(0.95);
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.75); }
   .modal.open {
-    pointer-events: initial; }
+    pointer-events: initial;
+    visibility: visible;
+    pointer-events: initial;
+    opacity: 1;
+    transition: opacity 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.75); }
+    .modal.open .modal-dialouge {
+      transform: scale(1);
+      transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.75); }
   .modal .modal_button--close.iconButton {
     position: absolute;
     top: 16px;

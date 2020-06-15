@@ -99,9 +99,9 @@
                         <label for="sign-up_password">Password</label>
                         <input type="password" name="sign-up_password" placeholder="Password">
                     </div>
-                    <div class="inputGroup checkbox">
-                        <input name="sign-up_age-verification" type="checkbox">
-                        <label for="sign-up_age-verification.">I'm 13 years or older.</label>
+                    <div class="checkboxGroup u-mar-t_4">
+                        <input id="sign-up_age-verification" name="sign-up_age-verification" type="checkbox">
+                        <label for="sign-up_age-verification">I'm 13 years or older.</label>
                     </div>
                     <p class="message"></p>
                     <p class="error"></p>
@@ -143,7 +143,7 @@
         <div style="display:none" data-view="my-trees">
             <div class="debugMessage u-mar-lr_auto u-mar-b_2 u-d_flex u-align-items_center" style="max-width: 600px;"></div>
             <ul id="myTree__list" class="u-d_flex u-fd_column u-ai_center u-jc_center" style="max-width: 600px"></ul>
-            <div class="modal medium" data-modal="create-tree_modal">
+            <div class="modal small medium" data-modal="create-tree_modal">
                 <form id="create-tree_form_modal" class="card modal-dialouge">
                     <div class="card__header">
                         <h2 class="u-mar-b_0 u-mar-t_0">Create a tree</h2>
@@ -316,27 +316,7 @@
             </form>
         </div>
 
-        <div id="permissions-info" class="modal medium" data-modal="permissions-info">
-            <div class="card modal-dialouge">
-                <div class="card__header">
-                    <h2 class="u-mar-t_0 u-mar-b_0">Permissions</h2>
-                </div>
-                <div class="card__content">
-                    <h3 class="u-mar-t_0 u-mar-b_1">Viewer:</h3>
-                    <p class="u-mar-t_0 u-text_low u-mar-b_0">Can view everything on the tree, but cannot edit any details besides their own.</p>
-                    <h3 class="u-mar-b_1 u-mar-t_3">Contributor:</h3>
-                    <p class="u-mar-t_0 u-text_low u-mar-b_0">Can create leaves and edit their data. Contributors can only remove leaves they have created.</p>
-                    <h3 class="u-mar-b_1 u-mar-t_3">Admin:</h3>
-                    <p class="u-mar-t_0 u-text_low u-mar-b_0">WIll be granted unlimited power.</p>
-                </div>
-                <div class="card__footer">
-                    <button class="modal_button--close u-w_full">Dismiss</button>
-                </div>
-                <a href="#" class="modal_button--close iconButton white"><i class="fal fa-times"></i></a>
-            </div>
-        </div>
-
-        <div class="modal medium" data-modal="rename-tree_modal">
+        <div class="modal small" data-modal="rename-tree_modal">
             <form id="rename-tree_form" class="card modal-dialouge" role="dialog">
                 <div class="card__header">
                     <h2 class="u-mar-b_0 u-mar-t_0">Rename tree</h2>
@@ -360,6 +340,7 @@
 
         <div class="modal medium" data-modal="edit-tree_modal">
             <form id="edit-tree_form" class="card modal-dialouge" role="dialog">
+                <a href="#" class="modal_button--close iconButton white"><i class="fal fa-times"></i></a>
                 <div class="card__header u-pad-b_0">
                     <h2 class="u-mar-b_0 u-mar-t_0">Settings & Permissions
                         <i class="far fa-question-circle u-mar-l_1 u-cursor_pointer u-font-size_14" data-modal-trigger="permissions-info"></i>
@@ -381,8 +362,27 @@
                         <button class="edit-tree_save" type="submit">Save changes</button>
                     </div>
                 </div>
-                <a href="#" class="modal_button--close iconButton white"><i class="fal fa-times"></i></a>
             </form>
+        </div>
+
+        <div id="permissions-info" class="modal medium" data-modal="permissions-info">
+            <div class="card modal-dialouge">
+                <a href="#" class="modal_button--close iconButton white"><i class="fal fa-times"></i></a>
+                <div class="card__header">
+                    <h2 class="u-mar-t_0 u-mar-b_0">Permissions</h2>
+                </div>
+                <div class="card__content">
+                    <h3 class="u-mar-t_0 u-mar-b_1">Viewer:</h3>
+                    <p class="u-mar-t_0 u-text_low u-mar-b_0">Can view everything on the tree, but cannot edit any details besides their own.</p>
+                    <h3 class="u-mar-b_1 u-mar-t_3">Contributor:</h3>
+                    <p class="u-mar-t_0 u-text_low u-mar-b_0">Can create leaves and edit their data. Contributors can only remove leaves they have created.</p>
+                    <h3 class="u-mar-b_1 u-mar-t_3">Admin:</h3>
+                    <p class="u-mar-t_0 u-text_low u-mar-b_0">WIll be granted unlimited power.</p>
+                </div>
+                <div class="card__footer">
+                    <button class="modal_button--close u-w_full">Dismiss</button>
+                </div>
+            </div>
         </div>
 
     <!-- The core Firebase JS SDK is always required and must be listed first -->

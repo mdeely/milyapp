@@ -28,7 +28,7 @@ Tree.setup = function(treeId) {
 
 Tree.treeViewOnAuthChange = function(user) {
     if (user) {
-        treeDebugMsg.innerHTM = "";
+        treeDebugMsg.innerHTML = "";
     } else {
         treeDebugMsg.innerHTML += `<h1 class="u-mar-lr_auto u-ta_center">Sign up/in to join this tree</h2>`;
         console.log("tree auth change!");

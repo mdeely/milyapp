@@ -786,10 +786,19 @@ input[name*="profile_photo"] {
     }
 
     .together {
-        margin-right: -56px;
+        // margin-right: -56px;
 
         .leaf {
-            margin-left: -32px;
+            margin-left: 0;
+            margin-right: 0;
+        }
+
+        & + .leaf {
+            margin-left: -8px;
+        }
+
+        &:empty + .leaf {
+            margin-left: 0;
         }
     }
 
@@ -918,7 +927,7 @@ input[name*="profile_photo"] {
         font-size: 14px;
         text-overflow: ellipsis;
         white-space: nowrap;
-        max-width: calc(var(--spacer) * 17);
+        max-width: calc(var(--spacer) * 11);
         overflow: hidden;
         backface-visibility: hidden;
         z-index: 5;
@@ -931,7 +940,8 @@ input[name*="profile_photo"] {
     }
 
     &__image {
-        background-color: var(--color_yellow);
+        // background-color: var(--color_yellow);
+        background-color: white;
         width: calc(var(--leafSize) + 12px);
         height: calc(var(--leafSize) + 12px);
         max-width: calc(var(--leafSize) + 12px);
@@ -1316,7 +1326,7 @@ button,
     cursor: pointer;
     font-weight: bold;
     font-size: 15px;
-    transition: all .1s ease-in-out;
+    transition: transform .1s ease-in-out;
     text-decoration: none;
 
     &:hover,
@@ -1326,7 +1336,7 @@ button,
 
     &:active {
         transform: scale(1.02);
-        transition: all 0s ease-in-out;
+        transition: transform 0s ease-in-out;
     }
 
     &:focus {
@@ -1491,6 +1501,10 @@ button,
     display: flex;
     justify-content: center;
     overflow: scroll;
+    visibility: hidden;
+    pointer-events: none;;
+    opacity: 0;
+    transition: opacity .2s cubic-bezier(0.175, 0.885, 0.32, 1.75);
 
     &.medium {
         .modal-dialouge  {
@@ -1512,15 +1526,26 @@ button,
         border-radius: 16px;
         box-shadow: 0 0 12px rgba(black, .2);
         background-color: white;
+        transform: scale(.95);
+        transition: transform .2s cubic-bezier(0.175, 0.885, 0.32, 1.75);
     }
 
-    &:not(.open) {
-        display: none;
-        pointer-events: none;
-    }
+    // &:not(.open) {
+    //     display: none;
+    //     pointer-events: none;
+    // }
 
     &.open {
         pointer-events: initial;
+        visibility: visible;
+        pointer-events: initial;
+        opacity: 1;
+        transition: opacity .2s cubic-bezier(0.175, 0.885, 0.32, 1.75);
+
+        .modal-dialouge {
+            transform: scale(1);
+            transition: transform .2s cubic-bezier(0.175, 0.885, 0.32, 1.75);
+        }
     }
 
     .modal_button--close.iconButton {

@@ -258,7 +258,6 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
             inviteMemberButton.classList.remove("u-d_none");
         }
 
-        console.log(leafDoc.data().claimed_by);
         if (!memberHasClaimedLeafOnTree && !leafDoc.data().claimed_by) {
             claimLeafAction.classList.remove("u-d_none");
         } else {
@@ -404,9 +403,9 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
             let familyMemberDoc = null;
             let memberPermissionType = authLeafPermissionType();
             
-            // if (familyLeafDoc.data().claimed_by) {
-            //     familyMemberDoc = LocalDocs.getMemberDocByIdFromCurrentTree(familyLeafDoc.data().claimed_by);
-            // }
+            if (familyLeafDoc && familyLeafDoc.data().claimed_by) {
+                familyMemberDoc = LocalDocs.getMemberDocByIdFromCurrentTree(familyLeafDoc.data().claimed_by);
+            }
 
             let docData = familyMemberDoc ? familyMemberDoc : familyLeafDoc;
 
@@ -1097,6 +1096,7 @@ DetailsPanel.editMember = function() {
                     "address1" : detailsPanelEdit["address1"].value,
                     "address2" : detailsPanelEdit["address2"].value,
                     "city" : detailsPanelEdit["city"].value,
+                    "state" : detailsPanelEdit["state"].value,
                     "zipcode" : detailsPanelEdit["zipcode"].value,
                     "country" : detailsPanelEdit["country"].value,
                 },
@@ -1176,6 +1176,7 @@ MemberBlueprint.object = {
                     "Address 1" : { "dataPath" : "address1", "defaultValue" : null, "icon" : "" },
                     "Address 2" : { "dataPath" : "address2", "defaultValue" : null, "icon" : "" },
                     "City" : { "dataPath" : "city", "defaultValue" : null, "icon" : "" },
+                    "State" : { "dataPath" : "state", "defaultValue" : null, "icon" : "" },
                     "Zipcode" : { "dataPath" : "zipcode", "defaultValue" : null, "icon" : "" },
                     "Country" : { "dataPath" : "country", "defaultValue" : null, "icon" : "" }
                 }
@@ -1198,7 +1199,7 @@ MemberBlueprint.loop = function(args) {
     let metaDetails = ["claimed_by", "topMember", "created_by", ];
     let basicDetails = ["email", "birthday", "occupation", "profile_photo", "facebook", "instagram", "website"];
     let groups = ["name", "address", "phone"];
-    let groupDetails = ["firstName", "middleName", "surnameCurrent", "nickname", "surnameBirth", "homePhone", "mobilePhone", "workPhone", "address1", "address2", "city", "zipcode", "country"];
+    let groupDetails = ["firstName", "middleName", "surnameCurrent", "nickname", "surnameBirth", "homePhone", "mobilePhone", "workPhone", "address1", "address2", "city", "state", "zipcode", "country"];
 
     let excludeItems = new Array;
 
@@ -1555,8 +1556,12 @@ Relationship.addSibling = function() {
 }
 
 Relationship.deleteLeaf = function() {
+    DetailsPanel.close();
+
     let reqRemovalDoc = DetailsPanel.getLeafDoc();
-    console.log(reqRemovalDoc);
+
+    // Find figure element (and tr element) and remove.
+    // Re-render connections
 
     if (false) {
     // if (reqRemovalDoc.data().claimed_by === LocalDocs.member.id) {
@@ -1654,13 +1659,35 @@ Relationship.deleteLeaf = function() {
     
             currentTreeLeafCollectionRef.doc(reqRemovalDoc.id).delete()
             .then(() => {
-                console.log("user was deleted");
-                location.reload();
+                // Rerender removed doc's parent's lines
+                // Rerender the lines to those connections.
+                let id = reqRemovalDoc.id;
+                LocalDocs.leaves
+
+                let leafEl = familyTree.querySelector(`[data-id="${id}"]`);
+                let rowEl = familyTreeListEl.querySelector(`[data-id="${id}"]`);
+
+                leafEl.remove();
+                if (rowEl) {
+                    rowEl.remove();
+                }
+
+                // let dataFromLines = familyTree.querySelectorAll(`[data-from-leaf="${id}"]`);
+                // let dataToLines = familyTree.querySelectorAll(`[data-to-leaf="${id}"]`);
+
+                let svgs = familyTree.querySelectorAll("svg.leaf_connections");
+
+                for (svg of svgs) {
+                    svg.remove();
+                }
+
+                connectLines();
+
+                // location.reload();
             })
             .catch(err => {
                 console.log(err.message);
             })
-            document.querySelector(`[data-id="${reqRemovalDoc.id}"]`).remove();
         }
     }
 }
@@ -1713,7 +1740,6 @@ function iterateOverConnections() {
 
     for (let [parentId, parentValue] of Object.entries(connectionObject.children)) {
         let parentEl = familyTreeEl.querySelector(`[data-id="${parentId}"]`);
-
         for (let childId of parentValue) {
             if ( !unrelatedArray.includes(childId[1]) ) {
                 let childEl = familyTreeEl.querySelector(`[data-id="${childId[0]}"]`);
@@ -1726,7 +1752,6 @@ function iterateOverConnections() {
     for (let [partnerId, partnerValue] of Object.entries(connectionObject.partners)) {
         if (partnerId) {
             let partnerEl = familyTreeEl.querySelector(`[data-id="${partnerId}"]`);
-
             for (let partnerMatchId of partnerValue) {
                 if ( apartArray.includes(partnerMatchId[1]) ) {
                     let partnerMatchEl = familyTreeEl.querySelector(`[data-id="${partnerMatchId[0]}"]`);
@@ -1739,60 +1764,64 @@ function iterateOverConnections() {
 }
 
 function createSVG(fromEl, toEl, relationshipType) {
-    let toAttributes = toEl.getBoundingClientRect();
-    let fromAttributes = fromEl.getBoundingClientRect();
-    let style = getComputedStyle(fromEl);
-    let width = fromEl.offsetWidth;
-    let height = width;
-    let halfWidth = width / 2;
-    let captionOffset = 12;
-    let singleMargin = parseInt(style.marginTop);
-    let distanceDif;
-
-    let fromleafId = fromEl.getAttribute("data-id");
-    let toLeafId = toEl.getAttribute("data-id");
-
-    let middleOfToX = toAttributes.x - toAttributes.width;
-    let middleOfToY = toAttributes.y - toAttributes.width;
-
-    if (fromAttributes.x > toAttributes.x) {
-        distanceDif = (-1 * (fromAttributes.x - toAttributes.x)) + halfWidth;
+    if (!toEl || !fromEl) {
+        return;
     } else {
-        distanceDif = (toAttributes.x - fromAttributes.x) + halfWidth;
+        let toAttributes = toEl.getBoundingClientRect();
+        let fromAttributes = fromEl.getBoundingClientRect();
+        let style = getComputedStyle(fromEl);
+        let width = fromEl.offsetWidth;
+        let height = width;
+        let halfWidth = width / 2;
+        let captionOffset = 12;
+        let singleMargin = parseInt(style.marginTop);
+        let distanceDif;
+    
+        let fromleafId = fromEl.getAttribute("data-id");
+        let toLeafId = toEl.getAttribute("data-id");
+    
+        let middleOfToX = toAttributes.x - toAttributes.width;
+        let middleOfToY = toAttributes.y - toAttributes.width;
+    
+        if (fromAttributes.x > toAttributes.x) {
+            distanceDif = (-1 * (fromAttributes.x - toAttributes.x)) + halfWidth;
+        } else {
+            distanceDif = (toAttributes.x - fromAttributes.x) + halfWidth;
+        }
+    
+        let d;
+    
+        if (relationshipType === "child") {
+            d = `M${halfWidth} ${height + captionOffset} L${halfWidth} ${height + (captionOffset/2) + singleMargin} L${distanceDif} ${height + (captionOffset/2) + singleMargin} L${distanceDif} ${height + captionOffset + (singleMargin*2)}`;
+        } else if (relationshipType === "partner") {
+            d = `M${halfWidth} ${halfWidth} L${distanceDif} ${halfWidth}`;
+        }
+    
+        let xmlns = "http://www.w3.org/2000/svg";
+    
+        let svgElem = document.createElementNS(xmlns, "svg");
+        svgElem.setAttributeNS(null, "viewBox", "0 0 " + width + " " + width);
+        svgElem.setAttributeNS(null, "width", width);
+        svgElem.setAttributeNS(null, "height", width);
+        svgElem.setAttributeNS(null, "class", "leaf_connections");
+        svgElem.setAttributeNS(null, "data-from-leaf", fromleafId);
+        svgElem.setAttributeNS(null, "data-to-leaf", toLeafId);
+    
+        // svgElem.setAttributeNS(null, "preserveAspectRatio", "none");
+    
+        let svgNS = "http://www.w3.org/2000/svg";  
+        path = document.createElementNS(svgNS, "path");
+        path.setAttributeNS(null, "d", d);
+    
+        if (relationshipType === "partner") {
+            path.setAttributeNS(null, "stroke-dasharray", "4 4");
+        }
+    
+        svgElem.appendChild(path);
+        fromEl.appendChild(svgElem);
+    
+        // return polylineConnector;
     }
-
-    let d;
-
-    if (relationshipType === "child") {
-        d = `M${halfWidth} ${height + captionOffset} L${halfWidth} ${height + (captionOffset/2) + singleMargin} L${distanceDif} ${height + (captionOffset/2) + singleMargin} L${distanceDif} ${height + captionOffset + (singleMargin*2)}`;
-    } else if (relationshipType === "partner") {
-        d = `M${halfWidth} ${halfWidth} L${distanceDif} ${halfWidth}`;
-    }
-
-    let xmlns = "http://www.w3.org/2000/svg";
-
-    let svgElem = document.createElementNS(xmlns, "svg");
-    svgElem.setAttributeNS(null, "viewBox", "0 0 " + width + " " + width);
-    svgElem.setAttributeNS(null, "width", width);
-    svgElem.setAttributeNS(null, "height", width);
-    svgElem.setAttributeNS(null, "class", "leaf_connections");
-    svgElem.setAttributeNS(null, "data-from-leaf", fromleafId);
-    svgElem.setAttributeNS(null, "data-to-leaf", toLeafId);
-
-    // svgElem.setAttributeNS(null, "preserveAspectRatio", "none");
-
-    let svgNS = "http://www.w3.org/2000/svg";  
-    path = document.createElementNS(svgNS, "path");
-    path.setAttributeNS(null, "d", d);
-
-    if (relationshipType === "partner") {
-        path.setAttributeNS(null, "stroke-dasharray", "4 4");
-    }
-
-    svgElem.appendChild(path);
-    fromEl.appendChild(svgElem);
-
-    // return polylineConnector;
 }
 
 function initiateModals() {
