@@ -225,8 +225,6 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
             addParentButton.classList.add("u-d_none");
         }
     }
-
-    console.log(`member is a ${memberPermissionType}`);
     
     if (memberPermissionType === "admin") {
         addParentIfTopMember();
@@ -402,14 +400,14 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
             let familyLeafDoc = LocalDocs.getLeafById(reqId);
             let familyMemberDoc = null;
             let memberPermissionType = authLeafPermissionType();
-            
+
             if (familyLeafDoc && familyLeafDoc.data().claimed_by) {
                 familyMemberDoc = LocalDocs.getMemberDocByIdFromCurrentTree(familyLeafDoc.data().claimed_by);
             }
 
             let docData = familyMemberDoc ? familyMemberDoc : familyLeafDoc;
 
-            let firstName = docData.data().name.firstName || "No name";
+            let firstName = docData.data().name.firstName ? docData.data().name.firstName : "No name";
             let surnameCurrent = docData.data().name.surnameCurrent ? ` ${docData.data().name.surnameCurrent}` : '';
             let label;
             let partnerAction = '';
@@ -1557,8 +1555,21 @@ Relationship.addSibling = function() {
 
 Relationship.deleteLeaf = function() {
     DetailsPanel.close();
-
     let reqRemovalDoc = DetailsPanel.getLeafDoc();
+    let leafEl = familyTree.querySelector(`[data-id="${reqRemovalDoc.id}"]`);
+    let rowEl = familyTreeListEl.querySelector(`[data-id="${reqRemovalDoc.id}"]`);
+    let dataFromLines = familyTree.querySelectorAll(`[data-from-leaf="${reqRemovalDoc.id}"]`);
+    let dataToLines = familyTree.querySelectorAll(`[data-to-leaf="${reqRemovalDoc.id}"]`);
+
+    leafEl.classList.add("removing");
+
+    for (dataFromLine of dataFromLines) {
+        dataFromLine.classList.add("removing");
+    }
+
+    for (dataToLine of dataToLines) {
+        dataToLine.classList.add("removing");
+    }
 
     // Find figure element (and tr element) and remove.
     // Re-render connections
@@ -1661,19 +1672,10 @@ Relationship.deleteLeaf = function() {
             .then(() => {
                 // Rerender removed doc's parent's lines
                 // Rerender the lines to those connections.
-                let id = reqRemovalDoc.id;
-                LocalDocs.leaves
-
-                let leafEl = familyTree.querySelector(`[data-id="${id}"]`);
-                let rowEl = familyTreeListEl.querySelector(`[data-id="${id}"]`);
-
                 leafEl.remove();
                 if (rowEl) {
                     rowEl.remove();
                 }
-
-                // let dataFromLines = familyTree.querySelectorAll(`[data-from-leaf="${id}"]`);
-                // let dataToLines = familyTree.querySelectorAll(`[data-to-leaf="${id}"]`);
 
                 let svgs = familyTree.querySelectorAll("svg.leaf_connections");
 

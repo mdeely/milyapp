@@ -37,7 +37,7 @@ const populateMyTreesList = async () => {
             if (!ranThrough.includes(treeId)) {
                 treesRef.doc(treeId).get()
                 .then((reqTreeDoc) => {
-                    if (reqTreeDoc.data().deleted !== true) {
+                    if (reqTreeDoc.exists && reqTreeDoc.data().deleted !== true) {
                         let liEl = createElementWithClass('li', 'u-w_full u-mar-r_2 u-mar-l_2' );
                         let aEl = createElementWithClass('a', 'myTree__item u-pad_2 u-w_full u-font-size_18 u-d_flex u-ai_center' );
                         let treeEditButton = createElementWithClass('button', 'iconButton white u-mar-l_auto edit_tree_button' );

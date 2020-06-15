@@ -118,7 +118,8 @@ path {
   left: 0;
   width: 100%;
   height: 100%;
-  overflow: visible; }
+  overflow: visible;
+  stroke-dasharray: 400; }
   .leaf_connections.highlight {
     z-index: 1; }
     .leaf_connections.highlight path {
@@ -127,6 +128,10 @@ path {
       stroke-width: 4; }
     .leaf_connections.highlight ~ .leaf_connections {
       z-index: -5; }
+  .leaf_connections.removing {
+    stroke-dasharray: 400;
+    stroke-dashoffset: 400;
+    transition: all .2s ease-in-out; }
 
 #mainContent {
   display: flex;
@@ -562,6 +567,11 @@ input[name*="profile_photo"] {
     box-shadow: 0 0 0 6px white inset, 0 0 0 4px var(--color_outline); }
   .leaf > * {
     pointer-events: none; }
+  .leaf.removing {
+    filter: grayscale(1);
+    transform: scale(0);
+    opacity: 0;
+    transition: all .2s ease-out; }
   .leaf .leaf_caption {
     position: absolute;
     padding: 8px 12px;

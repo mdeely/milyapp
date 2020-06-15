@@ -9,19 +9,28 @@ Tree.setup = function(treeId) {
     variablizeCurrentTreeDoc(treeId)
     .then((response) => {
         if (response) {
-            pageTitle.innerHTML = LocalDocs.tree ? LocalDocs.tree.data().name : "Tree not found!";
-            treesRef.doc(LocalDocs.tree.id).collection('leaves').get()
-            .then((response) => {
-                LocalDocs.leaves = response.docs;
-                window.currentTreeLeafCollectionRef = treesRef.doc(LocalDocs.tree.id).collection('leaves');
-                
-                TreeBranch.initiate();
-
-                let tableEl = familyTreeListEl.querySelector("table");
-                let tdEls = tableEl.querySelectorAll("tr td");
+            if (LocalDocs.tree.data().public === true || (LocalDocs.member ? LocalDocs.member.data().trees.includes(treeId) : false) ) {
+                pageTitle.innerHTML = LocalDocs.tree ? LocalDocs.tree.data().name : "Tree not found!";
+                treesRef.doc(LocalDocs.tree.id).collection('leaves').get()
+                .then((response) => {
+                    LocalDocs.leaves = response.docs;
+                    window.currentTreeLeafCollectionRef = treesRef.doc(LocalDocs.tree.id).collection('leaves');
                     
-                console.log("TODO: change the treeBranch abilities based on authentication and permission status");
-            })
+                    TreeBranch.initiate();
+    
+                    let tableEl = familyTreeListEl.querySelector("table");
+                    let tdEls = tableEl.querySelectorAll("tr td");
+                        
+                })
+            } else {
+                treeDebugMsg.innerHTML += `
+                        <h1 class="u-mar-lr_auto u-ta_center">
+                            <i class="far fa-lock-alt u-d_block u-mar-b_2"></i>
+                            Private tree
+                        </h2>
+                        <p class="u-mar-lr_auto u-ta_center">The tree your are trying to view is private and can only be viewed by members of that tree.</p>
+                        `;
+            }
         }
     })
 }
@@ -30,9 +39,9 @@ Tree.treeViewOnAuthChange = function(user) {
     if (user) {
         treeDebugMsg.innerHTML = "";
     } else {
-        treeDebugMsg.innerHTML += `<h1 class="u-mar-lr_auto u-ta_center">Sign up/in to join this tree</h2>`;
-        console.log("tree auth change!");
-        console.log("not authenticated!");
+        // treeDebugMsg.innerHTML += `<h1 class="u-mar-lr_auto u-ta_center">Sign up/in to join this tree</h2>`;
+        // console.log("tree auth change!");
+        // console.log("not authenticated!");
     }
 }
 
