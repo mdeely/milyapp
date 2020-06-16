@@ -139,7 +139,6 @@ const populateMyTreesList = async () => {
                                           let memberId = e.target.closest("[data-member-id]").getAttribute("data-member-id");
                                           let treeId = editTreeForm[`edit-tree_id`].value;
 
-
                                           treesRef.doc(treeId).get()
                                           .then((treeDoc) => {
                                               if (treeDoc.data().created_by === memberId) {
@@ -155,7 +154,7 @@ const populateMyTreesList = async () => {
                                                       })
                                                       .then(() => {
                                                             console.log("permission removed from tree");
-                                                        //   location.reload();
+                                                            location.reload();
                                                       })
                                                       .catch(err => {
                                                         console.log(err.message);

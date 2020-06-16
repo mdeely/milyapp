@@ -648,14 +648,14 @@ path {
             z-index: -1;
         }
 
-        button {
-            opacity: 1;
-        }
+        // button {
+        //     opacity: 1;
+        // }
     }
 
-    button {
-        opacity: 0;
-    }
+    // button {
+    //     opacity: 0;
+    // }
 }
 
 .detailsPanel__text {
@@ -761,6 +761,10 @@ input[name*="profile_photo"] {
     display: flex;
     flex-direction: row;
     position: relative;
+
+    &:empty {
+        display: none;
+    }
 }
 
 .partners {
@@ -1439,7 +1443,7 @@ button,
         font-family: 'Lato', sans-serif;
         pointer-events: none;
         position: absolute;
-        right: calc(100% + 8px);
+        right: 50%;
         padding: 6px 10px;
         border-radius: 24px;
         font-size: 12px;
@@ -1451,7 +1455,11 @@ button,
         color: white;
         background-color: var(--brand_600);
         transition-delay: unset;
-        transition: opacity .2s ease-in-out;
+        transition: opacity .2s ease-in-out, 
+                    right .15s ease-out, 
+                    left .15s ease-out,
+                    bottom .15s ease-out,
+                    top .15s ease-out;
     }
     
     &:hover {
@@ -1460,6 +1468,7 @@ button,
 
         &:after {
             opacity: 1;
+            right: calc(100% + 8px);
             transition-delay: .65s;
         }
     }
@@ -1468,35 +1477,65 @@ button,
         z-index: 99;
 
         &:after {
+            right: calc(100% + 8px);
             opacity: 1;
         }
     }
 }
 
-[tooltip-position="right"]:after {
-    left: calc(100% + 8px);
-    right: unset;
+[tooltip-position="right"] {
+    &:after {
+        left: 50%;
+        right: unset;
+    }
+    &:hover:after,
+    &:focus:after {
+        left: calc(100% + 8px);
+        right: unset;
+    }
 }
-[tooltip-position="top middle"]:after {
-    left: 50%;
-    top: unset;
-    bottom: calc(100% + 8px);
-    right: unset;
-    transform: translateX(-50%);
+[tooltip-position="top middle"] {
+    &:after {
+        left: 50%;
+        top: unset;
+        right: unset;
+        transform: translateX(-50%);
+        bottom: 0;
+    }
+    &:hover:after,
+    &:focus:after {
+        right: unset;
+        bottom: calc(100% + 8px);
+    }
 }
-[tooltip-position="top left"]:after {
-    left: 0;
-    top: unset;
-    bottom: calc(100% + 16px);
-    right: unset;
+[tooltip-position="top left"] {
+    &:after {
+        left: 0;
+        top: unset;
+        bottom: 50%;
+        right: unset;
+    }
+    &:hover:after,
+    &:focus:after {
+        bottom: calc(100% + 16px);
+        right: unset;
+    }
 }
-[tooltip-position="bottom middle"]:after {
-    left: 50%;
-    bottom: unset;
-    top: calc(100% + 8px);
-    right: unset;
-    transform: translateX(-50%);
+[tooltip-position="bottom middle"] {
+    &:after {
+        left: 50%;
+        bottom: unset;
+        top: 50%;
+        right: unset;
+        transform: translateX(-50%);
+    }
+    &:hover:after,
+    &:focus:after {
+        right: unset;
+        top: calc(100% + 8px);
+    }
 }
+
 [tooltip-reveal="fast"]:hover:after {
     transition-delay: unset;;
 }

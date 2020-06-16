@@ -6,33 +6,57 @@ let Tree = {};
 Tree.setup = function(treeId) {
     clear();
     Nav.showViewPreferencesButton(true);
+
     variablizeCurrentTreeDoc(treeId)
     .then((response) => {
         if (response) {
-            if (LocalDocs.tree.data().public === true || (LocalDocs.member ? LocalDocs.member.data().trees.includes(treeId) : false) ) {
-                pageTitle.innerHTML = LocalDocs.tree ? LocalDocs.tree.data().name : "Tree not found!";
-                treesRef.doc(LocalDocs.tree.id).collection('leaves').get()
-                .then((response) => {
-                    LocalDocs.leaves = response.docs;
-                    window.currentTreeLeafCollectionRef = treesRef.doc(LocalDocs.tree.id).collection('leaves');
-                    
-                    TreeBranch.initiate();
-    
-                    let tableEl = familyTreeListEl.querySelector("table");
-                    let tdEls = tableEl.querySelectorAll("tr td");
-                        
-                })
+            if (auth.currentUser){
+                if (LocalDocs.member) {
+                    Tree.continueTreeSetup(treeId);
+                } else {
+                    membersRef.where('claimed_by', '==', auth.currentUser.uid).limit(1).get()
+                    .then((queryResult) => {
+                        if (queryResult.docs[0]) {
+                            LocalDocs.member = queryResult.docs[0] ? queryResult.docs[0] : null;
+                            Tree.continueTreeSetup(treeId);
+                        }
+                    })
+                }
             } else {
-                treeDebugMsg.innerHTML += `
-                        <h1 class="u-mar-lr_auto u-ta_center">
-                            <i class="far fa-lock-alt u-d_block u-mar-b_2"></i>
-                            Private tree
-                        </h2>
-                        <p class="u-mar-lr_auto u-ta_center">The tree your are trying to view is private and can only be viewed by members of that tree.</p>
-                        `;
+                Tree.continueTreeSetup(treeId);
             }
         }
     })
+}
+
+Tree.continueTreeSetup = function(treeId) {
+    if ( (LocalDocs.member ? LocalDocs.member.data().trees.includes(treeId) : false) || LocalDocs.tree.data().public === true) {
+        pageTitle.innerHTML = LocalDocs.tree ? LocalDocs.tree.data().name : "Tree not found!";
+        treesRef.doc(LocalDocs.tree.id).collection('leaves').get()
+        .then((response) => {
+            for (doc of response.docs) {
+                LocalDocs.leaves.push({
+                    id: doc.id,
+                    ...doc.data()
+                });
+            }
+            window.currentTreeLeafCollectionRef = treesRef.doc(LocalDocs.tree.id).collection('leaves');
+            
+            TreeBranch.initiate();
+    
+            let tableEl = familyTreeListEl.querySelector("table");
+            let tdEls = tableEl.querySelectorAll("tr td");
+        })
+    } else {
+        console.log("tree isn't public");
+        treeDebugMsg.innerHTML += `
+                <h1 class="u-mar-lr_auto u-ta_center">
+                    <i class="far fa-lock-alt u-d_block u-mar-b_2"></i>
+                    Private tree
+                </h2>
+                <p class="u-mar-lr_auto u-ta_center">The tree your are trying to view is private and can only be viewed by members of that tree.</p>
+                `;
+    }
 }
 
 Tree.treeViewOnAuthChange = function(user) {
@@ -65,8 +89,8 @@ const variablizeCurrentTreeDoc = (treeId) => new Promise(
 const TreeBranch = {};
 
 TreeBranch.initiate =  function() {
-    let topMemberDoc = LocalDocs.leaves.find(leafDoc => leafDoc.data().topMember === true);
-    let siblings = topMemberDoc.data().siblings ? topMemberDoc.data().siblings : null;
+    let topMemberDoc = LocalDocs.leaves.find(item => item.topMember === true);
+    let siblings = topMemberDoc.siblings ? topMemberDoc.siblings : null;
 
     let topMemberBranchEl = TreeBranch.renderBranchByDoc(topMemberDoc);
 
@@ -100,8 +124,8 @@ TreeBranch.clear = function() {
     let partnerTogetherEl = createGroupEl("together");
     let partnerApartEl = createGroupEl("apart");
 
-    let children = Object.keys(memberDoc.data().children).length > 0 ? Object.keys(memberDoc.data().children) : null;
-    let partners = Object.keys(memberDoc.data().partners).length > 0 ?  Object.keys(memberDoc.data().partners) : null;
+    let children = Object.keys(memberDoc.children).length > 0 ? Object.keys(memberDoc.children) : null;
+    let partners = Object.keys(memberDoc.partners).length > 0 ?  Object.keys(memberDoc.partners) : null;
     
     let togetherPartnerTypes = ["Married", "Engaged", "Dating"];
     let apartPartnerTypes = ["Separated", "Divorced", "Widowed"];
@@ -109,7 +133,7 @@ TreeBranch.clear = function() {
     if (partners) {
         for (let partnerId of partners) {
             let topPartnerMemberDoc = LocalDocs.leaves.find(leafDoc => leafDoc.id === partnerId);
-            let partnerType = topPartnerMemberDoc.data().partners[memberDoc.id] ? topPartnerMemberDoc.data().partners[memberDoc.id] : null;
+            let partnerType = topPartnerMemberDoc.partners[memberDoc.id] ? topPartnerMemberDoc.partners[memberDoc.id] : null;
             
             if (togetherPartnerTypes.includes(partnerType)|| !partnerType) {
                 partnerTogetherEl.appendChild(TreeLeaf.create(topPartnerMemberDoc));
@@ -151,7 +175,7 @@ const createGroupEl = (className = null) => {
 const TreeLeaf = {};
 
 TreeLeaf.create = function (doc) {
-    let data = doc.data();
+    let data = doc;
     let memberDoc;
 
     let figure = document.createElement("figure");
@@ -161,7 +185,7 @@ TreeLeaf.create = function (doc) {
     let leafName = data.name.firstName ? data.name.firstName : "No name";
     let leafProfilePhoto = "https://firebasestorage.googleapis.com/v0/b/mily-4c2a8.appspot.com/o/assets%2Fplaceholder%2Fprofile_placeholder.svg?alt=media&token=d3b939f1-d46b-4315-bcc6-3167d17a18ed";
 
-    if (doc.data().deleted === true) {
+    if (doc.deleted === true) {
         image.style.backgroundImage = '';
         image.style.backgroundColor = "white";
         leafName = "(deleted)";
@@ -196,8 +220,8 @@ TreeLeaf.create = function (doc) {
         }
     });
 
-    if (doc.data().claimed_by && doc.data().deleted !== true) {
-        replaceNameAndImageWithMemberDoc(doc.id, doc.data().claimed_by);
+    if (doc.claimed_by && doc.deleted !== true) {
+        replaceNameAndImageWithMemberDoc(doc.id, doc.claimed_by);
     }
 
     return figure;
@@ -213,7 +237,11 @@ const replaceNameAndImageWithMemberDoc = (leafDocId, claimedById) => new Promise
         .then((reqMemberDoc) => {
             let targetLeaf = document.querySelector(`[data-id="${leafDocId}"]`);
 
-            LocalDocs.members.push(reqMemberDoc);
+            LocalDocs.members.push({
+                id: reqMemberDoc.id,
+                ...reqMemberDoc.data()
+            });
+
             memberDocData = reqMemberDoc.data();
             memberName = memberDocData.name.firstName ? memberDocData.name.firstName : "No name (member)";
             memberProfilePhoto = "https://firebasestorage.googleapis.com/v0/b/mily-4c2a8.appspot.com/o/assets%2Fplaceholder%2Fprofile_placeholder.svg?alt=media&token=d3b939f1-d46b-4315-bcc6-3167d17a18ed";

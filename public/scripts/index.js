@@ -762,8 +762,8 @@ const getListViewInfo = (leafDoc) => {
 }
 
 function renderRowAndRelations(doc, tableEl) {
-    let children = doc.data().children;
-    let partners = doc.data().partners;
+    let children = doc.children;
+    let partners = doc.partners;
     
     let memberRow = renderTableRow(doc);
     tableEl.appendChild(memberRow);
@@ -793,7 +793,7 @@ function renderRowAndRelations(doc, tableEl) {
 }
 
 function renderTableRow(doc) {
-    let data = doc.data();
+    let data = doc;
     let tr = createElementWithClass("tr", "");
     let tdName = createElementWithClass("td", "u-pad_1 u-bold");
     let tdProfileImage = createElementWithClass("td", "u-pad_1 profile__image");
@@ -809,9 +809,9 @@ function renderTableRow(doc) {
     let leafImageEl = familyTreeEl.querySelector(`[data-id="${doc.id}"]`);
     let leafImageStyle = leafImageEl.querySelector(`.leaf__image`).getAttribute("style");
 
-    if (doc.data().claimed_by) {
-        let memberDoc = LocalDocs.getMemberDocByIdFromCurrentTree(doc.data().claimed_by);
-        data = memberDoc.data();
+    if (doc.claimed_by) {
+        let memberDoc = LocalDocs.getMemberDocByIdFromCurrentTree(doc.claimed_by);
+        data = memberDoc;
     }
 
     profileImage.setAttribute("style", leafImageStyle);
@@ -908,7 +908,7 @@ const showListView = (show = true) => {
     if (show) {
         
         mainContent.classList.add("view_list");
-        let topLeafDoc = LocalDocs.leaves.find(leafDoc => leafDoc.data().topMember === true);
+        let topLeafDoc = LocalDocs.leaves.find(leafDoc => leafDoc.topMember === true);
         let tableEl = createElementWithClass("table", "u-w_full");
 
         tableEl.appendChild(renderTableHeaders());

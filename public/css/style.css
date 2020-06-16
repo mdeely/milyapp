@@ -411,10 +411,6 @@ path {
     background-color: var(--brand_lighter);
     transform: translate(-8px, -8px);
     z-index: -1; }
-  .detailsPanel__item:hover button {
-    opacity: 1; }
-  .detailsPanel__item button {
-    opacity: 0; }
 
 .detailsPanel__text {
   pointer-events: none; }
@@ -495,6 +491,9 @@ input[name*="profile_photo"] {
   display: flex;
   flex-direction: row;
   position: relative; }
+  .descendants:empty,
+  .partners:empty {
+    display: none; }
 
 .partners .apart,
 .partners .together {
@@ -953,7 +952,7 @@ button,
     font-family: 'Lato', sans-serif;
     pointer-events: none;
     position: absolute;
-    right: calc(100% + 8px);
+    right: 50%;
     padding: 6px 10px;
     border-radius: 24px;
     font-size: 12px;
@@ -965,41 +964,55 @@ button,
     color: white;
     background-color: var(--brand_600);
     transition-delay: unset;
-    transition: opacity .2s ease-in-out; }
+    transition: opacity .2s ease-in-out, right .15s ease-out,  left .15s ease-out, bottom .15s ease-out, top .15s ease-out; }
   [tooltip]:hover {
     z-index: 99;
     transition: opacity .2s ease-in-out; }
     [tooltip]:hover:after {
       opacity: 1;
+      right: calc(100% + 8px);
       transition-delay: .65s; }
   [tooltip]:focus {
     z-index: 99; }
     [tooltip]:focus:after {
+      right: calc(100% + 8px);
       opacity: 1; }
 
 [tooltip-position="right"]:after {
+  left: 50%;
+  right: unset; }
+[tooltip-position="right"]:hover:after, [tooltip-position="right"]:focus:after {
   left: calc(100% + 8px);
   right: unset; }
 
 [tooltip-position="top middle"]:after {
   left: 50%;
   top: unset;
-  bottom: calc(100% + 8px);
   right: unset;
-  transform: translateX(-50%); }
+  transform: translateX(-50%);
+  bottom: 0; }
+[tooltip-position="top middle"]:hover:after, [tooltip-position="top middle"]:focus:after {
+  right: unset;
+  bottom: calc(100% + 8px); }
 
 [tooltip-position="top left"]:after {
   left: 0;
   top: unset;
+  bottom: 50%;
+  right: unset; }
+[tooltip-position="top left"]:hover:after, [tooltip-position="top left"]:focus:after {
   bottom: calc(100% + 16px);
   right: unset; }
 
 [tooltip-position="bottom middle"]:after {
   left: 50%;
   bottom: unset;
-  top: calc(100% + 8px);
+  top: 50%;
   right: unset;
   transform: translateX(-50%); }
+[tooltip-position="bottom middle"]:hover:after, [tooltip-position="bottom middle"]:focus:after {
+  right: unset;
+  top: calc(100% + 8px); }
 
 [tooltip-reveal="fast"]:hover:after {
   transition-delay: unset; }
