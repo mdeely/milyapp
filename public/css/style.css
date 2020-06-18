@@ -639,15 +639,7 @@ input[name*="profile_photo"] {
     width: 100vw; }
   #mainContent.showDetails #detailsPanel {
     right: unset;
-    bottom: 0; }
-
-  .dropdown {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    top: initial;
-    z-index: 999; } }
+    bottom: 0; } }
 .card {
   --cardMaxWidth: 352px;
   --cardPadding: 24px;
