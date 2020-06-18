@@ -196,6 +196,7 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
 
     detailsHeaderEl.textContent = "Details"
     editDetailsAnchor.setAttribute("tooltip", "Edit");
+    editDetailsAnchor.setAttribute("tooltip-position", "top middle");
 
     let memberHasClaimedLeafOnTree = LocalDocs.leaves.find(leafDoc => leafDoc.claimed_by === LocalDocs.member.id) ? true : false;
     
@@ -348,7 +349,8 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
         }
 
         if (address.length > 0) {
-            let infoEl = `<div class="detailsPanel__item detailsPanel__address u-mar-b_3" tooltip-reveal="fast" tooltip="Address" tooltip-position="top left"><i class="fal fa-map-pin detailsPanel__icon u-mar-r_2"></i>${address}</div>`
+            hasDetails = true;
+            let infoEl = `<div class="detailsPanel__item detailsPanel__address u-mar-b_3" tooltip="Address" tooltip-position="top left"><i class="fal fa-map-pin detailsPanel__icon u-mar-r_2"></i>${address}</div>`
             detailsPanelMetaData.innerHTML += infoEl;
         }
     }
@@ -357,8 +359,9 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
 
     function createPhoneticNameAndAppend(dataSource) {
         if (dataSource.name.phonetic) {
+            hasDetails = true;
             let data = dataSource.name.phonetic;
-            let infoEl = `<div class="detailsPanel__item detailsPanel__phonetic u-mar-b_3" tooltip-reveal="fast" tooltip="Phonetic name" tooltip-position="top left"><i class="fal fa-comment-lines detailsPanel__icon u-mar-r_2"></i>${data}</div>`
+            let infoEl = `<div class="detailsPanel__item detailsPanel__phonetic u-mar-b_3" tooltip="Phonetic" tooltip-position="top left"><i class="fal fa-comment-lines detailsPanel__icon u-mar-r_2"></i>${data}</div>`
             detailsPanelMetaData.innerHTML += infoEl;
         }
     }
@@ -370,33 +373,26 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
             {"nickname" : "Nickname"},
             {"middleName" : "Middle name"},
             {"surnameCurrent" : "Last name"},
-        ]
-
+        ];
         for (const [i, item] of nameArray.entries()) {
             for ( const [key, value] of Object.entries(item) ) {
-                console.log(key);
-
                 if  (dataSource.name[`${key}`]) {
                     let info = dataSource.name[`${key}`];
                     let tooltip = value;
-
                     if (key === "nickname") {
                         info = `(${dataSource.name[key]})`;
                     }
-
                     if (i === 0 || !name) {
-                        name = `${name}<span tooltip-reveal="fast" tooltip-position="top middle" tooltip="${tooltip}">${info}</span>`;
+                        name = `${name}<span tooltip-position="top middle" tooltip="${tooltip}">${info}</span>`;
                     } else {
-                        name = `${name} <span tooltip-reveal="fast" tooltip-position="top middle" tooltip="${tooltip}">${info}</span>`;
+                        name = `${name} <span tooltip-position="top middle" tooltip="${tooltip}">${info}</span>`;
                     }
-    
                 }
             }
-
-
         }
 
         if (name.length > 0) {
+            hasDetails = true;
             let infoEl = `<div class="detailsPanel__item detailsPanel__name u-mar-b_3" ><i class="fal fa-id-badge detailsPanel__icon u-mar-r_2"></i><div>${name}</div></div>`
             detailsPanelMetaData.innerHTML += infoEl;
         }
@@ -427,7 +423,7 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
                 data = convertBirthday(data);
             }
     
-            let infoEl = `<div class="detailsPanel__item detailsPanel__${reqName} u-mar-b_3" tooltip-reveal="fast" tooltip="${key}" tooltip-position="top left"><i class="fal fa-${reqIcon} detailsPanel__icon u-mar-r_2"></i>${data}</div>`
+            let infoEl = `<div class="detailsPanel__item detailsPanel__${reqName} u-mar-b_3" tooltip="${key}" tooltip-position="top left"><i class="fal fa-${reqIcon} detailsPanel__icon u-mar-r_2"></i>${data}</div>`
     
             if (reqParentName === "address") {
                 // add to address element
@@ -1350,6 +1346,18 @@ LocalDocs.removeLeafFromLocalDocs = function(reqId) {
     }
 }
 
+LocalDocs.addPartnerToDoc = function(addToPartnerId, newPartnerId) {
+    LocalDocs.leaves[LocalDocs.leaves.findIndex(item => item.id === addToPartnerId)].partners[newPartnerId] = null;
+}
+
+LocalDocs.addChildToParentDoc = function(parentId, childId) {
+    LocalDocs.leaves[LocalDocs.leaves.findIndex(item => item.id === parentId)].children[childId] = null;
+}
+
+LocalDocs.addParentToChildDoc = function(childId, parentId) {
+    LocalDocs.leaves[LocalDocs.leaves.findIndex(item => item.id === childId)].parents[parentId] = null;
+}
+
 ///////
 
 
@@ -1501,11 +1509,22 @@ Relationship.addPartner = function() {
             "created_by": LocalDocs.member.id
         })
     ).then(newPartnerDoc => {
+
+        currentTreeLeafCollectionRef.doc(newPartnerDoc.id).get()
+        .then((newPartnerActualDoc) => {
+            LocalDocs.leaves.push({
+                id: newPartnerActualDoc.id,
+                ...newPartnerActualDoc.data()
+            });
+        })
+
         console.log(`${newPartnerDoc.id} was successfully created!`)
         currentTreeLeafCollectionRef.doc(addPartnerTo.id).update({
             [`partners.${newPartnerDoc.id}`] : null
         })
         .then(() => {
+        //add new partner ID to addPartnerTO.id;
+
             console.log(`${newPartnerDoc.id} was added as a partner to ${addPartnerTo.id}`)
 
             if (Object.keys(childrenObject).length > 0) {
@@ -1514,6 +1533,7 @@ Relationship.addPartner = function() {
                         [`parents.${newPartnerDoc.id}`] : null
                     })
                     .then(() => {
+                        LocalDocs.addParentToChildDoc(childId, newPartnerDoc.id);
                         console.log(`${childId} has a new parent: ${newPartnerDoc.id}`)
                     })
                     .catch(err => {
@@ -1529,6 +1549,7 @@ Relationship.addPartner = function() {
                         [`partners.${newPartnerDoc.id}`]: null
                     })
                     .then(() => {
+                        // LocalDocs.addPartnerToDoc(partnerId, newPartnerDoc.id);
                         console.log("Partner successfully added")
                     })
                     .catch(err => {
@@ -1537,7 +1558,16 @@ Relationship.addPartner = function() {
                     })
                 }
             }
-            location.reload();
+
+            LocalDocs.addPartnerToDoc(addPartnerTo.id, newPartnerDoc.id);
+            let addToEl = familyTreeEl.querySelector(`[data-id="${addPartnerTo.id}"]`);
+            let togetherEl = addToEl.previousElementSibling;
+            let partnerDoc = LocalDocs.getLeafById(newPartnerDoc.id);
+            togetherEl.appendChild(TreeLeaf.create(partnerDoc));
+            
+            clearConnectionLines();
+            connectLines();
+            // location.reload();
         })
         .catch(err => {
             console.log(err.message)
@@ -1753,11 +1783,8 @@ Relationship.deleteLeaf = function() {
                     rowEl.remove();
                 }
 
-                let svgs = familyTree.querySelectorAll("svg.leaf_connections");
-
-                for (svg of svgs) {
-                    svg.remove();
-                }
+                
+                clearConnectionLines();
 
                 LocalDocs.removeLeafFromLocalDocs(reqRemovalDoc.id);
 
@@ -1791,6 +1818,14 @@ function newLeafForFirebase(params) {
 }
 
 let connectionObject = {};
+
+function clearConnectionLines() {
+    let svgs = familyTree.querySelectorAll("svg.leaf_connections");
+
+    for (svg of svgs) {
+        svg.remove();
+    }
+}
 
 function connectLines() {
     let connectionChildren = connectionObject["children"] = {};

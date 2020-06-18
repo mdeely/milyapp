@@ -150,7 +150,6 @@ path {
     width: 100%;
     height: 100%;
     overflow: visible;
-    stroke-dasharray: 400;
 
     &.highlight {
         z-index: 1;
@@ -290,6 +289,8 @@ path {
 #branchContainer {
     display: flex;
     max-width: 100vw;
+    padding-left: 40px;
+    padding-right: 40px;
     transition: width $detailsRevealTiming ease-in-out;
 }
 
@@ -1469,7 +1470,7 @@ button,
         &:after {
             opacity: 1;
             right: calc(100% + 8px);
-            transition-delay: .65s;
+            // transition-delay: .65s;
         }
     }
 

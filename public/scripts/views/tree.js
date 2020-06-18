@@ -50,7 +50,7 @@ Tree.continueTreeSetup = function(treeId) {
             let tdEls = tableEl.querySelectorAll("tr td");
         })
     } else {
-        console.log("tree isn't public");
+        Nav.showViewPreferencesButton();
         treeDebugMsg.innerHTML += `
                 <h1 class="u-mar-lr_auto u-ta_center">
                     <i class="far fa-lock-alt u-d_block u-mar-b_2"></i>

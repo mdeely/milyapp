@@ -102,7 +102,6 @@ const populateMyTreesList = async () => {
                                     let trashIcon = createElementWithClass("i", "u-c_danger fal fa-trash-alt");
 
                                     removeMemberFromTreeButton.setAttribute("tooltip", "Remove member");
-                                    removeMemberFromTreeButton.setAttribute("tooltip-reveal", "fast");
                                     div.setAttribute("class", "u-d_flex u-mar-b_1 u-align-items_center");
                                     div.setAttribute("data-member-id", memberId);
 
