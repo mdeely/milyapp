@@ -50,10 +50,6 @@ const TreeDropdownItem = (treeDoc) => {
         editTreeForm["edit-tree_name"].value = reqTreeDoc.data().name;
         editTreeForm["edit-tree_id"].value = reqTreeDoc.id;
 
-        if (reqTreeDoc.data().public === true) {
-            editTreeForm["make-public"].setAttribute("checked", true);
-        }
-
         console.log(`TODO: If an admin, allow changing of permissions within the tree settings`);
 
         permissionsContainer.innerHTML = '';

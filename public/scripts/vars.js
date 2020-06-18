@@ -45,7 +45,6 @@ const detailsPanelAction = detailsPanel.querySelector(".detailsPanel__actions");
 const detailsPanelMetaData = detailsPanel.querySelector(".detailsPanel__metaData");
 const detailsPanelImmediateFamily = detailsPanel.querySelector(".detailsPanel__immediateFamily");
 const detailsPanelFirstName = detailsPanel.querySelector(".detailsPanel__firstName");
-const detailsPanelFullName = detailsPanel.querySelector(".detailsPanel__fullName");
 const detailsPanelProfileImage = detailsPanel.querySelector(".detailsPanel__profileImage");
 
 const renameTreeForm = document.querySelector("#rename-tree_form");
@@ -214,7 +213,6 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
     detailsPanelMetaData.textContent = '';
     detailsPanelImmediateFamily.textContent = '';
     detailsPanelFirstName.textContent = dataSource.name.firstName ? dataSource.name.firstName : "No name";
-    detailsPanelFullName.textContent = createFullName(leafDoc);
     detailsPanel.setAttribute("data-details-id", leafDoc.id);
     detailsPanelProfileImage.setAttribute("style", detailsPhoto);
 
@@ -300,6 +298,10 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
 
     let hasDetails = false;
 
+    createFullNameAndAppend(dataSource);
+    createPhoneticNameAndAppend(dataSource);
+    createFullAddressAndAppend(dataSource);
+
     MemberBlueprint.loop({
         "exclude" : ["profile_photo"],
         "functionCall": generateDetailElement
@@ -318,6 +320,87 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
         "onlyRelationships" : true,
         "functionCall": generateImmediateFamilyElement
     });
+
+    function createFullAddressAndAppend(dataSource) {
+        let address = new String;
+        let addressArray = [
+            "address1",
+            "address2",
+            "city",
+            "state",
+            "zipcode"
+        ]
+
+        for (const [i, item] of addressArray.entries()) {
+            if  (dataSource.address[`${item}`]) {
+                let info = dataSource.address[`${item}`];
+
+                if (i === 0 || !address) {
+                    address = address.concat(`${info}`);
+                } else if (address.length <= 1) {
+                    address = address.concat(`${info}`);
+                } else if (item === 'city' || item === 'state') {
+                    address = address.concat(`, ${info}`);
+                } else {
+                    address = address.concat(` ${info}`);
+                }
+            }
+        }
+
+        if (address.length > 0) {
+            let infoEl = `<div class="detailsPanel__item detailsPanel__address u-mar-b_3" tooltip-reveal="fast" tooltip="Address" tooltip-position="top left"><i class="fal fa-map-pin detailsPanel__icon u-mar-r_2"></i>${address}</div>`
+            detailsPanelMetaData.innerHTML += infoEl;
+        }
+    }
+
+
+
+    function createPhoneticNameAndAppend(dataSource) {
+        if (dataSource.name.phonetic) {
+            let data = dataSource.name.phonetic;
+            let infoEl = `<div class="detailsPanel__item detailsPanel__phonetic u-mar-b_3" tooltip-reveal="fast" tooltip="Phonetic name" tooltip-position="top left"><i class="fal fa-comment-lines detailsPanel__icon u-mar-r_2"></i>${data}</div>`
+            detailsPanelMetaData.innerHTML += infoEl;
+        }
+    }
+
+    function createFullNameAndAppend(dataSource) {
+        let name = new String;
+        let nameArray = [
+            {"firstName" : "First name"},
+            {"nickname" : "Nickname"},
+            {"middleName" : "Middle name"},
+            {"surnameCurrent" : "Last name"},
+        ]
+
+        for (const [i, item] of nameArray.entries()) {
+            for ( const [key, value] of Object.entries(item) ) {
+                console.log(key);
+
+                if  (dataSource.name[`${key}`]) {
+                    let info = dataSource.name[`${key}`];
+                    let tooltip = value;
+
+                    if (key === "nickname") {
+                        info = `(${dataSource.name[key]})`;
+                    }
+
+                    if (i === 0 || !name) {
+                        name = `${name}<span tooltip-reveal="fast" tooltip-position="top middle" tooltip="${tooltip}">${info}</span>`;
+                    } else {
+                        name = `${name} <span tooltip-reveal="fast" tooltip-position="top middle" tooltip="${tooltip}">${info}</span>`;
+                    }
+    
+                }
+            }
+
+
+        }
+
+        if (name.length > 0) {
+            let infoEl = `<div class="detailsPanel__item detailsPanel__name u-mar-b_3" ><i class="fal fa-id-badge detailsPanel__icon u-mar-r_2"></i><div>${name}</div></div>`
+            detailsPanelMetaData.innerHTML += infoEl;
+        }
+    }
 
     function generateDetailElement(key, value, parentValue = null) {
         let reqName = value["dataPath"];
@@ -625,6 +708,9 @@ function initiatePartnerOptions(leafId) {
                 if (value === "reset") {
                     value = null;
                 }
+
+                closeAllDropdowns();
+
                 let targetLeafId = DetailsPanel.getLeafDoc().id;
     
                 console.log(value);
@@ -752,6 +838,8 @@ function initiateChildOptions(leafId) {
                 if (value === "reset") {
                     value = null;
                 }
+
+                closeAllDropdowns();
                 let parentLeafId = DetailsPanel.getLeafDoc().id;
     
                 console.log(value);
@@ -808,6 +896,9 @@ function initiateParentOptions(leafId) {
                 if (value === "reset") {
                     value = null;
                 }
+
+                closeAllDropdowns();
+
                 let childLeafId = DetailsPanel.getLeafDoc().id;
     
                 console.log(value);
@@ -886,6 +977,9 @@ function initiateSiblingOptions(leafId) {
                 if (value === "reset") {
                     value = null;
                 }
+
+                closeAllDropdowns();
+
                 let siblingLeafId = DetailsPanel.getLeafDoc().id;
     
                 currentTreeLeafCollectionRef.doc(leafId).update({
@@ -907,53 +1001,6 @@ function initiateSiblingOptions(leafId) {
     }
 }
 
-
-function createFullName(leafDoc) {
-    let memberDoc = null;
-
-    // if (leafDoc.claimed_by) {
-    //     memberDoc = LocalDocs.getMemberDocByIdFromCurrentTree(leafDoc.claimed_by);
-    // }
-
-    let docData = memberDoc ? memberDoc : leafDoc;
-
-    let fullName;
-    let firstName = docData.name.firstName ? docData.name.firstName : null;
-    let middleName = docData.name.middleName ? docData.name.middleName : null;
-    let nickname = docData.name.nickname ? docData.name.nickname : null;
-    let surnameCurrent = docData.name.surnameCurrent ? docData.name.surnameCurrent : null;
-
-    if (firstName && !middleName && !nickname && !surnameCurrent) {
-        // if only firstName
-        fullName = ``;
-    } else if (firstName && middleName && !nickname && !surnameCurrent) {
-        // if only middle name
-        fullName = `Middle name: ${middleName}`;
-    } else if (!firstName && !middleName && !nickname && surnameCurrent) {
-        // if only last name
-        fullName = ``;
-    } else if (firstName && middleName && !nickname && surnameCurrent) {
-        // if only firstname, surnameCurrent, and middlename
-        fullName = `${firstName} ${middleName} ${surnameCurrent}`;
-    } else if (firstName && !middleName && nickname && !surnameCurrent) {
-        // if only last name
-        fullName = `Nickname: ${nickname}`;
-    } else if (firstName && !middleName && !nickname && surnameCurrent) {
-        // if firstname AND surnameCurrent
-        fullName = `${surnameCurrent}`;
-    } else if (firstName && !middleName && nickname && surnameCurrent) {
-        // if firstname AND surnameCurrent
-        fullName = `${firstName} (${nickname}) ${surnameCurrent}`;
-    } else if (!firstName && !middleName && !nickname && !surnameCurrent) {
-        // if none
-        fullName = ``;
-    } else {
-        // anything else
-        fullName = `${firstName} (${nickname}) ${middleName} ${surnameCurrent}`;
-    }
-
-    return fullName;
-}
 
 function createElementWithClass(elementType, classname = null, content = null) {
     let el = document.createElement(elementType);
@@ -982,7 +1029,7 @@ DetailsPanel.editMember = function() {
         memberDoc = LocalDocs.getMemberDocByIdFromCurrentTree(reqEditDocData.claimed_by);
     }
 
-    let docData = memberDoc ? memberDoc.data() : reqEditDocData;
+    let docData = memberDoc ? memberDoc : reqEditDocData;
 
     detailsPanelAction.classList.add("u-d_none");
     detailsPanelInfo.classList.add("u-d_none");

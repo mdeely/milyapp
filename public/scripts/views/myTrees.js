@@ -39,31 +39,32 @@ const populateMyTreesList = async () => {
                 .then((reqTreeDoc) => {
                     if (reqTreeDoc.exists && reqTreeDoc.data().deleted !== true) {
                         let liEl = createElementWithClass('li', 'u-w_full u-mar-r_2 u-mar-l_2' );
-                        let aEl = createElementWithClass('a', 'myTree__item u-pad_2 u-w_full u-font-size_18 u-d_flex u-ai_center' );
+                        let aEl = createElementWithClass('div', 'myTree__item u-pad_2 u-w_full u-font-size_18 u-d_flex u-ai_center' );
                         let treeEditButton = createElementWithClass('button', 'iconButton white u-mar-l_auto edit_tree_button' );
                         let ellipsisIcon = createElementWithClass('i', 'far fa-ellipsis-h' );
+                        let viewTreeButton = createElementWithClass('a', 'button secondary u-mar-l_2', "View");
                         let dropdownEl = createElementWithClass('div', 'dropdown u-visibility_hidden u-p_fixed' );
                         let renameDropdown = createElementWithClass('div', 'dropdown__item' );
-                        let inviteDropdown = createElementWithClass('div', 'dropdown__item' );
+                        // let inviteDropdown = createElementWithClass('div', 'dropdown__item' );
                         let editMembersDropdown = createElementWithClass('div', 'dropdown__item' );
                         let deleteDropdown = createElementWithClass('div', 'dropdown__item u-c_danger' );
                         let leaveTree = createElementWithClass('div', 'dropdown__item u-c_danger' );
 
                         liEl.setAttribute("data-tree-id", reqTreeDoc.id);
-                        aEl.setAttribute("href", `#/trees/${reqTreeDoc.id}`);
+                        viewTreeButton.setAttribute("href", `#/trees/${reqTreeDoc.id}`);
                         treeEditButton.setAttribute("data-dropdown-target", `edit_tree_options_${reqTreeDoc.id}`); 
                         treeEditButton.setAttribute("tooltip", `Options`); 
                         dropdownEl.setAttribute("id", `edit_tree_options_${reqTreeDoc.id}`);
                         renameDropdown.setAttribute("data-value", `rename`);
                         renameDropdown.setAttribute("data-modal-trigger", `rename-tree_modal`);
-                        inviteDropdown.setAttribute("data-value", `invite`);
-                        inviteDropdown.setAttribute("data-modal-trigger", `invite-members-to-tree_modal`);
+                        // inviteDropdown.setAttribute("data-value", `invite`);
+                        // inviteDropdown.setAttribute("data-modal-trigger", `invite-members-to-tree_modal`);
                         editMembersDropdown.setAttribute("data-modal-trigger", `edit-tree_modal`);
                         
                         aEl.textContent = reqTreeDoc.data().name;
-                        renameDropdown.textContent = "Rename";
-                        inviteDropdown.textContent = "Add members";
-                        editMembersDropdown.textContent = "Settings & permissions";
+                        renameDropdown.textContent = "Settings";
+                        // inviteDropdown.textContent = "Add members";
+                        editMembersDropdown.textContent = "Members";
                         deleteDropdown.textContent = "Delete tree";
                         leaveTree.textContent = "Leave tree";
     
@@ -72,7 +73,7 @@ const populateMyTreesList = async () => {
                         if ( reqTreeDoc.data().permissions[LocalDocs.member.id] ) {
                             if (reqTreeDoc.data().permissions[LocalDocs.member.id] === "admin") {
                                 dropdownEl.appendChild(renameDropdown);
-                                dropdownEl.appendChild(inviteDropdown);
+                                // dropdownEl.appendChild(inviteDropdown);
                                 dropdownEl.appendChild(editMembersDropdown);
                                 dropdownEl.appendChild(deleteDropdown);
                             } else {
@@ -81,6 +82,7 @@ const populateMyTreesList = async () => {
                         }
 
                         aEl.appendChild(treeEditButton);
+                        aEl.appendChild(viewTreeButton);
                         liEl.appendChild(dropdownEl);
                         liEl.appendChild(aEl);
     
@@ -90,7 +92,6 @@ const populateMyTreesList = async () => {
                             permissionsEl.innerHTML = '';
     
                             editTreeForm[`edit-tree_id`].value = treeId;
-                            editTreeForm["make-public"].checked = reqTreeDoc.data().public ? reqTreeDoc.data().public : null ;
     
                             if (reqTreeDoc.data().permissions) {
                                 for (let [memberId, memberPermission] of Object.entries(reqTreeDoc.data().permissions)) {
@@ -153,6 +154,7 @@ const populateMyTreesList = async () => {
                                                         [`permissions.${memberId}`] : firebase.firestore.FieldValue.delete()
                                                       })
                                                       .then(() => {
+                                                            // a claimed tree with memebrId should become unclaimed
                                                             console.log("permission removed from tree");
                                                             location.reload();
                                                       })
@@ -175,26 +177,28 @@ const populateMyTreesList = async () => {
     
                         deleteDropdown.addEventListener('click', (e) => {
                             e.preventDefault;
-                            console.log("you finna deletea atlwsl");
-                            treesRef.doc(reqTreeDoc.id).update({
-                                "deleted": true
-                            }).then(() => {
-                                location.reload();
-                            })
+                            if (confirm("Are you sure you want to delete this tree?")) {
+                                treesRef.doc(reqTreeDoc.id).update({
+                                    "deleted": true
+                                }).then(() => {
+                                    location.reload();
+                                })
+                            }
                         });
     
                         renameDropdown.addEventListener('click' , (e) => {
                             e.preventDefault();
                             renameTreeForm["rename-tree_name"].value = reqTreeDoc.data().name;
                             renameTreeForm["rename-tree_id"].value = reqTreeDoc.id;
+                            renameTreeForm["make-public"].checked = reqTreeDoc.data().public ? reqTreeDoc.data().public : null ;
                             closeAllDropdowns();
                         });
 
-                        inviteDropdown.addEventListener('click' , (e) => {
-                            e.preventDefault();
-                            inviteMembersToTreeForm[`invite-member-to-tree_id`].value = reqTreeDoc.id;
-                            closeAllDropdowns();
-                        });
+                        // inviteDropdown.addEventListener('click' , (e) => {
+                        //     e.preventDefault();
+                        //     inviteMembersToTreeForm[`invite-member-to-tree_id`].value = reqTreeDoc.id;
+                        //     closeAllDropdowns();
+                        // });
 
                         leaveTree.addEventListener('click', (e) => {
                             e.preventDefault();
@@ -265,9 +269,7 @@ const populateMyTreesList = async () => {
             let treeId = editTreeForm[`edit-tree_id`].value;
 
             let obj = {};
-            let makePublicCheckboxState = editTreeForm[`make-public`].checked;
-
-            console.log(makePublicCheckboxState);
+            // let makePublicCheckboxState = editTreeForm[`make-public`].checked;
 
             for (updateMemberPermission of memberEls) {
                 let memberId = updateMemberPermission.getAttribute("data-member-id");
@@ -278,8 +280,8 @@ const populateMyTreesList = async () => {
             };
 
             treesRef.doc(treeId).update({
-                "permissions": obj,
-                "public" : makePublicCheckboxState
+                "permissions": obj
+                // "public" : makePublicCheckboxState
             })     
             .then(() => {
                 console.log("updated!");

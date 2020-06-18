@@ -196,13 +196,15 @@ const showDropdown = (triggerEl) => {
     let triggerWidth = triggerData.width;
     let triggerHeight = triggerData.height;
     let browserHeight = window.innerHeight;
+    let browserWidth = window.innerWidth;
 
     let targetClass = triggerEl.getAttribute("data-dropdown-target");
     let targetEl = document.querySelector(`#${targetClass}`);
 
     let positionForDropdown = triggerY + triggerHeight + offset;
 
-    let targetElHeight = targetEl.getBoundingClientRect().height;;
+    let targetElHeight = targetEl.getBoundingClientRect().height;
+    let targetElWidth = targetEl.getBoundingClientRect().width;;
 
     // get height of browser. 
     // Get height of targetEl
@@ -213,7 +215,12 @@ const showDropdown = (triggerEl) => {
     if (targetEl.classList.contains(`u-visibility_hidden`)) {
         closeAllDropdowns();
         targetEl.classList.remove("u-visibility_hidden");
-        targetEl.style.left = `${triggerX - triggerWidth + offset}px`;
+
+        if ( (browserWidth) <= (triggerX + targetElWidth) ) {
+            targetEl.style.right = `${offset}px`;
+        } else {
+            targetEl.style.right = `${browserWidth - triggerX - triggerWidth - 8}px`;
+        }
 
         if ( (targetElHeight + positionForDropdown) >= browserHeight ) {
             targetEl.style.top = `${triggerY - targetElHeight - offset}px`;
@@ -598,9 +605,11 @@ renameTreeForm.addEventListener('submit', (e) => {
     e.preventDefault();
     let treeNameFromInput = renameTreeForm["rename-tree_name"].value;
     let treeId = renameTreeForm["rename-tree_id"].value;
+    let makePublicCheckboxState = renameTreeForm[`make-public`].checked;
 
     treesRef.doc(treeId).update({
-        "name": treeNameFromInput
+        "name": treeNameFromInput,
+        "public" : makePublicCheckboxState
     })
     .then(() => {
         location.reload();

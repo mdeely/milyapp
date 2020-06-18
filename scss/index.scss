@@ -273,17 +273,17 @@ path {
         min-height: 72px;
         box-shadow: 0 1px 0 var(--color_border);
 
-        &:hover,
-        &:focus {
-            border-radius: 8px;
-            outline: none;
-            background-color:var(--brand_lighter);
-            box-shadow: 0 1px 0 transparent;
-        }
+        // &:hover,
+        // &:focus {
+        //     border-radius: 8px;
+        //     outline: none;
+        //     background-color:var(--brand_lighter);
+        //     box-shadow: 0 1px 0 transparent;
+        // }
 
-        &:active {
-            background-color: rgba(0,0,0,.05);
-        }
+        // &:active {
+        //     background-color: rgba(0,0,0,.05);
+        // }
     }
 }
 
@@ -630,6 +630,7 @@ path {
 
 .detailsPanel__item {
     position: relative;
+    display: flex;
 
     &:hover {
         &:before {
@@ -672,20 +673,14 @@ path {
     opacity: .6;
 }
 
-.detailsPanel__fullName {
-    opacity: .5;
-    color: var(--brand);
-
-    &:empty {
-        display: none;
-    }
-}
 
 .detailsPanel__img {
+    min-width: var(--detailsPanelImgSize);
     width: var(--detailsPanelImgSize);
     height: var(--detailsPanelImgSize);;
     border-radius: 50%;
-    background-color: var(--color_yellow);
+    background-color: white;
+    box-shadow: 0 0 0 1px var(--color_border);
     overflow: hidden;
     background-size: cover;
     background-position: center;
@@ -713,8 +708,7 @@ path {
     height: var(--profileImageSize);
     border-radius: 8px;
     display: block;
-    background-color: lightgray;
-    background-color: var(--color_yellow);
+    background-color: white;
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
@@ -733,7 +727,7 @@ path {
 input[class*="profile_photo"],
 input[name*="profile_photo"] {
     min-height: 200px;
-    background-color: var(--color_yellow);
+    background-color: white;
     width: 200px;
     border-radius: 8px;
     background-size: cover;
@@ -1121,12 +1115,12 @@ select {
     color: var(--color_text);
 
     &:hover {
-        box-shadow: 0 0 0 2px var(--color_border);
+        box-shadow: 0 0 0 3px var(--color_border);
     }
 
     &:focus {
         outline: 0px solid transparent;
-        box-shadow: 0 0 0 2px var(--color_outline);
+        box-shadow: 0 0 0 4px var(--color_outline);
     }
 }
 
@@ -1240,6 +1234,12 @@ select {
         flex: 1;
         text-align: center;
         margin-bottom: 0;
+
+        &:focus {
+            background-color: var(--brand_lighter);
+            outline: 0px solid transparent;
+            box-shadow: 0 0 0 4px var(--color_outline);
+        }
     }
 }
 
@@ -1615,6 +1615,7 @@ button,
     background-color: white;
     padding: 8px 0;
     z-index: 999;
+    min-width: 120px;
 
     &__item {
         padding: 12px 20px;
@@ -1634,6 +1635,11 @@ button,
         &:active {
             background-color: rgba($brand, .04);
             cursor: pointer;
+        }
+
+        &:focus {
+            outline: 0 solid transparent;
+            box-shadow: 0 0 0 4px var(--color_outline) inset;
         }
     }
 
