@@ -184,6 +184,13 @@ DetailsPanel.getActiveDoc = function() {
     // return window.currentTreeLeaves.find(leafDoc => leafDoc.id === id);
 }
 
+DetailsPanel.refresh = function() {
+    let doc = DetailsPanel.getLeafDoc();
+    let activeLeafEl = familyTreeEl.querySelector(".leaf.active");
+
+    DetailsPanel.populate(doc, activeLeafEl);
+}
+
 DetailsPanel.populate = function(leafDoc, leafEl) {
     closeAllDropdowns();
     let dataSource = leafDoc;
@@ -1358,6 +1365,10 @@ LocalDocs.addParentToChildDoc = function(childId, parentId) {
     LocalDocs.leaves[LocalDocs.leaves.findIndex(item => item.id === childId)].parents[parentId] = null;
 }
 
+LocalDocs.addSiblingToDoc = function(addToSibling, newSiblingId) {
+    LocalDocs.leaves[LocalDocs.leaves.findIndex(item => item.id === addToSibling)].siblings[newSiblingId] = null;
+}
+
 ///////
 
 
@@ -1445,34 +1456,84 @@ Relationship.addChild = function() {
         })
     )
     .then((newChildRef) => {
-        for (parentId of Object.keys(parentsObject)) {
-            currentTreeLeafCollectionRef.doc(parentId).update({ 
-                [`children.${newChildRef.id}`] : null
+        currentTreeLeafCollectionRef.doc(newChildRef.id).get()
+        .then((newChildDoc) => {
+            LocalDocs.leaves.push({
+                id: newChildDoc.id,
+                ...newChildDoc.data()
             })
-            .then(() => {
-                console.log(`${parentId} has a new child: ${newChildRef.id}`);
-                if (Object.keys(siblingsObject).length > 0) {
-                    for (siblingId of Object.keys(siblingsObject)) {
-                        currentTreeLeafCollectionRef.doc(siblingId).update({
-                            [`siblings.${newChildRef.id}`] : null
-                        })
-                        .then(() => {
-                            console.log(`${siblingId} has a new sibling: ${newChildRef.id}`);
-                            location.reload();
-                        })
-                        .catch(err => {
-                            console.log(err.message);
-                        })
-                    }
-                }  else {
-                    location.reload();
+
+            const iterateOverParentsObject = async (parentsObject, newChildRef) => {
+                for await (parentId of Object.keys(parentsObject)) {
+                    currentTreeLeafCollectionRef.doc(parentId).update({ 
+                        [`children.${newChildRef.id}`] : null
+                    })
+                    .then(() => {
+                        LocalDocs.addChildToParentDoc(parentId, newChildRef.id);
+                        console.log(`${parentId} has a new child: ${newChildRef.id}`);
+                        clearConnectionLines();
+                        connectLines();
+                    })
+                    .catch(err => {
+                        console.log(err.message);
+                    })
                 }
-            })
-            .catch(err => {
-                console.log(err.message);
-            })
-        }
+            }
+
+            const iterateOverSiblingObject = async (siblingsObject, newChildRef) => {
+                for await (siblingId of Object.keys(siblingsObject)) {
+                    currentTreeLeafCollectionRef.doc(siblingId).update({
+                        [`siblings.${newChildRef.id}`] : null
+                    })
+                    .then(() => {
+                        LocalDocs.addSiblingToDoc(siblingId, newChildRef.id);
+                        console.log(`${siblingId} has a new sibling: ${newChildRef.id}`);
+                        clearConnectionLines();
+                        connectLines();
+                    })
+                    .catch(err => {
+                        console.log(err.message);
+                    })
+                }
+            }
+
+            iterateOverParentsObject(parentsObject, newChildRef);
+            iterateOverSiblingObject(siblingsObject, newChildRef);
+            renderChildToDom(addChildTo.id, newChildDoc.id);
+        });
     })
+}
+
+const renderChildToDom = (addToId, newChildId) => {
+    let addToEl = familyTreeEl.querySelector(`[data-id="${addToId}"]`).closest(".branch");
+
+    let branch = createElementWithClass("div", "branch");
+    let partners = createElementWithClass("div", "partners");
+    let together = createElementWithClass("div", "together");
+    let apart = createElementWithClass("div", "apart");
+    let descendants = createElementWithClass("div", "descendants");
+
+    let addToDoc = LocalDocs.getLeafById(newChildId);
+    let figure = TreeLeaf.create(addToDoc);
+
+    partners.appendChild(together);
+    partners.appendChild(figure);
+    partners.appendChild(apart);
+
+    // branch.appendChild(descendants)
+    branch.appendChild(partners)
+
+    if (addToEl.querySelector(".descendants")) {
+        let descendantsContainer = addToEl.querySelector(".descendants");
+        descendantsContainer.prepend(branch);
+    } else {
+        descendants.prepend(branch);
+        addToEl.appendChild(descendants);
+    }
+
+    DetailsPanel.refresh();
+
+    // location.reload();
 }
 
 Relationship.addPartner = function() {
@@ -1564,7 +1625,7 @@ Relationship.addPartner = function() {
             let togetherEl = addToEl.previousElementSibling;
             let partnerDoc = LocalDocs.getLeafById(newPartnerDoc.id);
             togetherEl.appendChild(TreeLeaf.create(partnerDoc));
-            
+
             clearConnectionLines();
             connectLines();
             // location.reload();
