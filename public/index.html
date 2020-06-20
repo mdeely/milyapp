@@ -24,10 +24,10 @@
             <div id="notification_menu" class="dropdown u-p_absolute">
             </div>
             <!-- <button id="search_button" class="u-mar-l_2 u-mar-r_1 iconButton"><i class="fa fa-search"></i></button> -->
-            <button id="view-preferences_button" class="u-mar-l_2 u-mar-r_2 iconButton" data-dropdown-target="view-preferences" tooltip="Preferences"><i class="fal fa-sliders-h"></i></button>
-            <div id="view-preferences" class="dropdown u-visibility_hidden u-p_absolute">
-                <div id="view-preferences_tree" class="dropdown__item">Tree</div>
-                <div id="view-preferences_list" class="dropdown__item">List</div>
+            <button id="view-preferences_button" class="u-mar-l_2 u-mar-r_2 iconButton" tooltip="Open toolbar"><i class="fal fa-sliders-h"></i></button>
+            <!-- <div id="view-preferences" class="dropdown u-visibility_hidden u-p_absolute"> -->
+                <!-- <div id="view-preferences_tree" class="dropdown__item">Tree</div>
+                <div id="view-preferences_list" class="dropdown__item">List</div> -->
                 <!-- <div id="view-preferences_list" class="dropdown__item">
                     <button class="iconButton view-preferences_zoomIn"><i fa-plus"></i></button>
                     <button class="iconButton u-mar-l_auto view-preferences_zoomOut"><i class="fa fa-minus"></i></button>
@@ -160,6 +160,12 @@
         <div style="display:none" data-view="tree">
             <div class="debugMessage"></div>
             <section id="mainContent">
+            <section id="toolbar" class="u-d_flex">
+                <button id="view-preferences_tree" class="u-mar-l_auto u-mar-r_1 u-font-size_16 iconButton" tooltip="Tree view"><i class="fal fa-sitemap"></i></button>
+                <button id="view-preferences_list" class="u-mar-r_2 u-font-size_16 iconButton"><i class="fal fa-list"></i></button>
+                <!-- <button id="view-preferences_tree" class="u-mar-l_auto">Tree</button>
+                <button id="view-preferences_list" class="u-mar-l_1">List</button> -->
+            </section>
             <section id="familyTree">
                 <div id="branchContainer"></div>
             </section>

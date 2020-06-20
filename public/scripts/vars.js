@@ -18,6 +18,8 @@ const deleteLeafButton = document.querySelector("#delete-leaf-action");
 const claimLeafAction = document.querySelector("#claim-leaf-action");
 const memberMoreOptionsButton = document.querySelector("#member-more-options");
 
+const toolbarEl = document.querySelector("#toolbar");
+
 // const removeMemberFromTreeButton = document.querySelector("#remove-member-from-tree-action");
 
 // const editMemberButton = document.querySelector("#edit-member-action");
@@ -86,7 +88,18 @@ const availablePermissions = {
 // });
 
 
+viewPreferencesButton.addEventListener('click', (e) => {
+    e.preventDefault();
+    
+    if (toolbarEl.classList.contains("active")) {
+        toolbarEl.classList.remove("active");
+    } else {
+        toolbarEl.classList.add("active");
+    }
+})
+
 ///////
+
 
 let Leaf = {};
 
@@ -1767,13 +1780,13 @@ Relationship.addSibling = function() {
             }
         }
 
-        renderSiblingToDom(addSiblingTo.id, newSiblingRef.id)
+        // renderSiblingToDom(addSiblingTo.id, newSiblingRef.id)
 
-        clearConnectionLines();
-        connectLines();
-        addRelationshipButton.classList.remove("disabled");
+        // clearConnectionLines();
+        // connectLines();
+        // addRelationshipButton.classList.remove("disabled");
 
-        // location.reload();
+        location.reload();
     })
     .catch(err => {
         console.log(err.message);

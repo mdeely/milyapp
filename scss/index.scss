@@ -187,6 +187,7 @@ path {
     display: flex;
     position: relative;
     flex: 1;
+    flex-direction: column;
     // overflow: hidden;
     transition: background-color $detailsRevealTiming ease-in-out;
 
@@ -212,7 +213,10 @@ path {
             // margin: var(--detailsWidth);
             width: calc(100vw - var(--detailsWidth));
             transition: width $detailsRevealTiming ease-in-out;
+        }
 
+        #toolbar {
+            width: calc(100vw - var(--detailsWidth));
         }
 
         // #familyTree__list {
@@ -1005,9 +1009,30 @@ input[name*="profile_photo"] {
 
 [data-view] {
     padding-top: 64px;
-
+}
+[data-view="tree"] {
+    padding-top: 0px;
 }
 
+#toolbar {
+    width: 100%;
+    max-height: 0;
+    background-color:white;
+    padding: 0 16px;
+    padding-top: 0;
+    margin-bottom: calc(var(--navDecorationHeight) + 32px);
+    border-bottom: 1px solid var(--color_border);
+    overflow: hidden;
+    transition: all $detailsRevealTiming ease-in-out;
+
+    &.active {
+        margin-bottom: var(--navDecorationHeight);
+        padding: 8px 16px;
+        max-height: 120px;
+        padding-top: calc(var(--navDecorationHeight) + 8px);
+        transition: all $detailsRevealTiming ease-in-out;
+    }
+}
 
 @media screen and (max-width: 640px) {
     :root {
@@ -1708,19 +1733,18 @@ button,
 .u-font-size_18 {
     font-size: 18px;
 }
-
 .u-font-size_17 {
     font-size: 17px;
 }
-
+.u-font-size_16 {
+    font-size: 16px;
+}
 .u-font-size_15 {
     font-size: 15px;
 }
-
 .u-font-size_14 {
     font-size: 14px;
 }
-
 .u-font-size_13 {
     font-size: 13px;
 }
@@ -1820,15 +1844,49 @@ button,
 }
 
 .u-pad-l_0 {
-    padding-left: 0px;
+    padding-left: 8px * 0;
 }
-
 .u-pad-l_1 {
-    padding-left: 8px;
+    padding-left: 8px * 1;
 }
-
 .u-pad-l_2 {
-    padding-left: 16px;
+    padding-left: 8px * 2;
+}
+.u-pad-l_3 {
+    padding-left: 8px * 3;
+}
+.u-pad-l_4 {
+    padding-left: 8px * 4;
+}
+.u-pad-l_5 {
+    padding-left: 8px * 5;
+}
+.u-pad-l_6 {
+    padding-left: 8px * 6;
+}
+.u-pad-l_7 {
+    padding-left: 8px * 7;
+}
+.u-pad-l_8 {
+    padding-left: 8px * 8;
+}
+.u-pad-l_9 {
+    padding-left: 8px * 9;
+}
+.u-pad-l_10 {
+    padding-left: 8px * 10;
+}
+.u-pad-l_11 {
+    padding-left: 8px * 11;
+}
+.u-pad-l_12 {
+    padding-left: 8px * 12;
+}
+.u-pad-l_13 {
+    padding-left: 8px * 13;
+}
+.u-pad-l_14 {
+    padding-left: 8px * 14;
 }
 
 .u-pad-b_0 {
@@ -1897,14 +1955,17 @@ button,
 }
 
 .u-mar-l_1 {
-    margin-left: 8px;
+    margin-left: 8px * 1;
 }
 
 .u-mar-l_2 {
-    margin-left: 16px;
+    margin-left: 8px * 2;
 }
 .u-mar-l_3 {
-    margin-left: 24px;
+    margin-left: 8px * 3;
+}
+.u-mar-l_4 {
+    margin-left: 8px * 4;
 }
 
 .u-mar-r_auto {

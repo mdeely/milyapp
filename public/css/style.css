@@ -136,6 +136,7 @@ path {
   display: flex;
   position: relative;
   flex: 1;
+  flex-direction: column;
   transition: background-color 0.2s ease-in-out; }
   #mainContent:focus {
     outline: none; }
@@ -147,6 +148,8 @@ path {
   #mainContent.showDetails #familyTree__list {
     width: calc(100vw - var(--detailsWidth));
     transition: width 0.2s ease-in-out; }
+  #mainContent.showDetails #toolbar {
+    width: calc(100vw - var(--detailsWidth)); }
   #mainContent.showDetails #detailsPanel {
     right: 0; }
   #mainContent.view_list {
@@ -611,6 +614,26 @@ input[name*="profile_photo"] {
 
 [data-view] {
   padding-top: 64px; }
+
+[data-view="tree"] {
+  padding-top: 0px; }
+
+#toolbar {
+  width: 100%;
+  max-height: 0;
+  background-color: white;
+  padding: 0 16px;
+  padding-top: 0;
+  margin-bottom: calc(var(--navDecorationHeight) + 32px);
+  border-bottom: 1px solid var(--color_border);
+  overflow: hidden;
+  transition: all 0.2s ease-in-out; }
+  #toolbar.active {
+    margin-bottom: var(--navDecorationHeight);
+    padding: 8px 16px;
+    max-height: 120px;
+    padding-top: calc(var(--navDecorationHeight) + 8px);
+    transition: all 0.2s ease-in-out; }
 
 @media screen and (max-width: 640px) {
   :root {
@@ -1120,6 +1143,9 @@ button,
 .u-font-size_17 {
   font-size: 17px; }
 
+.u-font-size_16 {
+  font-size: 16px; }
+
 .u-font-size_15 {
   font-size: 15px; }
 
@@ -1213,6 +1239,42 @@ button,
 .u-pad-l_2 {
   padding-left: 16px; }
 
+.u-pad-l_3 {
+  padding-left: 24px; }
+
+.u-pad-l_4 {
+  padding-left: 32px; }
+
+.u-pad-l_5 {
+  padding-left: 40px; }
+
+.u-pad-l_6 {
+  padding-left: 48px; }
+
+.u-pad-l_7 {
+  padding-left: 56px; }
+
+.u-pad-l_8 {
+  padding-left: 64px; }
+
+.u-pad-l_9 {
+  padding-left: 72px; }
+
+.u-pad-l_10 {
+  padding-left: 80px; }
+
+.u-pad-l_11 {
+  padding-left: 88px; }
+
+.u-pad-l_12 {
+  padding-left: 96px; }
+
+.u-pad-l_13 {
+  padding-left: 104px; }
+
+.u-pad-l_14 {
+  padding-left: 112px; }
+
 .u-pad-b_0 {
   padding-bottom: 0px; }
 
@@ -1276,6 +1338,9 @@ button,
 
 .u-mar-l_3 {
   margin-left: 24px; }
+
+.u-mar-l_4 {
+  margin-left: 32px; }
 
 .u-mar-r_auto {
   margin-right: auto; }

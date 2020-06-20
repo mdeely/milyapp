@@ -770,17 +770,19 @@ const getListViewInfo = (leafDoc) => {
     return viewListInfo;
 }
 
-function renderRowAndRelations(doc, tableEl) {
+
+function renderRowAndRelations(doc, tableEl, i = 0) {
+    i = i + 1;
     let children = doc.children;
     let partners = doc.partners;
     
-    let memberRow = renderTableRow(doc);
+    let memberRow = renderTableRow(doc, i);
     tableEl.appendChild(memberRow);
 
     if (Object.entries(partners).length > 0) {
         for (partnerId of Object.keys(partners)) {
             let partnerDoc = LocalDocs.leaves.find(leafDoc => leafDoc.id === partnerId);
-            let partnerRow = renderTableRow(partnerDoc);
+            let partnerRow = renderTableRow(partnerDoc , i);
             tableEl.appendChild(partnerRow);
         }
     }
@@ -788,7 +790,7 @@ function renderRowAndRelations(doc, tableEl) {
     if (Object.entries(children).length > 0) {
         for (childId of Object.keys(children)) {
             let childDoc = LocalDocs.leaves.find(leafDoc => leafDoc.id === childId);
-            renderRowAndRelations(childDoc, tableEl);
+            renderRowAndRelations(childDoc, tableEl, i);
         }
     }
 
@@ -801,7 +803,7 @@ function renderRowAndRelations(doc, tableEl) {
     // }
 }
 
-function renderTableRow(doc) {
+function renderTableRow(doc, i) {
     let data = doc;
     let tr = createElementWithClass("tr", "");
     let tdName = createElementWithClass("td", "u-pad_1 u-bold");
@@ -856,8 +858,16 @@ function renderTableRow(doc) {
     tdAddress.textContent = address;
 
     tdInfoButton.setAttribute("tooltip", "More details");
-
     tr.setAttribute("data-id", doc.id);
+ 
+    let padding;
+
+    if (i > 1) {
+        padding = (i - 1) * 3;
+    } else {
+        padding = 1;
+    }
+    tdProfileImage.classList.add(`u-pad-l_${padding}`);
 
     tdInfoButton.appendChild(tdInfoIcon);
     tdViewInfo.appendChild(tdInfoButton);
@@ -925,19 +935,8 @@ const showListView = (show = true) => {
         familyTreeListEl.innerHTML = '';
         familyTreeListEl.appendChild(tableEl);
 
-        // if (tdEls.length > 0) {
-        //     for (tdEl of tdEls) {
-        //         tdEl.remove();
-        //     }
-        // }
-
         renderRowAndRelations(topLeafDoc, tableEl);
 
-        // if (!tableEl.querySelector("tr td")) {
-        //     if (topLeafDoc) {
-        //         renderRowAndRelations(topLeafDoc, tableEl);
-        //     }
-        // }
     } else {
         mainContent.classList.remove("view_list");
     }
