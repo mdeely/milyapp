@@ -614,7 +614,7 @@ path {
         background-repeat: no-repeat;
         background-position: top;
         background-size: cover;
-        background-size: 100% 200px;
+        background-size: 100% 400px;
         height: 400px;
         z-index: -1;
     }
@@ -882,7 +882,6 @@ input[name*="profile_photo"] {
     }
 }
 
-
 .leaf {
     border-radius: 50%;
     box-shadow: var(--leafShadow);
@@ -890,7 +889,8 @@ input[name*="profile_photo"] {
     display: flex;
     justify-content: center;
     margin: var(--leafSpacing);
-    transition: transform $detailsRevealTiming ease-in-out;
+    transition: transform $detailsRevealTiming ease-in-out, opacity .4s ease-in-out;
+    opacity: 1;
     cursor: pointer;
 
     &:before {
@@ -900,10 +900,10 @@ input[name*="profile_photo"] {
         height: calc(var(--leafSize) + 24px);
         top: -6px;
         border-radius: 100px;
-        box-shadow: 0 0 0 6px rgba(white, 0) inset, 0 0 0 4px var(--color_outline);
+        box-shadow: 0 0 0 6px rgba(white, 0) inset, 0 0 0 4px var(--color_border);
         opacity: 0;
         transform: scale(.8);
-        transition: transform $detailsRevealTiming cubic-bezier(.66,.23,.33,1.02);
+        transition: transform $detailsRevealTiming cubic-bezier(.66,.23,.33,1.02), box-shadow $detailsRevealTiming ease-out;
     }
 
     &:active {
@@ -911,11 +911,19 @@ input[name*="profile_photo"] {
         transition: all .05s cubic-bezier(.66,.23,.33,1.02)
     }
 
-    &.active:before {
-        transition: transform $detailsRevealTiming cubic-bezier(.66,.23,.33,1.02);
+    &.active:before,
+    &.active:hover:before {
+        transition: transform $detailsRevealTiming cubic-bezier(.66,.23,.33,1.02), box-shadow $detailsRevealTiming ease-out;
         opacity: 1;
         transform: scale(1);
         box-shadow: 0 0 0 6px rgba(white, 1) inset, 0 0 0 4px var(--color_outline);
+    }
+
+    &:hover:before {
+        transition: transform $detailsRevealTiming cubic-bezier(.66,.23,.33,1.02), box-shadow $detailsRevealTiming ease-out;
+        opacity: 1;
+        transform: scale(1);
+        box-shadow: 0 0 0 6px rgba(white, 1) inset, 0 0 0 4px var(--color_border);
     }
 
     > * {
@@ -927,6 +935,13 @@ input[name*="profile_photo"] {
         transform: scale(0);  
         opacity: 0;      
         transition: all .2s ease-out;
+    }
+
+    &.adding {
+        // transform-origin: top center;
+        // transform: scale(.5);
+        opacity: 0;
+        transition: opacity .4s ease-out;
     }
 
     .leaf_caption {
@@ -1008,13 +1023,14 @@ input[name*="profile_photo"] {
     #detailsPanel {
         left:0;
         right: 0;
-        bottom: calc(-100vh - var(--navHeight));
+        bottom: -100%;
         top: unset;
         transition: bottom $detailsRevealTiming ease-in-out;
-        max-height: calc(100vh - (var(--navHeight) + 12vh));
+        max-height: unset;
         border-top-left-radius: 8px;
         border-top-right-radius: 8px;
         box-shadow: 0 0 24px rgba($brand, .25);
+        z-index: 99999;
     }
 
     .mainNav {
@@ -1044,6 +1060,7 @@ input[name*="profile_photo"] {
             #detailsPanel {
                 right: unset;
                 bottom: 0;
+                transition: bottom $detailsRevealTiming ease-in-out;
             }
         }
     }  

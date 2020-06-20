@@ -627,7 +627,11 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
                     let targetSvgReverse = document.querySelector(`svg[data-to-leaf="${leafId}"][data-from-leaf="${familyLeafDoc.id}"]`);
                     let targetTableEl = familyTreeListEl.querySelector(`[data-id="${familyLeafDoc.id}"]`);
     
-                    leafEl.classList.add("highlight");
+                    if (leafEl) {
+                        leafEl.classList.add("highlight");
+                    } else {
+                        console.log("Leaf node not found");
+                    }
     
                     if (targetSvg) {
                         targetSvg.classList.add("highlight");
@@ -646,8 +650,12 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
                     let targetSvgReverse = document.querySelector(`svg[data-to-leaf="${leafId}"][data-from-leaf="${familyLeafDoc.id}"]`);
     
                     let targetTableEl = familyTreeListEl.querySelector(`[data-id="${familyLeafDoc.id}"]`);
-    
-                    leafEl.classList.remove("highlight");
+
+                    if (leafEl) {
+                        leafEl.classList.remove("highlight");
+                    } else {
+                        console.log("Leaf node not found");
+                    }
     
                     if (targetSvg) {
                         targetSvg.classList.remove("highlight");
@@ -1358,6 +1366,7 @@ LocalDocs.addPartnerToDoc = function(addToPartnerId, newPartnerId) {
 }
 
 LocalDocs.addChildToParentDoc = function(parentId, childId) {
+    console.log(`${parentId} is adding ${childId} as a child`);
     LocalDocs.leaves[LocalDocs.leaves.findIndex(item => item.id === parentId)].children[childId] = null;
 }
 
@@ -1425,29 +1434,30 @@ Relationship.addParent = function() {
 };
 
 Relationship.addChild = function() {
-    let addChildTo = DetailsPanel.getActiveDoc();
-    console.log(`I'm finna add a child to ${addChildTo.id}`);
+    addRelationshipButton.classList.add("disabled");
 
-    // let parentArray = [addChildTo.id];
+    let addChildTo = DetailsPanel.getActiveDoc();
+    // console.log(`I'm finna add a child to ${addChildTo.id}`);
+
     let parentsObject = {};
     parentsObject[`${addChildTo.id}`] = null;
 
-    // let siblingsArray = [];
     let siblingsObject = {};
 
-    if (addChildTo.partners) {
+    if (Object.keys(addChildTo.partners).length > 0) {
         for (partnerId of Object.keys(addChildTo.partners)) {
-            console.log(`${partnerId} should be added as a parent to the new child`)
+            // console.log(`${partnerId} should be added as a parent to the new child`)
             parentsObject[`${partnerId}`] = null;
         }
     }
 
     if (Object.keys(addChildTo.children).length > 0) {
         for (childId of Object.keys(addChildTo.children)) {
+            // console.log(`${childId} should be added as a sibling to the new child`)
             siblingsObject[`${childId}`] = null;
         }
     }
-
+    
     currentTreeLeafCollectionRef.add(
         newLeafForFirebase({
             "siblings": siblingsObject,
@@ -1456,51 +1466,53 @@ Relationship.addChild = function() {
         })
     )
     .then((newChildRef) => {
-        currentTreeLeafCollectionRef.doc(newChildRef.id).get()
-        .then((newChildDoc) => {
-            LocalDocs.leaves.push({
-                id: newChildDoc.id,
-                ...newChildDoc.data()
+        LocalDocs.leaves.push({
+            id: newChildRef.id,
+            ...newLeafForFirebase({
+                "siblings": siblingsObject,
+                "parents": parentsObject,
+                "created_by": LocalDocs.member.id
             })
-
-            const iterateOverParentsObject = async (parentsObject, newChildRef) => {
-                for await (parentId of Object.keys(parentsObject)) {
-                    currentTreeLeafCollectionRef.doc(parentId).update({ 
-                        [`children.${newChildRef.id}`] : null
-                    })
-                    .then(() => {
-                        LocalDocs.addChildToParentDoc(parentId, newChildRef.id);
-                        console.log(`${parentId} has a new child: ${newChildRef.id}`);
-                        clearConnectionLines();
-                        connectLines();
-                    })
-                    .catch(err => {
-                        console.log(err.message);
-                    })
-                }
-            }
-
-            const iterateOverSiblingObject = async (siblingsObject, newChildRef) => {
-                for await (siblingId of Object.keys(siblingsObject)) {
-                    currentTreeLeafCollectionRef.doc(siblingId).update({
-                        [`siblings.${newChildRef.id}`] : null
-                    })
-                    .then(() => {
-                        LocalDocs.addSiblingToDoc(siblingId, newChildRef.id);
-                        console.log(`${siblingId} has a new sibling: ${newChildRef.id}`);
-                        clearConnectionLines();
-                        connectLines();
-                    })
-                    .catch(err => {
-                        console.log(err.message);
-                    })
-                }
-            }
-
-            iterateOverParentsObject(parentsObject, newChildRef);
-            iterateOverSiblingObject(siblingsObject, newChildRef);
-            renderChildToDom(addChildTo.id, newChildDoc.id);
         });
+
+
+        const iterateOverParentsObject = async (parentsObject, newChildRef) => {
+            for await (parentId of Object.keys(parentsObject)) {
+                LocalDocs.addChildToParentDoc(parentId, newChildRef.id);
+                currentTreeLeafCollectionRef.doc(parentId).update({ 
+                    [`children.${newChildRef.id}`] : null
+                })
+                .then(() => {
+                    // console.log(`${parentId} has a new child: ${newChildRef.id}`);
+                    clearConnectionLines();
+                    connectLines();
+                })
+                .catch(err => {
+                    console.log(err.message);
+                })
+            }
+        }
+
+        const iterateOverSiblingObject = async (siblingsObject, newChildRef) => {
+            for await (siblingId of Object.keys(siblingsObject)) {
+                LocalDocs.addSiblingToDoc(siblingId, newChildRef.id);
+                currentTreeLeafCollectionRef.doc(siblingId).update({
+                    [`siblings.${newChildRef.id}`] : null
+                })
+                .then(() => {
+                    // console.log(`${siblingId} has a new sibling: ${newChildRef.id}`);
+                    clearConnectionLines();
+                    connectLines();
+                })
+                .catch(err => {
+                    console.log(err.message);
+                })
+            }
+        }
+
+        iterateOverParentsObject(parentsObject, newChildRef);
+        iterateOverSiblingObject(siblingsObject, newChildRef);
+        renderChildToDom(addChildTo.id, newChildRef.id);
     })
 }
 
@@ -1515,6 +1527,8 @@ const renderChildToDom = (addToId, newChildId) => {
 
     let addToDoc = LocalDocs.getLeafById(newChildId);
     let figure = TreeLeaf.create(addToDoc);
+
+    figure.classList.add("adding");
 
     partners.appendChild(together);
     partners.appendChild(figure);
@@ -1531,12 +1545,52 @@ const renderChildToDom = (addToId, newChildId) => {
         addToEl.appendChild(descendants);
     }
 
+    setTimeout(function(){ 
+        figure.classList.remove("adding");
+     }, 100);
+
+
     DetailsPanel.refresh();
+    addRelationshipButton.classList.remove("disabled");
 
     // location.reload();
 }
 
+const renderSiblingToDom = (addToId, newSiblingId) => {
+    let addNextToEl = familyTreeEl.querySelector(`[data-id="${addToId}"]`);
+    let parentNode = addNextToEl.closest(".branch").parentNode;
+
+    let branch = createElementWithClass("div", "branch");
+    let partners = createElementWithClass("div", "partners");
+    let together = createElementWithClass("div", "together");
+    let apart = createElementWithClass("div", "apart");
+
+    let addToDoc = LocalDocs.getLeafById(newSiblingId);
+    let figure = TreeLeaf.create(addToDoc);
+
+    figure.classList.add("adding");
+
+    console.log(parentNode);
+
+    partners.appendChild(together);
+    partners.appendChild(figure);
+    partners.appendChild(apart);
+
+    branch.appendChild(partners)
+
+    parentNode.prepend(branch);
+
+    setTimeout(function(){ 
+        figure.classList.remove("adding");
+     }, 100);
+
+
+    DetailsPanel.refresh();
+}
+
 Relationship.addPartner = function() {
+    addRelationshipButton.classList.add("disabled");
+
     let addPartnerTo = DetailsPanel.getActiveDoc();
     // let partnerArray = [];
 
@@ -1551,14 +1605,14 @@ Relationship.addPartner = function() {
 
     partnerObject[addPartnerTo.id] = null;
 
-    if ( addPartnerTo.children && Object.keys(addPartnerTo.children).length > 0 ) {
+    if (Object.keys(addPartnerTo.children).length > 0) {
         for (childId of Object.keys(addPartnerTo.children)) {
             childrenObject[`${childId}`] = null;
         }
     }
 
-    if (partnerObject && Object.keys(partnerObject).length > 0) {
-        for (partnerId of Object.keys(partnerObject)) {
+    if (Object.keys(addPartnerTo.partners).length > 0) {
+        for (partnerId of Object.keys(addPartnerTo.partners)) {
             partnerObject[`${partnerId}`] = null;
         }
     }
@@ -1624,30 +1678,39 @@ Relationship.addPartner = function() {
             let addToEl = familyTreeEl.querySelector(`[data-id="${addPartnerTo.id}"]`);
             let togetherEl = addToEl.previousElementSibling;
             let partnerDoc = LocalDocs.getLeafById(newPartnerDoc.id);
-            togetherEl.appendChild(TreeLeaf.create(partnerDoc));
+            let figure = TreeLeaf.create(partnerDoc);
+
+            figure.classList.add("adding");
+            togetherEl.appendChild(figure);
 
             clearConnectionLines();
             connectLines();
+            addRelationshipButton.classList.remove("disabled");
+
+            setTimeout(function(){ 
+                figure.classList.remove("adding");
+             }, 100);
+
             // location.reload();
         })
         .catch(err => {
-            console.log(err.message)
+            console.log(err.message);
+            // location.reload();
         })
     })
 }
 
 Relationship.addSibling = function() {
-    let addSiblingTo = DetailsPanel.getActiveDoc();
-    console.log(`I'm finna add a sibling to ${addSiblingTo.id}`);
+    addRelationshipButton.classList.add("disabled");
 
-    // let parentArray = new Array;
-    // let siblingArray = [addSiblingTo.id];
+    let addSiblingTo = DetailsPanel.getActiveDoc();
+    // console.log(`I'm finna add a sibling to ${addSiblingTo.id}`);
 
     let parentObject = {};
     let siblingObject = {};
     siblingObject[addSiblingTo.id] = null;
 
-    if (addSiblingTo.siblings && Object.keys(addSiblingTo.siblings).length > 0) {
+    if (Object.keys(addSiblingTo.siblings).length > 0) {
         for (siblingId of Object.keys(addSiblingTo.siblings)) {
             siblingObject[siblingId] = null;
         }
@@ -1659,14 +1722,6 @@ Relationship.addSibling = function() {
         }
     }
 
-    // get other siblings, make sure this new sibling is added to them
-    // get parents, make sure new sibling is added as child to each
-    
-    console.log(parentObject);
-    console.log(siblingObject);
-
-    // Left off trying to figure out why adding a sibling won't add other siblnigs's parents to the new sibling
-
     currentTreeLeafCollectionRef.add(
         newLeafForFirebase({
             "siblings": siblingObject,
@@ -1675,7 +1730,17 @@ Relationship.addSibling = function() {
         })
     )
     .then((newSiblingRef) => {
+        LocalDocs.leaves.push({
+            id: newSiblingRef.id,
+            ...newLeafForFirebase({
+                "siblings": siblingObject,
+                "parents": parentObject,
+                "created_by": LocalDocs.member.id
+            })
+        });
+
         for (siblingId of Object.keys(siblingObject)) {
+            LocalDocs.addSiblingToDoc(siblingId, newSiblingRef.id);
             currentTreeLeafCollectionRef.doc(siblingId).update({
                 [`siblings.${newSiblingRef.id}`] : null
             })
@@ -1689,6 +1754,7 @@ Relationship.addSibling = function() {
 
         if (Object.keys(parentObject).length > 0) {
             for (parentId of Object.keys(parentObject)) {
+                LocalDocs.addChildToParentDoc(parentId, newSiblingRef.id);
                 currentTreeLeafCollectionRef.doc(parentId).update({
                     [`children.${newSiblingRef.id}`] : null
                 })
@@ -1700,7 +1766,14 @@ Relationship.addSibling = function() {
                 })
             }
         }
-        location.reload();
+
+        renderSiblingToDom(addSiblingTo.id, newSiblingRef.id)
+
+        clearConnectionLines();
+        connectLines();
+        addRelationshipButton.classList.remove("disabled");
+
+        // location.reload();
     })
     .catch(err => {
         console.log(err.message);
@@ -1714,6 +1787,7 @@ Relationship.deleteLeaf = function() {
     let rowEl = familyTreeListEl.querySelector(`[data-id="${reqRemovalDoc.id}"]`);
     let dataFromLines = familyTree.querySelectorAll(`[data-from-leaf="${reqRemovalDoc.id}"]`);
     let dataToLines = familyTree.querySelectorAll(`[data-to-leaf="${reqRemovalDoc.id}"]`);
+    let deletePartners = false;
 
     leafEl.classList.add("removing");
 
@@ -1725,9 +1799,16 @@ Relationship.deleteLeaf = function() {
         dataToLine.classList.add("removing");
     }
 
-
     // Find figure element (and tr element) and remove.
     // Re-render connections
+    if (Object.keys(reqRemovalDoc.partners).length > 0 && 
+        Object.keys(reqRemovalDoc.children).length <= 0 &&
+        Object.keys(reqRemovalDoc.parents).length > 0 ) {
+        if (confirm("Deleting this person will also remove any partners as well.")) {
+            deletePartners = true;
+        }
+    }
+
     if (false) {
     // if (reqRemovalDoc.claimed_by === LocalDocs.member.id) {
         alert("You cannot delete yourself!");
@@ -1783,15 +1864,23 @@ Relationship.deleteLeaf = function() {
                         console.log(err.message);
                     })
 
-                    let childrenDocIndex = LocalDocs.leaves.findIndex(doc => doc.id == childId);
+                    let childrenDocIndex = LocalDocs.leaves.findIndex(doc => doc.id === childId);
                     delete LocalDocs.leaves[childrenDocIndex].parents[reqRemovalDoc.id];
                 }
             }
-            
-            if (Object.keys(reqRemovalDoc.partners).length > 0) {
-                if ( Object.keys(reqRemovalDoc.partners).length > 0 ) {
-                    for ( partnerId of Object.keys(reqRemovalDoc.partners) ) {
-                        console.log(`Updating partners ${partnerId}`);
+            if ( Object.keys(reqRemovalDoc.partners).length > 0 ) {
+                for ( partnerId of Object.keys(reqRemovalDoc.partners) ) {
+                    console.log(`Updating partners ${partnerId}`);
+
+                    if (deletePartners === true) {
+                        let partnerLeafEl = familyTreeEl.querySelector(`[data-id="${partnerId}"]`);
+                        partnerLeafEl.remove();
+                        LocalDocs.removeLeafFromLocalDocs(partnerId);
+                        currentTreeLeafCollectionRef.doc(partnerId).delete()
+                        .then(() => {
+                            console.log(`${partnerId} has been deleted`);
+                        })
+                    } else {
                         currentTreeLeafCollectionRef.doc(partnerId).update({
                             [`partners.${reqRemovalDoc.id}`] : firebase.firestore.FieldValue.delete()
                         })
@@ -1802,31 +1891,40 @@ Relationship.deleteLeaf = function() {
                             console.log(`Partner not updated`);
                             console.log(err.message);
                         })
-
-                        let partnerDocIndex = LocalDocs.leaves.findIndex(doc => doc.id == partnerId);
-                        delete LocalDocs.leaves[partnerDocIndex].partners[reqRemovalDoc.id];
+    
+                        let partnerDocIndex = LocalDocs.leaves.findIndex(doc => doc.id === partnerId);
+                        delete LocalDocs.leaves[partnerDocIndex].partners[reqRemovalDoc.id]; 
                     }
                 }
             }
-    
             if (reqRemovalDoc.siblings && Object.keys(reqRemovalDoc.siblings).length > 0) {
                 for (siblingId of Object.keys(reqRemovalDoc.siblings)) {
+                    console.group();
+
                     console.log(`Updating sibling ${siblingId}`);
                     currentTreeLeafCollectionRef.doc(siblingId).update({
                         [`siblings.${reqRemovalDoc.id}`] : firebase.firestore.FieldValue.delete()
                     })
                     .then((ref) => {
-                        console.log("Sibling successfully updated")
+                        // console.log("Sibling successfully updated")
                     })
                     .catch(err => {
                         console.log(`Sibling not updated`);
                         console.log(err.message);
                     })
 
-                    let siblingDocIndex = LocalDocs.leaves.findIndex(doc => doc.id == siblingId);
+                    console.log(`${reqRemovalDoc.id} should be removed from ${siblingId}`);
+                    
+                    let siblingDocIndex = LocalDocs.leaves.findIndex(doc => doc.id === siblingId);
+                    console.log("")
+                    console.log(LocalDocs.leaves[siblingDocIndex].siblings);
                     delete LocalDocs.leaves[siblingDocIndex].siblings[reqRemovalDoc.id];
+                    console.log(LocalDocs.leaves[siblingDocIndex].siblings);
+                    console.groupEnd();
+
                 }
             }
+
 
             // treesRef.doc(LocalDocs.tree.id).update({
             //     "admins" : firebase.firestore.FieldValue.arrayRemove(reqRemovalDoc.claimed_by),
