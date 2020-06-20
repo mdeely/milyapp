@@ -925,7 +925,8 @@ const renderTableHeaders = () => {
 
 const showListView = (show = true) => {
     if (show) {
-        
+        viewPermissionsTree.classList.add("white");
+        viewPermissionsList.classList.remove("white");
         mainContent.classList.add("view_list");
         let topLeafDoc = LocalDocs.leaves.find(leafDoc => leafDoc.topMember === true);
         let tableEl = createElementWithClass("table", "u-w_full");
@@ -938,6 +939,8 @@ const showListView = (show = true) => {
         renderRowAndRelations(topLeafDoc, tableEl);
 
     } else {
+        viewPermissionsTree.classList.remove("white");
+        viewPermissionsList.classList.add("white");
         mainContent.classList.remove("view_list");
     }
 

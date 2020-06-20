@@ -92,8 +92,12 @@ viewPreferencesButton.addEventListener('click', (e) => {
     e.preventDefault();
     
     if (toolbarEl.classList.contains("active")) {
+        viewPreferencesButton.classList.remove("yellow");
+        viewPreferencesButton.setAttribute("tooltip", "Open toolbar");
         toolbarEl.classList.remove("active");
     } else {
+        viewPreferencesButton.classList.add("yellow");
+        viewPreferencesButton.setAttribute("tooltip", "Close toolbar");
         toolbarEl.classList.add("active");
     }
 })

@@ -160,9 +160,24 @@
         <div style="display:none" data-view="tree">
             <div class="debugMessage"></div>
             <section id="mainContent">
-            <section id="toolbar" class="u-d_flex">
-                <button id="view-preferences_tree" class="u-mar-l_auto u-mar-r_1 u-font-size_16 iconButton" tooltip="Tree view"><i class="fal fa-sitemap"></i></button>
-                <button id="view-preferences_list" class="u-mar-r_2 u-font-size_16 iconButton"><i class="fal fa-list"></i></button>
+            <section id="toolbar" class="u-d_flex u-ai_center">
+                <div class="searchGroup">
+                    <i class="fa fa-search"></i>
+                    <input type="search" placeholder="Search tree">
+                </div>
+                <div class="select-wrapper u-mar-l_auto u-mar-r_3">
+                    <select name="" id="generation_filter_select">
+                        <option value="All generations">All generations</option>
+                        <option value="gen_1">Generation 1</option>
+                        <option value="gen_2">Generation 2</option>
+                        <option value="gen_3">Generation 3</option>
+                    </select>
+                </div>
+                <p class="u-mar-r_2">Layout</p>
+                <div class="fauxToggle">
+                    <button id="view-preferences_tree" class="u-font-size_16 iconButton"><i class="fal fa-sitemap"></i></button>
+                    <button id="view-preferences_list" class="u-font-size_16 iconButton"><i class="fal fa-list"></i></button>
+                </div>
                 <!-- <button id="view-preferences_tree" class="u-mar-l_auto">Tree</button>
                 <button id="view-preferences_list" class="u-mar-l_1">List</button> -->
             </section>

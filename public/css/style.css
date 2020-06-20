@@ -351,7 +351,7 @@ path {
   width: var(--accountMenuSize);
   height: var(--accountMenuSize);
   border-radius: 8px;
-  background-color: var(--color_yellow);
+  background-color: white;
   padding: 0;
   background-size: cover;
   background-position: center;
@@ -618,6 +618,16 @@ input[name*="profile_photo"] {
 [data-view="tree"] {
   padding-top: 0px; }
 
+.fauxToggle {
+  display: flex;
+  border-radius: var(--iconButtonSize);
+  box-shadow: 0 0 0 1px var(--color_border);
+  max-height: var(--iconButtonSize); }
+  .fauxToggle:hover {
+    box-shadow: 0 0 0 3px var(--color_border); }
+  .fauxToggle .iconButton:focus, .fauxToggle .iconButton:hover {
+    transform: none; }
+
 #toolbar {
   width: 100%;
   max-height: 0;
@@ -704,6 +714,7 @@ input[type=password],
 input[type=number],
 input[type=date],
 input[type=tel],
+input[type=search],
 select {
   -webkit-appearance: none;
   padding: 12px 16px;
@@ -719,6 +730,7 @@ select {
   input[type=number]:hover,
   input[type=date]:hover,
   input[type=tel]:hover,
+  input[type=search]:hover,
   select:hover {
     box-shadow: 0 0 0 3px var(--color_border); }
   input[type=text]:focus,
@@ -727,9 +739,29 @@ select {
   input[type=number]:focus,
   input[type=date]:focus,
   input[type=tel]:focus,
+  input[type=search]:focus,
   select:focus {
     outline: 0px solid transparent;
     box-shadow: 0 0 0 4px var(--color_outline); }
+
+.searchGroup {
+  display: flex;
+  position: relative;
+  align-items: center; }
+  .searchGroup i {
+    position: absolute;
+    left: 16px;
+    opacity: .75;
+    transition: all 0.2s ease-out; }
+  .searchGroup input[type=search] {
+    border-radius: 24px;
+    padding-left: 44px;
+    transition: all 0.2s ease-out; }
+  .searchGroup:focus-within input[type=search] {
+    padding-left: 16px; }
+  .searchGroup:focus-within i {
+    opacity: 0;
+    left: -16px; }
 
 .checkboxGroup {
   display: flex;
@@ -928,6 +960,11 @@ button,
   button.danger,
   .iconButton.danger {
     background-color: var(--color_danger); }
+  .button.yellow,
+  button.yellow,
+  .iconButton.yellow {
+    background-color: var(--color_yellow);
+    color: var(--brand); }
   .button.disabled,
   button.disabled,
   .iconButton.disabled {
@@ -1350,6 +1387,9 @@ button,
 
 .u-mar-r_2 {
   margin-right: 16px; }
+
+.u-mar-r_3 {
+  margin-right: 24px; }
 
 .u-mar-b_0 {
   margin-bottom: 0px; }
