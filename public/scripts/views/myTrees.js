@@ -92,7 +92,8 @@ const populateMyTreesList = async () => {
                             permissionsEl.innerHTML = '';
     
                             editTreeForm[`edit-tree_id`].value = treeId;
-    
+                            inviteMembersToTreeForm[`invite-member-to-tree_id`].value = treeId;
+
                             if (reqTreeDoc.data().permissions) {
                                 for (let [memberId, memberPermission] of Object.entries(reqTreeDoc.data().permissions)) {
                                     let div = createElementWithClass("div", "u-mar-b_1 u-d_block");
@@ -108,6 +109,15 @@ const populateMyTreesList = async () => {
                                     membersRef.doc(memberId).get()
                                     .then((reqMemberDoc) => {
                                         if (reqMemberDoc.exists) {
+                                            let members = {};
+                                            members = {
+                                                id: reqMemberDoc.id,
+                                                ...reqMemberDoc.data()
+                                            }
+                                            LocalDocs.trees[reqTreeDoc.id] = {
+                                                members,
+                                                ...reqTreeDoc.data()
+                                            }
                                             div.textContent = `${reqMemberDoc.data().name.firstName} ${reqMemberDoc.data().name.surnameCurrent}`;
                                         } else {
                                             div.textContent = memberId;
@@ -153,9 +163,19 @@ const populateMyTreesList = async () => {
                                                         [`permissions.${memberId}`] : firebase.firestore.FieldValue.delete()
                                                       })
                                                       .then(() => {
-                                                            // a claimed tree with memebrId should become unclaimed
+                                                            // find if any leaves are claimed by this user.
+                                                            treesRef.doc(treeDoc.id).collection("leaves").where("claimed_by", "==", memberId).get()
+                                                            .then((response) => {
+                                                                let claimedLeafDoc = response.docs[0];
+                                                                treesRef.doc(treeId).collection("leaves").doc(claimedLeafDoc.id).update({
+                                                                    "claimed_by" : null
+                                                                })
+                                                                .then(() => {
+                                                                    console.log("member had a claimed leaf, and is now unclaimed");
+                                                                })
+                                                            })
                                                             console.log("permission removed from tree");
-                                                            location.reload();
+                                                            // location.reload();
                                                       })
                                                       .catch(err => {
                                                         console.log(err.message);
@@ -268,7 +288,6 @@ const populateMyTreesList = async () => {
             let treeId = editTreeForm[`edit-tree_id`].value;
 
             let obj = {};
-            // let makePublicCheckboxState = editTreeForm[`make-public`].checked;
 
             for (updateMemberPermission of memberEls) {
                 let memberId = updateMemberPermission.getAttribute("data-member-id");
@@ -280,7 +299,6 @@ const populateMyTreesList = async () => {
 
             treesRef.doc(treeId).update({
                 "permissions": obj
-                // "public" : makePublicCheckboxState
             })     
             .then(() => {
                 console.log("updated!");

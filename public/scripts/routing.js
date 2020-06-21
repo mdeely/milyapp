@@ -54,7 +54,7 @@ window.router = function(user) {
                             DetailsPanel.close();
                             if (LocalDocs.member.data().trees && LocalDocs.member.data().trees.length > 0) {
                                 if (LocalDocs.member.data().trees) {
-                                    LocalDocs.trees = [];
+                                    LocalDocs.trees = {};
                                     if ( LocalDocs.member.data().trees && LocalDocs.member.data().trees.length > 0) {
                                         // for (let treeId of LocalDocs.member.data().trees) {
                                         //     treesRef.doc(treeId).get()

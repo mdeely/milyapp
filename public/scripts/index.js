@@ -772,7 +772,8 @@ const getListViewInfo = (leafDoc) => {
 
 
 function renderRowAndRelations(doc, tableEl, i = 0) {
-    i = i + 1;
+    // i = i + 1;
+    i = 1;
     let children = doc.children;
     let partners = doc.partners;
     

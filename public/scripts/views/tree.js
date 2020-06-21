@@ -58,7 +58,7 @@ Tree.continueTreeSetup = function(treeId) {
     } else {
         Nav.showViewPreferencesButton();
         treeDebugMsg.innerHTML += `
-                <h1 class="u-mar-lr_auto u-ta_center">
+                <h1 class="u-mar-lr_auto u-ta_center u-mar-t_8">
                     <i class="far fa-lock-alt u-d_block u-mar-b_2"></i>
                     Private tree
                 </h2>
@@ -196,9 +196,12 @@ TreeLeaf.create = function (doc) {
     let leafProfilePhoto = "https://firebasestorage.googleapis.com/v0/b/mily-4c2a8.appspot.com/o/assets%2Fplaceholder%2Fprofile_placeholder.svg?alt=media&token=d3b939f1-d46b-4315-bcc6-3167d17a18ed";
 
     if (doc.deleted === true) {
-        image.style.backgroundImage = '';
+        image.style.backgroundImage = 'url("assets/img/removed_leaf.svg")';
         image.style.backgroundColor = "white";
-        leafName = "(deleted)";
+        image.style.backgroundSize = "40%";
+        image.style.backgroundPosition = "50% 42%"
+        figCaption.style.color = "var(--brand_600)";
+        leafName = "(Removed)";
     } else if (data.profile_photo) {
         let profileFileReference = storage.ref(`${data.profile_photo}`);
         profileFileReference.getDownloadURL().then(function(url) {

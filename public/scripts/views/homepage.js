@@ -2,6 +2,7 @@ let homepageViewEl = document.querySelector(`[data-view="homepage"]`);
 let homepageDebugMsg = homepageViewEl.querySelector(`.debugMessage`);
 
 const homepageSetup = () => {
+    Nav.showViewPreferencesButton(false);
     let auth = firebase.auth();
     homepageDebugMsg.innerHTML = "";
 

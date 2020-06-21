@@ -221,6 +221,18 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
     let dataSource = leafDoc;
     let detailsPhoto = leafEl.querySelector(".leaf__image").getAttribute("style");
     let memberPermissionType = authLeafPermissionType();
+
+    let docIsDeleted = leafDoc.deleted === true ? true : false;
+    let isDirectBloodline = true;
+
+    if (Object.keys(leafDoc.partners).length > 0) {
+        for (partnerId of Object.keys(leafDoc.partners)) {
+            let partnerDoc = LocalDocs.getLeafById(partnerId);
+            if (Object.keys(partnerDoc.parents).length > 0) {
+                isDirectBloodline = false;
+            }
+        }
+    }
     
     let detailsHeaderEl = createElementWithClass("h6", "u-mar-b_2 u-mar-t_8 u-d_flex u-ai_center");
     let editDetailsAnchor = createElementWithClass("button", "u-mar-l_auto small secondary");
@@ -232,7 +244,7 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
     editDetailsAnchor.setAttribute("tooltip-position", "top middle");
 
     let memberHasClaimedLeafOnTree = LocalDocs.leaves.find(leafDoc => leafDoc.claimed_by === LocalDocs.member.id) ? true : false;
-    
+
     editDetailsAnchor.appendChild(pencilIcon);
     editDetailsAnchor.addEventListener('click', (e) => {
         DetailsPanel.editMember();
@@ -246,20 +258,15 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
 
     detailsPanelMetaData.textContent = '';
     detailsPanelImmediateFamily.textContent = '';
-    detailsPanelFirstName.textContent = dataSource.name.firstName ? dataSource.name.firstName : "No name";
+    if (docIsDeleted) {
+        detailsPanelFirstName.textContent = "(Removed)";
+    } else {
+        detailsPanelFirstName.textContent = dataSource.name.firstName ? dataSource.name.firstName : "No name";
+    }
     detailsPanel.setAttribute("data-details-id", leafDoc.id);
     detailsPanelProfileImage.setAttribute("style", detailsPhoto);
-
-    function addParentIfTopMember() {
-        if (leafDoc.topMember === true) {
-            addParentButton.classList.remove("u-d_none");
-        } else {
-            addParentButton.classList.add("u-d_none");
-        }
-    }
     
     if (memberPermissionType === "admin") {
-        addParentIfTopMember();
 
         addRelationshipButton.classList.remove("u-d_none");
         deleteLeafButton.classList.remove("u-d_none");
@@ -279,7 +286,6 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
             // deleteLeafButton.classList.add("u-d_none");
         }
     } else if (memberPermissionType === "contributor") {
-        addParentIfTopMember();
 
         if (leafDoc.claimed_by) {
             console.log("claimed")
@@ -307,6 +313,22 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
         deleteLeafButton.classList.add("u-d_none");
         // editMemberButton.classList.add("u-d_none");
         addRelationshipButton.classList.add("u-d_none");
+    }
+
+    if (!isDirectBloodline) {
+        addParentButton.classList.add("disabled");
+        addSiblingButton.classList.add("disabled");
+        addPartnerButton.classList.add("disabled");
+        addParentButton.setAttribute("tooltip", "Unavialable for indirect leaves");
+        addSiblingButton.setAttribute("tooltip", "Unavialable for indirect leaves");
+        addPartnerButton.setAttribute("tooltip", "Unavialable for indirect leaves");
+    } else {
+        addParentButton.classList.remove("disabled");
+        addSiblingButton.classList.remove("disabled");
+        addPartnerButton.classList.remove("disabled");
+        addParentButton.removeAttribute("tooltip");
+        addSiblingButton.removeAttribute("tooltip");
+        addPartnerButton.removeAttribute("tooltip");
     }
 
     if (leafDoc.claimed_by) {
@@ -546,13 +568,13 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
     
                     if (memberPermissionType === "admin" || memberPermissionType === "contributor" && familyLeafDoc.created_by === LocalDocs.member.id) {
                             parentAction = `<button class="iconButton white u-mar-l_auto" tooltip="Options" tooltip-position="top middle" data-dropdown-target="parent_options_menu__${familyLeafDoc.id}">
-                            <i class="fal fa-ellipsis-h"></i>
+                            <i class="fal fa-pencil-alt u-font-size_20 u-o_75"></i>
                         </button>
                         <div id="parent_options_menu__${familyLeafDoc.id}" class="dropdown u-visibility_hidden u-p_fixed">
                             <div class="dropdown__item" data-value="Biological">Biological</div>
                             <div class="dropdown__item" data-value="Step">Step-parent</div>
                             <div class="dropdown__item" data-value="Unrelated">Unrelated</div>
-                            <div class="dropdown__item u-o_50" data-value="reset">Unset</div>
+                            <div class="dropdown__item u-o_75" data-value="reset">Reset</div>
                         </div>`
                     }
                 } else if (relativeType === "children") {
@@ -568,14 +590,14 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
                     }
                     if (memberPermissionType === "admin" || memberPermissionType === "contributor" && familyLeafDoc.created_by === LocalDocs.member.id) {
                                 childAction = `<button class="iconButton white u-mar-l_auto" tooltip="Options" tooltip-position="top middle" data-dropdown-target="child_options_menu__${familyLeafDoc.id}">
-                                <i class="fal fa-ellipsis-h"></i>
+                                <i class="fal fa-pencil-alt u-font-size_20 u-o_75"></i>
                             </button>
                             <div id="child_options_menu__${familyLeafDoc.id}" class="dropdown u-visibility_hidden u-p_fixed">
                                 <div class="dropdown__item" data-value="Adopted">Adopted</div>
                                 <div class="dropdown__item" data-value="Biological">Biological</div>
                                 <div class="dropdown__item" data-value="Step">Step-child</div>
                                 <div class="dropdown__item" data-value="Unrelated">Unrelated</div>
-                                <div class="dropdown__item u-o_50" data-value="reset">Unset</div>
+                                <div class="dropdown__item u-o_75" data-value="reset">Reset</div>
                             </div>`
                     }
                 } else if (relativeType === "siblings") {
@@ -592,13 +614,13 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
                     }
                     if (memberPermissionType === "admin" || memberPermissionType === "contributor" && familyLeafDoc.created_by === LocalDocs.member.id) {
                             siblingAction = `<button class="iconButton white u-mar-l_auto" tooltip="Options" tooltip-position="top middle" data-dropdown-target="sibling_options_menu__${familyLeafDoc.id}">
-                            <i class="fal fa-ellipsis-h"></i>
+                            <i class="fal fa-pencil-alt u-font-size_20 u-o_75"></i>
                         </button>
                         <div id="sibling_options_menu__${familyLeafDoc.id}" class="dropdown u-visibility_hidden u-p_fixed">
                             <div class="dropdown__item" data-value="Biological">Biological</div>
                             <div class="dropdown__item" data-value="Step">Step</div>
                             <div class="dropdown__item" data-value="Unrelated">Unrelated</div>
-                            <div class="dropdown__item u-o_50" data-value="reset">Unset</div>
+                            <div class="dropdown__item u-o_75" data-value="reset">Reset</div>
                         </div>`
                     }
                 } else if (relativeType === "partners") { 
@@ -611,7 +633,7 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
                     }
                     if (memberPermissionType === "admin" || memberPermissionType === "contributor" && familyLeafDoc.created_by === LocalDocs.member.id) {
                             partnerAction = `<button class="iconButton white u-mar-l_auto" tooltip="Options" tooltip-position="top middle" data-dropdown-target="partner_options_menu__${familyLeafDoc.id}">
-                            <i class="fal fa-ellipsis-h"></i>
+                            <i class="fal fa-pencil-alt u-font-size_20 u-o_75"></i>
                         </button>
                         <div id="partner_options_menu__${familyLeafDoc.id}" class="dropdown u-visibility_hidden u-p_fixed">
                             <div class="dropdown__item" data-value="Dating">Dating</div>
@@ -621,7 +643,7 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
                             <div class="dropdown__item" data-value="Separated">Separated</div>
                             <div class="dropdown__item" data-value="Widowed">Widowed</div>
                             <div class="dropdown__item" data-value="Unrelated">Unrelated</div>
-                            <div class="dropdown__item u-o_50" data-value="reset">Unset</div>
+                            <div class="dropdown__item u-o_75" data-value="reset">Reset</div>
                         </div>`
                     }
                 }
@@ -1414,7 +1436,17 @@ Relationship.addParent = function() {
     console.log(`I'm finna add a parent to ${addParentTo.id}`);
 
     let childrenObject = {};
+    let partnerObject = {};
     childrenObject[`${addParentTo.id}`] = null;
+
+    let hasPartners = false;
+
+    if (addParentTo.parents && Object.keys(addParentTo.parents).length > 0) {
+        for (parentId of Object.keys( addParentTo.parents)) {
+            partnerObject[`${parentId}`] = null;
+        }
+        hasPartners = true;
+    };
 
     if (addParentTo.siblings && Object.keys(addParentTo.siblings).length > 0) {
         for (siblingId of Object.keys( addParentTo.siblings)) {
@@ -1422,22 +1454,28 @@ Relationship.addParent = function() {
         }
     };
 
+    let topMemberStatus = true;
+    if (hasPartners) {
+        topMemberStatus = false;
+    }
+
     currentTreeLeafCollectionRef.add(      
         newLeafForFirebase({
             "children": childrenObject,
-            "topMember": true,
-            "created_by": LocalDocs.member.id
+            "topMember": topMemberStatus,
+            "created_by": LocalDocs.member.id,
+            "partners": partnerObject
         })
     )
-    .then((leafRef) => {
-        console.log(`Parent ${leafRef.id} succesfully created!`);
+    .then((newParentRef) => {
+        console.log(`Parent ${newParentRef.id} succesfully created!`);
         if (addParentTo.siblings && Object.keys(addParentTo.siblings).length > 0) {
             for (siblingId of Object.keys(addParentTo.siblings)) {
                 currentTreeLeafCollectionRef.doc(siblingId).update({
-                    [`parents.${leafRef.id}`] : null
+                    [`parents.${newParentRef.id}`] : null
                 })
                 .then(() => {
-                    console.log(`${siblingId} successfully updated to have ${leafRef.id} as a parent`)
+                    console.log(`${siblingId} successfully updated to have ${newParentRef.id} as a parent`)
                 })
                 .catch(err => {
                     console.log(err.message)
@@ -1446,10 +1484,24 @@ Relationship.addParent = function() {
         };
 
         currentTreeLeafCollectionRef.doc(addParentTo.id).update({
-            [`parents.${leafRef.id}`] : null,
+            [`parents.${newParentRef.id}`] : null,
             topMember: false
         }).then(() => {
-            location.reload();
+            if (hasPartners) {
+                for (partnerId of Object.keys(partnerObject)) {
+                    currentTreeLeafCollectionRef.doc(partnerId).update({
+                        [`partners.${newParentRef.id}`] : null
+                    })
+                    .then(() => {
+                        location.reload();
+                    })
+                    .catch(() => {
+                        console.log(err.message);
+                    })
+                }
+            } else {
+                location.reload();
+            }
         })
 
   })
@@ -1732,21 +1784,35 @@ Relationship.addSibling = function() {
     let addSiblingTo = DetailsPanel.getActiveDoc();
     // console.log(`I'm finna add a sibling to ${addSiblingTo.id}`);
 
+    console.group();
+    console.log("addSiblingTo has the following siblings:")
+    console.log(addSiblingTo.siblings)
+    console.groupEnd();
+
     let parentObject = {};
     let siblingObject = {};
     siblingObject[addSiblingTo.id] = null;
+    let hasParents = false;
 
     if (Object.keys(addSiblingTo.siblings).length > 0) {
         for (siblingId of Object.keys(addSiblingTo.siblings)) {
+            console.log(`adding ${siblingId} to siblingObject`);
             siblingObject[siblingId] = null;
         }
     }
+
+    console.group();
+    console.log("siblingObject has the following siblings:")
+    console.log(siblingObject);
+    console.groupEnd();
 
     if (addSiblingTo.parents && Object.keys(addSiblingTo.parents).length > 0) {
         for (parentId of Object.keys(addSiblingTo.parents)) {
             parentObject[parentId] = null;
         }
     }
+
+    hasParents = Object.keys(parentObject).length > 0 ? true : false;
 
     currentTreeLeafCollectionRef.add(
         newLeafForFirebase({
@@ -1767,9 +1833,33 @@ Relationship.addSibling = function() {
 
         for (siblingId of Object.keys(siblingObject)) {
             LocalDocs.addSiblingToDoc(siblingId, newSiblingRef.id);
-            currentTreeLeafCollectionRef.doc(siblingId).update({
-                [`siblings.${newSiblingRef.id}`] : null
-            })
+
+            let siblingData = {
+                "siblings" : {}
+            };
+
+            siblingData["siblings"][`${newSiblingRef.id}`] = null;
+
+            for (includeThisSiblingId of Object.keys(siblingObject)) {
+                if (includeThisSiblingId !== siblingId ) {
+                    siblingData["siblings"][`${includeThisSiblingId}`] = null;
+                }
+            }
+
+            console.group();
+            console.log(`siblingData for ${siblingId}`);
+            console.log(siblingData);
+            console.groupEnd();
+
+            // Add siblings that are not you. 
+
+            if (!hasParents) {
+                siblingData["topMember"] = false;
+            }
+
+            currentTreeLeafCollectionRef.doc(siblingId).update(
+                siblingData
+            )
             .then(() => {
                 console.log(`${siblingId} has added ${newSiblingRef.id} as a sibling.`)
             })
@@ -1778,19 +1868,53 @@ Relationship.addSibling = function() {
             })
         }
 
-        if (Object.keys(parentObject).length > 0) {
+        if (hasParents) {
             for (parentId of Object.keys(parentObject)) {
                 LocalDocs.addChildToParentDoc(parentId, newSiblingRef.id);
                 currentTreeLeafCollectionRef.doc(parentId).update({
                     [`children.${newSiblingRef.id}`] : null
                 })
                 .then(() => {
-                    console.log(`${parentId} has added ${newSiblingRef.id} as a sibling.`)
+                    console.log(`${parentId} has added ${newSiblingRef.id} as a sibling.`);
+                    location.reload();
                 })
                 .catch(err => {
                     console.log(err.message);
                 })
             }
+        } else {
+             // User has no parents. Make one.
+            siblingObject[`${newSiblingRef.id}`] = null;
+            currentTreeLeafCollectionRef.add(
+                newLeafForFirebase({
+                    "children": siblingObject,
+                    "created_by": LocalDocs.member.id,
+                    "topMember": true,
+                })
+            ).then((newParentRef) => {
+                LocalDocs.leaves.push({
+                    id: newParentRef.id,
+                    ...newLeafForFirebase({
+                        "children": siblingObject,
+                        "created_by": LocalDocs.member.id,
+                        "topMember": true,
+                    })
+                })
+                
+                for (siblingId of Object.keys(siblingObject)) {
+                    LocalDocs.addParentToChildDoc(siblingId, newParentRef.id);
+                    currentTreeLeafCollectionRef.doc(siblingId).update({
+                        [`parents.${newParentRef.id}`] : null
+                    })
+                    .then(() => {
+                        console.log(`Parent ${newParentRef.id} added to ${siblingId}`);
+                        location.reload();
+                    })
+                    .catch(() => {
+                        console.log(err.message);
+                    })
+                };
+            })
         }
 
         // renderSiblingToDom(addSiblingTo.id, newSiblingRef.id)
@@ -1798,8 +1922,6 @@ Relationship.addSibling = function() {
         // clearConnectionLines();
         // connectLines();
         // addRelationshipButton.classList.remove("disabled");
-
-        location.reload();
     })
     .catch(err => {
         console.log(err.message);
@@ -1815,16 +1937,6 @@ Relationship.deleteLeaf = function() {
     let dataToLines = familyTree.querySelectorAll(`[data-to-leaf="${reqRemovalDoc.id}"]`);
     let deletePartners = false;
 
-    leafEl.classList.add("removing");
-
-    for (dataFromLine of dataFromLines) {
-        dataFromLine.classList.add("removing");
-    }
-
-    for (dataToLine of dataToLines) {
-        dataToLine.classList.add("removing");
-    }
-
     // Find figure element (and tr element) and remove.
     // Re-render connections
     if (Object.keys(reqRemovalDoc.partners).length > 0 && 
@@ -1835,10 +1947,21 @@ Relationship.deleteLeaf = function() {
         }
     }
 
-    if (false) {
+    if (Object.keys(reqRemovalDoc.parents).length <= 0 && Object.keys(reqRemovalDoc.children).length > 1) {
+        alert("Cannot remove this member. It would orphan a child on the diagram. They must have one or fewer children in order to remove.");
+        return;
     // if (reqRemovalDoc.claimed_by === LocalDocs.member.id) {
-        alert("You cannot delete yourself!");
+        // alert("You cannot delete yourself!");
     } else {
+        leafEl.classList.add("removing");
+
+        for (dataFromLine of dataFromLines) {
+            dataFromLine.classList.add("removing");
+        }
+    
+        for (dataToLine of dataToLines) {
+            dataToLine.classList.add("removing");
+        }
         // if member has children and has parents
         if (Object.keys(reqRemovalDoc.children).length > 0 && Object.keys(reqRemovalDoc.parents).length > 0) {
             currentTreeLeafCollectionRef.doc(reqRemovalDoc.id).update({

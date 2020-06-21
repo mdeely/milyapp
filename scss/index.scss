@@ -4,6 +4,7 @@ $brand: #002831;
 :root {
     --brand: #002831;
     --brand_600: #5C737B;
+    --brand_500: #8699A0;
     --color_outline: #2D9CDB;
     --color_gray: #BDBDBD;
     --color_dark_gray: #828282;
@@ -725,7 +726,7 @@ path {
     background-repeat: no-repeat;
     background-position: center;
     // box-shadow: 0 0 0 8px var(--brand_lighter);
-    box-shadow: 0 2px 8px rgba($brand, 0.4), 0 4px 24px rgba($brand,.05)
+    box-shadow: 0 2px 8px rgba(#584F8E, 0.4), 0 4px 24px rgba(#584F8E,.05)
 }
 
 // .detailsEditInput__profile_photo {
@@ -968,7 +969,7 @@ input[name*="profile_photo"] {
         font-size: 14px;
         text-overflow: ellipsis;
         white-space: nowrap;
-        max-width: calc(var(--spacer) * 11);
+        max-width: calc(var(--spacer) * 14);
         overflow: hidden;
         backface-visibility: hidden;
         z-index: 5;
@@ -1018,6 +1019,7 @@ input[name*="profile_photo"] {
 
 [data-view] {
     padding-top: 64px;
+    padding-bottom: 64px;
 }
 [data-view="tree"] {
     padding-top: 0px;
@@ -1756,6 +1758,14 @@ button,
             outline: 0 solid transparent;
             box-shadow: 0 0 0 4px var(--color_outline) inset;
         }
+
+        &.disabled {
+            color: var(--brand_500);
+
+            &:active {
+                pointer-events: none;
+            }
+        }
     }
 
     &__label {
@@ -1802,6 +1812,12 @@ button,
     color: rgba(black, .65);
 }
 
+.u-font-size_20 {
+    font-size: 20px;
+}
+.u-font-size_19 {
+    font-size: 19px;
+}
 .u-font-size_18 {
     font-size: 18px;
 }

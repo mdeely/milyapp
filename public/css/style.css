@@ -1,6 +1,7 @@
 :root {
   --brand: #002831;
   --brand_600: #5C737B;
+  --brand_500: #8699A0;
   --color_outline: #2D9CDB;
   --color_gray: #BDBDBD;
   --color_dark_gray: #828282;
@@ -462,7 +463,7 @@ path {
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
-  box-shadow: 0 2px 8px rgba(0, 40, 49, 0.4), 0 4px 24px rgba(0, 40, 49, 0.05); }
+  box-shadow: 0 2px 8px rgba(88, 79, 142, 0.4), 0 4px 24px rgba(88, 79, 142, 0.05); }
 
 input[class*="profile_photo"],
 input[name*="profile_photo"] {
@@ -592,7 +593,7 @@ input[name*="profile_photo"] {
     font-size: 14px;
     text-overflow: ellipsis;
     white-space: nowrap;
-    max-width: calc(var(--spacer) * 11);
+    max-width: calc(var(--spacer) * 14);
     overflow: hidden;
     backface-visibility: hidden;
     z-index: 5; }
@@ -621,7 +622,8 @@ input[name*="profile_photo"] {
     transition: transform 0.15s ease-in-out; }
 
 [data-view] {
-  padding-top: 64px; }
+  padding-top: 64px;
+  padding-bottom: 64px; }
 
 [data-view="tree"] {
   padding-top: 0px; }
@@ -1156,6 +1158,10 @@ button,
     .dropdown__item:focus {
       outline: 0 solid transparent;
       box-shadow: 0 0 0 4px var(--color_outline) inset; }
+    .dropdown__item.disabled {
+      color: var(--brand_500); }
+      .dropdown__item.disabled:active {
+        pointer-events: none; }
   .dropdown__label {
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -1186,6 +1192,12 @@ button,
 
 .u-text_low {
   color: rgba(0, 0, 0, 0.65); }
+
+.u-font-size_20 {
+  font-size: 20px; }
+
+.u-font-size_19 {
+  font-size: 19px; }
 
 .u-font-size_18 {
   font-size: 18px; }
