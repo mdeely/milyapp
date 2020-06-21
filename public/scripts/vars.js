@@ -316,12 +316,15 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
     }
 
     if (!isDirectBloodline) {
+        // let message = `Available to direct ${LocalDocs.tree.data().name}`;
+        let message = `Unavailable for indirect leaves`;
+
         addParentButton.classList.add("disabled");
         addSiblingButton.classList.add("disabled");
         addPartnerButton.classList.add("disabled");
-        addParentButton.setAttribute("tooltip", "Unavialable for indirect leaves");
-        addSiblingButton.setAttribute("tooltip", "Unavialable for indirect leaves");
-        addPartnerButton.setAttribute("tooltip", "Unavialable for indirect leaves");
+        addParentButton.setAttribute("tooltip", message);
+        addSiblingButton.setAttribute("tooltip", message);
+        addPartnerButton.setAttribute("tooltip", message);
     } else {
         addParentButton.classList.remove("disabled");
         addSiblingButton.classList.remove("disabled");
@@ -1947,7 +1950,7 @@ Relationship.deleteLeaf = function() {
         }
     }
 
-    if (Object.keys(reqRemovalDoc.parents).length <= 0 && Object.keys(reqRemovalDoc.children).length > 1) {
+    if (Object.keys(reqRemovalDoc.parents).length <= 0 && Object.keys(reqRemovalDoc.children).length > 1 && reqRemovalDoc.topMember === true) {
         alert("Cannot remove this member. It would orphan a child on the diagram. They must have one or fewer children in order to remove.");
         return;
     // if (reqRemovalDoc.claimed_by === LocalDocs.member.id) {
