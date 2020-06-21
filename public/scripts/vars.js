@@ -19,6 +19,9 @@ const claimLeafAction = document.querySelector("#claim-leaf-action");
 const memberMoreOptionsButton = document.querySelector("#member-more-options");
 
 const toolbarEl = document.querySelector("#toolbar");
+const showToolbarButton = document.querySelector("#show-toolbar_button");
+const hideToolbarButton = document.querySelector("#hide-toolbar_button");
+
 
 // const removeMemberFromTreeButton = document.querySelector("#remove-member-from-tree-action");
 
@@ -59,13 +62,13 @@ const googleLogInButton = document.querySelector("#google-sign-up_button");
 const microsoftLogInButton = document.querySelector("#microsoft-sign-up_button");
 const accountMenuButton = document.querySelector("#accountMenu");
 // const searchButton = document.querySelector("#search_button");
-const viewPreferencesButton = document.querySelector("#view-preferences_button");
+// const viewPreferencesButton = document.querySelector("#view-preferences_button");
 
 const navLogo = document.querySelector("#mainNav_logo");
 const navProfileImage = document.querySelector(".mainNav__profile-image");
 
 let hideWhenAuthenticated = [signUpButton, logInButton];
-let showWhenAuthenticated = [accountMenuButton, viewPreferencesButton];
+let showWhenAuthenticated = [accountMenuButton];
 
 const pageTitle = document.querySelector("#pageTitle")
 
@@ -88,18 +91,19 @@ const availablePermissions = {
 // });
 
 
-viewPreferencesButton.addEventListener('click', (e) => {
+showToolbarButton.addEventListener('click', (e) => {
     e.preventDefault();
-    
-    if (toolbarEl.classList.contains("active")) {
-        viewPreferencesButton.classList.remove("yellow");
-        viewPreferencesButton.setAttribute("tooltip", "Open toolbar");
-        toolbarEl.classList.remove("active");
-    } else {
-        viewPreferencesButton.classList.add("yellow");
-        viewPreferencesButton.setAttribute("tooltip", "Close toolbar");
-        toolbarEl.classList.add("active");
-    }
+
+    showToolbarButton.classList.add("u-d_none");
+    showToolbarButton.classList.add("u-d_none");
+    toolbarEl.classList.add("active");
+})
+
+hideToolbarButton.addEventListener('click', (e) => {
+    e.preventDefault();
+
+    showToolbarButton.classList.remove("u-d_none");
+    toolbarEl.classList.remove("active");
 })
 
 ///////
@@ -170,11 +174,15 @@ let DetailsPanel = {};
 
 DetailsPanel.show = function(docId = null) {
     mainContent.classList.add("showDetails");
+    toolbarEl.classList.add("showDetails");
+    showToolbarButton.classList.add("showDetails");
     detailsPanel.scrollTop = 0;
 }
 
 DetailsPanel.close = function() {
     mainContent.classList.remove("showDetails");
+    toolbarEl.classList.remove("showDetails");
+    showToolbarButton.classList.remove("showDetails");
     Leaf.removeActive();
     closeAllDropdowns();
 }
@@ -215,10 +223,11 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
     let memberPermissionType = authLeafPermissionType();
     
     let detailsHeaderEl = createElementWithClass("h6", "u-mar-b_2 u-mar-t_8 u-d_flex u-ai_center");
-    let editDetailsAnchor = createElementWithClass("button", "u-mar-l_auto iconButton white");
-    let pencilIcon = createElementWithClass("i", "fal fa-pencil-alt");
+    let editDetailsAnchor = createElementWithClass("button", "u-mar-l_auto small secondary");
+    let pencilIcon = createElementWithClass("i", "fal fa-pencil-alt u-mar-l_2");
 
     detailsHeaderEl.textContent = "Details"
+    editDetailsAnchor.textContent = "Edit";
     editDetailsAnchor.setAttribute("tooltip", "Edit");
     editDetailsAnchor.setAttribute("tooltip-position", "top middle");
 

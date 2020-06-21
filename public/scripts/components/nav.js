@@ -34,9 +34,11 @@ Nav.update = function(user) {
 
 Nav.showViewPreferencesButton = function(show) {
     if (show) {
-        viewPreferencesButton.classList.remove("u-d_none");
+        showToolbarButton.classList.remove("u-d_none");
+        toolbarEl.classList.remove("u-d_none");
     } else {
-        viewPreferencesButton.classList.add("u-d_none");
+        showToolbarButton.classList.add("u-d_none");
+        toolbarEl.classList.add("u-d_none");
     }
 }
 

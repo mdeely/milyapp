@@ -21,10 +21,10 @@
                 <a class="button" id="sign-up_button" href="/#/sign-up">Sign up</a>
             </div>
             <button id="notification_indicator" data-dropdown-target="notification_menu" class="iconButton u-visibility_hidden" tooltip="Notifications"><i class="fal fa-bell"></i></button>
-            <div id="notification_menu" class="dropdown u-p_absolute">
+            <div id="notification_menu" class="dropdown u-p_absolute u-visibility_hidden">
             </div>
             <!-- <button id="search_button" class="u-mar-l_2 u-mar-r_1 iconButton"><i class="fa fa-search"></i></button> -->
-            <button id="view-preferences_button" class="u-mar-l_2 u-mar-r_2 iconButton" tooltip="Open toolbar"><i class="fal fa-sliders-h"></i></button>
+            <!-- <button id="view-preferences_button" class="u-mar-l_2 u-mar-r_2 iconButton" tooltip="Open toolbar"><i class="fal fa-sliders-h"></i></button> -->
             <!-- <div id="view-preferences" class="dropdown u-visibility_hidden u-p_absolute"> -->
                 <!-- <div id="view-preferences_tree" class="dropdown__item">Tree</div>
                 <div id="view-preferences_list" class="dropdown__item">List</div> -->
@@ -44,6 +44,37 @@
             <div id="pageTitle" class="u-mar-lr_auto u-c_white u-p_absolute"></div>
             <div class="mainNav__decoration"></div>
         </nav>
+        <button id="show-toolbar_button"class="white u-mar-t_1 u-mar-r_2 u-p_absolute"><i class="far fa-eye u-mar-r_1"></i>Show toolbar</button>
+        <section id="toolbar" class="u-d_flex u-ai_center">
+            <div class="searchGroup">
+                <i class="fa fa-search"></i>
+                <input type="search" placeholder="Search tree">
+            </div>
+            <div class="select-wrapper u-mar-l_auto u-mar-r_3">
+                <select name="" id="generation_filter_select">
+                    <option value="All generations">All generations</option>
+                    <option value="gen_1">Generation 1</option>
+                    <option value="gen_2">Generation 2</option>
+                    <option value="gen_3">Generation 3</option>
+                </select>
+            </div>
+            <p class="u-mar-r_2">Layout</p>
+            <div class="fauxToggle">
+                <button id="view-preferences_tree" class="u-font-size_16 iconButton"><i class="fal fa-sitemap"></i></button>
+                <button id="view-preferences_list" class="u-font-size_16 iconButton"><i class="fal fa-list"></i></button>
+            </div>
+            <button id="hide-toolbar_button" class="u-mar-l_2 white"><i class="far fa-eye-slash u-mar-r_1"></i>Hide toolbar</button>
+            <!-- <button id="view-preferences_tree" class="u-mar-l_auto">Tree</button>
+            <button id="view-preferences_list" class="u-mar-l_1">List</button> -->
+        </section>
+
+        <ul id="add-relationship-dropdown" class="dropdown u-visibility_hidden u-p_fixed">
+            <!-- <li class="dropdown__item dropdown__label">Add relationship</li> -->
+            <li id="add-parent-action" class="dropdown__item">Parent</li>
+            <li id="add-child-action" class="dropdown__item">Child</li>
+            <li id="add-sibling-action" class="dropdown__item">Sibling</li>
+            <li id="add-partner-action" class="dropdown__item">Partner</li>
+        </ul>
 
         <div style="display:none" data-view="account-verification">
             <div class="debugMessage"></div>
@@ -160,27 +191,6 @@
         <div style="display:none" data-view="tree">
             <div class="debugMessage"></div>
             <section id="mainContent">
-            <section id="toolbar" class="u-d_flex u-ai_center">
-                <div class="searchGroup">
-                    <i class="fa fa-search"></i>
-                    <input type="search" placeholder="Search tree">
-                </div>
-                <div class="select-wrapper u-mar-l_auto u-mar-r_3">
-                    <select name="" id="generation_filter_select">
-                        <option value="All generations">All generations</option>
-                        <option value="gen_1">Generation 1</option>
-                        <option value="gen_2">Generation 2</option>
-                        <option value="gen_3">Generation 3</option>
-                    </select>
-                </div>
-                <p class="u-mar-r_2">Layout</p>
-                <div class="fauxToggle">
-                    <button id="view-preferences_tree" class="u-font-size_16 iconButton"><i class="fal fa-sitemap"></i></button>
-                    <button id="view-preferences_list" class="u-font-size_16 iconButton"><i class="fal fa-list"></i></button>
-                </div>
-                <!-- <button id="view-preferences_tree" class="u-mar-l_auto">Tree</button>
-                <button id="view-preferences_list" class="u-mar-l_1">List</button> -->
-            </section>
             <section id="familyTree">
                 <div id="branchContainer"></div>
             </section>
@@ -198,33 +208,29 @@
             </section>
             <!-- <svg id="leaf_connections" width="160" height="280" xmlns="http://www.w3.org/2000/svg" version="1.1"></svg> -->
                 <aside id="detailsPanel">
-                    <nav class="detailsPanel__actions u-mar-b_6 u-mar-t_1">
-                        <button class="iconButton add-relationship_button" data-dropdown-target="add-relationship-dropdown" tooltip="Add relationship" tooltip-position="right"><i class="fal fa-plus"></i></button>
-                        <div class="detailsPanel__actions-secondary u-mar-l_auto u-d_flex">
-                            <button class="iconButton secondary" id="member-more-options" data-dropdown-target="member-options-dropdown" tooltip="More options" tooltip-position="bottom middle" ><i class="far fa-ellipsis-v"></i></button>
-                            <!-- <button class="iconButton secondary" id="invite-member-action" data-modal-trigger="invite-member_modal" tooltip="Invite member" tooltip-position="bottom middle" ><i class="fal fa-envelope"></i></button> -->
-                            <!-- <button class="iconButton secondary u-mar-l_2" id="edit-member-action" tooltip="Edit" tooltip-position="bottom middle" ><i class="fal fa-pencil-alt"></i></button> -->
-                            <button class="iconButton secondary details__button--close u-mar-l_2" tooltip="Hide panel" tooltip-position="bottom middle" ><i class="fal fa-times"></i></button> 
-                        </div>
+                    <nav class="detailsPanel__actions u-mar-t_1 u-mar-b_6">
+                        <button class="add-relationship_button white" data-dropdown-target="add-relationship-dropdown"><i class="far fa-user-plus u-mar-r_1"></i>Add</button>
+                        <button class="u-mar-l_auto" id="member-more-options" data-dropdown-target="member-options-dropdown">More<i class="fa fa-caret-down u-mar-l_1 u-o_50"></i></button>
+                        <button class="details__button--close u-mar-l_1" tooltip="Hide panel" tooltip-position="bottom middle" ><i class="fal fa-times"></i></button> 
                     </nav>
 
+                    <!-- <nav class="detailsPanel__actions u-mar-b_6 u-mar-t_1">
+                        <button class="iconButton add-relationship_button white" data-dropdown-target="add-relationship-dropdown" tooltip="Add relationship" tooltip-position="right"><i class="fal fa-plus"></i></button>
+                        <div class="detailsPanel__actions-secondary u-mar-l_auto u-d_flex">
+                            <button class="iconButton" id="member-more-options" data-dropdown-target="member-options-dropdown" tooltip="More options" tooltip-position="bottom middle" ><i class="far fa-ellipsis-v"></i></button>
+                            <button class="iconButton details__button--close u-mar-l_2" tooltip="Hide panel" tooltip-position="bottom middle" ><i class="fal fa-times"></i></button> 
+                        </div>
+                    </nav> -->
+
                     <ul id="member-options-dropdown" class="dropdown u-visibility_hidden u-p_fixed">
-                        <li id="claim-leaf-action" class="dropdown__item u-d_none">Claim this leaf</li>
-                        <li data-modal-trigger="invite-member_modal" id="invite-member-action" class="dropdown__item u-d_none">Invite someone to claim</li>
-                        <li id="delete-leaf-action" class="dropdown__item u-c_danger">Remove leaf from tree</li>
-                    </ul>
-
-                    <ul id="add-relationship-dropdown" class="dropdown u-visibility_hidden u-p_fixed">
-                        <!-- <li class="dropdown__item dropdown__label">Add relationship</li> -->
-                        <li id="add-parent-action" class="dropdown__item">Parent</li>
-                        <li id="add-child-action" class="dropdown__item">Child</li>
-                        <li id="add-sibling-action" class="dropdown__item">Sibling</li>
-                        <li id="add-partner-action" class="dropdown__item">Partner</li>
-
+                        <li id="claim-leaf-action" class="dropdown__item u-d_none"><i class="far fa-leaf u-mar-r_2"></i>Claim this leaf</li>
+                        <li data-modal-trigger="invite-member_modal" id="invite-member-action" class="dropdown__item u-d_none"><i class="far fa-envelope u-mar-r_2"></i>Invite someone to claim</li>
+                        <li id="delete-leaf-action" class="dropdown__item u-c_danger"><i class="far fa-trash-alt u-mar-r_2"></i>Remove leaf from tree</li>
                     </ul>
                     <div class="detailsPanel__information">
                         <div class="detailsPanel__profileImage u-mar-lr_auto u-mar-b_3"></div>
-                        <div class="detailsPanel__firstName u-mar-lr_auto header_m u-mar-b_6 u-ta_center"></div>
+                        <div class="detailsPanel__firstName u-mar-lr_auto header_m u-mar-b_6 u-ta_center u-c_white"></div>
+
                         <!-- <h6 class="u-mar-b_4">Details</h6> -->
                         <div class="detailsPanel__metaData u-mar-b_7 u-mar-t_10"></div>
                         <!-- <h6 class="u-mar-b_4">Immediate family</h6> -->

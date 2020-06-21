@@ -1,4 +1,4 @@
-$detailsRevealTiming: .2s;
+$detailsRevealTiming: .15s;
 $brand: #002831;
 
 :root {
@@ -29,6 +29,7 @@ $brand: #002831;
     --spacer: 8px;
     --accountMenuSize: 56px;
     --detailsPanelImgSize: 48px;
+    --toolbarHeight: 80px;
 }
 
 * {
@@ -214,11 +215,6 @@ path {
             width: calc(100vw - var(--detailsWidth));
             transition: width $detailsRevealTiming ease-in-out;
         }
-
-        #toolbar {
-            width: calc(100vw - var(--detailsWidth));
-        }
-
         // #familyTree__list {
         //     width: calc(1024px + var(--detailsWidth));
 
@@ -578,6 +574,17 @@ path {
     display: none;
 }
 
+#show-toolbar_button {
+    right: 0px;
+    top: calc( var(--navHeight) + var(--navDecorationHeight) + 4px);
+    z-index: 500;
+    transition: all $detailsRevealTiming ease-in-out;
+
+    &.showDetails {
+        right: var(--detailsWidth);
+    }
+}
+
 #accountMenu {
     width: var(--accountMenuSize);
     height: var(--accountMenuSize);
@@ -614,7 +621,7 @@ path {
         left: 1px;
         right: 0;
         top: var(--detailsPanelDecorationTopOffset);
-        background-image: url("../assets/img/wavy-sm.svg");
+        background-image: url("../assets/img/wavy-sm_purple.svg");
         background-repeat: no-repeat;
         background-position: top;
         background-size: cover;
@@ -717,6 +724,8 @@ path {
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
+    // box-shadow: 0 0 0 8px var(--brand_lighter);
+    box-shadow: 0 2px 8px rgba($brand, 0.4), 0 4px 24px rgba($brand,.05)
 }
 
 // .detailsEditInput__profile_photo {
@@ -1029,6 +1038,10 @@ input[name*="profile_photo"] {
         &:hover {
             transform: none;
         }
+
+        &:first-child {
+            margin-right: 4px;
+        }
     }
 }
 
@@ -1042,13 +1055,20 @@ input[name*="profile_photo"] {
     border-bottom: 1px solid var(--color_border);
     overflow: hidden;
     transition: all $detailsRevealTiming ease-in-out;
+    position: sticky;
+    top: calc( var(--navHeight));
+    z-index: 99;
 
     &.active {
         margin-bottom: var(--navDecorationHeight);
         padding: 8px 16px;
-        max-height: 120px;
+        max-height: calc( var(--toolbarHeight) + 16px);
         padding-top: calc(var(--navDecorationHeight) + 8px);
         transition: all $detailsRevealTiming ease-in-out;
+    }
+
+    &.showDetails {
+        width: calc(100vw - var(--detailsWidth));
     }
 }
 
@@ -1202,6 +1222,7 @@ select {
         border-radius: 24px;
         padding-left: 44px;
         transition: all $detailsRevealTiming ease-out;
+        background-color: white;
     }
 
     &:focus-within {
@@ -1438,6 +1459,7 @@ button,
     font-size: 15px;
     transition: transform .1s ease-in-out;
     text-decoration: none;
+    align-items: center;
 
     &:hover,
     &:focus {
@@ -1457,10 +1479,6 @@ button,
     &.secondary {
         background-color: var(--brand_lighter);
         color: var(--brand);
-
-        &:hover {
-            background-color: rgba(black, .05);
-        }
 
         &.danger {
             background-color: white;

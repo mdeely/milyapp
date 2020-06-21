@@ -7,6 +7,12 @@ Tree.setup = function(treeId) {
     clear();
     Nav.showViewPreferencesButton(true);
 
+    //// MILY ASH
+    //// Fetch API for receiving a JSON response
+    // fetch('http://example.com/movies.json')
+    // .then(response => response.json())
+    // .then(data => console.log(data));
+
     variablizeCurrentTreeDoc(treeId)
     .then((response) => {
         if (response) {
@@ -180,9 +186,11 @@ TreeLeaf.create = function (doc) {
     let data = doc;
     let memberDoc;
 
-    let figure = document.createElement("figure");
-    let image = document.createElement("div");
-    let figCaption = document.createElement("figcaption");
+    let figure = createElementWithClass("figure", "leaf");
+    let image = createElementWithClass("div", "leaf__image");
+    let figCaption = createElementWithClass("figcaption", "leaf_caption");
+    // let addRelationshipButton = createElementWithClass("button", "u-p_absolute");
+    // let icon = createElementWithClass("i", "far fa-plus");
 
     let leafName = data.name.firstName ? data.name.firstName : "No name";
     let leafProfilePhoto = "https://firebasestorage.googleapis.com/v0/b/mily-4c2a8.appspot.com/o/assets%2Fplaceholder%2Fprofile_placeholder.svg?alt=media&token=d3b939f1-d46b-4315-bcc6-3167d17a18ed";
@@ -200,16 +208,15 @@ TreeLeaf.create = function (doc) {
         image.style.backgroundImage = `url(${leafProfilePhoto})`;
     }
 
-    figure.setAttribute("class", "leaf");
     figure.setAttribute("data-id", doc.id);
 
-    image.setAttribute("class", "leaf__image");
-
-    figCaption.setAttribute("class", "leaf_caption");
     figCaption.textContent = leafName;
+
+    // addRelationshipButton.appendChild(icon);
 
     figure.appendChild(figCaption);
     figure.appendChild(image);
+    // figure.appendChild(addRelationshipButton);
 
     figure.addEventListener("click", (e) => {
         e.preventDefault();

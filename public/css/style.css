@@ -25,7 +25,8 @@
   --detailsPanelDecorationTopOffset: 0;
   --spacer: 8px;
   --accountMenuSize: 56px;
-  --detailsPanelImgSize: 48px; }
+  --detailsPanelImgSize: 48px;
+  --toolbarHeight: 80px; }
 
 * {
   box-sizing: border-box; }
@@ -137,7 +138,7 @@ path {
   position: relative;
   flex: 1;
   flex-direction: column;
-  transition: background-color 0.2s ease-in-out; }
+  transition: background-color 0.15s ease-in-out; }
   #mainContent:focus {
     outline: none; }
   #mainContent:not(.showDetails) #familyTree {
@@ -147,9 +148,7 @@ path {
   #mainContent.showDetails #familyTree,
   #mainContent.showDetails #familyTree__list {
     width: calc(100vw - var(--detailsWidth));
-    transition: width 0.2s ease-in-out; }
-  #mainContent.showDetails #toolbar {
-    width: calc(100vw - var(--detailsWidth)); }
+    transition: width 0.15s ease-in-out; }
   #mainContent.showDetails #detailsPanel {
     right: 0; }
   #mainContent.view_list {
@@ -172,13 +171,13 @@ path {
   max-width: 100vw;
   padding-left: 40px;
   padding-right: 40px;
-  transition: width 0.2s ease-in-out; }
+  transition: width 0.15s ease-in-out; }
 
 #familyTree__list {
   width: 100vw;
   display: none;
   padding: 0 16px;
-  transition: width 0.2s ease-in-out; }
+  transition: width 0.15s ease-in-out; }
   #familyTree__list img {
     width: 64px;
     height: 64px;
@@ -201,7 +200,7 @@ path {
         background-color: rgba(0, 0, 0, 0); }
     #familyTree__list tr.highlight .leaf__image {
       transform: scale3d(1.3, 1.3, 1.3);
-      transition: transform 0.2s ease-in-out; }
+      transition: transform 0.15s ease-in-out; }
     #familyTree__list tr.active td {
       box-shadow: 0px -4px 0 0px var(--color_outline) inset, 0px 4px 0 0px var(--color_outline) inset; }
       #familyTree__list tr.active td:first-child {
@@ -248,7 +247,7 @@ path {
       right: 0; }
 
 #familyTree {
-  transition: width 0.2s ease-in-out;
+  transition: width 0.15s ease-in-out;
   display: flex;
   flex-wrap: nowrap;
   justify-content: center;
@@ -347,6 +346,14 @@ path {
 .error:empty {
   display: none; }
 
+#show-toolbar_button {
+  right: 0px;
+  top: calc( var(--navHeight) + var(--navDecorationHeight) + 4px);
+  z-index: 500;
+  transition: all 0.15s ease-in-out; }
+  #show-toolbar_button.showDetails {
+    right: var(--detailsWidth); }
+
 #accountMenu {
   width: var(--accountMenuSize);
   height: var(--accountMenuSize);
@@ -366,7 +373,7 @@ path {
   max-width: var(--detailsWidth);
   height: calc(100vh - var(--navHeight));
   padding: 32px;
-  transition: right 0.2s ease-in-out;
+  transition: right 0.15s ease-in-out;
   top: var(--navHeight);
   bottom: 0;
   z-index: 99;
@@ -379,7 +386,7 @@ path {
     left: 1px;
     right: 0;
     top: var(--detailsPanelDecorationTopOffset);
-    background-image: url("../assets/img/wavy-sm.svg");
+    background-image: url("../assets/img/wavy-sm_purple.svg");
     background-repeat: no-repeat;
     background-position: top;
     background-size: cover;
@@ -454,7 +461,8 @@ path {
   background-color: white;
   background-size: cover;
   background-repeat: no-repeat;
-  background-position: center; }
+  background-position: center;
+  box-shadow: 0 2px 8px rgba(0, 40, 49, 0.4), 0 4px 24px rgba(0, 40, 49, 0.05); }
 
 input[class*="profile_photo"],
 input[name*="profile_photo"] {
@@ -537,7 +545,7 @@ input[name*="profile_photo"] {
   display: flex;
   justify-content: center;
   margin: var(--leafSpacing);
-  transition: transform 0.2s ease-in-out, opacity 0.4s ease-in-out;
+  transition: transform 0.15s ease-in-out, opacity 0.4s ease-in-out;
   opacity: 1;
   cursor: pointer; }
   .leaf:before {
@@ -550,16 +558,16 @@ input[name*="profile_photo"] {
     box-shadow: 0 0 0 6px rgba(255, 255, 255, 0) inset, 0 0 0 4px var(--color_border);
     opacity: 0;
     transform: scale(0.8);
-    transition: transform 0.2s cubic-bezier(0.66, 0.23, 0.33, 1.02), box-shadow 0.2s ease-out; }
+    transition: transform 0.15s cubic-bezier(0.66, 0.23, 0.33, 1.02), box-shadow 0.15s ease-out; }
   .leaf:active {
     transition: all 0.05s cubic-bezier(0.66, 0.23, 0.33, 1.02); }
   .leaf.active:before, .leaf.active:hover:before {
-    transition: transform 0.2s cubic-bezier(0.66, 0.23, 0.33, 1.02), box-shadow 0.2s ease-out;
+    transition: transform 0.15s cubic-bezier(0.66, 0.23, 0.33, 1.02), box-shadow 0.15s ease-out;
     opacity: 1;
     transform: scale(1);
     box-shadow: 0 0 0 6px white inset, 0 0 0 4px var(--color_outline); }
   .leaf:hover:before {
-    transition: transform 0.2s cubic-bezier(0.66, 0.23, 0.33, 1.02), box-shadow 0.2s ease-out;
+    transition: transform 0.15s cubic-bezier(0.66, 0.23, 0.33, 1.02), box-shadow 0.15s ease-out;
     opacity: 1;
     transform: scale(1);
     box-shadow: 0 0 0 6px white inset, 0 0 0 4px var(--color_border); }
@@ -606,11 +614,11 @@ input[name*="profile_photo"] {
     backface-visibility: hidden;
     z-index: 2; }
   .leaf__image, .leaf_caption {
-    transition: transform 0.2s ease-in-out; }
+    transition: transform 0.15s ease-in-out; }
   .leaf.highlight .leaf__image,
   .leaf.highlight .leaf_caption {
     transform: scale3d(1.2, 1.2, 1.2);
-    transition: transform 0.2s ease-in-out; }
+    transition: transform 0.15s ease-in-out; }
 
 [data-view] {
   padding-top: 64px; }
@@ -627,6 +635,8 @@ input[name*="profile_photo"] {
     box-shadow: 0 0 0 3px var(--color_border); }
   .fauxToggle .iconButton:focus, .fauxToggle .iconButton:hover {
     transform: none; }
+  .fauxToggle .iconButton:first-child {
+    margin-right: 4px; }
 
 #toolbar {
   width: 100%;
@@ -637,13 +647,18 @@ input[name*="profile_photo"] {
   margin-bottom: calc(var(--navDecorationHeight) + 32px);
   border-bottom: 1px solid var(--color_border);
   overflow: hidden;
-  transition: all 0.2s ease-in-out; }
+  transition: all 0.15s ease-in-out;
+  position: sticky;
+  top: calc( var(--navHeight));
+  z-index: 99; }
   #toolbar.active {
     margin-bottom: var(--navDecorationHeight);
     padding: 8px 16px;
-    max-height: 120px;
+    max-height: calc( var(--toolbarHeight) + 16px);
     padding-top: calc(var(--navDecorationHeight) + 8px);
-    transition: all 0.2s ease-in-out; }
+    transition: all 0.15s ease-in-out; }
+  #toolbar.showDetails {
+    width: calc(100vw - var(--detailsWidth)); }
 
 @media screen and (max-width: 640px) {
   :root {
@@ -659,7 +674,7 @@ input[name*="profile_photo"] {
     right: 0;
     bottom: -100%;
     top: unset;
-    transition: bottom 0.2s ease-in-out;
+    transition: bottom 0.15s ease-in-out;
     max-height: unset;
     border-top-left-radius: 8px;
     border-top-right-radius: 8px;
@@ -683,7 +698,7 @@ input[name*="profile_photo"] {
   #mainContent.showDetails #detailsPanel {
     right: unset;
     bottom: 0;
-    transition: bottom 0.2s ease-in-out; } }
+    transition: bottom 0.15s ease-in-out; } }
 .card {
   --cardMaxWidth: 352px;
   --cardPadding: 24px;
@@ -752,11 +767,12 @@ select {
     position: absolute;
     left: 16px;
     opacity: .75;
-    transition: all 0.2s ease-out; }
+    transition: all 0.15s ease-out; }
   .searchGroup input[type=search] {
     border-radius: 24px;
     padding-left: 44px;
-    transition: all 0.2s ease-out; }
+    transition: all 0.15s ease-out;
+    background-color: white; }
   .searchGroup:focus-within input[type=search] {
     padding-left: 16px; }
   .searchGroup:focus-within i {
@@ -916,7 +932,8 @@ button,
   font-weight: bold;
   font-size: 15px;
   transition: transform .1s ease-in-out;
-  text-decoration: none; }
+  text-decoration: none;
+  align-items: center; }
   .button:hover, .button:focus,
   button:hover,
   button:focus,
@@ -938,10 +955,6 @@ button,
   .iconButton.secondary {
     background-color: var(--brand_lighter);
     color: var(--brand); }
-    .button.secondary:hover,
-    button.secondary:hover,
-    .iconButton.secondary:hover {
-      background-color: rgba(0, 0, 0, 0.05); }
     .button.secondary.danger,
     button.secondary.danger,
     .iconButton.secondary.danger {
