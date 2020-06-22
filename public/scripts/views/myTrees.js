@@ -30,10 +30,10 @@ const populateMyTreesList = async () => {
     myTreesDebugMsg.innerHTML += `<h2 class="u-ta_center u-mar-l_2">Your trees:</h2>`;
     myTreesDebugMsg.appendChild(button);
 
-    if (Object.keys(LocalDocs.member.data().trees)) {
+    if (Object.keys(LocalDocs.member.trees)) {
         let ranThrough = [];
 
-        for await (let treeId of Object.keys(LocalDocs.member.data().trees)) {
+        for await (let treeId of Object.keys(LocalDocs.member.trees)) {
             if (!ranThrough.includes(treeId)) {
                 treesRef.doc(treeId).get()
                 .then((reqTreeDoc) => {

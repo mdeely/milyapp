@@ -452,6 +452,7 @@ path {
     display: none; }
 
 .detailsPanel__profileImage {
+  position: relative;
   max-width: var(--profileImageSize);
   height: var(--profileImageSize);
   max-width: var(--profileImageSize);
@@ -463,7 +464,44 @@ path {
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
-  box-shadow: 0 2px 8px rgba(88, 79, 142, 0.4), 0 4px 24px rgba(88, 79, 142, 0.05); }
+  box-shadow: 0 2px 8px rgba(88, 79, 142, 0.4), 0 4px 24px rgba(88, 79, 142, 0.05);
+  transition: all 0.15s ease-out; }
+  .detailsPanel__profileImage .iconButton {
+    right: 8px;
+    bottom: 8px;
+    visibility: hidden;
+    opacity: 0;
+    display: none;
+    pointer-events: none;
+    z-index: 1; }
+  .detailsPanel__profileImage input[type="file"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0;
+    width: 100%;
+    z-index: 2;
+    visibility: hidden;
+    opacity: 0;
+    display: none;
+    pointer-events: none; }
+    .detailsPanel__profileImage input[type="file"]:hover {
+      cursor: pointer; }
+  .detailsPanel__profileImage.editing {
+    transform: scale(1.2); }
+    .detailsPanel__profileImage.editing:hover {
+      box-shadow: 0 2px 8px rgba(88, 79, 142, 0.4), 0 4px 24px rgba(88, 79, 142, 0.05), 0 0 0 8px rgba(255, 255, 255, 0.25); }
+    .detailsPanel__profileImage.editing input[type="file"],
+    .detailsPanel__profileImage.editing .iconButton {
+      visibility: visible;
+      display: unset;
+      pointer-events: unset; }
+    .detailsPanel__profileImage.editing .iconButton {
+      opacity: 1; }
+    .detailsPanel__profileImage.editing + .detailsPanel__firstName {
+      opacity: 0; }
 
 input[class*="profile_photo"],
 input[name*="profile_photo"] {
@@ -1220,6 +1258,12 @@ button,
 .u-p_fixed {
   position: fixed; }
 
+.u-p_absolute {
+  position: absolute; }
+
+.u-p_relative {
+  position: relative; }
+
 .u-bold {
   font-weight: bold; }
 
@@ -1231,9 +1275,6 @@ button,
 
 .u-pe_none {
   pointer-events: none; }
-
-.u-p_absolute {
-  position: absolute; }
 
 .u-visibility_hidden {
   visibility: hidden; }
@@ -1527,8 +1568,14 @@ button,
 .u-o_50 {
   opacity: .5; }
 
+.u-o_35 {
+  opacity: .35; }
+
 .u-o_25 {
   opacity: .25; }
+
+.u-o_0 {
+  opacity: 0; }
 
 .u-remove-link-style {
   text-decoration: none;

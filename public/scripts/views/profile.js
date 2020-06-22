@@ -33,7 +33,7 @@ const editProfileEl = () => {
 
     let imageUrl = accountMenuButton.style.backgroundImage;
     let profilePhotoInputEl = generateInputItem({
-        "value" : LocalDocs.member ? LocalDocs.member.data().profile_photo : null,
+        "value" : LocalDocs.member ? LocalDocs.member.profile_photo : null,
         "name" : "profile_photo",
         "label" : "Profile photo",
         "backgroundImage" : imageUrl,
@@ -51,9 +51,9 @@ const editProfileEl = () => {
         let inputValue = "";
 
         if (LocalDocs.member) {
-            inputValue = LocalDocs.member.data()[value["dataPath"]] ? LocalDocs.member.data()[value["dataPath"]] : null;
+            inputValue = LocalDocs.member[value["dataPath"]] ? LocalDocs.member[value["dataPath"]] : null;
             if (parentValue) {
-                inputValue = LocalDocs.member.data()[parentValue["dataPath"]][value["dataPath"]];
+                inputValue = LocalDocs.member[parentValue["dataPath"]][value["dataPath"]];
             }
         } else {
             if (key === "Email") {
@@ -183,7 +183,7 @@ const updateMember = (button, form) => {
             });
         }
 
-        function goUpdateMember(photoFile = LocalDocs.member.data().profile_photo) { 
+        function goUpdateMember(photoFile = LocalDocs.member.profile_photo) { 
             membersRef.doc(LocalDocs.member.id).update({
                 "name" : {
                     "firstName" : form["firstName"].value,
@@ -191,6 +191,7 @@ const updateMember = (button, form) => {
                     "middleName" : form["middleName"].value,
                     "surnameBirth" : form["surnameBirth"].value,
                     "nickname" : form["nickname"].value,
+                    "phonetic" : form["phonetic"].value,
                 },
                 "address" : {
                     "address1" : form["address1"].value,
@@ -199,6 +200,11 @@ const updateMember = (button, form) => {
                     "state" : form["state"].value,
                     "zipcode" : form["zipcode"].value,
                     "country" : form["country"].value,
+                },
+                "phone" : {
+                    "homePhone" : form["homePhone"].value,
+                    "mobilePhone" : form["mobilePhone"].value,
+                    "workPhone" : form["workPhone"].value,   
                 },
                 "birthday" : form["birthday"].value,
                 "profile_photo" : photoFile,

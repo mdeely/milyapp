@@ -43,7 +43,6 @@ const mainContent = document.querySelector("#mainContent");
 const branchContainer = document.querySelector("#branchContainer");
 
 const detailsPanel = mainContent.querySelector("#detailsPanel");
-const detailsPanelInfo = detailsPanel.querySelector(".detailsPanel__information");
 const detailsPanelEdit = detailsPanel.querySelector("#detailsPanel__edit");
 const detailsPanelAction = detailsPanel.querySelector(".detailsPanel__actions");
 
@@ -218,6 +217,7 @@ DetailsPanel.refresh = function() {
 
 DetailsPanel.populate = function(leafDoc, leafEl) {
     closeAllDropdowns();
+    DetailsPanel.cancelEditMember();
     let dataSource = leafDoc;
     let detailsPhoto = leafEl.querySelector(".leaf__image").getAttribute("style");
     let memberPermissionType = authLeafPermissionType();
@@ -239,8 +239,8 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
 
     let pencilIcon = createElementWithClass("i", "fal fa-pencil-alt u-mar-l_2");
 
-    editDetailsAnchor.setAttribute("tooltip", "Edit");
-    editDetailsAnchor.setAttribute("tooltip-position", "top middle");
+    // editDetailsAnchor.setAttribute("tooltip", "Edit");
+    // editDetailsAnchor.setAttribute("tooltip-position", "top middle");
 
     let memberHasClaimedLeafOnTree = LocalDocs.leaves.find(leafDoc => leafDoc.claimed_by === LocalDocs.member.id) ? true : false;
 
@@ -1077,42 +1077,197 @@ function createElementWithClass(elementType, classname = null, content = null) {
     return el;
 }
 
+DetailsPanel.cancelEditMember = function(resetToPreviousBackgroundImage) {
+    let detailsHeaderEl = detailsPanel.querySelector(".edit-details-header");
+
+    if (detailsHeaderEl) {
+        detailsHeaderEl.remove();
+    }
+    detailsPanelEdit.innerHTML = "";
+    // detailsPanel.scrollTop = 0;
+    detailsPanelAction.classList.remove("u-o_0", "u-pe_none");
+    detailsPanelMetaData.classList.remove("u-d_none");
+    detailsPanelImmediateFamily.classList.remove("u-d_none");
+    detailsPanelProfileImage.classList.remove("editing");
+    if (resetToPreviousBackgroundImage){
+        detailsPanelProfileImage.style.backgroundImage = resetToPreviousBackgroundImage;
+    }
+}
 DetailsPanel.editMember = function() {
     detailsPanelMetaData.classList.add("u-d_none");
     detailsPanelImmediateFamily.classList.add("u-d_none");
-    detailsPanelAction.classList.add("u-visibility_hidden");
+    detailsPanelAction.classList.add("u-o_0");
+    detailsPanelProfileImage.classList.add("editing");
 
     // detailsPanelEdit.innerHTML = '';
     // detailsPanel.scrollTop = 0;
 
-    let detailsHeaderEl = createElementWithClass("h6", "u-mar-b_7 u-mar-t_10 u-d_flex u-ai_center", "Details");
+    let detailsHeaderEl = createElementWithClass("h6", "edit-details-header u-mar-b_4 u-mar-t_10 u-d_flex u-ai_center", "Details");
     let saveDetailsButton = createElementWithClass("button", "u-mar-l_auto u-mar-r_1", "Save");
     let cancelDetailsButton = createElementWithClass("button", "secondary", "Cancel");
+
+    let profileImageInput = detailsPanel.querySelector("#details-edit-profile");
+    let displayProfileImage = detailsPanel.querySelector(".detailsPanel__profileImage");
+    let resetToPreviousBackgroundImage = displayProfileImage.style.backgroundImage;
 
     let reqEditDoc = DetailsPanel.getLeafDoc();
     let reqEditDocData = reqEditDoc;
     let memberDoc = null;
     // let header = `<h6 class="u-mar-t_4 u-mar-b_4">Details</h2>`
 
-    detailsHeaderEl.appendChild(saveDetailsButton);
-    detailsHeaderEl.appendChild(cancelDetailsButton);
-    detailsPanelEdit.appendChild(detailsHeaderEl);
-
-    return;
+    saveDetailsButton.classList.add("disabled");
 
     if (reqEditDocData.claimed_by) {
         memberDoc = LocalDocs.getMemberDocByIdFromCurrentTree(reqEditDocData.claimed_by);
     }
 
     let docData = memberDoc ? memberDoc : reqEditDocData;
+    let ref = {};
+    let docId;
 
-    detailsPanelAction.classList.add("u-d_none");
-    detailsPanelInfo.classList.add("u-d_none");
-    detailsPanelEdit.classList.remove("u-d_none");
+    if (memberDoc) {
+        ref = {
+            "type" : "member",
+            "path" : membersRef
+        };
+        docId = memberDoc.id;
+    } else {
+        ref = {
+            "type" : "leaf",
+            "path" : currentTreeLeafCollectionRef
+        };
+        docId = reqEditDoc.id;
+    }
+
+    detailsHeaderEl.appendChild(saveDetailsButton);
+    detailsHeaderEl.appendChild(cancelDetailsButton);
+      
+
+    profileImageInput.addEventListener("change", (e) => {
+        console.log("changed");
+        readURL(e.target);
+    });
+
+    function readURL(input) {
+        if (input.files && input.files[0]) {
+          var reader = new FileReader();
+          
+          reader.onload = function(e) {
+              displayProfileImage.style.backgroundImage = `url("${e.target.result}")`
+          }
+          
+          reader.readAsDataURL(input.files[0]); // convert to base64 string
+        }
+    }
+
+
+    saveDetailsButton.addEventListener("click", (e) => {
+        e.preventDefault();
+        detailsHeaderEl.remove();
+
+        if (profileImageInput.files.length == 0) {
+            // No photo to upload
+            let photoFile = reqEditDoc.profile_photo;
+            if (memberDoc) {
+                photoFile = memberDoc.profile_photo;
+            }
+            goUpdateDoc(photoFile);
+        } else {
+            let uploadedPhotoFile = profileImageInput.files[0];
+            let fileName = uploadedPhotoFile.name;
+            let extension = fileName.split('.').pop();
+            let profilePhotoRef;
+
+            if (memberDoc) {
+                profilePhotoRef = storageRef.child(`members/${memberDoc.id}/profile.${extension}`);
+            } else {
+                profilePhotoRef = storageRef.child(`trees/${LocalDocs.tree.id}/${reqEditDoc.id}/profile.${extension}`);
+            }
+
+            profilePhotoRef.put(uploadedPhotoFile).then(function(snapshot) {
+                ref["path"].doc(docId).update({
+                    "profile_photo" : snapshot.metadata.fullPath
+                })
+                .then(() => {
+                    goUpdateDoc(snapshot.metadata.fullPath);
+                })
+                .catch(err => {
+                    console.log(err.message);
+                })
+            });
+        }
+
+        function goUpdateDoc(photoFile = null) {
+            let object = {};
+            
+            MemberBlueprint.loop({
+                "functionCall" : createObject,
+                "exclude" : ["profile_photo"]
+            });
+
+            function createObject(key, value, parentValue) {
+                let reqName = value["dataPath"];
+                let reqParentName = parentValue ? parentValue["dataPath"] : null;
+                let data = detailsPanelEdit[reqName].value;
+
+                if (data) {
+                    if (parentValue) {
+                        if (!object[reqParentName]) {
+                            object[reqParentName] = {};
+                        }
+                        object[reqParentName][reqName] = data;
+                    } else {
+                        object[reqName] = data;
+                    }
+                }
+            }
+            ref["path"].doc(docId).update(
+                object
+            )
+            .then(() => {
+                console.log("Updated!");
+                DetailsPanel.cancelEditMember();
+                // let doc;
+                // if (ref["type"] === "leaf") {
+                //     doc = LocalDocs.getLeafById(docId);
+                // } else {
+                //     doc = LocalDocs.getMemberById(docId);
+                // }
+
+                // LEFT OFF TODO: Try to update the LocalDocs data so you can run .populate without having to reload everything.
+                // DetailsPanel.populate();
+                location.reload();
+            })
+            .catch(err => {
+                console.log(err.message)
+            })
+        }
+    });
+
+    cancelDetailsButton.addEventListener("click", (e) => {
+        e.preventDefault();
+
+        DetailsPanel.cancelEditMember(detailsHeaderEl, resetToPreviousBackgroundImage);
+    });
+
+    detailsPanelEdit.insertAdjacentElement("beforebegin", detailsHeaderEl);
+
+    // detailsPanelAction.classList.add("u-d_none");
+    // detailsPanelInfo.classList.add("u-d_none");
+    // detailsPanelEdit.classList.remove("u-d_none");
 
     MemberBlueprint.loop({
-        "functionCall" : createMemberInput
+        "functionCall" : createMemberInput,
+        "exclude" : ["profile_photo"]
     });
+
+    let inputs = detailsPanel.querySelectorAll("input");
+
+    for (inputEl of inputs) {
+        inputEl.addEventListener('input', (e) => {
+            saveDetailsButton.classList.remove("disabled");
+        })
+    }
 
     function createMemberInput(key, value, parentValue) {
         let inputType = value.dataType ? value.dataType : "text";
@@ -1144,126 +1299,38 @@ DetailsPanel.editMember = function() {
         detailsPanelEdit.innerHTML += inputGroup;
     }
 
-    let buttonGroup = document.createElement('div');
-    let saveButton = document.createElement("button");
-    let cancelButton = document.createElement("button");
+    // let buttonGroup = document.createElement('div');
+    // let saveButton = document.createElement("button");
+    // let cancelButton = document.createElement("button");
 
-    saveButton.textContent = "Save";
-    saveButton.setAttribute("class", "u-w_full u-mar-b_1")
-    saveButton.setAttribute("type", "submit");
+    // saveButton.textContent = "Save";
+    // saveButton.setAttribute("class", "u-w_full u-mar-b_1")
+    // saveButton.setAttribute("type", "submit");
 
-    cancelButton.textContent = "Cancel";
-    cancelButton.setAttribute("class", "u-w_full button secondary")
-    cancelButton.setAttribute("href", "#");
+    // cancelButton.textContent = "Cancel";
+    // cancelButton.setAttribute("class", "u-w_full button secondary")
+    // cancelButton.setAttribute("href", "#");
 
-    let ref;
-    let docId;
+    // cancelDetailsButton.addEventListener("click", (e) => {
+    //     console.log("pressed!");
+    //     e.preventDefault();
+    //     detailsPanel.scrollTop = 0;
+    //     detailsPanelMetaData.classList.remove("u-d_none");
+    //     detailsPanelImmediateFamily.classList.remove("u-d_none");
+    //     detailsPanelAction.classList.remove("u-o_50", "u-pe_none");
+    //     // detailsPanelAction.classList.add("u-o_50", "u-pe_none");
+    //     // detailsPanelEdit.classList.add("u-d_none");
+    //     // detailsPanelInfo.classList.remove("u-d_none");
+    //     // detailsPanelAction.classList.remove("u-d_none");
+    // });
 
-    if (memberDoc) {
-        ref = membersRef;
-        docId = memberDoc.id;
-    } else {
-        ref = currentTreeLeafCollectionRef;
-        docId = reqEditDoc.id;
-    }
+    // buttonGroup.setAttribute("class", "formActions u-pad_4");
+    // buttonGroup.appendChild(saveButton);
+    // buttonGroup.appendChild(cancelButton);
 
-    saveButton.addEventListener("click", (e) => {
-        e.preventDefault();
-
-        console.log(`TODO: Profile images are setting to null on the member when updating a claimed leaf`);
-
-        if (detailsPanelEdit["profile_photo"].files.length == 0) {
-            // No photo to upload
-            let photoFile = reqEditDoc.profile_photo;
-            if (memberDoc) {
-                photoFile = memberDoc.profile_photo;
-            }
-            goUpdateDoc(photoFile);
-        } else {
-            // Photo to upload
-            let uploadedPhotoFile = detailsPanelEdit["profile_photo"].files[0];
-            let fileName = uploadedPhotoFile.name;
-            let extension = filename.split('.').pop();
-            let profilePhotoRef;
-
-            if (memberDoc) {
-                profilePhotoRef = storageRef.child(`members/${memberDoc.id}/profile.${extension}`);
-            } else {
-                profilePhotoRef = storageRef.child(`trees/${LocalDocs.tree.id}/${reqEditDoc.id}/profile.${extension}`);
-            }
-
-            profilePhotoRef.put(uploadedPhotoFile).then(function(snapshot) {
-                ref.doc(docId).update({
-                    "profile_photo" : snapshot.metadata.fullPath
-                })
-                .then(() => {
-                    goUpdateDoc(snapshot.metadata.fullPath);
-                })
-                .catch(err => {
-                    console.log(err.message);
-                })
-            });
-        }
-
-        function goUpdateDoc(photoFile = null) {
-            console.log("updating?");
-            ref.doc(docId).update({
-                "name" : {
-                    "firstName" : detailsPanelEdit["firstName"].value,
-                    "surnameCurrent" : detailsPanelEdit["surnameCurrent"].value,
-                    "middleName" : detailsPanelEdit["middleName"].value,
-                    "surnameBirth" : detailsPanelEdit["surnameBirth"].value,
-                    "nickname" : detailsPanelEdit["nickname"].value,
-                    "phonetic" : detailsPanelEdit["phonetic"].value,
-                },
-                "address" : {
-                    "address1" : detailsPanelEdit["address1"].value,
-                    "address2" : detailsPanelEdit["address2"].value,
-                    "city" : detailsPanelEdit["city"].value,
-                    "state" : detailsPanelEdit["state"].value,
-                    "zipcode" : detailsPanelEdit["zipcode"].value,
-                    "country" : detailsPanelEdit["country"].value,
-                },
-                "phone" : {
-                    "homePhone" : detailsPanelEdit["homePhone"].value,
-                    "mobilePhone" : detailsPanelEdit["mobilePhone"].value,
-                    "workPhone" : detailsPanelEdit["workPhone"].value,
-                },
-                "website" : detailsPanelEdit["website"].value,
-                "birthday" : detailsPanelEdit["birthday"].value,
-                "deathdate" : detailsPanelEdit["deathdate"].value,
-                "profile_photo" : photoFile,
-                "occupation" : detailsPanelEdit["occupation"].value,
-                "email" : detailsPanelEdit["email"].value,
-            })
-            .then(() => {
-                console.log("Updated!");
-                detailsPanelAction.classList.remove("u-d_none");
-                detailsPanelEdit.classList.add("u-d_none");
-                detailsPanelInfo.classList.remove("u-d_none");
-                location.reload();
-            })
-            .catch(err => {
-                console.log(err.message)
-            })
-        }
-    });
-
-    cancelButton.addEventListener("click", (e) => {
-        e.preventDefault();
-        detailsPanel.scrollTop = 0;
-        detailsPanelEdit.classList.add("u-d_none");
-        detailsPanelInfo.classList.remove("u-d_none");
-        detailsPanelAction.classList.remove("u-d_none");
-    });
-
-    buttonGroup.setAttribute("class", "formActions u-pad_4");
-    buttonGroup.appendChild(saveButton);
-    buttonGroup.appendChild(cancelButton);
-
-    detailsPanelInfo.classList.add("u-d_none");
-    detailsPanelAction.classList.add("u-d_none");
-    detailsPanelEdit.appendChild(buttonGroup);
+    // detailsPanelInfo.classList.add("u-d_none");
+    // detailsPanelAction.classList.add("u-d_none");
+    // detailsPanelEdit.appendChild(buttonGroup);
     // detailsPanelEdit.insertAdjacentHTML("afterBegin", header);
 }
 

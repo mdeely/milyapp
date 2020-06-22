@@ -23,7 +23,11 @@ Tree.setup = function(treeId) {
                     membersRef.where('claimed_by', '==', auth.currentUser.uid).limit(1).get()
                     .then((queryResult) => {
                         if (queryResult.docs[0]) {
-                            LocalDocs.member = queryResult.docs[0] ? queryResult.docs[0] : null;
+                            LocalDocs.member = {
+                                id: queryResult.docs[0].id,
+                                ...queryResult.docs[0].data()
+                            }
+                            // LocalDocs.member = queryResult.docs[0] ? queryResult.docs[0] : null;
                             Tree.continueTreeSetup(treeId);
                         }
                     })
@@ -38,7 +42,7 @@ Tree.setup = function(treeId) {
 Tree.continueTreeSetup = function(treeId) {
     LocalDocs.leaves = [];
 
-    if ( (LocalDocs.member ? Object.keys(LocalDocs.member.data().trees).includes(treeId) : false) || LocalDocs.tree.data().public === true) {
+    if ( (LocalDocs.member ? Object.keys(LocalDocs.member.trees).includes(treeId) : false) || LocalDocs.tree.data().public === true) {
         pageTitle.innerHTML = LocalDocs.tree ? LocalDocs.tree.data().name : "Tree not found!";
         treesRef.doc(LocalDocs.tree.id).collection('leaves').get()
         .then((response) => {

@@ -10,8 +10,8 @@ Nav.update = function(user) {
         }
         navLogo.setAttribute("href", "#/my-trees");
 
-        if (LocalDocs.member && LocalDocs.member.data().profile_photo) {
-            let profileFileReference = storage.ref(`${LocalDocs.member.data().profile_photo}`);
+        if (LocalDocs.member && LocalDocs.member.profile_photo) {
+            let profileFileReference = storage.ref(`${LocalDocs.member.profile_photo}`);
             profileFileReference.getDownloadURL().then(function(url) {
                 accountMenuButton.style.backgroundImage = `url(${url})`;
             })
@@ -96,7 +96,7 @@ const getNotificationsByAuthMember = () => {
 
 const getNotificationsByEmail = async (email) => {
     if (LocalDocs.member) {
-        let notificationQuery = notificationsRef.where("status", "==", "pending").where("for_email", "==", LocalDocs.member.data().email);
+        let notificationQuery = notificationsRef.where("status", "==", "pending").where("for_email", "==", LocalDocs.member.email);
 
         notificationQuery.get().then(queryResult  => {
             let docs = queryResult.docs;
