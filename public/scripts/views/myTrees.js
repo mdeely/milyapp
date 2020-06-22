@@ -30,10 +30,10 @@ const populateMyTreesList = async () => {
     myTreesDebugMsg.innerHTML += `<h2 class="u-ta_center u-mar-l_2">Your trees:</h2>`;
     myTreesDebugMsg.appendChild(button);
 
-    if (LocalDocs.member.data().trees) {
+    if (Object.keys(LocalDocs.member.data().trees)) {
         let ranThrough = [];
 
-        for await (let treeId of LocalDocs.member.data().trees) {
+        for await (let treeId of Object.keys(LocalDocs.member.data().trees)) {
             if (!ranThrough.includes(treeId)) {
                 treesRef.doc(treeId).get()
                 .then((reqTreeDoc) => {
@@ -166,13 +166,15 @@ const populateMyTreesList = async () => {
                                                             // find if any leaves are claimed by this user.
                                                             treesRef.doc(treeDoc.id).collection("leaves").where("claimed_by", "==", memberId).get()
                                                             .then((response) => {
-                                                                let claimedLeafDoc = response.docs[0];
-                                                                treesRef.doc(treeId).collection("leaves").doc(claimedLeafDoc.id).update({
-                                                                    "claimed_by" : null
-                                                                })
-                                                                .then(() => {
-                                                                    console.log("member had a claimed leaf, and is now unclaimed");
-                                                                })
+                                                                if (response.docs.length > 0) {
+                                                                    let claimedLeafDoc = response.docs[0];
+                                                                    treesRef.doc(treeId).collection("leaves").doc(claimedLeafDoc.id).update({
+                                                                        "claimed_by" : null
+                                                                    })
+                                                                    .then(() => {
+                                                                        console.log("member had a claimed leaf, and is now unclaimed");
+                                                                    })
+                                                                }
                                                             })
                                                             console.log("permission removed from tree");
                                                             // location.reload();
@@ -223,7 +225,8 @@ const populateMyTreesList = async () => {
                             e.preventDefault();
 
                             membersRef.doc(LocalDocs.member.id).update({
-                                trees : firebase.firestore.FieldValue.arrayRemove(reqTreeDoc.id)
+                                [`trees.${reqTreeDoc.id}`] : firebase.firestore.FieldValue.delete()
+                                // trees : firebase.firestore.FieldValue.arrayRemove(reqTreeDoc.id)
                             })
                             .then(() => {
                                 console.log(`${LocalDocs.member.id} updated to remove tree ${reqTreeDoc.id}`);
@@ -235,17 +238,20 @@ const populateMyTreesList = async () => {
 
                                     treesRef.doc(reqTreeDoc.id).collection('leaves').where("claimed_by", "==", LocalDocs.member.id).get()
                                     .then((result) => {
-                                        let leafDocId = result.docs[0].id;
-
-                                        if (leafDocId) {
-                                            treesRef.doc(reqTreeDoc.id).collection('leaves').doc(leafDocId).update({
-                                                "claimed_by" : null
-                                            })
-                                            .then(() => {
-                                                console.log(`${leafDocId} updated to remove claimed by ${LocalDocs.member.id}`)
+                                        if (result.docs.length > 0) {
+                                            let leafDocId = result.docs[0].id;
+                                            if (leafDocId) {
+                                                treesRef.doc(reqTreeDoc.id).collection('leaves').doc(leafDocId).update({
+                                                    "claimed_by" : null
+                                                })
+                                                .then(() => {
+                                                    console.log(`${leafDocId} updated to remove claimed by ${LocalDocs.member.id}`)
+                                                    location.reload();
+                                                })
+                                                .catch(() => console.log("error"));
+                                            } else {
                                                 location.reload();
-                                            })
-                                            .catch(() => console.log("error"));
+                                            }
                                         } else {
                                             location.reload();
                                         }

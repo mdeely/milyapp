@@ -234,12 +234,11 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
         }
     }
     
-    let detailsHeaderEl = createElementWithClass("h6", "u-mar-b_2 u-mar-t_8 u-d_flex u-ai_center");
-    let editDetailsAnchor = createElementWithClass("button", "u-mar-l_auto small secondary");
+    let detailsHeaderEl = createElementWithClass("h6", "u-mar-b_2 u-mar-t_8 u-d_flex u-ai_center", "Details");
+    let editDetailsAnchor = createElementWithClass("button", "u-mar-l_auto secondary", "Edit");
+
     let pencilIcon = createElementWithClass("i", "fal fa-pencil-alt u-mar-l_2");
 
-    detailsHeaderEl.textContent = "Details"
-    editDetailsAnchor.textContent = "Edit";
     editDetailsAnchor.setAttribute("tooltip", "Edit");
     editDetailsAnchor.setAttribute("tooltip-position", "top middle");
 
@@ -1079,13 +1078,27 @@ function createElementWithClass(elementType, classname = null, content = null) {
 }
 
 DetailsPanel.editMember = function() {
-    detailsPanelEdit.innerHTML = '';
-    detailsPanel.scrollTop = 0;
+    detailsPanelMetaData.classList.add("u-d_none");
+    detailsPanelImmediateFamily.classList.add("u-d_none");
+    detailsPanelAction.classList.add("u-visibility_hidden");
+
+    // detailsPanelEdit.innerHTML = '';
+    // detailsPanel.scrollTop = 0;
+
+    let detailsHeaderEl = createElementWithClass("h6", "u-mar-b_7 u-mar-t_10 u-d_flex u-ai_center", "Details");
+    let saveDetailsButton = createElementWithClass("button", "u-mar-l_auto u-mar-r_1", "Save");
+    let cancelDetailsButton = createElementWithClass("button", "secondary", "Cancel");
 
     let reqEditDoc = DetailsPanel.getLeafDoc();
     let reqEditDocData = reqEditDoc;
     let memberDoc = null;
-    let header = `<h2 class="u-mar-t_4 u-mar-b_4">Edit details</h2>`
+    // let header = `<h6 class="u-mar-t_4 u-mar-b_4">Details</h2>`
+
+    detailsHeaderEl.appendChild(saveDetailsButton);
+    detailsHeaderEl.appendChild(cancelDetailsButton);
+    detailsPanelEdit.appendChild(detailsHeaderEl);
+
+    return;
 
     if (reqEditDocData.claimed_by) {
         memberDoc = LocalDocs.getMemberDocByIdFromCurrentTree(reqEditDocData.claimed_by);
@@ -1251,11 +1264,7 @@ DetailsPanel.editMember = function() {
     detailsPanelInfo.classList.add("u-d_none");
     detailsPanelAction.classList.add("u-d_none");
     detailsPanelEdit.appendChild(buttonGroup);
-    detailsPanelEdit.insertAdjacentHTML("afterBegin", header);
-
-
-    // add save/cancel action
-    // turn all information into inputs
+    // detailsPanelEdit.insertAdjacentHTML("afterBegin", header);
 }
 
 let MemberBlueprint = {};

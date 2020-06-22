@@ -638,7 +638,8 @@ createTreeFormModal.addEventListener('submit', (e) => {
         )
         if (!LocalDocs.member.data().primary_tree)
             membersRef.doc(LocalDocs.member.id).update({
-                "trees" : firebase.firestore.FieldValue.arrayUnion(newTreeRef.id),
+                [`trees.${newTreeRef.id}`] : null,
+                // "trees" : firebase.firestore.FieldValue.arrayUnion(newTreeRef.id),
                 "primary_tree" : newTreeRef.id
             })
             .then(() => {
@@ -649,7 +650,8 @@ createTreeFormModal.addEventListener('submit', (e) => {
             })
         else {
             membersRef.doc(LocalDocs.member.id).update({
-                "trees" : firebase.firestore.FieldValue.arrayUnion(newTreeRef.id),
+                [`trees.${newTreeRef.id}`] : null
+                // "trees" : firebase.firestore.FieldValue.arrayUnion(newTreeRef.id),
             })   
             .then(() => {
                 location.reload();

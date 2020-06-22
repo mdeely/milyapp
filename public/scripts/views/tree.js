@@ -38,7 +38,7 @@ Tree.setup = function(treeId) {
 Tree.continueTreeSetup = function(treeId) {
     LocalDocs.leaves = [];
 
-    if ( (LocalDocs.member ? LocalDocs.member.data().trees.includes(treeId) : false) || LocalDocs.tree.data().public === true) {
+    if ( (LocalDocs.member ? Object.keys(LocalDocs.member.data().trees).includes(treeId) : false) || LocalDocs.tree.data().public === true) {
         pageTitle.innerHTML = LocalDocs.tree ? LocalDocs.tree.data().name : "Tree not found!";
         treesRef.doc(LocalDocs.tree.id).collection('leaves').get()
         .then((response) => {

@@ -205,7 +205,7 @@ const handleNotification = (method, doc) => {
 
             membersRef.doc(LocalDocs.member.id).update({
                 // Add new tree to the member's Trees
-                "trees" : firebase.firestore.FieldValue.arrayUnion(treeToJoin)
+                [`trees.${treeToJoin}`] : null
             })
             .then(() => {
                 notificationsRef.doc(doc.id).update({

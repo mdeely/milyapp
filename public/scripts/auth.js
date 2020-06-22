@@ -210,7 +210,7 @@ signUpForm.addEventListener('submit', (e) => {
                 surnameBirth: null
             },
             "email": email,
-            "trees": [],
+            "trees": {},
             "primary_tree": null
         }).then(() => {
             var user = firebase.auth().currentUser;
