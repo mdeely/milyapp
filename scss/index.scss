@@ -204,6 +204,7 @@ path {
 
         #detailsPanel {
             right: calc( (var(--detailsWidth) * -1 ));
+            box-shadow: 0 0 20px rgba($brand, .1);
         }
     }
 
@@ -226,6 +227,7 @@ path {
 
         #detailsPanel {
             right: 0;
+            box-shadow: 0 0 20px rgba($brand, .1)
         }
     }
 
@@ -319,7 +321,8 @@ path {
     table {
         max-width: 1024px;
         width: 100%;
-        margin: 0 auto;
+        margin-left: auto;
+        margin-right: auto;
         border-collapse: collapse;
     }
 
@@ -619,7 +622,7 @@ path {
     &:before {
         content: '';
         position: absolute;
-        left: 1px;
+        left: 0;
         right: 0;
         top: var(--detailsPanelDecorationTopOffset);
         background-image: url("../assets/img/wavy-sm_purple.svg");
@@ -1079,10 +1082,32 @@ input[name*="profile_photo"] {
 [data-view="tree"] {
     padding-top: 0px;
 }
+[data-view="profile"] {
+    padding-top: var(--navDecorationHeight);
+
+    .profile__decoration {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 44 * 8px;
+        width: 100%;
+        z-index: -1;
+    }
+    .profile__container {
+        max-width: 600px;
+        padding: 40px;
+    }
+    .profile__image {
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+    } 
+}
 
 .fauxToggle {
     display: flex;
-    border-radius: var(--iconButtonSize);
+    border-radius: 8px;
     box-shadow: 0 0 0 1px var(--color_border);
     max-height: var(--iconButtonSize);
 
@@ -1090,7 +1115,8 @@ input[name*="profile_photo"] {
         box-shadow: 0 0 0 3px var(--color_border);
     }
 
-    .iconButton {
+    .iconButton,
+    button {
         &:focus,
         &:hover {
             transform: none;
@@ -1098,6 +1124,13 @@ input[name*="profile_photo"] {
 
         &:first-child {
             margin-right: 4px;
+            border-top-right-radius: 0px;
+            border-bottom-right-radius: 0px;
+        }
+
+        &:last-child {
+            border-top-left-radius: 0px;
+            border-bottom-left-radius: 0px;
         }
     }
 }
@@ -1108,7 +1141,7 @@ input[name*="profile_photo"] {
     background-color:white;
     padding: 0 16px;
     padding-top: 0;
-    margin-bottom: calc(var(--navDecorationHeight) + 32px);
+    // margin-bottom: calc(var(--navDecorationHeight) + 32px);
     border-bottom: 1px solid var(--color_border);
     overflow: hidden;
     transition: all $detailsRevealTiming ease-in-out;
@@ -1117,11 +1150,12 @@ input[name*="profile_photo"] {
     z-index: 99;
 
     &.active {
-        margin-bottom: var(--navDecorationHeight);
+        // margin-bottom: var(--navDecorationHeight);
         padding: 8px 16px;
         max-height: calc( var(--toolbarHeight) + 16px);
         padding-top: calc(var(--navDecorationHeight) + 8px);
         transition: all $detailsRevealTiming ease-in-out;
+        box-shadow: 0 0 20px rgba($brand, .1);
     }
 
     &.showDetails {
@@ -1529,6 +1563,7 @@ button,
     transition: transform .1s ease-in-out;
     text-decoration: none;
     align-items: center;
+    z-index: 1;
 
     &:hover,
     &:focus {
@@ -1562,6 +1597,31 @@ button,
     &.white {
         background-color: white;
         color: var(--brand);
+
+        &:hover {
+            background-color: rgba(black, .05);
+        }
+        &:active {
+            background-color: rgba(black, .1);
+        }
+    }
+
+    &.white-text {
+        background-color: transparent;
+        color: white;
+
+        &:hover {
+            background-color: rgba(black, .15);
+        }
+        &:active {
+            background-color: rgba(black, .2);
+        }
+    }
+
+    &.white-outline {
+        background-color: transparent;
+        color: white;
+        box-shadow: 0 0 0 2px rgba(white, .25);
     }
 
     &.danger {
@@ -1577,6 +1637,7 @@ button,
         opacity: .35;
         pointer-events: none;
     }
+
 }
 
 .iconButton {
@@ -1972,6 +2033,9 @@ button,
 .u-pad_1 {
     padding: 8px;
 }
+.u-pad_1-5 {
+    padding: 12px;
+}
 .u-pad_2 {
     padding: 16px;
 }
@@ -2180,7 +2244,6 @@ button,
 .u-mar-t_7 {
     margin-top: 56px;
 }
-
 .u-mar-t_8 {
     margin-top: 64px;
 }
@@ -2235,17 +2298,21 @@ button,
 .u-ta_center {
     text-align: center;
 }
+.u-ta_right {
+    text-align: right;
+}
 
 .u-w_full {
     width: 100%;
 }
-
 .u-w_25perc {
     width: 25%;
 }
-
 .u-w_33perc {
     width: 33.333%;
+}
+.u-w_1ch {
+    width: 1ch;
 }
 
 .u-flex_1 {
@@ -2307,6 +2374,10 @@ button,
 }
 
 /// Header classes
+.header_l {
+    font-weight: 900;
+    font-size: 32px;
+}
 .header_m {
     font-weight: 900;
     font-size: 24px;

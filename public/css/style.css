@@ -145,13 +145,15 @@ path {
   #mainContent:not(.showDetails) #familyTree {
     margin-right: 0; }
   #mainContent:not(.showDetails) #detailsPanel {
-    right: calc( (var(--detailsWidth) * -1 )); }
+    right: calc( (var(--detailsWidth) * -1 ));
+    box-shadow: 0 0 20px rgba(0, 40, 49, 0.1); }
   #mainContent.showDetails #familyTree,
   #mainContent.showDetails #familyTree__list {
     width: calc(100vw - var(--detailsWidth));
     transition: width 0.15s ease-in-out; }
   #mainContent.showDetails #detailsPanel {
-    right: 0; }
+    right: 0;
+    box-shadow: 0 0 20px rgba(0, 40, 49, 0.1); }
   #mainContent.view_list {
     --leafSize: 32px; }
     #mainContent.view_list #familyTree {
@@ -191,7 +193,8 @@ path {
   #familyTree__list table {
     max-width: 1024px;
     width: 100%;
-    margin: 0 auto;
+    margin-left: auto;
+    margin-right: auto;
     border-collapse: collapse; }
   #familyTree__list tr {
     border-radius: 16px; }
@@ -384,7 +387,7 @@ path {
   #detailsPanel:before {
     content: '';
     position: absolute;
-    left: 1px;
+    left: 0;
     right: 0;
     top: var(--detailsPanelDecorationTopOffset);
     background-image: url("../assets/img/wavy-sm_purple.svg");
@@ -666,17 +669,44 @@ input[name*="profile_photo"] {
 [data-view="tree"] {
   padding-top: 0px; }
 
+[data-view="profile"] {
+  padding-top: var(--navDecorationHeight); }
+  [data-view="profile"] .profile__decoration {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 352px;
+    width: 100%;
+    z-index: -1; }
+  [data-view="profile"] .profile__container {
+    max-width: 600px;
+    padding: 40px; }
+  [data-view="profile"] .profile__image {
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat; }
+
 .fauxToggle {
   display: flex;
-  border-radius: var(--iconButtonSize);
+  border-radius: 8px;
   box-shadow: 0 0 0 1px var(--color_border);
   max-height: var(--iconButtonSize); }
   .fauxToggle:hover {
     box-shadow: 0 0 0 3px var(--color_border); }
-  .fauxToggle .iconButton:focus, .fauxToggle .iconButton:hover {
+  .fauxToggle .iconButton:focus, .fauxToggle .iconButton:hover,
+  .fauxToggle button:focus,
+  .fauxToggle button:hover {
     transform: none; }
-  .fauxToggle .iconButton:first-child {
-    margin-right: 4px; }
+  .fauxToggle .iconButton:first-child,
+  .fauxToggle button:first-child {
+    margin-right: 4px;
+    border-top-right-radius: 0px;
+    border-bottom-right-radius: 0px; }
+  .fauxToggle .iconButton:last-child,
+  .fauxToggle button:last-child {
+    border-top-left-radius: 0px;
+    border-bottom-left-radius: 0px; }
 
 #toolbar {
   width: 100%;
@@ -684,7 +714,6 @@ input[name*="profile_photo"] {
   background-color: white;
   padding: 0 16px;
   padding-top: 0;
-  margin-bottom: calc(var(--navDecorationHeight) + 32px);
   border-bottom: 1px solid var(--color_border);
   overflow: hidden;
   transition: all 0.15s ease-in-out;
@@ -692,11 +721,11 @@ input[name*="profile_photo"] {
   top: calc( var(--navHeight));
   z-index: 99; }
   #toolbar.active {
-    margin-bottom: var(--navDecorationHeight);
     padding: 8px 16px;
     max-height: calc( var(--toolbarHeight) + 16px);
     padding-top: calc(var(--navDecorationHeight) + 8px);
-    transition: all 0.15s ease-in-out; }
+    transition: all 0.15s ease-in-out;
+    box-shadow: 0 0 20px rgba(0, 40, 49, 0.1); }
   #toolbar.showDetails {
     width: calc(100vw - var(--detailsWidth)); }
 
@@ -973,7 +1002,8 @@ button,
   font-size: 15px;
   transition: transform .1s ease-in-out;
   text-decoration: none;
-  align-items: center; }
+  align-items: center;
+  z-index: 1; }
   .button:hover, .button:focus,
   button:hover,
   button:focus,
@@ -1009,6 +1039,33 @@ button,
   .iconButton.white {
     background-color: white;
     color: var(--brand); }
+    .button.white:hover,
+    button.white:hover,
+    .iconButton.white:hover {
+      background-color: rgba(0, 0, 0, 0.05); }
+    .button.white:active,
+    button.white:active,
+    .iconButton.white:active {
+      background-color: rgba(0, 0, 0, 0.1); }
+  .button.white-text,
+  button.white-text,
+  .iconButton.white-text {
+    background-color: transparent;
+    color: white; }
+    .button.white-text:hover,
+    button.white-text:hover,
+    .iconButton.white-text:hover {
+      background-color: rgba(0, 0, 0, 0.15); }
+    .button.white-text:active,
+    button.white-text:active,
+    .iconButton.white-text:active {
+      background-color: rgba(0, 0, 0, 0.2); }
+  .button.white-outline,
+  button.white-outline,
+  .iconButton.white-outline {
+    background-color: transparent;
+    color: white;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.25); }
   .button.danger,
   button.danger,
   .iconButton.danger {
@@ -1309,6 +1366,9 @@ button,
 .u-pad_1 {
   padding: 8px; }
 
+.u-pad_1-5 {
+  padding: 12px; }
+
 .u-pad_2 {
   padding: 16px; }
 
@@ -1535,6 +1595,9 @@ button,
 .u-ta_center {
   text-align: center; }
 
+.u-ta_right {
+  text-align: right; }
+
 .u-w_full {
   width: 100%; }
 
@@ -1543,6 +1606,9 @@ button,
 
 .u-w_33perc {
   width: 33.333%; }
+
+.u-w_1ch {
+  width: 1ch; }
 
 .u-flex_1 {
   flex: 1; }
@@ -1589,6 +1655,10 @@ button,
 
 .u-c_danger {
   color: var(--color_danger); }
+
+.header_l {
+  font-weight: 900;
+  font-size: 32px; }
 
 .header_m {
   font-weight: 900;

@@ -808,16 +808,17 @@ function renderRowAndRelations(doc, tableEl, i = 0) {
 
 function renderTableRow(doc, i) {
     let data = doc;
+    let tdPadding = "1";
     let tr = createElementWithClass("tr", "");
-    let tdName = createElementWithClass("td", "u-pad_1 u-bold");
-    let tdProfileImage = createElementWithClass("td", "u-pad_1 profile__image");
-    let tdEmail = createElementWithClass("td", "u-pad_1 u-font-size_14");
-    let tdMobilePhone = createElementWithClass("td", "u-pad_1 u-font-size_14");
-    let tdBirthday = createElementWithClass("td", "u-pad_1 u-font-size_14");
-    let tdAddress = createElementWithClass("td", "u-pad_1 u-font-size_14");
-    let tdViewInfo = createElementWithClass("td", "u-pad_1");
-    let tdInfoButton = createElementWithClass("button", "u-pad_1 u-mar-l_auto iconButton white");
-    let tdInfoIcon = createElementWithClass("i", "fal fa-info-circle");
+    let tdName = createElementWithClass("td", `u-pad_${tdPadding} u-bold`);
+    let tdProfileImage = createElementWithClass("td", `u-pad_${tdPadding} profile__image`);
+    let tdEmail = createElementWithClass("td", `u-pad_${tdPadding} u-font-size_14 u-text_low`);
+    let tdMobilePhone = createElementWithClass("td", `u-pad_${tdPadding} u-font-size_14 u-text_low`);
+    let tdBirthday = createElementWithClass("td", `u-pad_${tdPadding} u-font-size_14 u-text_low`);
+    let tdAddress = createElementWithClass("td", `u-pad_${tdPadding} u-font-size_14 u-text_low`);
+    let tdViewInfo = createElementWithClass("td", `u-pad_${tdPadding}`);
+    let tdInfoButton = createElementWithClass("button", `u-pad_${tdPadding} u-mar-l_auto iconButton white`);
+    let tdInfoIcon = createElementWithClass("i", "fal fa-info-circle u-font-size_18 u-text_low");
 
     let profileImage = createElementWithClass("div", "leaf__image");
     let leafImageEl = familyTreeEl.querySelector(`[data-id="${doc.id}"]`);
@@ -932,7 +933,7 @@ const showListView = (show = true) => {
         viewPermissionsList.classList.remove("white");
         mainContent.classList.add("view_list");
         let topLeafDoc = LocalDocs.leaves.find(leafDoc => leafDoc.topMember === true);
-        let tableEl = createElementWithClass("table", "u-w_full");
+        let tableEl = createElementWithClass("table", "u-w_full u-mar-t_6");
 
         tableEl.appendChild(renderTableHeaders());
 

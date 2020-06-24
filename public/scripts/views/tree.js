@@ -55,12 +55,15 @@ Tree.continueTreeSetup = function(treeId) {
             window.currentTreeLeafCollectionRef = treesRef.doc(LocalDocs.tree.id).collection('leaves');
             
             TreeBranch.initiate();
+            toolbarEl.classList.add("u-d_none");
+
     
             let tableEl = familyTreeListEl.querySelector("table");
             let tdEls = tableEl.querySelectorAll("tr td");
         })
     } else {
         Nav.showViewPreferencesButton();
+        toolbarEl.classList.add("u-d_none");
         treeDebugMsg.innerHTML += `
                 <h1 class="u-mar-lr_auto u-ta_center u-mar-t_8">
                     <i class="far fa-lock-alt u-d_block u-mar-b_2"></i>

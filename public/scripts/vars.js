@@ -234,7 +234,7 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
         }
     }
     
-    let detailsHeaderEl = createElementWithClass("h6", "u-mar-b_2 u-mar-t_8 u-d_flex u-ai_center", "Details");
+    let detailsHeaderEl = createElementWithClass("h6", "u-mar-b_2 u-mar-t_8 u-d_flex u-ai_center", "Profile");
     let editDetailsAnchor = createElementWithClass("button", "u-mar-l_auto secondary", "Edit");
 
     let pencilIcon = createElementWithClass("i", "fal fa-pencil-alt u-mar-l_2");
@@ -1221,6 +1221,7 @@ DetailsPanel.editMember = function() {
                     }
                 }
             }
+            
             ref["path"].doc(docId).update(
                 object
             )
@@ -1337,18 +1338,19 @@ DetailsPanel.editMember = function() {
 let MemberBlueprint = {};
 
 MemberBlueprint.object = {
-    "Name" : { "dataPath" : "name", "icon" : "user", 
+    "Name" : { "dataPath" : "name", "icon" : "id-badge", 
                 "defaultValue" : {
-                    "First name" : { "dataPath" : "firstName", "defaultValue" : null, "icon" : "user" },
-                    "Middle name" : { "dataPath" : "middleName", "defaultValue" : null, "icon" : "user" },
-                    "Surname (current)" : { "dataPath" : "surnameCurrent", "defaultValue" : null, "icon" : "user" },
-                    "Surname (at birth)" : { "dataPath" : "surnameBirth", "defaultValue" : null, "icon" : "user" },
-                    "Nickname" : { "dataPath" : "nickname", "defaultValue" : null, "icon" : "user" },
-                    "Phonetic" : { "dataPath" : "phonetic", "defaultValue" : null, "icon" : "user" }
+                    "First name" : { "dataPath" : "firstName", "defaultValue" : null, "icon" : "id-badge" },
+                    "Middle name" : { "dataPath" : "middleName", "defaultValue" : null, "icon" : "id-badge" },
+                    "Surname (current)" : { "dataPath" : "surnameCurrent", "defaultValue" : null, "icon" : "id-badge" },
+                    "Surname (at birth)" : { "dataPath" : "surnameBirth", "defaultValue" : null, "icon" : "id-badge" },
+                    "Nickname" : { "dataPath" : "nickname", "defaultValue" : null, "icon" : "id-badge" },
+                    "Phonetic" : { "dataPath" : "phonetic", "defaultValue" : null, "icon" : "id-badge" }
                 }
             },
     "Email" : { "dataPath" : "email", "defaultValue" : null, "icon" : "envelope" },
     "Website" : { "dataPath" : "website", "defaultValue" : null, "icon" : "link"},
+    "Public" : { "dataPath" : "public", "icon" : "globe", "defaultValue" : null , "dataType": "checkbox"},
     "Phone" : { "dataPath" : "phone", "icon" : "phone", 
                 "defaultValue" : {
                     "Home phone" : { "dataPath" : "homePhone", "defaultValue" : null, "icon" : "phone", "dataType": "tel" },
@@ -1357,15 +1359,15 @@ MemberBlueprint.object = {
                 }
             },
     "Birthday" : { "dataPath" : "birthday", "defaultValue" : null, "icon" : "birthday-cake", "dataType": "date" },
-    "Death date" : { "dataPath" : "deathdate", "defaultValue" : null, "icon" : "hand-peace", "dataType": "date" },
+    "Death date" : { "dataPath" : "deathdate", "defaultValue" : null, "icon" : "tombstone", "dataType": "date" },
     "Address" : { "dataPath" : "address", "icon" : "map-pin", 
                 "defaultValue" : {
-                    "Address 1" : { "dataPath" : "address1", "defaultValue" : null, "icon" : "" },
-                    "Address 2" : { "dataPath" : "address2", "defaultValue" : null, "icon" : "" },
-                    "City" : { "dataPath" : "city", "defaultValue" : null, "icon" : "" },
-                    "State" : { "dataPath" : "state", "defaultValue" : null, "icon" : "" },
-                    "Zipcode" : { "dataPath" : "zipcode", "defaultValue" : null, "icon" : "" },
-                    "Country" : { "dataPath" : "country", "defaultValue" : null, "icon" : "" }
+                    "Address 1" : { "dataPath" : "address1", "defaultValue" : null, "icon" : "map-pin" },
+                    "Address 2" : { "dataPath" : "address2", "defaultValue" : null, "icon" : "map-pin" },
+                    "City" : { "dataPath" : "city", "defaultValue" : null, "icon" : "map-pin" },
+                    "State" : { "dataPath" : "state", "defaultValue" : null, "icon" : "map-pin" },
+                    "Zipcode" : { "dataPath" : "zipcode", "defaultValue" : null, "icon" : "map-pin" },
+                    "Country" : { "dataPath" : "country", "defaultValue" : null, "icon" : "map-pin" }
                 }
             },
     "Occupation" : { "dataPath" : "occupation", "defaultValue" : null, "icon" : "briefcase" },
@@ -1376,14 +1378,14 @@ MemberBlueprint.object = {
     "Top Member" : { "dataPath" : "topMember", "defaultValue" : false },
     "Claimed by" : { "dataPath" : "claimed_by", "defaultValue" : null },
     "Created by" : { "dataPath" : "created_by", "defaultValue" : null },
-    "Profile photo" : { "dataPath" : "profile_photo", "icon" : "picture", "defaultValue" : null , "dataType": "file"},
+    "Profile photo" : { "dataPath" : "profile_photo", "icon" : "image", "defaultValue" : null , "dataType": "file"},
 }
 
 MemberBlueprint.loop = function(args) {
     let exclude = args.exclude || [];
     let functionCall = args.functionCall;
     let relationships = ["children", "parents", "siblings", "partners"];
-    let metaDetails = ["claimed_by", "topMember", "created_by", ];
+    let metaDetails = ["claimed_by", "topMember", "created_by", "public"];
     let basicDetails = ["email", "birthday", "occupation", "profile_photo", "facebook", "instagram", "website"];
     let groups = ["name", "address", "phone"];
     let groupDetails = ["firstName", "middleName", "surnameCurrent", "nickname", "surnameBirth", "homePhone", "mobilePhone", "workPhone", "address1", "address2", "city", "state", "zipcode", "country"];

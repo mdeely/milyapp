@@ -13,7 +13,12 @@ Nav.update = function(user) {
         if (LocalDocs.member && LocalDocs.member.profile_photo) {
             let profileFileReference = storage.ref(`${LocalDocs.member.profile_photo}`);
             profileFileReference.getDownloadURL().then(function(url) {
+                let targetProfileEl = document.querySelector(".profile__image");
+                let profileImageStyle = accountMenuButton.style.backgroundImage;
+
+                targetProfileEl.style.backgroundImage = profileImageStyle;
                 accountMenuButton.style.backgroundImage = `url(${url})`;
+                LocalDocs.member["profile_url"] = url;
             })
         } else {
             accountMenuButton.style.backgroundImage = `url(${placeholderImageUrl})`;

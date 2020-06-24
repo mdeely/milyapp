@@ -58,10 +58,10 @@
                     <option value="gen_3">Generation 3</option>
                 </select>
             </div>
-            <p class="u-mar-r_2">Layout</p>
+            <!-- <p class="u-mar-r_2">Layout</p> -->
             <div class="fauxToggle">
-                <button id="view-preferences_tree" class="u-font-size_16 iconButton"><i class="fal fa-sitemap"></i></button>
-                <button id="view-preferences_list" class="u-font-size_16 iconButton"><i class="fal fa-list"></i></button>
+                <button id="view-preferences_tree" class="u-font-size_14"><i class="fal fa-sitemap u-mar-r_2"></i>Map</button>
+                <button id="view-preferences_list" class="u-font-size_14"><i class="fal fa-list u-mar-r_2"></i>Table</button>
             </div>
             <button id="hide-toolbar_button" class="u-mar-l_2 white"><i class="far fa-eye-slash u-mar-r_1"></i>Hide toolbar</button>
             <!-- <button id="view-preferences_tree" class="u-mar-l_auto">Tree</button>
@@ -248,7 +248,34 @@
             </section>
         </div>
 
-        <div style="display:none" class="u-pad_4 u-pad-t_8" data-view="profile">
+        <div style="display:none" data-view="profile">
+            <img class="profile__decoration" src="/assets/img/wavy-sm_purple.svg" alt="decoration">
+            <div class="profile__container u-mar-lr_auto">
+                <div class="profile__header u-mar-b_4 u-d_flex u-ai_center" style="height: 130px">
+                    <div class="profile__image u-mar-r_3" style="width: 130px; height: 130px; background-color: white; border-radius: 8px"></div>
+                    <div class="profile__info">
+                        <div class="profile__name header_l u-c_white u-mar-b_1">Marc Deely</div>
+                        <div class="profile__email u-font-size_18 u-c_white u-o_75 u-mar-b_2">themarcusdeely@gmail.com</div>
+                        <div class="u-d_flex u-ai_center">
+                            <button class="u-font-size_13 white-outline"><i class="fal fa-lock-alt u-font-size_15 u-mar-r_2"></i>Your profile is private<i class="fa fa-caret-down u-font-size_18 u-mar-l_1 u-o_50"></i></button>
+                            <button class="iconButton white-text u-mar-l_1 u-o_50"><i class="fal fa-question-circle"></i></button>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="profile__details card large u-w_full">
+                    <div class="card__header">
+                        <div class="u-d_flex u-ai_center u-mar-b_2">
+                            <h3 class="u-mar-t_0 u-mar-b_0">Profile</h3>
+                            <button class="secondary u-mar-l_auto">Edit <i class="fal fa-pencil-alt u-mar-l_2"></i></button>
+                        </div>
+                        <a href="#" class="u-mar-l_auto u-font-size_13 u-text_lowest u-w_full u-ta_right u-d_block u-remove-link-style u-o_75">What's this?</a>
+                    </div>
+                    <div id="profile_content" class="card__content u-pad-t_0">
+                        stuff
+                    </div>
+                </div>
+            </div>
             <div class="debugMessage"></div>
         </div>
 

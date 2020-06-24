@@ -1,5 +1,6 @@
 let profileViewEl = document.querySelector(`[data-view="profile"]`);
 let profileDebugMsg = profileViewEl.querySelector(`.debugMessage`);
+let profileContent = profileViewEl.querySelector("#profile_content");
 var storageRef = firebase.storage().ref()
 
 function profileSetup() {
@@ -8,15 +9,174 @@ function profileSetup() {
 }
 
 const profileViewOnAuthChange = (user) => {
-    profileViewEl.innerHTML = '';
+    profileContent.innerHTML = '';
     window.location.hash = "/profile";
     if (user) {
+        populateMemberDetails();
+        return;
         editProfileEl();
     } else {
-        profileViewEl.innerHTML = '';
+        profileContent.innerHTML = '';
     }
 }
 
+const populateMemberDetails = () => {
+    let containerEl = createElementWithClass("ul", "");
+    let groupItems = ["name", "address"];
+    let dataSource = LocalDocs.member;
+
+    MemberBlueprint.loop({
+        "exclude" : ["profile_photo"],
+        "functionCall" : generateDetailElement
+    });
+
+    generateFullAddress();
+    generateFullName();
+    profileContent.appendChild(containerEl);
+
+    function generateFullAddress(dataSource = LocalDocs.member) {
+        let listItem = createElementWithClass("li", "u-d_flex u-ai_center u-mar-b_1");
+        let iconEl = createElementWithClass("i", `fal fa-map-pin fa-fw u-mar-r_2 u-font-size_20 u-o_50 u-font-size_20 u-o_50`);
+        let button = createElementWithClass("button", "iconButton u-mar-l_auto white");
+        let buttonIcon = createElementWithClass("i", "fal fa-lock-alt");
+        
+        button.setAttribute("tooltip", "Private");
+        listItem.setAttribute("tooltip-position", "top left");
+        listItem.setAttribute("tooltip", "Address");
+
+        button.appendChild(buttonIcon);
+        listItem.appendChild(iconEl);
+
+        let address = new String;
+        let addressArray = [
+            "address1",
+            "address2",
+            "city",
+            "state",
+            "zipcode"
+        ]
+
+        for (const [i, item] of addressArray.entries()) {
+            if  (dataSource.address[`${item}`]) {
+                let info = dataSource.address[`${item}`];
+
+                if (i === 0 || !address) {
+                    address = address.concat(`${info}`);
+                } else if (address.length <= 1) {
+                    address = address.concat(`${info}`);
+                } else if (item === 'city' || item === 'state') {
+                    address = address.concat(`, ${info}`);
+                } else {
+                    address = address.concat(` ${info}`);
+                }
+            }
+        }
+
+        if (address.length <= 0) {
+            address = "No data";
+        }
+
+        if (address.length > 0) {
+            let text = createElementWithClass("p", "u-mar-t_0 u-mar-b_0", address);
+            listItem.appendChild(text);
+            listItem.appendChild(button);
+            containerEl.prepend(listItem);
+        }
+    }
+
+    function generateFullName() {
+        let listItem = createElementWithClass("li", "u-d_flex u-ai_center u-mar-b_1");
+        let iconEl = createElementWithClass("i", `fal fa-id-badge fa-fw u-mar-r_2 u-font-size_20 u-o_50 u-font-size_20 u-o_50`);
+        let text = createElementWithClass("p", "u-mar-t_0 u-mar-b_0");
+        let button = createElementWithClass("button", "iconButton u-mar-l_auto white");
+        let buttonIcon = createElementWithClass("i", "fal fa-lock-alt");
+        
+        button.setAttribute("tooltip", "Private");
+        listItem.setAttribute("tooltip-position", "top left");
+        
+        button.appendChild(buttonIcon);
+        listItem.appendChild(iconEl);
+
+        let name = new String;
+        let nameArray = [
+            {"firstName" : "First name"},
+            {"nickname" : "Nickname"},
+            {"middleName" : "Middle name"},
+            {"surnameCurrent" : "Last name"},
+        ];
+
+        for (const [i, item] of nameArray.entries()) {
+            for ( const [key, value] of Object.entries(item) ) {
+                if  (dataSource.name[`${key}`]) {
+                    let info = dataSource.name[`${key}`];
+                    let tooltip = value;
+                    if (key === "nickname") {
+                        info = `(${dataSource.name[key]})`;
+                    }
+                    if (i === 0 || !name) {
+                        let span = createElementWithClass("span", "", `${info}`);
+                        span.setAttribute("tooltip", tooltip);
+                        span.setAttribute("tooltip-position", "top middle");
+
+                        text.appendChild(span);
+                    } else {
+                        let span = createElementWithClass("span", "", ` ${info}`);
+                        span.setAttribute("tooltip", tooltip);
+                        span.setAttribute("tooltip-position", "top middle");
+
+                        text.appendChild(span);
+                    }
+                }
+            }
+        }
+    
+        if (text) {
+            console.log(text);
+            listItem.appendChild(text);
+            listItem.appendChild(button);
+            containerEl.prepend(listItem);
+        }
+    }
+
+    function generateDetailElement(key, value, parentValue) {
+        let isParent = parentValue ? (groupItems.includes(parentValue["dataPath"])) : false;
+
+        if ( !isParent ) {
+            let icon = value["icon"];
+            let data = LocalDocs.member[`${value["dataPath"]}`] || null;
+
+            if (data && (key === "Birthday" || key === "Death date")) {
+                data = convertBirthday(data);
+            }
+
+            renderListItem(key, icon, data);
+        }
+    }
+
+    function renderListItem(key, icon, data = null) {
+        let textClasses = "u-mar-t_0 u-mar-b_0";
+        if (!data) {
+            textClasses = "u-mar-t_0 u-mar-b_0 u-italic u-text_lowest";
+            data = data ? data : "No data";
+        }
+        let listItem = createElementWithClass("li", "u-d_flex u-ai_center u-mar-b_1");
+        let iconEl = createElementWithClass("i", `fal fa-${icon} fa-fw u-mar-r_2 u-font-size_20 u-o_50`);
+        let text = createElementWithClass("p", `${textClasses}`, data);
+        let button = createElementWithClass("button", "iconButton u-mar-l_auto white");
+        let buttonIcon = createElementWithClass("i", "fal fa-lock-alt");
+        
+        button.setAttribute("tooltip", "Private");
+        listItem.setAttribute("tooltip", key);
+        listItem.setAttribute("tooltip-position", "top left");
+
+        button.appendChild(buttonIcon);
+        listItem.appendChild(iconEl);
+        listItem.appendChild(text);
+        listItem.appendChild(button);
+
+        containerEl.appendChild(listItem);
+    }
+}
 const editProfileEl = () => {
     let form = createElementWithClass("form", "card full_width u-mar-lr_auto");
     let cardContent = createElementWithClass("div", "card__content u-d_flex u-flex-wrap_wrap");
@@ -108,7 +268,7 @@ const editProfileEl = () => {
     form.appendChild(cardContent);
     form.appendChild(cardFooter);
 
-    profileViewEl.appendChild(form);
+    profileContent.appendChild(form);
 
     const setProfileForm = document.querySelector("#set-profile_form");
     
@@ -184,33 +344,36 @@ const updateMember = (button, form) => {
         }
 
         function goUpdateMember(photoFile = LocalDocs.member.profile_photo) { 
-            membersRef.doc(LocalDocs.member.id).update({
-                "name" : {
-                    "firstName" : form["firstName"].value,
-                    "surnameCurrent" : form["surnameCurrent"].value,
-                    "middleName" : form["middleName"].value,
-                    "surnameBirth" : form["surnameBirth"].value,
-                    "nickname" : form["nickname"].value,
-                    "phonetic" : form["phonetic"].value,
-                },
-                "address" : {
-                    "address1" : form["address1"].value,
-                    "address2" : form["address2"].value,
-                    "city" : form["city"].value,
-                    "state" : form["state"].value,
-                    "zipcode" : form["zipcode"].value,
-                    "country" : form["country"].value,
-                },
-                "phone" : {
-                    "homePhone" : form["homePhone"].value,
-                    "mobilePhone" : form["mobilePhone"].value,
-                    "workPhone" : form["workPhone"].value,   
-                },
-                "birthday" : form["birthday"].value,
-                "profile_photo" : photoFile,
-                "occupation" : form["occupation"].value,
-                "email" : form["email"].value,
-            })
+            let object = {};
+            
+            MemberBlueprint.loop({
+                "functionCall" : createObject,
+                "exclude" : ["profile_photo"]
+            });
+
+            function createObject(key, value, parentValue) {
+                let reqName = value["dataPath"];
+                let reqParentName = parentValue ? parentValue["dataPath"] : null;
+                let data = form[reqName].value;
+
+                if (data) {
+                    if (parentValue) {
+                        if (!object[reqParentName]) {
+                            object[reqParentName] = {};
+                        }
+                        object[reqParentName][reqName] = data;
+                    } else {
+                        object[reqName] = data;
+                    }
+                }
+
+                object["profile_photo"] = photoFile;
+            }
+
+
+            membersRef.doc(LocalDocs.member.id).update(
+                object
+            )
             .then(() => {
                 console.log("Updated!");
                 location.reload();
