@@ -1,26 +1,111 @@
-let profileViewEl = document.querySelector(`[data-view="profile"]`);
-let profileDebugMsg = profileViewEl.querySelector(`.debugMessage`);
-let profileContent = profileViewEl.querySelector("#profile_content");
-var storageRef = firebase.storage().ref()
+const profileViewEl = document.querySelector(`[data-view="profile"]`);
+const profileDebugMsg = profileViewEl.querySelector(`.debugMessage`);
+const profileContent = profileViewEl.querySelector("#profile_content");
+const profileInfo = profileViewEl.querySelector(".profile__info");
+const profileImage = profileViewEl.querySelector(".profile__image");
+
+const privacyButtonContainer = profileViewEl.querySelector(".privacy-button_container");
+const privacySettingsPrivate = profileViewEl.querySelector("#privacy-settings_private");
+const privacySettingsPublic = profileViewEl.querySelector("#privacy-settings_public");
+
+const editProfilePageButton = profileViewEl.querySelector("#edit-profile-page_button");
+const saveProfilePageButton = profileViewEl.querySelector("#save-profile-page_button");
+const cancelProfilePageButton = profileViewEl.querySelector("#cancel-profile-page_button");
+
+const profileContainer = profileViewEl.querySelector(".profile__container");
+
+var storageRef = firebase.storage().ref();
 
 function profileSetup() {
-    pageTitle.innerHTML = "Profile";
+    pageTitle.innerHTML = "";
     Nav.showViewPreferencesButton(false);
 }
 
 const profileViewOnAuthChange = (user) => {
-    profileContent.innerHTML = '';
     window.location.hash = "/profile";
     if (user) {
+        populateProfileHeader();
+        initiatePrivacyDropdown();
         populateMemberDetails();
-        return;
-        editProfileEl();
     } else {
         profileContent.innerHTML = '';
     }
 }
 
+const populateProfileHeader = () => {
+    let profileNameEl = profileViewEl.querySelector(".profile__name");
+    let accountEmail = profileViewEl.querySelector(".profile__email");
+
+    let data = LocalDocs.member.name;
+    let name = "No name"
+    let email = LocalDocs.member.email ? LocalDocs.member.email : "No email";
+
+    if (data.firstName && data.surnameCurrent) {
+        name = `${data.firstName} ${data.surnameCurrent}`
+    } else if (data.firstName) {
+        name = `${data.firstName}`
+    }
+
+    if (!profileNameEl) {
+        profileNameEl = createElementWithClass("div", "profile__name header_l u-c_white u-mar-b_1", name)
+    } else {
+        profileNameEl.textContent = name;
+    }
+
+    if (!accountEmail) {
+        accountEmail = createElementWithClass("div", "profile__email u-font-size_18 u-c_white u-o_75 u-mar-b_2", email);
+    } else {
+        accountEmail.textContent = email;
+    }
+    
+    profileInfo.prepend(accountEmail);
+    profileInfo.prepend(profileNameEl);
+
+    initiatePrivacyDropdown();
+}
+
+const initiatePrivacyDropdown = () => {
+    let existingButton = profileViewEl.querySelector("#privacy-dropdown_button");
+
+    if (existingButton) {
+        existingButton.remove();
+    }
+
+    let public_profile = LocalDocs.member.preferences.public_profile;
+    let icon = "eye"
+    let status = "public";
+
+    if (!public_profile) {
+        icon = "lock-alt";
+        status = "private";
+    };
+
+    let button = createElementWithClass("button", "u-font-size_13 u-fw_200 white-outline", `Your profile is ${status}`);
+    let buttonPrivacyStatus = createElementWithClass("i", `fal fa-${icon} u-font-size_15 u-mar-r_2`);
+    let buttonPrivacyCaret = createElementWithClass("i", "fa fa-caret-down u-font-size_18 u-mar-l_1 u-o_50");
+
+    button.setAttribute("id", "privacy-dropdown_button");
+    button.setAttribute("data-dropdown-target", "privacy-settings");
+
+    button.prepend(buttonPrivacyStatus);
+    button.appendChild(buttonPrivacyCaret);
+
+    privacyButtonContainer.prepend(button);
+    initiateDropdown(button);
+
+    if (public_profile) {
+        privacySettingsPublic.querySelector("i.fa-check").classList.remove("u-visibility_hidden");
+        privacySettingsPrivate.querySelector("i.fa-check").classList.add("u-visibility_hidden");
+    } else {
+        privacySettingsPublic.querySelector("i.fa-check").classList.add("u-visibility_hidden");
+        privacySettingsPrivate.querySelector("i.fa-check").classList.remove("u-visibility_hidden");
+    }
+
+    profileViewEl.querySelector("#privacy-settings").classList.add("u-visibility_hidden");
+}
+
 const populateMemberDetails = () => {
+    profileContent.innerHTML = "";
     let containerEl = createElementWithClass("ul", "");
     let groupItems = ["name", "address"];
     let dataSource = LocalDocs.member;
@@ -35,12 +120,13 @@ const populateMemberDetails = () => {
     profileContent.appendChild(containerEl);
 
     function generateFullAddress(dataSource = LocalDocs.member) {
+        let privacyIcon = LocalDocs.member.preferences.public_profile === false ? `lock-alt` : `eye`;
         let listItem = createElementWithClass("li", "u-d_flex u-ai_center u-mar-b_1");
         let iconEl = createElementWithClass("i", `fal fa-map-pin fa-fw u-mar-r_2 u-font-size_20 u-o_50 u-font-size_20 u-o_50`);
         let button = createElementWithClass("button", "iconButton u-mar-l_auto white");
-        let buttonIcon = createElementWithClass("i", "fal fa-lock-alt");
+        let buttonIcon = createElementWithClass("i", `fal fa-${privacyIcon}`);
         
-        button.setAttribute("tooltip", "Private");
+        button.setAttribute("tooltip", "Privacy status");
         listItem.setAttribute("tooltip-position", "top left");
         listItem.setAttribute("tooltip", "Address");
 
@@ -73,7 +159,7 @@ const populateMemberDetails = () => {
         }
 
         if (address.length <= 0) {
-            address = "No data";
+            address = "No address";
         }
 
         if (address.length > 0) {
@@ -85,13 +171,14 @@ const populateMemberDetails = () => {
     }
 
     function generateFullName() {
+        let privacyIcon = LocalDocs.member.preferences.public_profile === false ? `lock-alt` : `eye`;
         let listItem = createElementWithClass("li", "u-d_flex u-ai_center u-mar-b_1");
         let iconEl = createElementWithClass("i", `fal fa-id-badge fa-fw u-mar-r_2 u-font-size_20 u-o_50 u-font-size_20 u-o_50`);
         let text = createElementWithClass("p", "u-mar-t_0 u-mar-b_0");
         let button = createElementWithClass("button", "iconButton u-mar-l_auto white");
-        let buttonIcon = createElementWithClass("i", "fal fa-lock-alt");
+        let buttonIcon = createElementWithClass("i", `fal fa-${privacyIcon}`);
         
-        button.setAttribute("tooltip", "Private");
+        button.setAttribute("tooltip", "Privacy status");
         listItem.setAttribute("tooltip-position", "top left");
         
         button.appendChild(buttonIcon);
@@ -131,7 +218,6 @@ const populateMemberDetails = () => {
         }
     
         if (text) {
-            console.log(text);
             listItem.appendChild(text);
             listItem.appendChild(button);
             containerEl.prepend(listItem);
@@ -157,15 +243,17 @@ const populateMemberDetails = () => {
         let textClasses = "u-mar-t_0 u-mar-b_0";
         if (!data) {
             textClasses = "u-mar-t_0 u-mar-b_0 u-italic u-text_lowest";
-            data = data ? data : "No data";
+            let string = key.toLowerCase();
+            data = data ? data : `No ${string}`;
         }
+        let privacyIcon = LocalDocs.member.preferences.public_profile === false ? `lock-alt` : `eye`;
         let listItem = createElementWithClass("li", "u-d_flex u-ai_center u-mar-b_1");
         let iconEl = createElementWithClass("i", `fal fa-${icon} fa-fw u-mar-r_2 u-font-size_20 u-o_50`);
         let text = createElementWithClass("p", `${textClasses}`, data);
         let button = createElementWithClass("button", "iconButton u-mar-l_auto white");
-        let buttonIcon = createElementWithClass("i", "fal fa-lock-alt");
+        let buttonIcon = createElementWithClass("i", `fal fa-${privacyIcon}`);
         
-        button.setAttribute("tooltip", "Private");
+        button.setAttribute("tooltip", "Privacy status");
         listItem.setAttribute("tooltip", key);
         listItem.setAttribute("tooltip-position", "top left");
 
@@ -177,118 +265,163 @@ const populateMemberDetails = () => {
         containerEl.appendChild(listItem);
     }
 }
-const editProfileEl = () => {
-    let form = createElementWithClass("form", "card full_width u-mar-lr_auto");
-    let cardContent = createElementWithClass("div", "card__content u-d_flex u-flex-wrap_wrap");
-    let cardHeader = createElementWithClass("div", "card__header");
-    let cardFooter = createElementWithClass("div", "card__footer");
-    let button = createElementWithClass("button", "u-w_full", "Save");
-    let header = createElementWithClass("h2", "u-mar-b_0 u-mar-t_0", "Your profile");
-    let fieldsetName = createElementWithClass("fieldset", "u-pad_1 u-flex_1");
-    let fieldsetAddress = createElementWithClass("fieldset", "u-pad_1 u-flex_1");
-    let fieldsetContact = createElementWithClass("fieldset", "u-pad_1 u-flex_1");
-    let fieldsetOther = createElementWithClass("fieldset", "u-pad_1 u-flex_1");
 
-    form.setAttribute("id", "set-profile_form");    
+const generateEditProfileForm = () => {
+    profile_content.innerHTML = '';
 
-    let imageUrl = accountMenuButton.style.backgroundImage;
-    let profilePhotoInputEl = generateInputItem({
-        "value" : LocalDocs.member ? LocalDocs.member.profile_photo : null,
-        "name" : "profile_photo",
-        "label" : "Profile photo",
-        "backgroundImage" : imageUrl,
-        "type" : "file"
-    });
-
-    cardContent.appendChild(profilePhotoInputEl);
+    let form = createElementWithClass("form", "");
+    form.setAttribute("id", "edit-profile-page_form");
 
     MemberBlueprint.loop({
-        "functionCall" : handleProfileItems,
-        "exclude" : ["profile_photo"]
+        "exclude" : ["profile_photo"],
+        "functionCall" : editFormInputs
     });
 
-    function handleProfileItems(key, value, parentValue) {
-        let inputValue = "";
+    function editFormInputs(key, value, parentValue) {
+        let inputGroup = createElementWithClass("div", "inputGroup");
+        let label = createElementWithClass("label", "", key);
+        let input = createElementWithClass("input", "");
+        let data;
 
-        if (LocalDocs.member) {
-            inputValue = LocalDocs.member[value["dataPath"]] ? LocalDocs.member[value["dataPath"]] : null;
-            if (parentValue) {
-                inputValue = LocalDocs.member[parentValue["dataPath"]][value["dataPath"]];
-            }
+        if (parentValue) {
+            data = LocalDocs.member[parentValue["dataPath"]][value["dataPath"]] || null;
         } else {
-            if (key === "Email") {
-                inputValue = auth.currentUser.email;
-            }
+            data = LocalDocs.member[value["dataPath"]] || null;
         }
 
-        let isRequired = false;
-        if (value["dataPath"] === "email") {
-            isRequired = true;
-        }
+        input.value = data;
+        input.setAttribute("type", value["dataType"] || "text");
+        input.setAttribute("name", value["dataPath"]);
+        input.setAttribute("id", value["dataPath"]);
 
-        let el = generateInputItem({
-            "value" : inputValue,
-            "name" : value["dataPath"],
-            "label" : key,
-            "type" : value["dataType"] || "text",
-            "required" : isRequired
-        });
+        inputGroup.appendChild(label);
+        inputGroup.appendChild(input);
 
-        let regexName = /(name|Name|phonetic)/g;
-        let regexAddress = /(address|zipcode|city|state|country)/g;
-        let regexContact = /(phone|Phone|email)/g;
-
-        if (value["dataPath"].match(regexName)) {
-            fieldsetName.appendChild(el);
-        } else if (value["dataPath"].match(regexAddress)) {
-            fieldsetAddress.appendChild(el);
-        } else if (value["dataPath"].match(regexContact)) {
-            fieldsetContact.appendChild(el);
-        } else {
-            fieldsetOther.appendChild(el);
-        }
-        // cardContent.appendChild(el);
+        form.appendChild(inputGroup);
     }
-
-    if (LocalDocs.member) {
-        updateMember(button, form);
-    } else {
-        newMember(button, form);
-        header.textContent = "Create your profile";
-    }
-    
-    cardFooter.appendChild(button);
-    cardContent.appendChild(fieldsetName);
-    cardContent.appendChild(fieldsetContact);
-    cardContent.appendChild(fieldsetAddress);
-    cardContent.appendChild(fieldsetOther);
-    cardHeader.appendChild(header)
-
-    form.appendChild(cardHeader);
-    form.appendChild(cardContent);
-    form.appendChild(cardFooter);
 
     profileContent.appendChild(form);
 
-    const setProfileForm = document.querySelector("#set-profile_form");
-    
-    setProfileForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-    
-        membersRef.doc(authMemberDoc.id).update({
-            name : {
-                firstName : setProfileForm["set-profile__firstName"]
-            },
-            birthday : setProfileForm["set-profile__birthday"]
+    let inputs = profileContent.querySelectorAll("input");
+    for (inputEl of inputs) {
+        inputEl.addEventListener("input", (e) => {
+            saveProfilePageButton.classList.remove("disabled");
         })
-        .then(() => {
-            console.log("member was updated");
-        })
-        .catch(err => {
-            console.log(err.message);
-        })
-    })
+    }
 }
+
+// const editProfileEl = () => {
+//     let form = createElementWithClass("form", "card full_width u-mar-lr_auto");
+//     let cardContent = createElementWithClass("div", "card__content u-d_flex u-flex-wrap_wrap");
+//     let cardHeader = createElementWithClass("div", "card__header");
+//     let cardFooter = createElementWithClass("div", "card__footer");
+//     let button = createElementWithClass("button", "u-w_full", "Save");
+//     let header = createElementWithClass("h2", "u-mar-b_0 u-mar-t_0", "Your profile");
+//     let fieldsetName = createElementWithClass("fieldset", "u-pad_1 u-flex_1");
+//     let fieldsetAddress = createElementWithClass("fieldset", "u-pad_1 u-flex_1");
+//     let fieldsetContact = createElementWithClass("fieldset", "u-pad_1 u-flex_1");
+//     let fieldsetOther = createElementWithClass("fieldset", "u-pad_1 u-flex_1");
+
+//     form.setAttribute("id", "set-profile_form");    
+
+//     let imageUrl = accountMenuButton.style.backgroundImage;
+//     let profilePhotoInputEl = generateInputItem({
+//         "value" : LocalDocs.member ? LocalDocs.member.profile_photo : null,
+//         "name" : "profile_photo",
+//         "label" : "Profile photo",
+//         "backgroundImage" : imageUrl,
+//         "type" : "file"
+//     });
+
+//     profileContent.appendChild(profilePhotoInputEl);
+
+//     MemberBlueprint.loop({
+//         "functionCall" : handleProfileItems,
+//         "exclude" : ["profile_photo"]
+//     });
+
+//     function handleProfileItems(key, value, parentValue) {
+//         let inputValue = "";
+
+//         if (LocalDocs.member) {
+//             inputValue = LocalDocs.member[value["dataPath"]] ? LocalDocs.member[value["dataPath"]] : null;
+//             if (parentValue) {
+//                 inputValue = LocalDocs.member[parentValue["dataPath"]][value["dataPath"]];
+//             }
+//         } else {
+//             if (key === "Email") {
+//                 inputValue = auth.currentUser.email;
+//             }
+//         }
+
+//         let isRequired = false;
+//         if (value["dataPath"] === "email") {
+//             isRequired = true;
+//         }
+
+//         let el = generateInputItem({
+//             "value" : inputValue,
+//             "name" : value["dataPath"],
+//             "label" : key,
+//             "type" : value["dataType"] || "text",
+//             "required" : isRequired
+//         });
+
+//         let regexName = /(name|Name|phonetic)/g;
+//         let regexAddress = /(address|zipcode|city|state|country)/g;
+//         let regexContact = /(phone|Phone|email)/g;
+
+//         if (value["dataPath"].match(regexName)) {
+//             fieldsetName.appendChild(el);
+//         } else if (value["dataPath"].match(regexAddress)) {
+//             fieldsetAddress.appendChild(el);
+//         } else if (value["dataPath"].match(regexContact)) {
+//             fieldsetContact.appendChild(el);
+//         } else {
+//             fieldsetOther.appendChild(el);
+//         }
+//         // cardContent.appendChild(el);
+//     }
+
+//     if (LocalDocs.member) {
+//         updateMember(button, form);
+//     } else {
+//         newMember(button, form);
+//         header.textContent = "Create your profile";
+//     }
+    
+//     cardFooter.appendChild(button);
+//     cardContent.appendChild(fieldsetName);
+//     cardContent.appendChild(fieldsetContact);
+//     cardContent.appendChild(fieldsetAddress);
+//     cardContent.appendChild(fieldsetOther);
+//     cardHeader.appendChild(header)
+
+//     form.appendChild(cardHeader);
+//     form.appendChild(cardContent);
+//     form.appendChild(cardFooter);
+
+//     profileContent.appendChild(form);
+
+//     const setProfileForm = document.querySelector("#set-profile_form");
+    
+//     setProfileForm.addEventListener('submit', (e) => {
+//         e.preventDefault();
+    
+//         membersRef.doc(authMemberDoc.id).update({
+//             name : {
+//                 firstName : setProfileForm["set-profile__firstName"]
+//             },
+//             birthday : setProfileForm["set-profile__birthday"]
+//         })
+//         .then(() => {
+//             console.log("member was updated");
+//         })
+//         .catch(err => {
+//             console.log(err.message);
+//         })
+//     })
+// }
 
 const generateInputItem = (args) => {
     let inputGroupEl = createElementWithClass("div", "inputGroup");
@@ -427,6 +560,95 @@ const newMember = (button, form) => {
         })
     });
 }
+
+editProfilePageButton.addEventListener('click', (e) => {
+    e.preventDefault();
+    editProfilePageButton.classList.add("u-d_none");
+    saveProfilePageButton.classList.remove("u-d_none");
+    cancelProfilePageButton.classList.remove("u-d_none");
+
+    profileContainer.classList.add("editing");
+    generateEditProfileForm();
+});
+
+saveProfilePageButton.addEventListener('click', (e) => {
+    e.preventDefault();
+
+    let editProfilePageForm = profileViewEl.querySelector("#edit-profile-page_form");
+    let object = {};
+
+    MemberBlueprint.loop({
+        "functionCall" : createObject,
+        "exclude" : ["profile_photo"]
+    });
+
+    function createObject(key, value, parentValue) {
+        console.log(value);
+        let reqName = value["dataPath"];
+        let reqParentName = parentValue ? parentValue["dataPath"] : null;
+        let data = editProfilePageForm[reqName].value;
+
+        if (data) {
+            if (parentValue) {
+                if (!object[reqParentName]) {
+                    object[reqParentName] = {};
+                }
+                object[reqParentName][reqName] = data;
+            } else {
+                object[reqName] = data;
+            }
+        }
+    };
+    
+    membersRef.doc(LocalDocs.member.id).update(object).then(() => {
+        location.reload();
+    })
+    
+})
+
+cancelProfilePageButton.addEventListener('click', (e) => {
+    e.preventDefault();
+    editProfilePageButton.classList.remove("u-d_none");
+    saveProfilePageButton.classList.add("u-d_none");
+    cancelProfilePageButton.classList.add("u-d_none");
+
+    profileContent.innerHTML = '';
+    populateMemberDetails();
+
+    profileContainer.classList.remove("editing");
+});
+
+privacySettingsPrivate.addEventListener("click", (e) => {
+    e.preventDefault();
+
+    if (LocalDocs.member.preferences.public_profile !== false) {
+        membersRef.doc(LocalDocs.member.id).update({
+            "preferences" : {
+                "public_profile" : false
+            }
+        })
+        .then(() => {
+            LocalDocs.member.preferences.public_profile = false;
+            initiatePrivacyDropdown();
+        })
+    }
+});
+
+privacySettingsPublic.addEventListener("click", (e) => {
+    e.preventDefault();
+
+    if (LocalDocs.member.preferences.public_profile !== true) {
+        membersRef.doc(LocalDocs.member.id).update({
+            "preferences" : {
+                "public_profile" : true
+            }
+        })
+        .then(() => {
+            LocalDocs.member.preferences.public_profile = true;
+            initiatePrivacyDropdown();
+        })
+    }
+});
 
 
 // const loopThroughMemberBlueprint = (args) => {

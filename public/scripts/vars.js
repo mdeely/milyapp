@@ -22,7 +22,6 @@ const toolbarEl = document.querySelector("#toolbar");
 const showToolbarButton = document.querySelector("#show-toolbar_button");
 const hideToolbarButton = document.querySelector("#hide-toolbar_button");
 
-
 // const removeMemberFromTreeButton = document.querySelector("#remove-member-from-tree-action");
 
 // const editMemberButton = document.querySelector("#edit-member-action");
@@ -1350,7 +1349,6 @@ MemberBlueprint.object = {
             },
     "Email" : { "dataPath" : "email", "defaultValue" : null, "icon" : "envelope" },
     "Website" : { "dataPath" : "website", "defaultValue" : null, "icon" : "link"},
-    "Public" : { "dataPath" : "public", "icon" : "globe", "defaultValue" : null , "dataType": "checkbox"},
     "Phone" : { "dataPath" : "phone", "icon" : "phone", 
                 "defaultValue" : {
                     "Home phone" : { "dataPath" : "homePhone", "defaultValue" : null, "icon" : "phone", "dataType": "tel" },
@@ -1379,15 +1377,20 @@ MemberBlueprint.object = {
     "Claimed by" : { "dataPath" : "claimed_by", "defaultValue" : null },
     "Created by" : { "dataPath" : "created_by", "defaultValue" : null },
     "Profile photo" : { "dataPath" : "profile_photo", "icon" : "image", "defaultValue" : null , "dataType": "file"},
+    "Preferences" : { "dataPath" : "preferences", "icon" : "cog", 
+                "defaultValue" : {
+                    "Public profile" : { "dataPath" : "public_profile", "defaultValue" : false, "icon" : "shield-alt" },
+                }
+            },
 }
 
 MemberBlueprint.loop = function(args) {
     let exclude = args.exclude || [];
     let functionCall = args.functionCall;
     let relationships = ["children", "parents", "siblings", "partners"];
-    let metaDetails = ["claimed_by", "topMember", "created_by", "public"];
+    let metaDetails = ["claimed_by", "topMember", "created_by", "public_profile"];
     let basicDetails = ["email", "birthday", "occupation", "profile_photo", "facebook", "instagram", "website"];
-    let groups = ["name", "address", "phone"];
+    let groups = ["name", "address", "phone", "preferences"];
     let groupDetails = ["firstName", "middleName", "surnameCurrent", "nickname", "surnameBirth", "homePhone", "mobilePhone", "workPhone", "address1", "address2", "city", "state", "zipcode", "country"];
 
     let excludeItems = new Array;

@@ -1097,12 +1097,29 @@ input[name*="profile_photo"] {
     .profile__container {
         max-width: 600px;
         padding: 40px;
+
+        &.editing {
+
+            .profile__image {
+                transform: scale(1.1);
+            }
+            .profile__info {
+                opacity: 0;
+                pointer-events: none;
+            }
+        }
     }
     .profile__image {
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
+        transform-origin: left center;
+        transition: all $detailsRevealTiming ease-out;
     } 
+
+    .profile__info {
+        transition: all $detailsRevealTiming ease-out;
+    }
 }
 
 .fauxToggle {
@@ -1622,6 +1639,11 @@ button,
         background-color: transparent;
         color: white;
         box-shadow: 0 0 0 2px rgba(white, .25);
+
+        &:hover,
+        &:focus {
+            box-shadow: 0 0 0 2px rgba(white, .5);
+        }
     }
 
     &.danger {
@@ -1926,6 +1948,9 @@ button,
 .u-fw_600 {
     font-weight: 600;
 }
+.u-fw_200 {
+    font-weight: 200;
+}
 
 .u_disabled {
     pointer-events: none;
@@ -2149,19 +2174,15 @@ button,
 .u-mar_0 {
     margin: 0px;
 }
-
 .u-mar_1 {
-    margin: 16px;
+    margin: 8px;
 }
-
 .u-mar_2 {
     margin: 16px;
 }
-
 .u-mar_3 {
     margin: 24px;
 }
-
 .u-mar_4 {
     margin: 32px;
 }
@@ -2216,31 +2237,27 @@ button,
 .u-mar-t_0 {
     margin-top: 0px;
 }
-
+.u-mar-t__5 {
+    margin-top: 4px;
+}
 .u-mar-t_1 {
     margin-top: 8px;
 }
-
 .u-mar-t_2 {
     margin-top: 16px;
 }
-
 .u-mar-t_3 {
     margin-top: 24px;
 }
-
 .u-mar-t_4 {
     margin-top: 32px;
 }
-
 .u-mar-t_5 {
     margin-top: 40px;
 }
-
 .u-mar-t_6 {
     margin-top: 48px;
 }
-
 .u-mar-t_7 {
     margin-top: 56px;
 }

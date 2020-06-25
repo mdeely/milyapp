@@ -44,22 +44,22 @@
             <div id="pageTitle" class="u-mar-lr_auto u-c_white u-p_absolute"></div>
             <div class="mainNav__decoration"></div>
         </nav>
-        <button id="show-toolbar_button"class="white u-mar-t_1 u-mar-r_2 u-p_fixed"><i class="far fa-eye u-mar-r_1"></i>Show toolbar</button>
+        <button id="show-toolbar_button"class="white u-mar-t_1 u-mar-r_2 u-p_fixed "><i class="far fa-eye u-mar-r_1"></i>Show toolbar</button>
         <section id="toolbar" class="u-d_flex u-ai_center">
             <div class="searchGroup">
                 <i class="fa fa-search"></i>
                 <input type="search" placeholder="Search tree">
             </div>
-            <div class="select-wrapper u-mar-l_auto u-mar-r_3">
+            <!-- <div class="select-wrapper u-mar-l_auto u-mar-r_3">
                 <select name="" id="generation_filter_select">
                     <option value="All generations">All generations</option>
                     <option value="gen_1">Generation 1</option>
                     <option value="gen_2">Generation 2</option>
                     <option value="gen_3">Generation 3</option>
                 </select>
-            </div>
+            </div> -->
             <!-- <p class="u-mar-r_2">Layout</p> -->
-            <div class="fauxToggle">
+            <div class="fauxToggle u-mar-l_auto">
                 <button id="view-preferences_tree" class="u-font-size_14"><i class="fal fa-sitemap u-mar-r_2"></i>Map</button>
                 <button id="view-preferences_list" class="u-font-size_14"><i class="fal fa-list u-mar-r_2"></i>Table</button>
             </div>
@@ -254,26 +254,38 @@
                 <div class="profile__header u-mar-b_4 u-d_flex u-ai_center" style="height: 130px">
                     <div class="profile__image u-mar-r_3" style="width: 130px; height: 130px; background-color: white; border-radius: 8px"></div>
                     <div class="profile__info">
-                        <div class="profile__name header_l u-c_white u-mar-b_1">Marc Deely</div>
-                        <div class="profile__email u-font-size_18 u-c_white u-o_75 u-mar-b_2">themarcusdeely@gmail.com</div>
-                        <div class="u-d_flex u-ai_center">
-                            <button class="u-font-size_13 white-outline"><i class="fal fa-lock-alt u-font-size_15 u-mar-r_2"></i>Your profile is private<i class="fa fa-caret-down u-font-size_18 u-mar-l_1 u-o_50"></i></button>
+                        <div class="u-d_flex u-ai_center privacy-button_container">
                             <button class="iconButton white-text u-mar-l_1 u-o_50"><i class="fal fa-question-circle"></i></button>
                         </div>
-
+                        <div id="privacy-settings" class="dropdown u-p_absolute u-visibility_hidden">
+                            <div id="privacy-settings_private" class="dropdown__item">
+                                <i class="fal fa-lock-alt fa-fw u-mar-r_2 u-o_50"></i>
+                                <span class="u-d_flex u-fd_column u-mar-r_3">Private
+                                    <div class="u-font-size_13 u-text_lowest u-mar-t__5 u-fw_200" style="max-width: 180px">Only visible to members of the same tree.</div>
+                                </span>
+                                <i class="fa fa-check fa-fw u-mar-l_auto"></i>
+                            </div>
+                            <div id="privacy-settings_public" class="dropdown__item">
+                                <i class="fal fa-eye fa-fw u-mar-r_2 u-o_50"></i>
+                                <span class="u-d_flex u-fd_column u-mar-r_3">Public
+                                    <div class="u-font-size_13 u-text_lowest u-mar-t__5 u-fw_200">Visible on any public trees.</div>
+                                </span>
+                                <i class="fa fa-check fa-fw u-mar-l_auto u-visibility_hidden"></i>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="profile__details card large u-w_full">
                     <div class="card__header">
                         <div class="u-d_flex u-ai_center u-mar-b_2">
                             <h3 class="u-mar-t_0 u-mar-b_0">Profile</h3>
-                            <button class="secondary u-mar-l_auto">Edit <i class="fal fa-pencil-alt u-mar-l_2"></i></button>
+                            <button id="edit-profile-page_button" class="secondary u-mar-l_auto">Edit <i class="fal fa-pencil-alt u-mar-l_2"></i></button>
+                            <button id="save-profile-page_button" class="u-mar-l_auto u-d_none disabled">Save</button>
+                            <button id="cancel-profile-page_button" class="secondary u-mar-l_1 u-d_none">Cancel</button>
                         </div>
-                        <a href="#" class="u-mar-l_auto u-font-size_13 u-text_lowest u-w_full u-ta_right u-d_block u-remove-link-style u-o_75">What's this?</a>
+                        <!-- <a href="#" class="u-mar-l_auto u-font-size_13 u-text_lowest u-w_full u-ta_right u-d_block u-remove-link-style u-o_75">What's this?</a> -->
                     </div>
-                    <div id="profile_content" class="card__content u-pad-t_0">
-                        stuff
-                    </div>
+                    <div id="profile_content" class="card__content u-pad-t_0"></div>
                 </div>
             </div>
             <div class="debugMessage"></div>

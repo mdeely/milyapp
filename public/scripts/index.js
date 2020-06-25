@@ -241,7 +241,7 @@ const showDropdown = (triggerEl) => {
 
 const closeAllDropdowns = () => {
     dropdownTriggers = document.querySelectorAll(`[data-dropdown-target]`);
-
+    
     for (dropdownTrigger of dropdownTriggers) {
         let targetClass = dropdownTrigger.getAttribute("data-dropdown-target");
         let targetEl = document.querySelector(`#${targetClass}`);

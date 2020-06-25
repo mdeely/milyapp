@@ -682,10 +682,19 @@ input[name*="profile_photo"] {
   [data-view="profile"] .profile__container {
     max-width: 600px;
     padding: 40px; }
+    [data-view="profile"] .profile__container.editing .profile__image {
+      transform: scale(1.1); }
+    [data-view="profile"] .profile__container.editing .profile__info {
+      opacity: 0;
+      pointer-events: none; }
   [data-view="profile"] .profile__image {
     background-size: cover;
     background-position: center;
-    background-repeat: no-repeat; }
+    background-repeat: no-repeat;
+    transform-origin: left center;
+    transition: all 0.15s ease-out; }
+  [data-view="profile"] .profile__info {
+    transition: all 0.15s ease-out; }
 
 .fauxToggle {
   display: flex;
@@ -1066,6 +1075,12 @@ button,
     background-color: transparent;
     color: white;
     box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.25); }
+    .button.white-outline:hover, .button.white-outline:focus,
+    button.white-outline:hover,
+    button.white-outline:focus,
+    .iconButton.white-outline:hover,
+    .iconButton.white-outline:focus {
+      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5); }
   .button.danger,
   button.danger,
   .iconButton.danger {
@@ -1278,6 +1293,9 @@ button,
 .u-fw_600 {
   font-weight: 600; }
 
+.u-fw_200 {
+  font-weight: 200; }
+
 .u_disabled {
   pointer-events: none;
   opacity: .5; }
@@ -1475,7 +1493,7 @@ button,
   margin: 0px; }
 
 .u-mar_1 {
-  margin: 16px; }
+  margin: 8px; }
 
 .u-mar_2 {
   margin: 16px; }
@@ -1528,6 +1546,9 @@ button,
 
 .u-mar-t_0 {
   margin-top: 0px; }
+
+.u-mar-t__5 {
+  margin-top: 4px; }
 
 .u-mar-t_1 {
   margin-top: 8px; }
