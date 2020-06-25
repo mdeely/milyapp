@@ -44,7 +44,7 @@
             <div id="pageTitle" class="u-mar-lr_auto u-c_white u-p_absolute"></div>
             <div class="mainNav__decoration"></div>
         </nav>
-        <button id="show-toolbar_button"class="white u-mar-t_1 u-mar-r_2 u-p_fixed "><i class="far fa-eye u-mar-r_1"></i>Show toolbar</button>
+        <button id="show-toolbar_button"class="white u-mar-t_1 u-mar-r_2 u-p_fixed" data-hover-style="transparent"><i class="far fa-eye u-mar-r_1"></i>Show toolbar</button>
         <section id="toolbar" class="u-d_flex u-ai_center">
             <div class="searchGroup">
                 <i class="fa fa-search"></i>
@@ -252,7 +252,12 @@
             <img class="profile__decoration" src="/assets/img/wavy-sm_purple.svg" alt="decoration">
             <div class="profile__container u-mar-lr_auto">
                 <div class="profile__header u-mar-b_4 u-d_flex u-ai_center" style="height: 130px">
-                    <div class="profile__image u-mar-r_3" style="width: 130px; height: 130px; background-color: white; border-radius: 8px"></div>
+                    <div class="profile__image u-mar-r_3 profileImage__editable" style="width: 130px; height: 130px; background-color: white; border-radius: 8px">
+                        <input id="profile-page-edit-profile" type="file">
+                        <button class="iconButton u-p_absolute">
+                            <i class="fal fa-upload"></i>
+                        </button>
+                    </div>
                     <div class="profile__info">
                         <div class="u-d_flex u-ai_center privacy-button_container">
                             <button class="iconButton white-text u-mar-l_1 u-o_50"><i class="fal fa-question-circle"></i></button>

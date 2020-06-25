@@ -636,7 +636,7 @@ createTreeFormModal.addEventListener('submit', (e) => {
                 "topMember" : true
             })
         )
-        if (!LocalDocs.member.data().primary_tree)
+        if (!LocalDocs.member.primary_tree)
             membersRef.doc(LocalDocs.member.id).update({
                 [`trees.${newTreeRef.id}`] : null,
                 // "trees" : firebase.firestore.FieldValue.arrayUnion(newTreeRef.id),

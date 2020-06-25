@@ -454,7 +454,8 @@ path {
   .detailsPanel__relativeType:empty {
     display: none; }
 
-.detailsPanel__profileImage {
+.detailsPanel__profileImage,
+.profileImage__editable {
   position: relative;
   max-width: var(--profileImageSize);
   height: var(--profileImageSize);
@@ -469,7 +470,8 @@ path {
   background-position: center;
   box-shadow: 0 2px 8px rgba(88, 79, 142, 0.4), 0 4px 24px rgba(88, 79, 142, 0.05);
   transition: all 0.15s ease-out; }
-  .detailsPanel__profileImage .iconButton {
+  .detailsPanel__profileImage .iconButton,
+  .profileImage__editable .iconButton {
     right: 8px;
     bottom: 8px;
     visibility: hidden;
@@ -477,7 +479,8 @@ path {
     display: none;
     pointer-events: none;
     z-index: 1; }
-  .detailsPanel__profileImage input[type="file"] {
+  .detailsPanel__profileImage input[type="file"],
+  .profileImage__editable input[type="file"] {
     position: absolute;
     top: 0;
     left: 0;
@@ -490,20 +493,27 @@ path {
     opacity: 0;
     display: none;
     pointer-events: none; }
-    .detailsPanel__profileImage input[type="file"]:hover {
+    .detailsPanel__profileImage input[type="file"]:hover,
+    .profileImage__editable input[type="file"]:hover {
       cursor: pointer; }
-  .detailsPanel__profileImage.editing {
+  .detailsPanel__profileImage.editing,
+  .profileImage__editable.editing {
     transform: scale(1.2); }
-    .detailsPanel__profileImage.editing:hover {
+    .detailsPanel__profileImage.editing:hover,
+    .profileImage__editable.editing:hover {
       box-shadow: 0 2px 8px rgba(88, 79, 142, 0.4), 0 4px 24px rgba(88, 79, 142, 0.05), 0 0 0 8px rgba(255, 255, 255, 0.25); }
     .detailsPanel__profileImage.editing input[type="file"],
-    .detailsPanel__profileImage.editing .iconButton {
+    .detailsPanel__profileImage.editing .iconButton,
+    .profileImage__editable.editing input[type="file"],
+    .profileImage__editable.editing .iconButton {
       visibility: visible;
       display: unset;
       pointer-events: unset; }
-    .detailsPanel__profileImage.editing .iconButton {
+    .detailsPanel__profileImage.editing .iconButton,
+    .profileImage__editable.editing .iconButton {
       opacity: 1; }
-    .detailsPanel__profileImage.editing + .detailsPanel__firstName {
+    .detailsPanel__profileImage.editing + .detailsPanel__firstName,
+    .profileImage__editable.editing + .detailsPanel__firstName {
       opacity: 0; }
 
 input[class*="profile_photo"],
@@ -723,7 +733,6 @@ input[name*="profile_photo"] {
   background-color: white;
   padding: 0 16px;
   padding-top: 0;
-  border-bottom: 1px solid var(--color_border);
   overflow: hidden;
   transition: all 0.15s ease-in-out;
   position: sticky;
@@ -1051,11 +1060,19 @@ button,
     .button.white:hover,
     button.white:hover,
     .iconButton.white:hover {
-      background-color: rgba(0, 0, 0, 0.05); }
+      background-color: #f7f7f7; }
     .button.white:active,
     button.white:active,
     .iconButton.white:active {
-      background-color: rgba(0, 0, 0, 0.1); }
+      background-color: #f2f2f2; }
+  .button [data-hover-style="transparent"]:hover:hover,
+  button [data-hover-style="transparent"]:hover:hover,
+  .iconButton [data-hover-style="transparent"]:hover:hover {
+    background-color: rgba(0, 0, 0, 0.05); }
+  .button [data-hover-style="transparent"]:hover:active,
+  button [data-hover-style="transparent"]:hover:active,
+  .iconButton [data-hover-style="transparent"]:hover:active {
+    background-color: rgba(0, 0, 0, 0.1); }
   .button.white-text,
   button.white-text,
   .iconButton.white-text {

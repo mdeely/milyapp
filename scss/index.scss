@@ -716,7 +716,8 @@ path {
     }
 }
 
-.detailsPanel__profileImage {
+.detailsPanel__profileImage,
+.profileImage__editable {
     $boxShadow: 0 2px 8px rgba(#584F8E, 0.4), 0 4px 24px rgba(#584F8E,.05);
     position: relative;
     max-width: var(--profileImageSize);
@@ -1159,7 +1160,7 @@ input[name*="profile_photo"] {
     padding: 0 16px;
     padding-top: 0;
     // margin-bottom: calc(var(--navDecorationHeight) + 32px);
-    border-bottom: 1px solid var(--color_border);
+    // border-bottom: 1px solid var(--color_border);
     overflow: hidden;
     transition: all $detailsRevealTiming ease-in-out;
     position: sticky;
@@ -1616,10 +1617,21 @@ button,
         color: var(--brand);
 
         &:hover {
-            background-color: rgba(black, .05);
+            background-color: darken(white, 3%);
         }
         &:active {
-            background-color: rgba(black, .1);
+            background-color: darken(white, 5%);
+        }
+    }
+
+    [data-hover-style="transparent"] {
+        &:hover {
+            &:hover {
+                background-color: rgba(black, .05);
+            }
+            &:active {
+                background-color: rgba(black, .1);
+            }        
         }
     }
 
