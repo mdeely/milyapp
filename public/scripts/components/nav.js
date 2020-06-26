@@ -67,10 +67,10 @@ const getNotificationsByAuthMember = () => {
                 notificationEl.setAttribute("data-notification-id", doc.id);
                 notificationEl.setAttribute("class","dropdown__item");
 
-                if (doc.status === "accepted") {
-                    message = `${doc.for_email} accepted your request`;
+                if (doc.data().status === "accepted") {
+                    message = `${doc.data().for_email} accepted your request`;
                 } else {
-                    message = `${doc.for_email} declined your request`;
+                    message = `${doc.data().for_email} declined your request`;
                 }
 
                 dismissNotificationButton.addEventListener('click', (e) => {
@@ -101,8 +101,8 @@ const getNotificationsByAuthMember = () => {
 
 const getNotificationsByEmail = async (email) => {
     if (LocalDocs.member) {
-        let notificationQuery = notificationsRef.where("status", "==", "pending").where("for_email", "==", LocalDocs.member.email);
-
+        let notificationQuery = notificationsRef.where("status", "==", "pending").where("for_email", "==", auth.currentUser.email);
+        
         notificationQuery.get().then(queryResult  => {
             let docs = queryResult.docs;
             if (docs.length > 0) {
@@ -135,25 +135,25 @@ const getNotificationsByEmail = async (email) => {
                     notificationEl.setAttribute("data-notification-id", doc.id);
                     notificationEl.setAttribute("class","dropdown__item u-fd_column u-ai_flex-start");
     
-                    membersRef.doc(doc.from_member).get()
+                    membersRef.doc(doc.data().from_member).get()
                     .then(memberDoc => {
                         if (memberDoc.exists) {
-                            treesRef.doc(doc.for_tree).get()
+                            treesRef.doc(doc.data().for_tree).get()
                             .then((treeDoc) => {
-                                let memberName = memberDoc.name && memberDoc.name.firstName ? memberDoc.name.firstName : "a Mily member";
-                                let treeName = treeDoc.name ? treeDoc.name : "a tree";
+                                let memberName = memberDoc.data().name && memberDoc.data().name.firstName ? memberDoc.data().name.firstName : "a Mily member";
+                                let treeName = treeDoc.data().name ? treeDoc.data().name : "a tree";
                                 let leafName;
                                 let notificationMessage;
 
-                                if (doc.type === "leaf") {
-                                    treesRef.doc(doc.for_tree).collection("leaves").doc(doc.for_leaf).get()
+                                if (doc.data().type === "leaf") {
+                                    treesRef.doc(doc.data().for_tree).collection("leaves").doc(doc.data().for_leaf).get()
                                     .then((leafDoc) => {
-                                        leafName = leafDoc.name && leafDoc.name.firstName ? leafDoc.name.firstName : "a leaf";
-                                        notificationMessage =`You have an invitation from ${memberName} to take over "${leafName}" in family "${treeName}" as a ${doc.permission_type}.`;
+                                        leafName = leafDoc.data().name && leafDoc.data().name.firstName ? leafDoc.data().name.firstName : "a leaf";
+                                        notificationMessage =`You have an invitation from ${memberName} to take over "${leafName}" in family "${treeName}" as a ${doc.data().permission_type}.`;
                                         appendToNotifications(acceptNotification, declinetNotification, notificationMessage);
                                     })
-                                } else if (doc.type === "tree") {
-                                    notificationMessage =`You have an invitation from ${memberName} join the "${treeName}" family as a ${doc.permission_type}.`;
+                                } else if (doc.data().type === "tree") {
+                                    notificationMessage =`You have an invitation from ${memberName} join the "${treeName}" family as a ${doc.data().permission_type}.`;
                                     appendToNotifications(acceptNotification, declinetNotification, notificationMessage);
                                 }   
                                 
@@ -179,13 +179,13 @@ const getNotificationsByEmail = async (email) => {
 }
 
 const handleNotification = (method, doc) => {
-    let leafToTakeOver = doc.for_leaf;
-    let treeToJoin = doc.for_tree;
+    let leafToTakeOver = doc.data().for_leaf;
+    let treeToJoin = doc.data().for_tree;
 
     let reqTreeRef = treesRef.doc(treeToJoin);
     let reqTreeAndLeafRef;
 
-    if (doc.type === "leaf") {
+    if (doc.data().type === "leaf") {
         reqTreeAndLeafRef = reqTreeRef.collection('leaves').doc(leafToTakeOver);
     }
 
@@ -195,12 +195,12 @@ const handleNotification = (method, doc) => {
 
             reqTreeRef.update({
                 // Place member into the correct permission.
-                [`permissions.${LocalDocs.member.id}`] : doc.permission_type
+                [`permissions.${LocalDocs.member.id}`] : doc.data().permission_type
             })
             .then(() => console.log("permission added to tree successfully!"))
             .catch(() => console.log("error while adding permission to tree"));
 
-            if (!reqMemberDoc.primary_tree) {
+            if (!reqMemberDoc.data().primary_tree) {
                 membersRef.doc(LocalDocs.member.id).update({
                     "primary_tree" : treeToJoin
                 })
@@ -224,7 +224,7 @@ const handleNotification = (method, doc) => {
             })
             .catch(() => console.log("error while updating member trees"));
 
-            if (doc.for_leaf) {
+            if (doc.data().for_leaf) {
                 reqTreeAndLeafRef.update({
                     "claimed_by" : LocalDocs.member.id,
                     "invitation" : null
@@ -242,7 +242,7 @@ const handleNotification = (method, doc) => {
         })
         .then(() => {
             // remove invitation from leaf
-            if (doc.type === "leaf") {
+            if (doc.data().type === "leaf") {
                 reqTreeAndLeafRef.update({
                     "invitation" : null
                 })
