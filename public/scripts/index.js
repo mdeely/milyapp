@@ -566,7 +566,7 @@ inviteMemberForm.addEventListener('submit', (e) => {
     let emaillAddress = inviteMemberForm["invite-member_email"].value;
     let leafId = detailsPanel.getAttribute("data-details-id");
     let permissionType = inviteMemberForm.querySelector(`input[name="invite-member_permission"]:checked`).value;
-    let emailAlreadyInUse = LocalDocs.members.find(memberDoc => memberDoc.data().email === emaillAddress);
+    let emailAlreadyInUse = LocalDocs.members.find(memberDoc => memberDoc.email === emaillAddress);
     console.log(`${emaillAddress} should take over ${leafId} as a ${permissionType}. Sent by ${LocalDocs.member.id}`);
 
     if (emailAlreadyInUse) {
