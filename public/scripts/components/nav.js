@@ -25,7 +25,7 @@ Nav.update = function(user) {
         }
 
         // getNotificationsByAuthMember();
-        getNotificationsByEmail();
+        Nav.getNotificationsByEmail();
     } else {
         for (let item of hideWhenAuthenticated) {
             item.style.display = "";
@@ -47,129 +47,131 @@ Nav.showViewPreferencesButton = function(show) {
     }
 }
 
-const getNotificationsByAuthMember = () => {
-    let notificationUpdateQuery = notificationsRef.where("from_member", "==", LocalDocs.member.id).where("status", "in", ["declined", "accepted"]);
-    notificationUpdateQuery.get()
-    .then(queryResult => {
-        let docs = queryResult.docs;
+// Nav.getNotificationsByAuthMember = function() {
+//     let notificationUpdateQuery = notificationsRef.where("from_member", "==", LocalDocs.member.id).where("status", "in", ["declined", "accepted"]);
+//     notificationUpdateQuery.get()
+//     .then(queryResult => {
+//         let docs = queryResult.docs;
 
-        if (docs.length > 0) {
-            for (doc of docs) {
-                console.log("There is a notification");
-                let notificationEl = document.createElement("div");
-                let dismissNotificationButton = document.createElement('button');
-                let icon = `<i class="fa fa-times"></i>`
-                let message;
+//         if (docs.length > 0) {
+//             for (doc of docs) {
+//                 console.log("There is a notification");
+//                 let notificationEl = createElementWithClass("div", "dropdown__item");
+//                 let dismissNotificationButton = createElementWithClass('button', "iconButton white");
+//                 let icon = `<i class="fa fa-times"></i>`
+//                 let message;
 
-                dismissNotificationButton.innerHTML = icon;
-                dismissNotificationButton.setAttribute("class", "iconButton white");
+//                 dismissNotificationButton.innerHTML = icon;
 
-                notificationEl.setAttribute("data-notification-id", doc.id);
-                notificationEl.setAttribute("class","dropdown__item");
+//                 notificationEl.setAttribute("data-notification-id", doc.id);
 
-                if (doc.data().status === "accepted") {
-                    message = `${doc.data().for_email} accepted your request`;
-                } else {
-                    message = `${doc.data().for_email} declined your request`;
-                }
+//                 if (doc.data().status === "accepted") {
+//                     message = `${doc.data().for_email} accepted your request`;
+//                 } else {
+//                     message = `${doc.data().for_email} declined your request`;
+//                 }
 
-                dismissNotificationButton.addEventListener('click', (e) => {
-                    e.preventDefault();
+//                 dismissNotificationButton.addEventListener('click', (e) => {
+//                     e.preventDefault();
 
-                    notificationsRef.doc(doc.id).delete()
-                    .then(() => {
-                        console.log("notificaiton was dismissed and deleted");
-                        location.reload();
-                    })
-                    .catch(err => {
-                        console.log(err.message);
-                    })
-                })
+//                     notificationsRef.doc(doc.id).delete()
+//                     .then(() => {
+//                         console.log("notificaiton was dismissed and deleted");
+//                         location.reload();
+//                     })
+//                     .catch(err => {
+//                         console.log(err.message);
+//                     })
+//                 })
 
-                notificationEl.textContent += message;                
+//                 notificationEl.textContent += message;                
 
-                notificationEl.appendChild(dismissNotificationButton);
-                notificationMenu.appendChild(notificationEl);
-                notificationIndicator.classList.remove("u-visibility_hidden");
-            }
-        } else {
-            notificationMenu.classList.add("u-visibility_hidden");
-        }
-    })
-    console.log("TODO: when a user dismisses a declined or accepted invitation, delete notification record");
-}
+//                 notificationEl.appendChild(dismissNotificationButton);
+//                 notificationMenu.appendChild(notificationEl);
+//                 notificationIndicator.classList.remove("u-visibility_hidden");
+//             }
+//         } else {
+//             notificationMenu.classList.add("u-visibility_hidden");
+//         }
+//     })
+//     console.log("TODO: when a user dismisses a declined or accepted invitation, delete notification record");
+// }
 
-const getNotificationsByEmail = async (email) => {
+Nav.getNotificationsByEmail = async function(email) {
     if (LocalDocs.member) {
         let notificationQuery = notificationsRef.where("status", "==", "pending").where("for_email", "==", auth.currentUser.email);
         
         notificationQuery.get().then(queryResult  => {
-            let docs = queryResult.docs;
-            if (docs.length > 0) {
+            let notificationDocs = queryResult.docs;
+            if (notificationDocs.length > 0) {
                 notificationIndicator.classList.remove("u-visibility_hidden");
     
-                for (doc of docs) {
-                    let notificationEl = document.createElement("div");
-                    let acceptNotification = document.createElement("button");
-                    let declinetNotification = document.createElement("button");
-                    let buttonGroup = createElementWithClass("div", "u-d_flex u-mar-t_1")
-    
-                    acceptNotification.setAttribute("id", "accept-notification");
-                    acceptNotification.setAttribute("class", "u-mar-r_1");
-                    declinetNotification.setAttribute("id", "decline-notification");
-                    declinetNotification.setAttribute("class", "danger");
-    
-                    acceptNotification.textContent = "Accept";
-                    declinetNotification.textContent = "Decline";
-    
-                    acceptNotification.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        handleNotification("accept", doc);
-                    });
-    
-                    declinetNotification.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        handleNotification("decline", doc);
-                    });
-    
-                    notificationEl.setAttribute("data-notification-id", doc.id);
-                    notificationEl.setAttribute("class","dropdown__item u-fd_column u-ai_flex-start");
-    
-                    membersRef.doc(doc.data().from_member).get()
-                    .then(memberDoc => {
-                        if (memberDoc.exists) {
-                            treesRef.doc(doc.data().for_tree).get()
-                            .then((treeDoc) => {
-                                let memberName = memberDoc.data().name && memberDoc.data().name.firstName ? memberDoc.data().name.firstName : "a Mily member";
-                                let treeName = treeDoc.data().name ? treeDoc.data().name : "a tree";
-                                let leafName;
-                                let notificationMessage;
+                for (notificationDoc of notificationDocs) {
+                    // LocalDocs.notifications = {
+                    //     id : doc.id,
+                    //     ...doc.data()
+                    // }
+                    let existingNotificationEl = notificationMenu.querySelector(`[data-notification-id="${notificationDoc.id}"]`);
+                    if (!existingNotificationEl) {
+                        let notificationEl = createElementWithClass("div", "dropdown__item u-font-size_13");
+                        let acceptNotification = createElementWithClass("button", "u-mar-r_1");
+                        let declinetNotification = createElementWithClass("button", "danger");
+                        let buttonGroup = createElementWithClass("div", "u-d_flex u-mar-l_3 u-mar-t_1")
+        
+                        acceptNotification.setAttribute("id", "accept-notification");
+                        declinetNotification.setAttribute("id", "decline-notification");
+                        notificationEl.setAttribute("data-notification-id", notificationDoc.id);
+                        notificationEl.setAttribute("style", "max-width: 348px");
 
-                                if (doc.data().type === "leaf") {
-                                    treesRef.doc(doc.data().for_tree).collection("leaves").doc(doc.data().for_leaf).get()
-                                    .then((leafDoc) => {
-                                        leafName = leafDoc.data().name && leafDoc.data().name.firstName ? leafDoc.data().name.firstName : "a leaf";
-                                        notificationMessage =`You have an invitation from ${memberName} to take over "${leafName}" in family "${treeName}" as a ${doc.data().permission_type}.`;
-                                        appendToNotifications(acceptNotification, declinetNotification, notificationMessage);
-                                    })
-                                } else if (doc.data().type === "tree") {
-                                    notificationMessage =`You have an invitation from ${memberName} join the "${treeName}" family as a ${doc.data().permission_type}.`;
-                                    appendToNotifications(acceptNotification, declinetNotification, notificationMessage);
-                                }   
+                        acceptNotification.textContent = "Accept";
+                        declinetNotification.textContent = "Decline";
+    
+                        acceptNotification.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            handleNotification("accept", notificationDoc);
+                        });
+        
+                        declinetNotification.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            handleNotification("decline", notificationDoc);
+                        });
                                 
-                                function appendToNotifications(acceptBtn, declineButton, message) {
-                                    notificationEl.insertAdjacentText('afterBegin', message);
-
-                                    buttonGroup.appendChild(acceptBtn);
-                                    buttonGroup.appendChild(declineButton);
-                                    notificationEl.appendChild(buttonGroup);
-                                    notificationMenu.appendChild(notificationEl);
-                                } 
-                            });
-                        } else {
-                            console.log("An invitation exists, but that member is no longer a part of Mily.");
-                        }
-                    })
+                        membersRef.doc(notificationDoc.data().from_member).get()
+                        .then(memberDoc => {
+                            if (memberDoc.exists) {
+                                treesRef.doc(notificationDoc.data().for_tree).get()
+                                .then((treeDoc) => {
+                                    let memberName = memberDoc.data().name && memberDoc.data().name.firstName ? memberDoc.data().name.firstName : "Someone";
+                                    let treeName = treeDoc.data().name ? treeDoc.data().name : "a tree";
+                                    let leafName;
+                                    let notificationMessage;
+    
+                                    if (notificationDoc.data().type === "leaf") {
+                                        treesRef.doc(notificationDoc.data().for_tree).collection("leaves").doc(notificationDoc.data().for_leaf).get()
+                                        .then((leafDoc) => {
+                                            leafName = leafDoc.data().name && leafDoc.data().name.firstName ? leafDoc.data().name.firstName : "a leaf";
+                                            notificationMessage =`${memberName} invited you to the ${treeName} tree.`;
+                                            appendToNotifications(acceptNotification, declinetNotification, notificationMessage);
+                                        })
+                                    } else if (notificationDoc.data().type === "tree") {
+                                        notificationMessage =`${memberName} Invited you to the ${treeName} tree.`;
+                                        appendToNotifications(acceptNotification, declinetNotification, notificationMessage);
+                                    }   
+                                    
+                                    function appendToNotifications(acceptBtn, declineButton, message) {
+                                        notificationEl.insertAdjacentText('afterBegin', message);
+    
+                                        buttonGroup.appendChild(acceptBtn);
+                                        buttonGroup.appendChild(declineButton);
+                                        notificationEl.appendChild(buttonGroup);
+                                        notificationMenu.appendChild(notificationEl);
+                                    } 
+                                });
+                            } else {
+                                console.log("An invitation exists, but that member is no longer a part of Mily.");
+                            }
+                        })
+                    }
                 }            
             } else {
                 notificationMenu.classList.add("u-visibility_hidden");

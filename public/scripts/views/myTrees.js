@@ -5,7 +5,7 @@ let myTreeListEl = myTreesViewEl.querySelector(`#myTree__list`);
 let MyTrees = {};
 
 const myTreesSetup = () => {
-    pageTitle.innerHTML = "My trees";
+    pageTitle.innerHTML = "Your trees";
     Nav.showViewPreferencesButton(false);
 }
 
@@ -27,7 +27,7 @@ const populateMyTreesList = async () => {
 
     button.textContent = "Create a tree";
 
-    myTreesDebugMsg.innerHTML += `<h2 class="u-ta_center u-mar-l_2">Your trees:</h2>`;
+    myTreesDebugMsg.innerHTML += `<h2 class="u-ta_center u-mar-l_2">Your trees</h2>`;
     myTreesDebugMsg.appendChild(button);
 
     if (Object.keys(LocalDocs.member.trees)) {

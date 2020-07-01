@@ -131,20 +131,20 @@ const populateMemberDetails = () => {
     profileContent.appendChild(containerEl);
 
     function generateFullAddress() {
-        let privacyIcon;
-        if (LocalDocs.member) {
-            privacyIcon = LocalDocs.member.preferences.public_profile === false ? `lock-alt` : `eye`;
-        }
-        let listItem = createElementWithClass("li", "u-d_flex u-ai_center u-mar-b_1");
+        // let privacyIcon;
+        // if (LocalDocs.member) {
+        //     privacyIcon = LocalDocs.member.preferences.public_profile === false ? `lock-alt` : `eye`;
+        // }
+        let listItem = createElementWithClass("li", "u-d_flex u-ai_center u-mar-b_3");
         let iconEl = createElementWithClass("i", `fal fa-map-pin fa-fw u-mar-r_2 u-font-size_20 u-o_50 u-font-size_20 u-o_50`);
-        let button = createElementWithClass("button", "iconButton u-mar-l_auto white");
-        let buttonIcon = createElementWithClass("i", `fal fa-${privacyIcon}`);
+        // let button = createElementWithClass("button", "iconButton u-mar-l_auto white");
+        // let buttonIcon = createElementWithClass("i", `fal fa-${privacyIcon}`);
         
-        button.setAttribute("tooltip", "Privacy status");
+        // button.setAttribute("tooltip", "Privacy status");
         listItem.setAttribute("tooltip-position", "top left");
         listItem.setAttribute("tooltip", "Address");
 
-        button.appendChild(buttonIcon);
+        // button.appendChild(buttonIcon);
         listItem.appendChild(iconEl);
 
         let address = new String;
@@ -183,7 +183,7 @@ const populateMemberDetails = () => {
         if (address.length > 0) {
             let text = createElementWithClass("p", `u-mar-t_0 u-mar-b_0 ${klass}`, address);
             listItem.appendChild(text);
-            listItem.appendChild(button);
+            // listItem.appendChild(button);
             containerEl.prepend(listItem);
         }
     }
@@ -193,16 +193,16 @@ const populateMemberDetails = () => {
         if (LocalDocs.member) {
             privacyIcon = LocalDocs.member.preferences.public_profile === false ? `lock-alt` : `eye`;
         }
-        let listItem = createElementWithClass("li", "u-d_flex u-ai_center u-mar-b_1");
+        let listItem = createElementWithClass("li", "u-d_flex u-ai_center u-mar-b_3");
         let iconEl = createElementWithClass("i", `fal fa-id-badge fa-fw u-mar-r_2 u-font-size_20 u-o_50 u-font-size_20 u-o_50`);
         let text = createElementWithClass("p", "u-mar-t_0 u-mar-b_0");
         let button = createElementWithClass("button", "iconButton u-mar-l_auto white");
         let buttonIcon = createElementWithClass("i", `fal fa-${privacyIcon}`);
         
-        button.setAttribute("tooltip", "Privacy status");
+        // button.setAttribute("tooltip", "Privacy status");
         listItem.setAttribute("tooltip-position", "top left");
         
-        button.appendChild(buttonIcon);
+        // button.appendChild(buttonIcon);
         listItem.appendChild(iconEl);
 
         let name = new String;
@@ -246,7 +246,7 @@ const populateMemberDetails = () => {
         }
 
         listItem.appendChild(text);
-        listItem.appendChild(button);
+        // listItem.appendChild(button);
         containerEl.prepend(listItem);
     }
 
@@ -278,20 +278,20 @@ const populateMemberDetails = () => {
         if (LocalDocs.member) {
             privacyIcon = LocalDocs.member.preferences.public_profile === false ? `lock-alt` : `eye`;
         }
-        let listItem = createElementWithClass("li", "u-d_flex u-ai_center u-mar-b_1");
+        let listItem = createElementWithClass("li", "u-d_flex u-ai_center u-mar-b_3");
         let iconEl = createElementWithClass("i", `fal fa-${icon} fa-fw u-mar-r_2 u-font-size_20 u-o_50`);
         let text = createElementWithClass("p", `${textClasses}`, data);
-        let button = createElementWithClass("button", "iconButton u-mar-l_auto white");
-        let buttonIcon = createElementWithClass("i", `fal fa-${privacyIcon}`);
+        // let button = createElementWithClass("button", "iconButton u-mar-l_auto white");
+        // let buttonIcon = createElementWithClass("i", `fal fa-${privacyIcon}`);
         
-        button.setAttribute("tooltip", "Privacy status");
+        // button.setAttribute("tooltip", "Privacy status");
         listItem.setAttribute("tooltip", key);
         listItem.setAttribute("tooltip-position", "top left");
 
-        button.appendChild(buttonIcon);
+        // button.appendChild(buttonIcon);
         listItem.appendChild(iconEl);
         listItem.appendChild(text);
-        listItem.appendChild(button);
+        // listItem.appendChild(button);
 
         containerEl.appendChild(listItem);
     }
@@ -670,7 +670,8 @@ saveProfilePageButton.addEventListener('click', (e) => {
     } else if (!LocalDocs.member) {
         let newMemberObject = {};
         MemberBlueprint.loop({
-            "functionCall" : createNewMemberObject
+            "functionCall" : createNewMemberObject,
+            "exclude" : ["profile_photo"]
         });
 
         function createNewMemberObject(key, value, parentValue) {
@@ -682,19 +683,23 @@ saveProfilePageButton.addEventListener('click', (e) => {
             newMemberObject["preferences"] = {};
             newMemberObject["preferences"]["public_profile"] = false;
 
+            let reqNewMemberName = value["dataPath"];
+
             if (parentValue) {
                 if (!newMemberObject[parentValue["dataPath"]]) {
                     newMemberObject[parentValue["dataPath"]] = {};
-                    if (object[parentValue["dataPath"]] && object[parentValue["dataPath"]][value["dataPath"]]) {
-                        newMemberObject[parentValue["dataPath"]][value["dataPath"]] = object[parentValue["dataPath"]][value["dataPath"]];
-                    }
-                    newMemberObject[parentValue["dataPath"]][value["dataPath"]] = null;
+                }
+                if (editProfilePageForm[reqNewMemberName].value) {
+                    newMemberObject[parentValue["dataPath"]][value["dataPath"]] = editProfilePageForm[reqNewMemberName].value;
                 } else {
                     newMemberObject[parentValue["dataPath"]][value["dataPath"]] = null;
                 }
             } else {
-                let existingObjectValue = object[value["dataPath"]] || null;
-                newMemberObject[value["dataPath"]] = existingObjectValue;
+                if (editProfilePageForm[reqNewMemberName].value) {
+                    newMemberObject[value["dataPath"]] = editProfilePageForm[reqNewMemberName].value;
+                } else {
+                    newMemberObject[value["dataPath"]] = null;
+                }
             }
         }
 
@@ -711,7 +716,6 @@ cancelProfilePageButton.addEventListener('click', (e) => {
     cancelProfilePageButton.classList.add("u-d_none");
     profileImage.classList.remove("editing");
 
-    console.log(currentProfileImageStyle)
     profileImage.style.backgroundImage = currentProfileImageStyle;
 
     profileContent.innerHTML = '';

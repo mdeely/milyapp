@@ -304,7 +304,6 @@ DetailsPanel.populate = function(leafDoc, leafEl) {
             deleteLeafButton.classList.add("u-d_none");
         }
     } else if (memberPermissionType === "viewer" || !memberPermissionType)  {
-        console.log("I'm a viewers")
         memberMoreOptionsButton.classList.add("u-d_none");
         addParentButton.classList.add("u-d_none")
         inviteMemberButton.classList.add("u-d_none");
@@ -1101,7 +1100,7 @@ DetailsPanel.editMember = function() {
     // detailsPanelEdit.innerHTML = '';
     // detailsPanel.scrollTop = 0;
 
-    let detailsHeaderEl = createElementWithClass("h6", "edit-details-header u-mar-b_4 u-mar-t_10 u-d_flex u-ai_center", "Details");
+    let detailsHeaderEl = createElementWithClass("h6", "edit-details-header u-mar-b_4 u-mar-t_10 u-d_flex u-ai_center", "Profile");
     let saveDetailsButton = createElementWithClass("button", "u-mar-l_auto u-mar-r_1", "Save");
     let cancelDetailsButton = createElementWithClass("button", "secondary", "Cancel");
 

@@ -35,7 +35,7 @@
             </div>
             <button id="accountMenu" class="u-mar-l_3" data-dropdown-target="accountMenu__dropdown"></button>
             <div id="accountMenu__dropdown" class="dropdown u-p_absolute u-visibility_hidden">
-                <a href="#/my-trees" class="dropdown__item">My trees</a>
+                <a href="#/my-trees" class="dropdown__item">Trees</a>
                 <a href="#/profile" class="dropdown__item">Profile</a>
                 <!-- <a href="#/settings" class="dropdown__item">Settings</a> -->
                 <div tabindex="0" id="sign-out_button" class=" dropdown__item">Sign out</div>
@@ -59,7 +59,7 @@
                 </select>
             </div> -->
             <!-- <p class="u-mar-r_2">Layout</p> -->
-            <div class="fauxToggle u-mar-l_auto">
+            <div class="fauxToggle u-mar-lr_auto">
                 <button id="view-preferences_tree" class="u-font-size_14"><i class="fal fa-sitemap u-mar-r_2"></i>Map</button>
                 <button id="view-preferences_list" class="u-font-size_14"><i class="fal fa-list u-mar-r_2"></i>Table</button>
             </div>
@@ -210,8 +210,10 @@
                 <aside id="detailsPanel">
                     <nav class="detailsPanel__actions u-mar-t_1 u-mar-b_6">
                         <button class="add-relationship_button white" data-dropdown-target="add-relationship-dropdown"><i class="far fa-user-plus u-mar-r_1"></i>Add</button>
-                        <button class="u-mar-l_auto" id="member-more-options" data-dropdown-target="member-options-dropdown">More<i class="fa fa-caret-down u-mar-l_1 u-o_50"></i></button>
-                        <button class="details__button--close u-mar-l_1" tooltip="Hide panel" tooltip-position="bottom middle" ><i class="fal fa-times"></i></button> 
+                        <div class="u-mar-l_auto u-d_flex">
+                            <button id="member-more-options" data-dropdown-target="member-options-dropdown">More<i class="fa fa-caret-down u-mar-l_1 u-o_50"></i></button>
+                            <button class="details__button--close u-mar-l_1" tooltip="Hide panel" tooltip-position="bottom middle" ><i class="fal fa-times"></i></button> 
+                        </div>
                     </nav>
 
                     <!-- <nav class="detailsPanel__actions u-mar-b_6 u-mar-t_1">
@@ -506,7 +508,6 @@
         firebase.analytics();
     </script>
 
-    <!-- Compiled and minified JavaScript -->
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <script src='https://unpkg.com/panzoom@8.7.3/dist/panzoom.min.js'></script>
@@ -521,6 +522,5 @@
     <script src="scripts/views/homepage.js"></script>
     <script src="scripts/routing.js"></script>
     <script src="scripts/index.js"></script>
-    <!-- <script src="scripts/settings.js"></script> -->
     </body>
 </html>

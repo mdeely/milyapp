@@ -830,14 +830,32 @@ function renderTableRow(doc, i) {
     }
 
     profileImage.setAttribute("style", leafImageStyle);
-    let nameString = `${ data.name.firstName}  ${data.name.surnameCurrent}`
+    let nameString = "No name";
+    let firstName = doc.name.firstName || "No name";
+    let lastName;
 
-    let firstName = data.name.firstName || "No name";
-    if (data.name.firstNam || !data.name.firstName) {
-        nameString = `${firstName}`
-    } else if (data.name.firstName && data.name.surnameCurrent) {
-        nameString = `${firstName} ${data.name.surnameCurrent}`
+    console.log(doc.id);
+    if (doc.name.surnameCurrent || doc.name.surnameCurrent !== "undefined") {
+        lastName = doc.name.surnameCurrent;
+    } else if (doc.name.surnameBirth || doc.name.surnameBirth !== "undefined") {
+        lastName = doc.name.surnameBirth;
+    } else {
+        lastName = null;
     }
+
+    if (firstName && lastName) {
+        nameString = `${firstName} ${lastName}`;
+    } else {
+        nameString = `${firstName}`;
+    }
+
+    // let firstName = data.name.firstName || "No name";
+    // if (data.name.firstName && (!data.name.surnameCurrent || !data.name.surnameBirth)) {
+    //     nameString = `${firstName}`
+    // } else if (data.name.firstName && (data.name.surnameCurrent || data.name.surnameBirth)) {
+    //     lastName = data.name.surnameCurrent ? data.name.surnameCurrent : data.name.surnameBirth;
+    //     nameString = `${firstName} ${lastName}`
+    // }
 
     let email = data.email || '';
     let mobilePhone = data.phone.mobilePhone ? formatPhoneNumber(data.phone.mobilePhone) : '';
